@@ -5,12 +5,13 @@ mod map;
 // pub use map::*;
 mod player;
 mod components;
-
+mod rect;
 
 
 pub struct State {
     ecs: World,
 }
+
 
 
 impl GameState for State {
@@ -20,7 +21,7 @@ impl GameState for State {
         player::player_input(self, ctx);
         self.run_systems();
 
-        let the_map = self.ecs.fetch::<Vec<map::TileType>>();
+        let the_map = self.ecs.fetch::<map::Map>();
         map::draw_map(&the_map, ctx);
         let positions = self.ecs.read_storage::<components::Position>();
         let renderables = self.ecs.read_storage::<components::Renderable>();
@@ -47,9 +48,13 @@ fn main() -> rltk::BError {
     gs.ecs.register::<components::Renderable>();
     gs.ecs.register::<components::Player>();
 
+    let map = map::Map::new_map_rooms_and_corridors();
+    let (player_x, player_y) = map.rooms[0].center();
+    gs.ecs.insert(map);
+
     gs.ecs
         .create_entity()
-        .with(components::Position { x: 40, y: 25 })
+        .with(components::Position { x: player_x, y: player_y })
         .with(components::Renderable {
             glyph: rltk::to_cp437('@'),
             fg: RGB::named(rltk::YELLOW),
@@ -58,7 +63,6 @@ fn main() -> rltk::BError {
         .with(components::Player{})
         .build();
 
-    gs.ecs.insert(map::new_map_test());
 
     rltk::main_loop(context, gs)
 }
