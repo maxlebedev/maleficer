@@ -1,6 +1,8 @@
-use rltk::{Rltk, RGB, RandomNumberGenerator};
+use rltk::{Rltk, RGB, RandomNumberGenerator, Point, BaseMap, Algorithm2D};
 use super::rect::Rect;
+use super::components;
 use std::cmp::{max, min};
+use specs::prelude::*;
 
 // TODO: there are rendering issues around entities interacting
 // this might be related to crossterm
@@ -99,26 +101,52 @@ impl Map {
 }
 
 
-pub fn draw_map(map: &Map, ctx : &mut Rltk) {
-    let mut y = 0;
-    let mut x = 0;
-    for tile in map.tiles.iter() {
-        // Render a tile depending upon the tile type
-        match tile {
-            TileType::Floor => {
-                ctx.set(x, y, RGB::from_f32(0.5, 0.5, 0.5), RGB::from_f32(0., 0., 0.), rltk::to_cp437('.'));
-            }
-            TileType::Wall => {
-                ctx.set(x, y, RGB::from_f32(0.0, 1.0, 0.0), RGB::from_f32(0., 0., 0.), rltk::to_cp437('#'));
-            }
-        }
+pub fn draw_map(ecs: &World, ctx : &mut Rltk) {
+    let mut viewsheds = ecs.write_storage::<components::Viewshed>();
+    let mut players = ecs.write_storage::<components::Player>();
+    let map = ecs.fetch::<Map>();
 
-        // Move the coordinates
-        // TODO: surely a modulo works here?
-        x += 1;
-        if x > 79 {
-            x = 0;
-            y += 1;
+    let grey = RGB::named(rltk::GREY);
+    let green = RGB::named(rltk::GREEN);
+    let black = RGB::named(rltk::BLACK);
+
+    for (_player, viewshed) in (&mut players, &mut viewsheds).join() {
+        let mut y = 0;
+        let mut x = 0;
+        for tile in map.tiles.iter() {
+            // Render a tile depending upon the tile type
+            let pt = rltk::Point::new(x, y);
+            if viewshed.visible_tiles.contains(&pt) {
+                match tile {
+                    TileType::Floor => {
+                        ctx.set(x, y, grey, black, rltk::to_cp437('.'));
+                    }
+                    TileType::Wall => {
+                        ctx.set(x, y, green, black, rltk::to_cp437('#'));
+                    }
+                }
+            }
+
+            // Move the coordinates
+            // TODO: surely a modulo works here?
+            x += 1;
+            if x > 79 {
+                x = 0;
+                y += 1;
+            }
         }
+    }
+
+}
+
+impl Algorithm2D for Map {
+    fn dimensions(&self) -> Point {
+        Point::new(self.width, self.height)
+    }
+}
+
+impl BaseMap for Map {
+    fn is_opaque(&self, idx:usize) -> bool {
+        self.tiles[idx as usize] == TileType::Wall
     }
 }
