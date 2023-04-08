@@ -64,7 +64,7 @@ fn main() -> rltk::BError {
             bg: RGB::named(rltk::BLACK),
         })
         .with(components::Player{})
-        .with(components::Viewshed{ visible_tiles : Vec::new(), range : 8 })
+        .with(components::Viewshed{ visible_tiles : Vec::new(), range : 8, dirty : true })
         .build();
 
 
