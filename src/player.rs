@@ -1,5 +1,7 @@
-use rltk::{VirtualKeyCode, Rltk, Point};
+use rltk::{VirtualKeyCode, Rltk, Point, console};
 use specs::prelude::*;
+use crate::CombatStats;
+
 use super::{components, State, map, RunState};
 use num;
 
@@ -7,11 +9,23 @@ fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
     let mut positions = ecs.write_storage::<components::Position>();
     let mut players = ecs.write_storage::<components::Player>();
     let mut viewsheds = ecs.write_storage::<components::Viewshed>();
+
+    let combat_stats = ecs.read_storage::<CombatStats>();
     let map = ecs.fetch::<map::Map>();
-    // TODO: we are fetching by type exclusively. how? what if there were multiple maps
 
     for (_player, pos, viewshed) in (&mut players, &mut positions, &mut viewsheds).join() {
         let destination_idx = map.xy_idx(pos.x + delta_x, pos.y + delta_y);
+        for potential_target in map.tile_content[destination_idx].iter() {
+            let target = combat_stats.get(*potential_target);
+            match target {
+                None => {}
+                Some(t) => {
+                    // Attack it
+                    console::log(&format!("From Hell's Heart, I stab thee!"));
+                    return; // So we don't move after attacking
+                }
+            }
+        }
         if !map.blocked[destination_idx] {
             pos.x = num::clamp(pos.x + delta_x, 0, map.width-1);
             pos.y = num::clamp(pos.y + delta_y, 0, map.height-1);
