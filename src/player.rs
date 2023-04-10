@@ -1,6 +1,5 @@
 use rltk::{VirtualKeyCode, Rltk, Point};
 use specs::prelude::*;
-use crate::CombatStats;
 
 
 use super::{components, State, map, RunState};
