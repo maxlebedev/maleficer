@@ -2,3 +2,16 @@
 malefactor is intended to be a ttpg-inspired roguelike written in rust.
 
 It takes heavy inspiration from games like Trespassor, bringing modern ttrpg dungeon crawling mechanics to the roguelike genre
+
+# Ideas
+characters are all some variant of wizard, and start with two schools.
+The options are something like:
+	* one per element
+	* battle magic
+	* teleportation/forced movement
+	* defense
+	* stealth
+	* info gathering
+Leveling up grants spells from the chosen schools, but more can be learned.
+
+Going with spells because I don't want the combat loop to be about repeatedly making default attacks

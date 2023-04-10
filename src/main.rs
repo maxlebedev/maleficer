@@ -2,20 +2,23 @@ use rltk::{GameState, Rltk, RGB};
 use specs::prelude::*;
 
 mod map;
+pub use map::*;
 mod player;
+pub use player::*;
 mod components;
 pub use components::*;
 mod rect;
 mod visibility_system;
 mod monster_ai_system;
 mod map_indexing_system;
+mod melee_combat_system;
+mod damage_system;
 
 #[derive(PartialEq, Copy, Clone)]
-pub enum RunState { Paused, Running }
+pub enum RunState { AwaitingInput, PreRun, PlayerTurn, MonsterTurn }
 
 pub struct State {
     ecs: World,
-    pub runstate: RunState
 }
 
 
@@ -23,23 +26,43 @@ pub struct State {
 impl GameState for State {
     fn tick(&mut self, ctx: &mut Rltk) {
         ctx.cls();
-        if self.runstate == RunState::Running {
-            self.run_systems();
-            self.runstate = RunState::Paused;
-        } else {
-            self.runstate = player::player_input(self, ctx);
+        let mut newrunstate;
+        {
+            let runstate = self.ecs.fetch::<RunState>();
+            newrunstate = *runstate;
         }
+        match newrunstate {
+            RunState::PreRun => {
+                self.run_systems();
+                newrunstate = RunState::AwaitingInput;
+            }
+            RunState::AwaitingInput => {
+                newrunstate = player_input(self, ctx);
+            }
+            RunState::PlayerTurn => {
+                self.run_systems();
+                newrunstate = RunState::MonsterTurn;
+            }
+            RunState::MonsterTurn => {
+                self.run_systems();
+                newrunstate = RunState::AwaitingInput;
+            }
+        }
+        {
+            let mut runwriter = self.ecs.write_resource::<RunState>();
+            *runwriter = newrunstate;
+        }
+        damage_system::delete_the_dead(&mut self.ecs);
 
-        map::draw_map(&self.ecs, ctx);
+        draw_map(&self.ecs, ctx);
+
         let positions = self.ecs.read_storage::<Position>();
         let renderables = self.ecs.read_storage::<Renderable>();
-        let map = self.ecs.fetch::<map::Map>();
+        let map = self.ecs.fetch::<Map>();
 
         for (pos, render) in (&positions, &renderables).join() {
             let idx = map.xy_idx(pos.x, pos.y);
-            if map.visible_tiles[idx] {
-                ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph);
-            }
+            if map.visible_tiles[idx] { ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph) }
         }
     }
 }
@@ -52,6 +75,11 @@ impl State {
         mob.run_now(&self.ecs);
         let mut mapindex = map_indexing_system::MapIndexingSystem{};
         mapindex.run_now(&self.ecs);
+        let mut melee = melee_combat_system::MeleeCombatSystem{};
+        melee.run_now(&self.ecs);
+        let mut damage = damage_system::DamageSystem{};
+        damage.run_now(&self.ecs);
+
         self.ecs.maintain();
     }
 }
@@ -63,8 +91,8 @@ fn main() -> rltk::BError {
         .build()?;
     let mut gs = State {
         ecs: World::new(),
-        runstate: RunState::Running
     };
+    gs.ecs.insert(RunState::PreRun);
     gs.ecs.register::<Position>();
     gs.ecs.register::<Renderable>();
     gs.ecs.register::<Player>();
@@ -73,8 +101,10 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Name>();
     gs.ecs.register::<BlocksTile>();
     gs.ecs.register::<CombatStats>();
+    gs.ecs.register::<WantsToMelee>();
+    gs.ecs.register::<SufferDamage>();
 
-    let map = map::Map::new_map_rooms_and_corridors();
+    let map = Map::new_map_rooms_and_corridors();
     let (player_x, player_y) = map.rooms[0].center();
 
     let mut rng = rltk::RandomNumberGenerator::new();
@@ -103,7 +133,7 @@ fn main() -> rltk::BError {
     }
     gs.ecs.insert(map);
 
-    gs.ecs
+    let player_entity = gs.ecs
         .create_entity()
         .with(Position { x: player_x, y: player_y })
         .with(Renderable {
@@ -116,9 +146,9 @@ fn main() -> rltk::BError {
         .with(Name{name: "Player".to_string()})
         .with(CombatStats{ max_hp: 30, hp: 30, defense: 2, power: 5 })
         .build();
+    gs.ecs.insert(player_entity);
 
     gs.ecs.insert(rltk::Point::new(player_x, player_y));
-
 
     rltk::main_loop(context, gs)
 }
