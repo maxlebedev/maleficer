@@ -7,20 +7,20 @@ mod player;
 pub use player::*;
 mod components;
 pub use components::*;
-mod rect;
-mod visibility_system;
-mod monster_ai_system;
+mod damage_system;
+mod gamelog;
+mod gui;
 mod map_indexing_system;
 mod melee_combat_system;
-mod damage_system;
-mod gui;
-mod gamelog;
+mod monster_ai_system;
+mod rect;
+mod visibility_system;
 pub use gamelog::GameLog;
-mod spawner;
 mod inventory_system;
+mod spawner;
 
 #[derive(PartialEq, Copy, Clone)]
-pub enum RunState { 
+pub enum RunState {
     AwaitingInput,
     PreRun,
     PlayerTurn,
@@ -31,7 +31,6 @@ pub enum RunState {
 pub struct State {
     ecs: World,
 }
-
 
 impl GameState for State {
     fn tick(&mut self, ctx: &mut Rltk) {
@@ -66,7 +65,10 @@ impl GameState for State {
                         let item_entity = result.1.unwrap();
                         let names = self.ecs.read_storage::<Name>();
                         let mut gamelog = self.ecs.fetch_mut::<gamelog::GameLog>();
-                        gamelog.entries.push(format!("You try to use {}, but it isn't written yet", names.get(item_entity).unwrap().name));
+                        gamelog.entries.push(format!(
+                            "You try to use {}, but it isn't written yet",
+                            names.get(item_entity).unwrap().name
+                        ));
                         newrunstate = RunState::AwaitingInput;
                     }
                 }
@@ -86,7 +88,9 @@ impl GameState for State {
 
         for (pos, render) in (&positions, &renderables).join() {
             let idx = map.xy_idx(pos.x, pos.y);
-            if map.visible_tiles[idx] { ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph) }
+            if map.visible_tiles[idx] {
+                ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph)
+            }
         }
         gui::draw_ui(&self.ecs, ctx);
     }
@@ -94,17 +98,17 @@ impl GameState for State {
 
 impl State {
     fn run_systems(&mut self) {
-        let mut vis = visibility_system::VisibilitySystem{};
+        let mut vis = visibility_system::VisibilitySystem {};
         vis.run_now(&self.ecs);
-        let mut mob = monster_ai_system::MonsterAI{};
+        let mut mob = monster_ai_system::MonsterAI {};
         mob.run_now(&self.ecs);
-        let mut mapindex = map_indexing_system::MapIndexingSystem{};
+        let mut mapindex = map_indexing_system::MapIndexingSystem {};
         mapindex.run_now(&self.ecs);
-        let mut melee = melee_combat_system::MeleeCombatSystem{};
+        let mut melee = melee_combat_system::MeleeCombatSystem {};
         melee.run_now(&self.ecs);
-        let mut damage = damage_system::DamageSystem{};
+        let mut damage = damage_system::DamageSystem {};
         damage.run_now(&self.ecs);
-        let mut pickup = inventory_system::ItemCollectionSystem{};
+        let mut pickup = inventory_system::ItemCollectionSystem {};
         pickup.run_now(&self.ecs);
 
         self.ecs.maintain();
@@ -118,9 +122,7 @@ fn main() -> rltk::BError {
         .build()?;
     // TODO: figure out how to make background not black
     context.with_post_scanlines(true);
-    let mut gs = State {
-        ecs: World::new(),
-    } ;
+    let mut gs = State { ecs: World::new() };
     gs.ecs.insert(RunState::PreRun);
     gs.ecs.register::<Position>();
     gs.ecs.register::<Renderable>();
@@ -151,7 +153,9 @@ fn main() -> rltk::BError {
 
     gs.ecs.insert(rltk::Point::new(player_x, player_y));
 
-    gs.ecs.insert(GameLog{ entries : vec!["Welcome to Rusty Roguelike".to_string()] });
+    gs.ecs.insert(GameLog {
+        entries: vec!["Welcome to Rusty Roguelike".to_string()],
+    });
 
     rltk::main_loop(context, gs)
 }
