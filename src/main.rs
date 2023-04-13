@@ -154,7 +154,7 @@ fn main() -> rltk::BError {
     gs.ecs.insert(rltk::Point::new(player_x, player_y));
 
     gs.ecs.insert(GameLog {
-        entries: vec!["Welcome to Rusty Roguelike".to_string()],
+        entries: vec!["Welcome to Malefactor".to_string()],
     });
 
     rltk::main_loop(context, gs)
