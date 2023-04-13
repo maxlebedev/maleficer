@@ -1,5 +1,6 @@
 use rltk::{VirtualKeyCode, Rltk, Point};
 use specs::prelude::*;
+use super::gamelog::GameLog;
 
 
 use super::{components, State, map, RunState};
@@ -41,40 +42,51 @@ fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
     }
 }
 
+
+fn get_item(ecs: &mut World) {
+    let player_pos = ecs.fetch::<Point>();
+    let player_entity = ecs.fetch::<Entity>();
+    let entities = ecs.entities();
+    let items = ecs.read_storage::<Item>();
+    let positions = ecs.read_storage::<Position>();
+    let mut gamelog = ecs.fetch_mut::<GameLog>();    
+
+    let mut target_item : Option<Entity> = None;
+    for (item_entity, _item, position) in (&entities, &items, &positions).join() {
+        if position.x == player_pos.x && position.y == player_pos.y {
+            target_item = Some(item_entity);
+        }
+    }
+
+    match target_item {
+        None => gamelog.entries.push("There is nothing here to pick up.".to_string()),
+        Some(item) => {
+            let mut pickup = ecs.write_storage::<WantsToPickupItem>();
+            pickup.insert(*player_entity, WantsToPickupItem{ collected_by: *player_entity, item }).expect("Unable to insert want to pickup");
+        }
+    }
+}
+
 pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState{
     // Player movement
     match ctx.key {
         None => { return RunState::AwaitingInput } // Nothing happened
         Some(key) => match key {
-            VirtualKeyCode::Left |
-            VirtualKeyCode::Numpad4 |
-            VirtualKeyCode::H => try_move_player(-1, 0, &mut gs.ecs),
+            // TODO: read keymaps off of a text file
+            VirtualKeyCode::J => try_move_player(-1, 0, &mut gs.ecs),
+            VirtualKeyCode::K => try_move_player(0, 1, &mut gs.ecs),
+            VirtualKeyCode::L => try_move_player(0, -1, &mut gs.ecs),
+            VirtualKeyCode::Semicolon => try_move_player(1, 0, &mut gs.ecs),
 
-            VirtualKeyCode::Right |
-            VirtualKeyCode::Numpad6 |
-            VirtualKeyCode::L => try_move_player(1, 0, &mut gs.ecs),
-
-            VirtualKeyCode::Up |
-            VirtualKeyCode::Numpad8 |
-            VirtualKeyCode::K => try_move_player(0, -1, &mut gs.ecs),
-
-            VirtualKeyCode::Down |
-            VirtualKeyCode::Numpad2 |
-            VirtualKeyCode::J => try_move_player(0, 1, &mut gs.ecs),
-
-            // Diagonals
-            // weird choice, but ok
-            VirtualKeyCode::Numpad9 |
+            /* Diagonals maybe unlockable at some point?
             VirtualKeyCode::Y => try_move_player(1, -1, &mut gs.ecs),
-
-            VirtualKeyCode::Numpad7 |
             VirtualKeyCode::U => try_move_player(-1, -1, &mut gs.ecs),
-
-            VirtualKeyCode::Numpad3 |
             VirtualKeyCode::N => try_move_player(1, 1, &mut gs.ecs),
-
-            VirtualKeyCode::Numpad1 |
             VirtualKeyCode::B => try_move_player(-1, 1, &mut gs.ecs),
+            */
+
+            VirtualKeyCode::G => get_item(&mut gs.ecs),
+            VirtualKeyCode::I => return RunState::ShowInventory,
 
             _ => { return RunState::AwaitingInput }
         },

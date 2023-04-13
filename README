@@ -1,3 +1,4 @@
+built off of https://github.com/amethyst/rustrogueliketutorial
 
 malefactor is intended to be a ttpg-inspired roguelike written in rust.
 
@@ -10,8 +11,10 @@ The options are something like:
 	* battle magic
 	* teleportation/forced movement
 	* defense
-	* stealth
+	* illusion/stealth
 	* info gathering
 Leveling up grants spells from the chosen schools, but more can be learned.
+
+Might use a mana sytem at first, but maybe something more involved going forward? Like a stat for magic reserves, magnitude, duration, etc
 
 Going with spells because I don't want the combat loop to be about repeatedly making default attacks

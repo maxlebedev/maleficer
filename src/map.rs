@@ -4,8 +4,8 @@ use std::cmp::{max, min};
 use specs::prelude::*;
 
 
-const MAPWIDTH : usize = 80;
-const MAPHEIGHT : usize = 43;
+pub const MAPWIDTH : usize = 80;
+pub const MAPHEIGHT : usize = 43;
 const MAPCOUNT : usize = MAPHEIGHT * MAPWIDTH;
 
 // TODO: there are rendering issues around entities interacting
@@ -30,6 +30,15 @@ impl Map {
     pub fn xy_idx(&self, x: i32, y: i32) -> usize {
         ((y * self.width ) + x) as usize
     }
+   
+    /// for DRY reasons. TODO: actually use this
+    pub fn idx_xy(idx: usize) -> (i32, i32) {
+        let x = idx % MAPWIDTH;
+        let y = idx / MAPWIDTH;
+        (x as i32, y as i32)
+    }
+
+
 
     fn is_exit_valid(&self, x:i32, y:i32) -> bool {
         if x < 1 || x > self.width-1 || y < 1 || y > self.height-1 { return false; }
@@ -198,11 +207,12 @@ impl BaseMap for Map {
         if self.is_exit_valid(x, y-1) { exits.push((idx-w, 1.0)) };
         if self.is_exit_valid(x, y+1) { exits.push((idx+w, 1.0)) };
 
-        // Diagonals
+        /* Diagonals. Things shouldn't be diagonal by default
         if self.is_exit_valid(x-1, y-1) { exits.push(((idx-w)-1, 1.45)); }
         if self.is_exit_valid(x+1, y-1) { exits.push(((idx-w)+1, 1.45)); }
         if self.is_exit_valid(x-1, y+1) { exits.push(((idx+w)-1, 1.45)); }
         if self.is_exit_valid(x+1, y+1) { exits.push(((idx+w)+1, 1.45)); }
+        */
 
         exits
     }

@@ -23,7 +23,8 @@ impl<'a> System<'a> for MonsterAI {
 
         for (entity, mut viewshed,_monster,mut pos) in (&entities, &mut viewshed, &monster, &mut position).join() {
             let distance = rltk::DistanceAlg::Pythagoras.distance2d(Point::new(pos.x, pos.y), *player_pos);
-            if distance < 1.5 {
+            if distance < 1.1 { //was 1.5 to allow diagonal attacks
+                //TODO: make ditance a stat
                 wants_to_melee.insert(entity, WantsToMelee{ target: *player_entity }).expect("Unable to insert attack");
             }
             else if viewshed.visible_tiles.contains(&*player_pos) {
