@@ -1,4 +1,4 @@
-use crate::{gamelog::GameLog, InBackpack, Name, Position, WantsToPickupItem, WantsToUseItem, CombatStats, WantsToDropItem, Consumable, ProvidesHealing};
+use crate::{gamelog::GameLog, InBackpack, Name, Position, WantsToPickupItem, WantsToUseItem, CombatStats, WantsToDropItem, Consumable, ProvidesHealing, InflictsDamage, map, SufferDamage};
 use specs::prelude::*;
 
 pub struct ItemCollection{}
@@ -52,14 +52,18 @@ impl<'a> System<'a> for ItemUse{
                         ReadStorage<'a, Name>,
                         ReadStorage<'a, Consumable>,
                         ReadStorage<'a, ProvidesHealing>,
+                        ReadStorage<'a, InflictsDamage>,
+                        WriteStorage<'a, SufferDamage>,
+                        ReadExpect<'a, map::Map>,
                         WriteStorage<'a, CombatStats>
                       );
 
     fn run(&mut self, data : Self::SystemData) {
-        let (player_entity, mut gamelog, entities, mut wants_use, names, consumables, healing, mut combat_stats) = data;
+        let (player_entity, mut gamelog, entities, mut wants_use, names, consumables, healing, inflict_damage, mut suffer_damage, map, mut combat_stats) = data;
 
 
         for (entity, useitem, stats) in (&entities, &wants_use, &mut combat_stats).join() {
+            let mut used_item = true;
             let item_heals = healing.get(useitem.item);
             match item_heals {
                 None => {}
@@ -77,7 +81,38 @@ impl<'a> System<'a> for ItemUse{
                     entities.delete(useitem.item).expect("Delete failed");
                 }
             }
+            // If it inflicts damage, apply it to the target cell
+            let item_damages = inflict_damage.get(useitem.item);
+            match item_damages {
+                None => {}
+                Some(damage) => {
+                    let target_point = useitem.target.unwrap();
+                    let idx = map.xy_idx(target_point.x, target_point.y);
+                    used_item = false;
+                    for mob in map.tile_content[idx].iter() {
+                        SufferDamage::new_damage(&mut suffer_damage, *mob, damage.damage);
+                        if entity == *player_entity {
+                            let mob_name = names.get(*mob).unwrap();
+                            let item_name = names.get(useitem.item).unwrap();
+                            gamelog.entries.push(format!("You use {} on {}, inflicting {} hp.", item_name.name, mob_name.name, damage.damage));
+                        }
+
+                        used_item = true;
+                    }
+                }
+            }
+            // If its a consumable, we delete it on use
+            if used_item {
+                let consumable = consumables.get(useitem.item);
+                match consumable {
+                    None => {}
+                    Some(_) => {
+                        entities.delete(useitem.item).expect("Delete failed");
+                    }
+                }
+            }
         }
+
         wants_use.clear();
     }
 }
