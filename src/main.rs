@@ -7,16 +7,11 @@ mod player;
 pub use player::*;
 mod components;
 pub use components::*;
-mod damage_system;
 mod gamelog;
 mod gui;
-mod map_indexing_system;
-mod melee_combat_system;
-mod monster_ai_system;
+mod systems;
 mod rect;
-mod visibility_system;
 pub use gamelog::GameLog;
-mod inventory_system;
 mod spawner;
 
 #[derive(PartialEq, Copy, Clone)]
@@ -78,7 +73,7 @@ impl GameState for State {
             let mut runwriter = self.ecs.write_resource::<RunState>();
             *runwriter = newrunstate;
         }
-        damage_system::delete_the_dead(&mut self.ecs);
+        systems::damage::delete_the_dead(&mut self.ecs);
 
         draw_map(&self.ecs, ctx);
 
@@ -98,18 +93,20 @@ impl GameState for State {
 
 impl State {
     fn run_systems(&mut self) {
-        let mut vis = visibility_system::VisibilitySystem {};
+        let mut vis = systems::visibility::Visibility{};
         vis.run_now(&self.ecs);
-        let mut mob = monster_ai_system::MonsterAI {};
+        let mut mob = systems::monster_ai::MonsterAI {};
         mob.run_now(&self.ecs);
-        let mut mapindex = map_indexing_system::MapIndexingSystem {};
+        let mut mapindex = systems::map_indexing::MapIndexing{};
         mapindex.run_now(&self.ecs);
-        let mut melee = melee_combat_system::MeleeCombatSystem {};
+        let mut melee = systems::melee_combat::MeleeCombat{};
         melee.run_now(&self.ecs);
-        let mut damage = damage_system::DamageSystem {};
+        let mut damage = systems::damage::Damage{};
         damage.run_now(&self.ecs);
-        let mut pickup = inventory_system::ItemCollectionSystem {};
+        let mut pickup = systems::inventory::ItemCollection{};
         pickup.run_now(&self.ecs);
+        let mut potions = systems::inventory::PotionUse{};
+        potions.run_now(&self.ecs);
 
         self.ecs.maintain();
     }
@@ -138,6 +135,8 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Potion>();
     gs.ecs.register::<InBackpack>();
     gs.ecs.register::<WantsToPickupItem>();
+    gs.ecs.register::<WantsToDrinkPotion>();
+
 
     let map = Map::new_map_rooms_and_corridors();
     let (player_x, player_y) = map.rooms[0].center();

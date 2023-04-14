@@ -1,11 +1,10 @@
-use super::components;
-use super::map;
+use crate::{components, map};
 use rltk;
 use specs::prelude::*;
 
-pub struct VisibilitySystem {}
+pub struct Visibility{}
 
-impl<'a> System<'a> for VisibilitySystem {
+impl<'a> System<'a> for Visibility{
     type SystemData = (
         WriteExpect<'a, map::Map>,
         Entities<'a>,

@@ -1,10 +1,10 @@
-use super::{CombatStats, GameLog, Name, SufferDamage, WantsToMelee};
+use crate::{CombatStats, Name, GameLog, SufferDamage, WantsToMelee};
 use specs::prelude::*;
 // use rltk::console;
 
-pub struct MeleeCombatSystem {}
+pub struct MeleeCombat{}
 
-impl<'a> System<'a> for MeleeCombatSystem {
+impl<'a> System<'a> for MeleeCombat{
     type SystemData = (
         Entities<'a>,
         WriteExpect<'a, GameLog>,

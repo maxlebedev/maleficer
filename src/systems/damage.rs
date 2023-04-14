@@ -1,10 +1,10 @@
-use super::{CombatStats, GameLog, Name, Player, SufferDamage};
+use crate::{CombatStats, GameLog, Name, Player, SufferDamage};
 use rltk::console;
 use specs::prelude::*;
 
-pub struct DamageSystem {}
+pub struct Damage{}
 
-impl<'a> System<'a> for DamageSystem {
+impl<'a> System<'a> for Damage{
     type SystemData = (
         WriteStorage<'a, CombatStats>,
         WriteStorage<'a, SufferDamage>,

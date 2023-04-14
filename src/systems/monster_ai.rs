@@ -1,4 +1,4 @@
-use super::{Map, Monster, Position, RunState, Viewshed, WantsToMelee};
+use crate::{Map, Monster, Position, RunState, Viewshed, WantsToMelee};
 use rltk::Point;
 use specs::prelude::*;
 
