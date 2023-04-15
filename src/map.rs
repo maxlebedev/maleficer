@@ -2,13 +2,13 @@ use super::rect::Rect;
 use rltk::{Algorithm2D, BaseMap, Point, RandomNumberGenerator, Rltk, RGB};
 use specs::prelude::*;
 use std::cmp::{max, min};
+use serde::{Serialize, Deserialize};
 
 pub const MAPWIDTH: usize = 80;
 pub const MAPHEIGHT: usize = 43;
 const MAPCOUNT: usize = MAPHEIGHT * MAPWIDTH;
 
-// TODO: there are rendering issues around entities interacting
-// this might be related to crossterm
+// TODO: things in crossterm update slowly, only when I spam keys
 #[derive(PartialEq, Copy, Clone)]
 pub enum TileType {
     Wall,
@@ -23,6 +23,7 @@ pub struct Map {
     pub revealed_tiles: Vec<bool>,
     pub visible_tiles: Vec<bool>,
     pub blocked: Vec<bool>,
+
     pub tile_content: Vec<Vec<Entity>>,
 }
 

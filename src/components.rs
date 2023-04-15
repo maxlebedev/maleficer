@@ -1,6 +1,7 @@
 use rltk::RGB;
 use specs::prelude::*;
 use specs_derive::*;
+use serde::{Serialize, Deserialize};
 
 #[derive(Component)]
 pub struct Position {
@@ -109,4 +110,9 @@ pub struct Ranged {
 #[derive(Component, Debug)]
 pub struct InflictsDamage {
     pub damage : i32
+}
+
+#[derive(Component, Debug)]
+pub struct AreaOfEffect {
+    pub radius : i32
 }

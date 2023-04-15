@@ -1,6 +1,7 @@
 use rltk::{GameState, Rltk};
 use specs::prelude::*;
 
+
 mod map;
 pub use map::*;
 mod player;
@@ -23,6 +24,8 @@ pub enum RunState {
     ShowInventory,
     ShowDropItem,
     ShowTargeting{ range : i32, item : Entity},
+    MainMenu {menu_selection: gui::MainMenuSelection},
+    SaveGame,
 }
 
 pub struct State {
@@ -31,14 +34,55 @@ pub struct State {
 
 impl GameState for State {
     fn tick(&mut self, ctx: &mut Rltk) {
-        ctx.cls();
-        draw_map(&self.ecs, ctx);
         let mut newrunstate;
         {
             let runstate = self.ecs.fetch::<RunState>();
             newrunstate = *runstate;
         }
+        ctx.cls();
+
         match newrunstate {
+            RunState::MainMenu{..} => {}
+            RunState::SaveGame => {
+                let data = serde_json::to_string(&*self.ecs.fetch::<Map>()).unwrap();
+                println!("{}", data);
+                newrunstate = RunState::MainMenu{ menu_selection : gui::MainMenuSelection::LoadGame };
+            }
+            _ => {
+                draw_map(&self.ecs, ctx);
+
+                {
+                    let positions = self.ecs.read_storage::<Position>();
+                    let renderables = self.ecs.read_storage::<Renderable>();
+                    let map = self.ecs.fetch::<Map>();
+
+                    let mut data = (&positions, &renderables).join().collect::<Vec<_>>();
+                    data.sort_by(|&a, &b| b.1.render_order.cmp(&a.1.render_order) );
+                    for (pos, render) in data.iter() {
+                        let idx = map.xy_idx(pos.x, pos.y);
+                        if map.visible_tiles[idx] { ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph) }
+                    }
+
+                    gui::draw_ui(&self.ecs, ctx);
+                }
+            }
+        }
+
+        match newrunstate {
+            RunState::MainMenu{ .. } => {
+                let result = gui::main_menu(self, ctx);
+                match result {
+                    gui::MainMenuResult::NoSelection{ selected } => newrunstate = RunState::MainMenu{ menu_selection: selected },
+                    gui::MainMenuResult::Selected{ selected } => {
+                        match selected {
+                            gui::MainMenuSelection::NewGame => newrunstate = RunState::PreRun,
+                            gui::MainMenuSelection::LoadGame => newrunstate = RunState::PreRun,
+                            gui::MainMenuSelection::Quit => { ::std::process::exit(0); }
+                        }
+                    }
+                }
+            }
+            RunState::SaveGame => {}
             RunState::PreRun => {
                 self.run_systems();
                 self.ecs.maintain();
@@ -107,21 +151,6 @@ impl GameState for State {
             *runwriter = newrunstate;
         }
         systems::damage::delete_the_dead(&mut self.ecs);
-
-
-        let positions = self.ecs.read_storage::<Position>();
-        let renderables = self.ecs.read_storage::<Renderable>();
-        let map = self.ecs.fetch::<Map>();
-
-        let mut data = (&positions, &renderables).join().collect::<Vec<_>>();
-        data.sort_by(|&a, &b| b.1.render_order.cmp(&a.1.render_order) );
-        for (pos, render) in data.iter() {
-            let idx = map.xy_idx(pos.x, pos.y);
-            if map.visible_tiles[idx] {
-                ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph)
-            }
-        }
-        gui::draw_ui(&self.ecs, ctx);
     }
 }
 
@@ -176,6 +205,7 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Consumable>();
     gs.ecs.register::<Ranged>();
     gs.ecs.register::<InflictsDamage>();
+    gs.ecs.register::<AreaOfEffect>();
 
 
     let map = Map::new_map_rooms_and_corridors();
@@ -192,9 +222,8 @@ fn main() -> rltk::BError {
 
     gs.ecs.insert(rltk::Point::new(player_x, player_y));
 
-    gs.ecs.insert(GameLog {
-        entries: vec!["Welcome to Malefactor".to_string()],
-    });
+    let gamelog = GameLog {entries: vec!["Welcome to Malefactor".to_string()]};
+    gs.ecs.insert(gamelog);
 
     rltk::main_loop(context, gs)
 }
