@@ -172,24 +172,25 @@ fn wall_glyph(map: &Map, x: i32, y: i32) -> rltk::FontCharType {
         mask += 8;
     }
 
+
     match mask {
-        0 => 254,    // Pillar because we can't see neighbors
-        1 => 186,  // Wall only to the north
-        2 => 186,  // Wall only to the south
-        3 => 186,  // Wall to the north and south
-        4 => 205,  // Wall only to the west
-        5 => 188,  // Wall to the north and west
-        6 => 187,  // Wall to the south and west
-        7 => 185,  // Wall to the north, south and west
-        8 => 205,  // Wall only to the east
-        9 => 200,  // Wall to the north and east
-        10 => 201, // Wall to the south and east
-        11 => 204, // Wall to the north, south and east
-        12 => 205, // Wall to the east and west
-        13 => 202, // Wall to the east, west, and south
-        14 => 203, // Wall to the east, west, and north
+        0 => 254,  // ■ Pillar because we can't see neighbors
+        1 => 186,  // ║ Wall only to the north
+        2 => 186,  // ║ Wall only to the south
+        3 => 186,  // ║ Wall to the north and south
+        4 => 205,  // ═ Wall only to the west
+        5 => 188,  // ╝ Wall to the north and west
+        6 => 187,  // ╗ Wall to the south and west
+        7 => 185,  // ╣ Wall to the north, south and west
+        8 => 205,  // ═ Wall only to the east
+        9 => 200,  // ╚ Wall to the north and east
+        10 => 201, // ╔ Wall to the south and east
+        11 => 204, // ╠ Wall to the north, south and east
+        12 => 205, // ═ Wall to the east and west
+        13 => 202, // ╩ Wall to the east, west, and south
+        14 => 203, // ╦ Wall to the east, west, and north
         15 => 206, // ╬ Wall on all sides
-        _ => 35,   // We missed one?
+        _ => 35,   // # We missed one?
     }
 }
 
