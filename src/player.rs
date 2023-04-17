@@ -1,5 +1,5 @@
 use super::gamelog::GameLog;
-use rltk::{Point, Rltk, VirtualKeyCode};
+use rltk::{Point, Rltk};
 use specs::prelude::*;
 
 use super::{components, map, RunState, State, config};
@@ -93,19 +93,19 @@ fn get_item(ecs: &mut World) {
 }
 
 pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
-    // Player movement
-    
-    let left = config::cfg_to_kc(config::CONFIG.left.to_string());
-    let down = config::cfg_to_kc(config::CONFIG.down.to_string());
-    let up = config::cfg_to_kc(config::CONFIG.up.to_string());
-    let right = config::cfg_to_kc(config::CONFIG.right.to_string());
+    let left = config::cfg_to_kc(&config::CONFIG.left);
+    let down = config::cfg_to_kc(&config::CONFIG.down);
+    let up = config::cfg_to_kc(&config::CONFIG.up);
+    let right = config::cfg_to_kc(&config::CONFIG.right);
 
-    let pick_up = config::cfg_to_kc(config::CONFIG.pick_up.to_string());
-    let inventory = config::cfg_to_kc(config::CONFIG.inventory.to_string());
-    let drop = config::cfg_to_kc(config::CONFIG.drop.to_string());
+    let pick_up = config::cfg_to_kc(&config::CONFIG.pick_up);
+    let inventory = config::cfg_to_kc(&config::CONFIG.inventory);
+    let drop = config::cfg_to_kc(&config::CONFIG.drop);
+    let exit = config::cfg_to_kc(&config::CONFIG.exit);
     match ctx.key {
         None => return RunState::AwaitingInput, // Nothing happened
         Some(key) => match key {
+            // TODO: I still don't understand why I have to do do `_ if key ==`
             _ if key == left => try_move_player(-1, 0, &mut gs.ecs),
             _ if key == down => try_move_player(0, 1, &mut gs.ecs),
             _ if key == up => try_move_player(0, -1, &mut gs.ecs),
@@ -116,7 +116,7 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
 
             _ if key == drop => return RunState::ShowDropItem,
             // Save and Quit
-            VirtualKeyCode::Escape => return RunState::SaveGame,
+            _ if key == exit=> return RunState::SaveGame,
 
             _ => return RunState::AwaitingInput,
         },
