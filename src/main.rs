@@ -1,5 +1,6 @@
 use rltk::{GameState, Rltk};
 use specs::prelude::*;
+use specs::saveload::{SimpleMarker, SimpleMarkerAllocator};
 
 
 mod map;
@@ -44,8 +45,7 @@ impl GameState for State {
         match newrunstate {
             RunState::MainMenu{..} => {}
             RunState::SaveGame => {
-                let data = serde_json::to_string(&*self.ecs.fetch::<Map>()).unwrap();
-                println!("{}", data);
+                systems::save_load::save_game(&mut self.ecs);
                 newrunstate = RunState::MainMenu{ menu_selection : gui::MainMenuSelection::LoadGame };
             }
             _ => {
@@ -76,7 +76,11 @@ impl GameState for State {
                     gui::MainMenuResult::Selected{ selected } => {
                         match selected {
                             gui::MainMenuSelection::NewGame => newrunstate = RunState::PreRun,
-                            gui::MainMenuSelection::LoadGame => newrunstate = RunState::PreRun,
+                            gui::MainMenuSelection::LoadGame => {
+                                systems::save_load::load_game(&mut self.ecs);
+                                newrunstate = RunState::AwaitingInput;
+                                systems::save_load::delete_save();
+                            }
                             gui::MainMenuSelection::Quit => { ::std::process::exit(0); }
                         }
                     }
@@ -177,15 +181,7 @@ impl State {
     }
 }
 
-fn main() -> rltk::BError {
-    use rltk::RltkBuilder;
-    let mut context: Rltk = RltkBuilder::simple80x50()
-        .with_title("Malefactor")
-        .build()?;
-    // TODO: figure out how to make background not black
-    context.with_post_scanlines(true);
-    let mut gs = State { ecs: World::new() };
-    gs.ecs.insert(RunState::PreRun);
+fn register_all(gs: &mut State){
     gs.ecs.register::<Position>();
     gs.ecs.register::<Renderable>();
     gs.ecs.register::<Player>();
@@ -206,7 +202,22 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Ranged>();
     gs.ecs.register::<InflictsDamage>();
     gs.ecs.register::<AreaOfEffect>();
+    gs.ecs.register::<SimpleMarker<SerializeMe>>();
+    gs.ecs.register::<SerializationHelper>();
+}
 
+fn main() -> rltk::BError {
+    use rltk::RltkBuilder;
+    let mut context: Rltk = RltkBuilder::simple80x50()
+        .with_title("Malefactor")
+        .build()?;
+    // TODO: figure out how to make background not black
+    context.with_post_scanlines(true);
+    let mut gs = State { ecs: World::new() };
+    gs.ecs.insert(RunState::PreRun);
+    register_all(&mut gs);
+
+    gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());
 
     let map = Map::new_map_rooms_and_corridors();
     let (player_x, player_y) = map.rooms[0].center();

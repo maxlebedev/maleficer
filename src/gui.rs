@@ -207,6 +207,7 @@ pub fn ranged_target(gs : &mut State, ctx : &mut Rltk, range : i32) -> (ItemMenu
 }
 
 pub fn main_menu(gs : &mut State, ctx : &mut Rltk) -> MainMenuResult {
+    let save_exists = super::systems::save_load::does_save_exist();
     let runstate = gs.ecs.fetch::<RunState>();
 
     ctx.print_color_centered(15, RGB::named(rltk::YELLOW), RGB::named(rltk::BLACK), "Malefactor");
@@ -237,20 +238,27 @@ pub fn main_menu(gs : &mut State, ctx : &mut Rltk) -> MainMenuResult {
                 match key {
                     VirtualKeyCode::Escape => { return MainMenuResult::NoSelection{ selected: MainMenuSelection::Quit } }
                     VirtualKeyCode::Up => {
-                        let newselection;
+                        let mut newselection;
                         match selection {
+                            // TODO: this is dumb, navigate some circular data struct
                             MainMenuSelection::NewGame => newselection = MainMenuSelection::Quit,
                             MainMenuSelection::LoadGame => newselection = MainMenuSelection::NewGame,
                             MainMenuSelection::Quit => newselection = MainMenuSelection::LoadGame
                         }
+                        if newselection == MainMenuSelection::LoadGame && !save_exists {
+                            newselection = MainMenuSelection::NewGame;
+                        }
                         return MainMenuResult::NoSelection{ selected: newselection }
                     }
                     VirtualKeyCode::Down => {
-                        let newselection;
+                        let mut newselection;
                         match selection {
                             MainMenuSelection::NewGame => newselection = MainMenuSelection::LoadGame,
                             MainMenuSelection::LoadGame => newselection = MainMenuSelection::Quit,
                             MainMenuSelection::Quit => newselection = MainMenuSelection::NewGame
+                        }
+                        if newselection == MainMenuSelection::LoadGame && !save_exists {
+                            newselection = MainMenuSelection::Quit;
                         }
                         return MainMenuResult::NoSelection{ selected: newselection }
                     }

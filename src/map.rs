@@ -1,20 +1,21 @@
 use super::rect::Rect;
 use rltk::{Algorithm2D, BaseMap, Point, RandomNumberGenerator, Rltk, RGB};
+use serde::{Deserialize, Serialize};
 use specs::prelude::*;
 use std::cmp::{max, min};
-use serde::{Serialize, Deserialize};
 
 pub const MAPWIDTH: usize = 80;
 pub const MAPHEIGHT: usize = 43;
-const MAPCOUNT: usize = MAPHEIGHT * MAPWIDTH;
+pub const MAPCOUNT: usize = MAPHEIGHT * MAPWIDTH;
 
 // TODO: things in crossterm update slowly, only when I spam keys
-#[derive(PartialEq, Copy, Clone)]
+#[derive(PartialEq, Copy, Clone, Serialize, Deserialize)]
 pub enum TileType {
     Wall,
     Floor,
 }
 
+#[derive(Default, Serialize, Deserialize, Clone)]
 pub struct Map {
     pub tiles: Vec<TileType>,
     pub rooms: Vec<Rect>,
@@ -24,6 +25,8 @@ pub struct Map {
     pub visible_tiles: Vec<bool>,
     pub blocked: Vec<bool>,
 
+    #[serde(skip_serializing)]
+    #[serde(skip_deserializing)]
     pub tile_content: Vec<Vec<Entity>>,
 }
 
@@ -141,6 +144,55 @@ impl Map {
     }
 }
 
+fn is_revealed_and_wall(map: &Map, x: i32, y: i32) -> bool {
+    let idx = map.xy_idx(x, y);
+    map.tiles[idx] == TileType::Wall && map.revealed_tiles[idx]
+}
+
+fn wall_glyph(map: &Map, x: i32, y: i32) -> rltk::FontCharType {
+    if x < 1 || x > map.width - 2 || y < 1 || y > map.height - 2 as i32 {
+        return 35;
+        // TODO: we can conditionally return
+        // 186 for left and right edges
+        // 205 for top and bottom
+        // 201, 187, 188, 200 for top-left, top-right, bot-right, bot-left corners
+    }
+    let mut mask: u8 = 0;
+
+    if is_revealed_and_wall(map, x, y - 1) {
+        mask += 1;
+    }
+    if is_revealed_and_wall(map, x, y + 1) {
+        mask += 2;
+    }
+    if is_revealed_and_wall(map, x - 1, y) {
+        mask += 4;
+    }
+    if is_revealed_and_wall(map, x + 1, y) {
+        mask += 8;
+    }
+
+    match mask {
+        0 => 254,    // Pillar because we can't see neighbors
+        1 => 186,  // Wall only to the north
+        2 => 186,  // Wall only to the south
+        3 => 186,  // Wall to the north and south
+        4 => 205,  // Wall only to the west
+        5 => 188,  // Wall to the north and west
+        6 => 187,  // Wall to the south and west
+        7 => 185,  // Wall to the north, south and west
+        8 => 205,  // Wall only to the east
+        9 => 200,  // Wall to the north and east
+        10 => 201, // Wall to the south and east
+        11 => 204, // Wall to the north, south and east
+        12 => 205, // Wall to the east and west
+        13 => 202, // Wall to the east, west, and south
+        14 => 203, // Wall to the east, west, and north
+        15 => 206, // ╬ Wall on all sides
+        _ => 35,   // We missed one?
+    }
+}
+
 pub fn draw_map(ecs: &World, ctx: &mut Rltk) {
     let map = ecs.fetch::<Map>();
     let cyan = RGB::from_f32(0.0, 0.5, 0.5);
@@ -161,7 +213,7 @@ pub fn draw_map(ecs: &World, ctx: &mut Rltk) {
                     fg = cyan;
                 }
                 TileType::Wall => {
-                    glyph = rltk::to_cp437('#');
+                    glyph = wall_glyph(&*map, x, y);
                     fg = green;
                 }
             }
