@@ -5,7 +5,7 @@ use super::{
 use crate::map;
 use rltk::{RandomNumberGenerator, RGB};
 use specs::prelude::*;
-use specs::saveload::{SimpleMarker, SimpleMarkerAllocator};
+use specs::saveload::SimpleMarker;
 
 use specs::saveload::MarkedBuilder;
 pub use components::*;

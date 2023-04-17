@@ -2,9 +2,12 @@ use super::gamelog::GameLog;
 use rltk::{Point, Rltk, VirtualKeyCode};
 use specs::prelude::*;
 
-use super::{components, map, RunState, State};
+use super::{components, map, RunState, State, config};
 pub use components::*;
 use num;
+
+
+
 
 fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
     let mut positions = ecs.write_storage::<Position>();
@@ -91,25 +94,27 @@ fn get_item(ecs: &mut World) {
 
 pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
     // Player movement
+    
+    let left = config::cfg_to_kc(config::CONFIG.left.to_string());
+    let down = config::cfg_to_kc(config::CONFIG.down.to_string());
+    let up = config::cfg_to_kc(config::CONFIG.up.to_string());
+    let right = config::cfg_to_kc(config::CONFIG.right.to_string());
+
+    let pick_up = config::cfg_to_kc(config::CONFIG.pick_up.to_string());
+    let inventory = config::cfg_to_kc(config::CONFIG.inventory.to_string());
+    let drop = config::cfg_to_kc(config::CONFIG.drop.to_string());
     match ctx.key {
         None => return RunState::AwaitingInput, // Nothing happened
         Some(key) => match key {
-            // TODO: read keymaps off of a text file
-            VirtualKeyCode::J => try_move_player(-1, 0, &mut gs.ecs),
-            VirtualKeyCode::K => try_move_player(0, 1, &mut gs.ecs),
-            VirtualKeyCode::L => try_move_player(0, -1, &mut gs.ecs),
-            VirtualKeyCode::Semicolon => try_move_player(1, 0, &mut gs.ecs),
+            _ if key == left => try_move_player(-1, 0, &mut gs.ecs),
+            _ if key == down => try_move_player(0, 1, &mut gs.ecs),
+            _ if key == up => try_move_player(0, -1, &mut gs.ecs),
+            _ if key == right => try_move_player(1, 0, &mut gs.ecs),
 
-            /* Diagonals maybe unlockable at some point?
-            VirtualKeyCode::Y => try_move_player(1, -1, &mut gs.ecs),
-            VirtualKeyCode::U => try_move_player(-1, -1, &mut gs.ecs),
-            VirtualKeyCode::N => try_move_player(1, 1, &mut gs.ecs),
-            VirtualKeyCode::B => try_move_player(-1, 1, &mut gs.ecs),
-            */
-            VirtualKeyCode::G => get_item(&mut gs.ecs),
-            VirtualKeyCode::I => return RunState::ShowInventory,
+            _ if key == pick_up => get_item(&mut gs.ecs),
+            _ if key == inventory => return RunState::ShowInventory,
 
-            VirtualKeyCode::D => return RunState::ShowDropItem,
+            _ if key == drop => return RunState::ShowDropItem,
             // Save and Quit
             VirtualKeyCode::Escape => return RunState::SaveGame,
 

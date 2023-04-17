@@ -8,6 +8,8 @@ pub const MAPWIDTH: usize = 80;
 pub const MAPHEIGHT: usize = 43;
 pub const MAPCOUNT: usize = MAPHEIGHT * MAPWIDTH;
 
+// TODO: there are places that we do absolute rather than relative math
+
 // TODO: things in crossterm update slowly, only when I spam keys
 #[derive(PartialEq, Copy, Clone, Serialize, Deserialize)]
 pub enum TileType {
@@ -150,12 +152,25 @@ fn is_revealed_and_wall(map: &Map, x: i32, y: i32) -> bool {
 }
 
 fn wall_glyph(map: &Map, x: i32, y: i32) -> rltk::FontCharType {
-    if x < 1 || x > map.width - 2 || y < 1 || y > map.height - 2 as i32 {
-        return 35;
-        // TODO: we can conditionally return
-        // 186 for left and right edges
-        // 205 for top and bottom
-        // 201, 187, 188, 200 for top-left, top-right, bot-right, bot-left corners
+
+    // TODO: match once I learn how those work
+    if x == 0 && y == 0 {
+        return 201; // ╔
+    }
+    if x == map.width - 1 && y == 0 {
+        return 201; // ╗
+    }
+    if x == map.width - 1 && y == map.width-1 {
+        return 201; // ╝
+    }
+    if x == 0 && y == map.height - 1 {
+        return 201; // ╚
+    }
+    if x < 1 || x > map.width - 2 {
+        return 186; // ║
+    }
+    if y < 1 || y > map.height - 2 {
+        return 205;  // ═
     }
     let mut mask: u8 = 0;
 

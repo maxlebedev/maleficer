@@ -2,6 +2,8 @@ use rltk::{GameState, Rltk};
 use specs::prelude::*;
 use specs::saveload::{SimpleMarker, SimpleMarkerAllocator};
 
+#[macro_use]
+extern crate lazy_static;
 
 mod map;
 pub use map::*;
@@ -15,6 +17,8 @@ mod systems;
 mod rect;
 pub use gamelog::GameLog;
 mod spawner;
+mod config;
+
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum RunState {
@@ -208,9 +212,13 @@ fn register_all(gs: &mut State){
 
 fn main() -> rltk::BError {
     use rltk::RltkBuilder;
-    let mut context: Rltk = RltkBuilder::simple80x50()
+
+    let rb = RltkBuilder::simple(config::CONFIG.width, config::CONFIG.height);
+
+    let mut context: Rltk = rb.unwrap()
         .with_title("Malefactor")
         .build()?;
+
     // TODO: figure out how to make background not black
     context.with_post_scanlines(true);
     let mut gs = State { ecs: World::new() };
