@@ -299,9 +299,9 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
         MainMenuSelection::LoadGame,
         MainMenuSelection::Quit,
     ];
-    let idx = 1; // we start at LoadGame
-     // TODO: use this states list and an index and incremenent/decrement instead of this big
-     // match thing
+
+    let mut idx: i8;
+    let state_num: i8 = states.len() as i8;
 
     if let RunState::MainMenu {
         menu_selection: selection,
@@ -311,14 +311,23 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
         let mut lgcolor = white;
         let mut qcolor = white;
         match selection {
-            MainMenuSelection::NewGame => ngcolor = magenta,
-            MainMenuSelection::LoadGame => lgcolor = magenta,
-            MainMenuSelection::Quit => qcolor = magenta,
+            MainMenuSelection::NewGame => {
+                ngcolor = magenta;
+                idx = 0;
+            }
+            MainMenuSelection::LoadGame => {
+                lgcolor = magenta;
+                idx = 1;
+            }
+            MainMenuSelection::Quit => {
+                qcolor = magenta;
+                idx = 2;
+            }
         }
 
         ctx.print_color_centered(24, ngcolor, black, "Begin New Game");
         ctx.print_color_centered(25, lgcolor, black, "Load Game");
-        ctx.print_color_centered(26, qcolor , black, "Quit");
+        ctx.print_color_centered(26, qcolor, black, "Quit");
 
         let down = config::cfg_to_kc(&config::CONFIG.down);
         let up = config::cfg_to_kc(&config::CONFIG.up);
@@ -338,15 +347,8 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
                         }
                     }
                     _ if key == up => {
-                        let mut newselection;
-                        match selection {
-                            // TODO: this is dumb, navigate some circular data struct
-                            MainMenuSelection::NewGame => newselection = MainMenuSelection::Quit,
-                            MainMenuSelection::LoadGame => {
-                                newselection = MainMenuSelection::NewGame
-                            }
-                            MainMenuSelection::Quit => newselection = MainMenuSelection::LoadGame,
-                        }
+                        idx = (idx - 1) % state_num;
+                        let mut newselection = states[idx as usize];
                         if newselection == MainMenuSelection::LoadGame && !save_exists {
                             newselection = MainMenuSelection::NewGame;
                         }
@@ -355,14 +357,9 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
                         };
                     }
                     _ if key == down => {
-                        let mut newselection;
-                        match selection {
-                            MainMenuSelection::NewGame => {
-                                newselection = MainMenuSelection::LoadGame
-                            }
-                            MainMenuSelection::LoadGame => newselection = MainMenuSelection::Quit,
-                            MainMenuSelection::Quit => newselection = MainMenuSelection::NewGame,
-                        }
+                        idx = (idx + 1) % state_num;
+                        let mut newselection = states[idx as usize];
+
                         if newselection == MainMenuSelection::LoadGame && !save_exists {
                             newselection = MainMenuSelection::Quit;
                         }
