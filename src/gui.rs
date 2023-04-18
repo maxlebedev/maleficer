@@ -124,6 +124,18 @@ pub fn show_inventory(gs: &mut State, ctx: &mut Rltk) -> (ItemMenuResult, Option
     }
 }
 
+/*
+pub fn show_inventoryv2(gs: &mut State, ctx: &mut Rltk) -> (ItemMenuResult, Option<Entity>) {
+    let player_entity = gs.ecs.fetch::<Entity>();
+    let names = gs.ecs.read_storage::<Name>();
+    let backpack = gs.ecs.read_storage::<InBackpack>();
+    let entities = gs.ecs.entities();
+
+    let inventory = (&backpack, &names)
+        .join()
+        .filter(|item| item.0.owner == *player_entity);
+}
+*/
 
 pub fn drop_item_menu(gs: &mut State, ctx: &mut Rltk) -> (ItemMenuResult, Option<Entity>) {
     let player_entity = gs.ecs.fetch::<Entity>();
@@ -245,7 +257,6 @@ pub fn ranged_target(
         return (ItemMenuResult::Cancel, None);
     }
 
-
     // Draw mouse cursor
     let mouse_pos = ctx.mouse_pos();
     let mut valid_target = false;
@@ -276,59 +287,38 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
     let save_exists = super::systems::save_load::does_save_exist();
     let runstate = gs.ecs.fetch::<RunState>();
 
-    ctx.print_color_centered(
-        15,
-        RGB::named(rltk::YELLOW),
-        RGB::named(rltk::BLACK),
-        "Malefactor",
-    );
+    let white = RGB::named(rltk::WHITE);
+    let yellow = RGB::named(rltk::YELLOW);
+    let black = RGB::named(rltk::BLACK);
+    let magenta = RGB::named(rltk::MAGENTA);
+
+    ctx.print_color_centered(15, yellow, black, "Malefactor");
+
+    let states = [
+        MainMenuSelection::NewGame,
+        MainMenuSelection::LoadGame,
+        MainMenuSelection::Quit,
+    ];
+    let idx = 1; // we start at LoadGame
+     // TODO: use this states list and an index and incremenent/decrement instead of this big
+     // match thing
 
     if let RunState::MainMenu {
         menu_selection: selection,
     } = *runstate
     {
-        if selection == MainMenuSelection::NewGame {
-            ctx.print_color_centered(
-                24,
-                RGB::named(rltk::MAGENTA),
-                RGB::named(rltk::BLACK),
-                "Begin New Game",
-            );
-        } else {
-            ctx.print_color_centered(
-                24,
-                RGB::named(rltk::WHITE),
-                RGB::named(rltk::BLACK),
-                "Begin New Game",
-            );
+        let mut ngcolor = white;
+        let mut lgcolor = white;
+        let mut qcolor = white;
+        match selection {
+            MainMenuSelection::NewGame => ngcolor = magenta,
+            MainMenuSelection::LoadGame => lgcolor = magenta,
+            MainMenuSelection::Quit => qcolor = magenta,
         }
 
-        if selection == MainMenuSelection::LoadGame {
-            ctx.print_color_centered(
-                25,
-                RGB::named(rltk::MAGENTA),
-                RGB::named(rltk::BLACK),
-                "Load Game",
-            );
-        } else {
-            ctx.print_color_centered(
-                25,
-                RGB::named(rltk::WHITE),
-                RGB::named(rltk::BLACK),
-                "Load Game",
-            );
-        }
-
-        if selection == MainMenuSelection::Quit {
-            ctx.print_color_centered(
-                26,
-                RGB::named(rltk::MAGENTA),
-                RGB::named(rltk::BLACK),
-                "Quit",
-            );
-        } else {
-            ctx.print_color_centered(26, RGB::named(rltk::WHITE), RGB::named(rltk::BLACK), "Quit");
-        }
+        ctx.print_color_centered(24, ngcolor, black, "Begin New Game");
+        ctx.print_color_centered(25, lgcolor, black, "Load Game");
+        ctx.print_color_centered(26, qcolor , black, "Quit");
 
         let down = config::cfg_to_kc(&config::CONFIG.down);
         let up = config::cfg_to_kc(&config::CONFIG.up);
