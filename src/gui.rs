@@ -101,15 +101,9 @@ pub fn show_inventory(
         .join()
         .filter(|item| item.0.owner == *player_entity);
 
-    ctx.draw_box(0, 0, MAPWIDTH / 2, MAPHEIGHT, fgcolor, bgcolor);
-    ctx.draw_box(
-        MAPWIDTH / 2 + 1,
-        0,
-        MAPWIDTH / 2,
-        MAPHEIGHT,
-        fgcolor,
-        bgcolor,
-    );
+    let halfwidth = MAPWIDTH / 2;
+    ctx.draw_box(0, 0, halfwidth, MAPHEIGHT, fgcolor, bgcolor);
+    ctx.draw_box(halfwidth + 1, 0, halfwidth, MAPHEIGHT, fgcolor, bgcolor);
     ctx.print_color_centered(0, yellow, bgcolor, "Inventory");
     ctx.print_color_centered(MAPHEIGHT, yellow, bgcolor, "ESCAPE to cancel");
 
