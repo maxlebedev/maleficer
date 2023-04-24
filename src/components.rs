@@ -127,26 +127,13 @@ pub struct WantsToDropItem {
     pub item: Entity,
 }
 
+// Serialization helper code. We need to implement ConvertSaveload for each type that contains an
+// Entity.
+
 pub struct SerializeMe;
 
 // Special component that exists to help serialize the game data
 #[derive(Component, Serialize, Deserialize, Clone)]
 pub struct SerializationHelper {
     pub map: super::map::Map,
-}
-
-
-// Status system. Each status works in a predicable way. 
-// Bleed X means: take x dmg. X decreases every turn.
-// there are a bunch of different types of statuses. how to model this in ECS-land?
-pub struct Status {
-    pub duration: i32,
-    pub typ: str,
-}
-
-
-impl Status {
-    fn _tick() {
-        // 
-    }
 }
