@@ -1,11 +1,14 @@
-use crate::{gamelog::GameLog, InBackpack, Name, Position, WantsToPickupItem, WantsToUseItem, CombatStats, WantsToDropItem, Consumable, ProvidesHealing, InflictsDamage, map, SufferDamage, AreaOfEffect};
+use crate::{
+    gamelog::GameLog, map, AreaOfEffect, CombatStats, Consumable, InBackpack, InflictsDamage, Name,
+    Position, ProvidesHealing, SufferDamage, WantsToDropItem, WantsToPickupItem, WantsToUseItem,
+};
 use specs::prelude::*;
 
-pub struct ItemCollection{}
+pub struct ItemCollection {}
 
 //TODO: consider renaming file to item.rs
 
-impl<'a> System<'a> for ItemCollection{
+impl<'a> System<'a> for ItemCollection {
     #[allow(clippy::type_complexity)]
     type SystemData = (
         ReadExpect<'a, Entity>,
@@ -43,32 +46,47 @@ impl<'a> System<'a> for ItemCollection{
     }
 }
 
-pub struct ItemUse{}
+pub struct ItemUse {}
 
-impl<'a> System<'a> for ItemUse{
+impl<'a> System<'a> for ItemUse {
     #[allow(clippy::type_complexity)]
-    type SystemData = ( ReadExpect<'a, Entity>,
-                        WriteExpect<'a, GameLog>,
-                        Entities<'a>,
-                        WriteStorage<'a, WantsToUseItem>,
-                        ReadStorage<'a, Name>,
-                        ReadStorage<'a, Consumable>,
-                        ReadStorage<'a, ProvidesHealing>,
-                        ReadStorage<'a, InflictsDamage>,
-                        WriteStorage<'a, SufferDamage>,
-                        ReadExpect<'a, map::Map>,
-                        WriteStorage<'a, CombatStats>,
-                        ReadStorage<'a, AreaOfEffect>
-                      );
+    type SystemData = (
+        ReadExpect<'a, Entity>,
+        WriteExpect<'a, GameLog>,
+        Entities<'a>,
+        WriteStorage<'a, WantsToUseItem>,
+        ReadStorage<'a, Name>,
+        ReadStorage<'a, Consumable>,
+        ReadStorage<'a, ProvidesHealing>,
+        ReadStorage<'a, InflictsDamage>,
+        WriteStorage<'a, SufferDamage>,
+        ReadExpect<'a, map::Map>,
+        WriteStorage<'a, CombatStats>,
+        ReadStorage<'a, AreaOfEffect>,
+    );
 
-    fn run(&mut self, data : Self::SystemData) {
-        let (player_entity, mut gamelog, entities, mut wants_use, names, consumables, healing, inflict_damage, mut suffer_damage, map, mut combat_stats, aoe) = data;
-
+    fn run(&mut self, data: Self::SystemData) {
+        let (
+            player_entity,
+            mut gamelog,
+            entities,
+            mut wants_use,
+            names,
+            consumables,
+            healing,
+            inflict_damage,
+            mut suffer_damage,
+            map,
+            mut combat_stats,
+            aoe,
+        ) = data;
 
         for (entity, useitem) in (&entities, &wants_use).join() {
-            let mut targets : Vec<Entity> = Vec::new();
+            let mut targets: Vec<Entity> = Vec::new();
             match useitem.target {
-                None => { targets.push( *player_entity ); }
+                None => {
+                    targets.push(*player_entity);
+                }
                 Some(target) => {
                     let area_effect = aoe.get(useitem.item);
                     match area_effect {
@@ -81,8 +99,11 @@ impl<'a> System<'a> for ItemUse{
                         }
                         Some(area_effect) => {
                             // AoE
-                            let mut blast_tiles = rltk::field_of_view(target, area_effect.radius, &*map);
-                            blast_tiles.retain(|p| p.x > 0 && p.x < map.width-1 && p.y > 0 && p.y < map.height-1 );
+                            let mut blast_tiles =
+                                rltk::field_of_view(target, area_effect.radius, &*map);
+                            blast_tiles.retain(|p| {
+                                p.x > 0 && p.x < map.width - 1 && p.y > 0 && p.y < map.height - 1
+                            });
                             for tile_idx in blast_tiles.iter() {
                                 let idx = map.xy_idx(tile_idx.x, tile_idx.y);
                                 for mob in map.tile_content[idx].iter() {
@@ -104,14 +125,18 @@ impl<'a> System<'a> for ItemUse{
                         if let Some(stats) = stats {
                             stats.hp = i32::min(stats.max_hp, stats.hp + healer.heal_amount);
                             if entity == *player_entity {
-                                gamelog.entries.push(format!("You drink the {}, healing {} hp.", names.get(useitem.item).unwrap().name, healer.heal_amount));
+                                gamelog.entries.push(format!(
+                                    "You drink the {}, healing {} hp.",
+                                    names.get(useitem.item).unwrap().name,
+                                    healer.heal_amount
+                                ));
                             }
                         }
                     }
                 }
             }
             let consumable = consumables.get(useitem.item);
-            match consumable{
+            match consumable {
                 None => {}
                 Some(_) => {
                     entities.delete(useitem.item).expect("Delete failed");
@@ -128,7 +153,10 @@ impl<'a> System<'a> for ItemUse{
                         if entity == *player_entity {
                             let mob_name = names.get(*mob).unwrap();
                             let item_name = names.get(useitem.item).unwrap();
-                            gamelog.entries.push(format!("You use {} on {}, inflicting {} damage.", item_name.name, mob_name.name, damage.damage));
+                            gamelog.entries.push(format!(
+                                "You use {} on {}, inflicting {} damage.",
+                                item_name.name, mob_name.name, damage.damage
+                            ));
                         }
                         used_item = true;
                     }
@@ -150,34 +178,54 @@ impl<'a> System<'a> for ItemUse{
     }
 }
 
-pub struct ItemDrop{}
+pub struct ItemDrop {}
 
-impl<'a> System<'a> for ItemDrop{
+impl<'a> System<'a> for ItemDrop {
     #[allow(clippy::type_complexity)]
-    type SystemData = ( ReadExpect<'a, Entity>,
-                        WriteExpect<'a, GameLog>,
-                        Entities<'a>,
-                        WriteStorage<'a, WantsToDropItem>,
-                        ReadStorage<'a, Name>,
-                        WriteStorage<'a, Position>,
-                        WriteStorage<'a, InBackpack>
-                      );
+    type SystemData = (
+        ReadExpect<'a, Entity>,
+        WriteExpect<'a, GameLog>,
+        Entities<'a>,
+        WriteStorage<'a, WantsToDropItem>,
+        ReadStorage<'a, Name>,
+        WriteStorage<'a, Position>,
+        WriteStorage<'a, InBackpack>,
+    );
 
-    fn run(&mut self, data : Self::SystemData) {
-        let (player_entity, mut gamelog, entities, mut wants_drop, names, mut positions, mut backpack) = data;
+    fn run(&mut self, data: Self::SystemData) {
+        let (
+            player_entity,
+            mut gamelog,
+            entities,
+            mut wants_drop,
+            names,
+            mut positions,
+            mut backpack,
+        ) = data;
 
         for (entity, to_drop) in (&entities, &wants_drop).join() {
-            let mut dropper_pos : Position = Position{x:0, y:0};
+            let mut dropper_pos: Position = Position { x: 0, y: 0 };
             {
                 let dropped_pos = positions.get(entity).unwrap();
                 dropper_pos.x = dropped_pos.x;
                 dropper_pos.y = dropped_pos.y;
             }
-            positions.insert(to_drop.item, Position{ x : dropper_pos.x, y : dropper_pos.y }).expect("Unable to insert position");
+            positions
+                .insert(
+                    to_drop.item,
+                    Position {
+                        x: dropper_pos.x,
+                        y: dropper_pos.y,
+                    },
+                )
+                .expect("Unable to insert position");
             backpack.remove(to_drop.item);
 
             if entity == *player_entity {
-                gamelog.entries.push(format!("You drop the {}.", names.get(to_drop.item).unwrap().name));
+                gamelog.entries.push(format!(
+                    "You drop the {}.",
+                    names.get(to_drop.item).unwrap().name
+                ));
             }
         }
 

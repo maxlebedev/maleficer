@@ -18,6 +18,23 @@ pub enum MainMenuResult {
     Selected { selected: MainMenuSelection },
 }
 
+#[derive(PartialEq, Copy, Clone)]
+pub enum ItemMenuResult {
+    Cancel,
+    NoResponse,
+    Up,
+    Down,
+    Selected,
+    Drop,
+}
+
+#[derive(PartialEq, Copy, Clone)]
+pub enum SelectResult {
+    Cancel,
+    NoResponse,
+    Selected,
+}
+
 pub fn draw_ui(ecs: &World, ctx: &mut Rltk) {
     ctx.draw_box(
         0,
@@ -61,174 +78,77 @@ pub fn draw_ui(ecs: &World, ctx: &mut Rltk) {
     }
 }
 
-#[derive(PartialEq, Copy, Clone)]
-pub enum ItemMenuResult {
-    Cancel,
-    NoResponse,
-    Selected,
-}
-
-// TODO: strongly consider a full-screen inventory thing
-// TODO: instead of letter options, have a scrollable hightlight thing
-pub fn show_inventory(gs: &mut State, ctx: &mut Rltk) -> (ItemMenuResult, Option<Entity>) {
-    let player_entity = gs.ecs.fetch::<Entity>();
-    let names = gs.ecs.read_storage::<Name>();
-    let backpack = gs.ecs.read_storage::<InBackpack>();
-    let entities = gs.ecs.entities();
-
-    let inventory = (&backpack, &names)
-        .join()
-        .filter(|item| item.0.owner == *player_entity);
-    let count = inventory.count();
-
+pub fn show_inventory(
+    gs: &mut State,
+    ctx: &mut Rltk,
+    selection: usize,
+) -> (ItemMenuResult, Option<Entity>) {
     let white = RGB::named(rltk::WHITE);
     let black = RGB::named(rltk::BLACK);
     let yellow = RGB::named(rltk::YELLOW);
+    let magenta = RGB::named(rltk::MAGENTA);
 
-    let mut y = (25 - (count / 2)) as i32;
-    ctx.draw_box(15, y - 2, 31, (count + 3) as i32, white, black);
-    ctx.print_color(18, y - 2, yellow, black, "Inventory");
-    ctx.print_color(18, y + count as i32 + 1, yellow, black, "ESCAPE to cancel");
+    let fgcolor = white;
+    let bgcolor = black;
+    let hlcolor = magenta;
 
-    let mut equippable: Vec<Entity> = Vec::new();
-    let mut j = 0;
-    for (entity, _pack, name) in (&entities, &backpack, &names)
-        .join()
-        .filter(|item| item.1.owner == *player_entity)
-    {
-        ctx.set(17, y, white, black, rltk::to_cp437('('));
-        ctx.set(18, y, yellow, black, 97 + j as rltk::FontCharType);
-        ctx.set(19, y, white, black, rltk::to_cp437(')'));
-
-        ctx.print(21, y, &name.name.to_string());
-        equippable.push(entity);
-        y += 1;
-        j += 1;
-    }
-
-    match ctx.key {
-        None => (ItemMenuResult::NoResponse, None),
-        Some(key) => match key {
-            VirtualKeyCode::Escape => (ItemMenuResult::Cancel, None),
-            _ => {
-                let selection = rltk::letter_to_option(key);
-                if selection > -1 && selection < count as i32 {
-                    return (
-                        ItemMenuResult::Selected,
-                        Some(equippable[selection as usize]),
-                    );
-                }
-                (ItemMenuResult::NoResponse, None)
-            }
-        },
-    }
-}
-
-/*
-pub fn show_inventoryv2(gs: &mut State, ctx: &mut Rltk) -> (ItemMenuResult, Option<Entity>) {
     let player_entity = gs.ecs.fetch::<Entity>();
     let names = gs.ecs.read_storage::<Name>();
     let backpack = gs.ecs.read_storage::<InBackpack>();
     let entities = gs.ecs.entities();
 
-    let inventory = (&backpack, &names)
+    let inventory = (&backpack, &names, &entities)
         .join()
         .filter(|item| item.0.owner == *player_entity);
-}
-*/
 
-pub fn drop_item_menu(gs: &mut State, ctx: &mut Rltk) -> (ItemMenuResult, Option<Entity>) {
-    let player_entity = gs.ecs.fetch::<Entity>();
-    let names = gs.ecs.read_storage::<Name>();
-    let backpack = gs.ecs.read_storage::<InBackpack>();
-    let entities = gs.ecs.entities();
-
-    let inventory = (&backpack, &names)
-        .join()
-        .filter(|item| item.0.owner == *player_entity);
-    let count = inventory.count();
-
-    let mut y = (25 - (count / 2)) as i32;
+    ctx.draw_box(0, 0, MAPWIDTH / 2, MAPHEIGHT, fgcolor, bgcolor);
     ctx.draw_box(
-        15,
-        y - 2,
-        31,
-        (count + 3) as i32,
-        RGB::named(rltk::WHITE),
-        RGB::named(rltk::BLACK),
+        MAPWIDTH / 2 + 1,
+        0,
+        MAPWIDTH / 2,
+        MAPHEIGHT,
+        fgcolor,
+        bgcolor,
     );
-    ctx.print_color(
-        18,
-        y - 2,
-        RGB::named(rltk::YELLOW),
-        RGB::named(rltk::BLACK),
-        "Drop Which Item?",
-    );
-    ctx.print_color(
-        18,
-        y + count as i32 + 1,
-        RGB::named(rltk::YELLOW),
-        RGB::named(rltk::BLACK),
-        "ESCAPE to cancel",
-    );
+    ctx.print_color_centered(0, yellow, bgcolor, "Inventory");
+    ctx.print_color_centered(MAPHEIGHT, yellow, bgcolor, "ESCAPE to cancel");
 
+    let inv_offset = 2;
     let mut equippable: Vec<Entity> = Vec::new();
-    let mut j = 0;
-    for (entity, _pack, name) in (&entities, &backpack, &names)
-        .join()
-        .filter(|item| item.1.owner == *player_entity)
-    {
-        ctx.set(
-            17,
-            y,
-            RGB::named(rltk::WHITE),
-            RGB::named(rltk::BLACK),
-            rltk::to_cp437('('),
+    for (y, item) in inventory.enumerate() {
+        let mut color = fgcolor;
+        if y == selection {
+            color = hlcolor;
+        }
+        ctx.print_color(
+            inv_offset,
+            y + inv_offset,
+            color,
+            bgcolor,
+            &item.1.name.to_string(),
         );
-        ctx.set(
-            18,
-            y,
-            RGB::named(rltk::YELLOW),
-            RGB::named(rltk::BLACK),
-            97 + j as rltk::FontCharType,
-        );
-        ctx.set(
-            19,
-            y,
-            RGB::named(rltk::WHITE),
-            RGB::named(rltk::BLACK),
-            rltk::to_cp437(')'),
-        );
-
-        ctx.print(21, y, &name.name.to_string());
-        equippable.push(entity);
-        y += 1;
-        j += 1;
+        equippable.push(item.2);
     }
 
+    let up = config::cfg_to_kc(&config::CONFIG.up);
+    let down = config::cfg_to_kc(&config::CONFIG.down);
+    let exit = config::cfg_to_kc(&config::CONFIG.exit);
+    let drop = config::cfg_to_kc(&config::CONFIG.drop);
+    let select = config::cfg_to_kc(&config::CONFIG.select);
     match ctx.key {
         None => (ItemMenuResult::NoResponse, None),
         Some(key) => match key {
-            VirtualKeyCode::Escape => (ItemMenuResult::Cancel, None),
-            _ => {
-                let selection = rltk::letter_to_option(key);
-                if selection > -1 && selection < count as i32 {
-                    return (
-                        ItemMenuResult::Selected,
-                        Some(equippable[selection as usize]),
-                    );
-                }
-                (ItemMenuResult::NoResponse, None)
-            }
+            _ if key == exit => (ItemMenuResult::Cancel, None),
+            _ if key == up => (ItemMenuResult::Up, None),
+            _ if key == down => (ItemMenuResult::Down, None),
+            _ if key == drop => (ItemMenuResult::Drop, Some(equippable[selection])),
+            _ if key == select => (ItemMenuResult::Selected, Some(equippable[selection])),
+            _ => (ItemMenuResult::NoResponse, None),
         },
     }
 }
 
-pub fn ranged_target(
-    gs: &mut State,
-    ctx: &mut Rltk,
-    range: i32,
-) -> (ItemMenuResult, Option<Point>) {
+pub fn ranged_target(gs: &mut State, ctx: &mut Rltk, range: i32) -> (SelectResult, Option<Point>) {
     let player_entity = gs.ecs.fetch::<Entity>();
     let player_pos = gs.ecs.fetch::<Point>();
     let viewsheds = gs.ecs.read_storage::<Viewshed>();
@@ -254,7 +174,7 @@ pub fn ranged_target(
             }
         }
     } else {
-        return (ItemMenuResult::Cancel, None);
+        return (SelectResult::Cancel, None);
     }
 
     // Draw mouse cursor
@@ -269,18 +189,18 @@ pub fn ranged_target(
         ctx.set_bg(mouse_pos.0, mouse_pos.1, RGB::named(rltk::CYAN));
         if ctx.left_click {
             return (
-                ItemMenuResult::Selected,
+                SelectResult::Selected,
                 Some(Point::new(mouse_pos.0, mouse_pos.1)),
             );
         }
     } else {
         ctx.set_bg(mouse_pos.0, mouse_pos.1, RGB::named(rltk::RED));
         if ctx.left_click {
-            return (ItemMenuResult::Cancel, None);
+            return (SelectResult::Cancel, None);
         }
     }
 
-    (ItemMenuResult::NoResponse, None)
+    (SelectResult::NoResponse, None)
 }
 
 pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
@@ -332,53 +252,50 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
         let down = config::cfg_to_kc(&config::CONFIG.down);
         let up = config::cfg_to_kc(&config::CONFIG.up);
         let exit = config::cfg_to_kc(&config::CONFIG.exit);
-        // TODO: steal this interaction for inventory
         match ctx.key {
             None => {
                 return MainMenuResult::NoSelection {
                     selected: selection,
                 }
             }
-            Some(key) => {
-                match key {
-                    _ if key == exit => {
-                        return MainMenuResult::NoSelection {
-                            selected: MainMenuSelection::Quit,
-                        }
-                    }
-                    _ if key == up => {
-                        idx = (idx - 1) % state_num;
-                        let mut newselection = states[idx as usize];
-                        if newselection == MainMenuSelection::LoadGame && !save_exists {
-                            newselection = MainMenuSelection::NewGame;
-                        }
-                        return MainMenuResult::NoSelection {
-                            selected: newselection,
-                        };
-                    }
-                    _ if key == down => {
-                        idx = (idx + 1) % state_num;
-                        let mut newselection = states[idx as usize];
-
-                        if newselection == MainMenuSelection::LoadGame && !save_exists {
-                            newselection = MainMenuSelection::Quit;
-                        }
-                        return MainMenuResult::NoSelection {
-                            selected: newselection,
-                        };
-                    }
-                    VirtualKeyCode::Return => {
-                        return MainMenuResult::Selected {
-                            selected: selection,
-                        }
-                    }
-                    _ => {
-                        return MainMenuResult::NoSelection {
-                            selected: selection,
-                        }
+            Some(key) => match key {
+                _ if key == exit => {
+                    return MainMenuResult::NoSelection {
+                        selected: MainMenuSelection::Quit,
                     }
                 }
-            }
+                _ if key == up => {
+                    idx = (idx - 1) % state_num;
+                    let mut newselection = states[idx as usize];
+                    if newselection == MainMenuSelection::LoadGame && !save_exists {
+                        newselection = MainMenuSelection::NewGame;
+                    }
+                    return MainMenuResult::NoSelection {
+                        selected: newselection,
+                    };
+                }
+                _ if key == down => {
+                    idx = (idx + 1) % state_num;
+                    let mut newselection = states[idx as usize];
+
+                    if newselection == MainMenuSelection::LoadGame && !save_exists {
+                        newselection = MainMenuSelection::Quit;
+                    }
+                    return MainMenuResult::NoSelection {
+                        selected: newselection,
+                    };
+                }
+                VirtualKeyCode::Return => {
+                    return MainMenuResult::Selected {
+                        selected: selection,
+                    }
+                }
+                _ => {
+                    return MainMenuResult::NoSelection {
+                        selected: selection,
+                    }
+                }
+            },
         }
     }
 

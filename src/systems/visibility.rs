@@ -2,9 +2,9 @@ use crate::{components, map};
 use rltk;
 use specs::prelude::*;
 
-pub struct Visibility{}
+pub struct Visibility {}
 
-impl<'a> System<'a> for Visibility{
+impl<'a> System<'a> for Visibility {
     type SystemData = (
         WriteExpect<'a, map::Map>,
         Entities<'a>,

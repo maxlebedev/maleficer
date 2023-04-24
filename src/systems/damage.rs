@@ -2,9 +2,9 @@ use crate::{CombatStats, GameLog, Name, Player, SufferDamage};
 use rltk::console;
 use specs::prelude::*;
 
-pub struct Damage{}
+pub struct Damage {}
 
-impl<'a> System<'a> for Damage{
+impl<'a> System<'a> for Damage {
     type SystemData = (
         WriteStorage<'a, CombatStats>,
         WriteStorage<'a, SufferDamage>,
@@ -41,7 +41,10 @@ pub fn delete_the_dead(ecs: &mut World) {
                         }
                         dead.push(entity)
                     }
-                    Some(_) => console::log("You are dead"),
+                    Some(_) => {
+                        console::log("You are dead");
+                        ::std::process::exit(0);
+                    }
                 }
             }
         }

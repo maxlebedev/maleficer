@@ -152,7 +152,6 @@ fn is_revealed_and_wall(map: &Map, x: i32, y: i32) -> bool {
 }
 
 fn wall_glyph(map: &Map, x: i32, y: i32) -> rltk::FontCharType {
-
     // TODO: match once I learn how those work
     if x == 0 && y == 0 {
         return 201; // ╔
@@ -160,7 +159,7 @@ fn wall_glyph(map: &Map, x: i32, y: i32) -> rltk::FontCharType {
     if x == map.width - 1 && y == 0 {
         return 201; // ╗
     }
-    if x == map.width - 1 && y == map.width-1 {
+    if x == map.width - 1 && y == map.width - 1 {
         return 201; // ╝
     }
     if x == 0 && y == map.height - 1 {
@@ -170,7 +169,7 @@ fn wall_glyph(map: &Map, x: i32, y: i32) -> rltk::FontCharType {
         return 186; // ║
     }
     if y < 1 || y > map.height - 2 {
-        return 205;  // ═
+        return 205; // ═
     }
     let mut mask: u8 = 0;
 
@@ -186,7 +185,6 @@ fn wall_glyph(map: &Map, x: i32, y: i32) -> rltk::FontCharType {
     if is_revealed_and_wall(map, x + 1, y) {
         mask += 8;
     }
-
 
     match mask {
         0 => 254,  // ■ Pillar because we can't see neighbors

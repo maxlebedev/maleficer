@@ -1,9 +1,9 @@
 use crate::{map, BlocksTile, Position};
 use specs::prelude::*;
 
-pub struct MapIndexing{}
+pub struct MapIndexing {}
 
-impl<'a> System<'a> for MapIndexing{
+impl<'a> System<'a> for MapIndexing {
     type SystemData = (
         WriteExpect<'a, map::Map>,
         ReadStorage<'a, Position>,

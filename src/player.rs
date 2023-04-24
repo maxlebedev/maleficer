@@ -2,12 +2,9 @@ use super::gamelog::GameLog;
 use rltk::{Point, Rltk};
 use specs::prelude::*;
 
-use super::{components, map, RunState, State, config};
+use super::{components, config, map, RunState, State};
 pub use components::*;
 use num;
-
-
-
 
 fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
     let mut positions = ecs.write_storage::<Position>();
@@ -100,7 +97,6 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
 
     let pick_up = config::cfg_to_kc(&config::CONFIG.pick_up);
     let inventory = config::cfg_to_kc(&config::CONFIG.inventory);
-    let drop = config::cfg_to_kc(&config::CONFIG.drop);
     let exit = config::cfg_to_kc(&config::CONFIG.exit);
     match ctx.key {
         None => return RunState::AwaitingInput, // Nothing happened
@@ -112,11 +108,9 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
             _ if key == right => try_move_player(1, 0, &mut gs.ecs),
 
             _ if key == pick_up => get_item(&mut gs.ecs),
-            _ if key == inventory => return RunState::ShowInventory,
-
-            _ if key == drop => return RunState::ShowDropItem,
+            _ if key == inventory => return RunState::ShowInventory { selection: 0 },
             // Save and Quit
-            _ if key == exit=> return RunState::SaveGame,
+            _ if key == exit => return RunState::SaveGame,
 
             _ => return RunState::AwaitingInput,
         },
