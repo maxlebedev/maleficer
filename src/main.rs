@@ -200,7 +200,6 @@ impl GameState for State {
         }
         systems::damage::delete_the_dead(&mut self.ecs);
     }
-
 }
 
 impl State {
@@ -226,6 +225,7 @@ impl State {
     }
 
     fn new_game(&mut self) {
+        self.ecs.delete_all();
         let map = Map::new_map_rooms_and_corridors();
         let (player_x, player_y) = map.rooms[0].center();
 

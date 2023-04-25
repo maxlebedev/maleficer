@@ -219,7 +219,6 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
             }
         }
 
-        // options should be New game, Continue, or Quit
         ctx.print_color_centered(24, ngcolor, black, "Begin New Game");
         ctx.print_color_centered(25, lgcolor, black, "Continue");
         ctx.print_color_centered(26, qcolor, black, "Quit");

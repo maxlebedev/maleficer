@@ -161,7 +161,7 @@ impl Map {
 
 fn is_revealed_and_wall(map: &Map, x: i32, y: i32) -> bool {
     let idx = map.xy_idx(x, y);
-    if idx > MAPCOUNT{
+    if idx > MAPCOUNT {
         return false;
     }
     map.tiles[idx] == TileType::Wall && map.revealed_tiles[idx]

@@ -1,7 +1,7 @@
+use super::save_load;
 use crate::{CombatStats, GameLog, Name, Player, SufferDamage};
 use rltk::console;
 use specs::prelude::*;
-use super::save_load;
 
 pub struct Damage {}
 
