@@ -53,8 +53,8 @@ impl Map {
     }
 
     fn apply_room_to_map(&mut self, room: &Rect) {
+        //TODO: what is this +1 doing here?
         for y in room.y1 + 1..=room.y2 {
-            //TODO: what is this +1 doing here?
             for x in room.x1 + 1..=room.x2 {
                 let idx = self.xy_idx(x, y);
                 self.tiles[idx] = TileType::Floor;

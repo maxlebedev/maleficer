@@ -42,7 +42,7 @@ impl<'a> System<'a> for MonsterAI {
                 rltk::DistanceAlg::Pythagoras.distance2d(Point::new(pos.x, pos.y), *player_pos);
             if distance < 1.1 {
                 //was 1.5 to allow diagonal attacks
-                //TODO: make ditance a stat
+                //TODO: make disance a stat
                 wants_to_melee
                     .insert(
                         entity,

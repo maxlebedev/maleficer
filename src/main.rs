@@ -215,11 +215,11 @@ impl State {
         melee.run_now(&self.ecs);
         let mut damage = systems::damage::Damage {};
         damage.run_now(&self.ecs);
-        let mut pickup = systems::inventory::ItemCollection {};
+        let mut pickup = systems::item::ItemCollection {};
         pickup.run_now(&self.ecs);
-        let mut items = systems::inventory::ItemUse {};
+        let mut items = systems::item::ItemUse {};
         items.run_now(&self.ecs);
-        let mut drop_items = systems::inventory::ItemDrop {};
+        let mut drop_items = systems::item::ItemDrop {};
         drop_items.run_now(&self.ecs);
 
         self.ecs.maintain();
@@ -257,8 +257,9 @@ fn main() -> rltk::BError {
     let rb = RltkBuilder::simple(config::CONFIG.width, config::CONFIG.height);
 
     let mut context: Rltk = rb.unwrap().with_title("Malefactor").build()?;
+    context.screen_burn_color(rltk::RGB::named(rltk::GRAY7));
+    // context.post_screenburn=true;
 
-    // TODO: figure out how to make background not black
     context.with_post_scanlines(true);
     let mut gs = State { ecs: World::new() };
     gs.ecs.insert(RunState::PreRun);

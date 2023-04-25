@@ -5,6 +5,7 @@ use super::map::{MAPHEIGHT, MAPWIDTH};
 use super::{components, config, GameLog, Player, RunState, State};
 pub use components::*;
 
+
 #[derive(PartialEq, Copy, Clone)]
 pub enum MainMenuSelection {
     NewGame,
@@ -36,42 +37,25 @@ pub enum SelectResult {
 }
 
 pub fn draw_ui(ecs: &World, ctx: &mut Rltk) {
-    ctx.draw_box(
-        0,
-        MAPHEIGHT,
-        MAPWIDTH - 1,
-        6,
-        RGB::named(rltk::WHITE),
-        RGB::named(rltk::BLACK),
-    );
+    let white = RGB::named(rltk::WHITE);
+    let black = RGB::named(rltk::BLACK);
+    let yellow = RGB::named(rltk::YELLOW);
+    let red = RGB::named(rltk::RED);
+    ctx.draw_box(0, MAPHEIGHT, MAPWIDTH - 1, 6, white, black);
 
     let combat_stats = ecs.read_storage::<CombatStats>();
     let players = ecs.read_storage::<Player>();
     for (_player, stats) in (&players, &combat_stats).join() {
         let health = format!(" HP: {} / {} ", stats.hp, stats.max_hp);
-        ctx.print_color(
-            12,
-            MAPWIDTH,
-            RGB::named(rltk::YELLOW),
-            RGB::named(rltk::BLACK),
-            &health,
-        );
+        ctx.print_color(12, MAPWIDTH, yellow, black, &health);
 
-        ctx.draw_bar_horizontal(
-            28,
-            MAPHEIGHT,
-            51,
-            stats.hp,
-            stats.max_hp,
-            RGB::named(rltk::RED),
-            RGB::named(rltk::BLACK),
-        );
+        ctx.draw_bar_horizontal(28, MAPHEIGHT, 51, stats.hp, stats.max_hp, red, black);
     }
     let log = ecs.fetch::<GameLog>();
 
-    let mut y = 44;
+    let mut y = MAPHEIGHT - 6; // 44;
     for s in log.entries.iter().rev() {
-        if y < 49 {
+        if y < MAPHEIGHT - 1 {
             ctx.print(2, y, s);
         }
         y += 1;
@@ -147,13 +131,10 @@ pub fn ranged_target(gs: &mut State, ctx: &mut Rltk, range: i32) -> (SelectResul
     let player_pos = gs.ecs.fetch::<Point>();
     let viewsheds = gs.ecs.read_storage::<Viewshed>();
 
-    ctx.print_color(
-        5,
-        0,
-        RGB::named(rltk::YELLOW),
-        RGB::named(rltk::BLACK),
-        "Select Target:",
-    );
+    let yellow = RGB::named(rltk::YELLOW);
+    let black = RGB::named(rltk::BLACK);
+    let cyan = RGB::named(rltk::CYAN);
+    ctx.print_color(5, 0, yellow, black, "Select Target:");
 
     // Highlight available target cells
     let mut available_cells = Vec::new();
@@ -180,7 +161,7 @@ pub fn ranged_target(gs: &mut State, ctx: &mut Rltk, range: i32) -> (SelectResul
         }
     }
     if valid_target {
-        ctx.set_bg(mouse_pos.0, mouse_pos.1, RGB::named(rltk::CYAN));
+        ctx.set_bg(mouse_pos.0, mouse_pos.1, cyan);
         if ctx.left_click {
             return (
                 SelectResult::Selected,

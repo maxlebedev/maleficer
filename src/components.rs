@@ -1,10 +1,10 @@
 use rltk::RGB;
 use serde::{Deserialize, Serialize};
+#[allow(deprecated)]
 use specs::error::NoError;
 use specs::prelude::*;
 use specs::saveload::{ConvertSaveload, Marker};
 use specs_derive::*;
-// use std::convert::Infallible;
 
 #[derive(Component, ConvertSaveload, Clone)]
 pub struct Position {

@@ -6,7 +6,6 @@ use specs::prelude::*;
 
 pub struct ItemCollection {}
 
-//TODO: consider renaming file to item.rs
 
 impl<'a> System<'a> for ItemCollection {
     #[allow(clippy::type_complexity)]

@@ -30,7 +30,8 @@ pub fn spawn_room(ecs: &mut World, room: &Rect) {
                 let x = (room.x1 + rng.roll_dice(1, i32::abs(room.x2 - room.x1))) as usize;
                 let y = (room.y1 + rng.roll_dice(1, i32::abs(room.y2 - room.y1))) as usize;
                 let idx = (y * map::MAPWIDTH) + x;
-                // TODO: why are we making an idx from xy, then undoing that work later?
+                // TODO: why are we making an idx from xy, then undoing that work later? does
+                // contains work porrly on tuples?
                 if !monster_spawn_points.contains(&idx) {
                     monster_spawn_points.push(idx);
                     added = true;
