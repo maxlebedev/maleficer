@@ -36,7 +36,6 @@ pub enum RunState {
     MainMenu {
         menu_selection: gui::MainMenuSelection,
     },
-    SaveGame,
 }
 
 pub struct State {
@@ -54,12 +53,6 @@ impl GameState for State {
 
         match newrunstate {
             RunState::MainMenu { .. } => {}
-            RunState::SaveGame => {
-                systems::save_load::save_game(&mut self.ecs);
-                newrunstate = RunState::MainMenu {
-                    menu_selection: gui::MainMenuSelection::LoadGame,
-                };
-            }
             _ => {
                 draw_map(&self.ecs, ctx);
 
@@ -99,12 +92,12 @@ impl GameState for State {
                             systems::save_load::delete_save();
                         }
                         gui::MainMenuSelection::Quit => {
+                            systems::save_load::save_game(&mut self.ecs);
                             ::std::process::exit(0);
                         }
                     },
                 }
             }
-            RunState::SaveGame => {}
             RunState::PreRun => {
                 self.run_systems();
                 self.ecs.maintain();
@@ -257,12 +250,12 @@ fn main() -> rltk::BError {
     let rb = RltkBuilder::simple(config::CONFIG.width, config::CONFIG.height);
 
     let mut context: Rltk = rb.unwrap().with_title("Malefactor").build()?;
-    context.screen_burn_color(rltk::RGB::named(rltk::GRAY7));
+    context.screen_burn_color(rltk::RGB::named(rltk::DARKGRAY));
     // context.post_screenburn=true;
 
     context.with_post_scanlines(true);
     let mut gs = State { ecs: World::new() };
-    gs.ecs.insert(RunState::PreRun);
+    gs.ecs.insert(RunState::MainMenu { menu_selection: gui::MainMenuSelection::NewGame });
     register_all(&mut gs);
 
     gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());

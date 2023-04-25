@@ -120,8 +120,8 @@ fn random_item(ecs: &mut World, x: i32, y: i32) {
         roll = rng.roll_dice(1, 20); //1,2
     }
     match roll {
-        1..=4 => health_potion(ecs, x, y),
-        5..=9 => magic_missile_scroll(ecs, x, y),
+        1..=9 => health_potion(ecs, x, y),
+        10..=15 => magic_missile_scroll(ecs, x, y),
         _ => fireball_scroll(ecs, x, y),
     }
 }

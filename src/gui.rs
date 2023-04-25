@@ -1,5 +1,6 @@
 use rltk::{Point, Rltk, VirtualKeyCode, RGB};
 use specs::prelude::*;
+use std::cmp::{max, min};
 
 use super::map::{MAPHEIGHT, MAPWIDTH};
 use super::{components, config, GameLog, Player, RunState, State};
@@ -53,9 +54,10 @@ pub fn draw_ui(ecs: &World, ctx: &mut Rltk) {
     }
     let log = ecs.fetch::<GameLog>();
 
-    let mut y = MAPHEIGHT - 6; // 44;
+
+    let mut y = MAPHEIGHT + 1; // 44;
     for s in log.entries.iter().rev() {
-        if y < MAPHEIGHT - 1 {
+        if y < MAPHEIGHT + 6 { // 49
             ctx.print(2, y, s);
         }
         y += 1;
@@ -237,10 +239,12 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
                 _ if key == exit => {
                     return MainMenuResult::NoSelection {
                         selected: MainMenuSelection::Quit,
+                        // TODO: here we can continue. maybe?
+                        // Alternatively there would need to be a continue button
                     }
                 }
                 _ if key == up => {
-                    idx = (idx - 1) % state_num;
+                    idx = max(0, idx - 1);
                     let mut newselection = states[idx as usize];
                     if newselection == MainMenuSelection::LoadGame && !save_exists {
                         newselection = MainMenuSelection::NewGame;
@@ -250,7 +254,7 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
                     };
                 }
                 _ if key == down => {
-                    idx = (idx + 1) % state_num;
+                    idx = min(state_num-1, idx + 1);
                     let mut newselection = states[idx as usize];
 
                     if newselection == MainMenuSelection::LoadGame && !save_exists {

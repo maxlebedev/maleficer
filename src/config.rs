@@ -23,6 +23,7 @@ impl FromStr for VirtualKeyCode {
             (";", VirtualKeyCode::Semicolon),
             ("escape", VirtualKeyCode::Escape),
             ("return", VirtualKeyCode::Return),
+            ("space", VirtualKeyCode::Space),
         ]);
         *key_map.get(&chr).unwrap()
     }
@@ -39,6 +40,7 @@ pub struct Config {
     pub drop: String,
     pub exit: String,
     pub select: String,
+    pub wait: String,
 
     pub width: i32,
     pub height: i32,

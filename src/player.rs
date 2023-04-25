@@ -1,3 +1,5 @@
+use crate::gui;
+
 use super::gamelog::GameLog;
 use rltk::{Point, Rltk};
 use specs::prelude::*;
@@ -98,6 +100,8 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
     let pick_up = config::cfg_to_kc(&config::CONFIG.pick_up);
     let inventory = config::cfg_to_kc(&config::CONFIG.inventory);
     let exit = config::cfg_to_kc(&config::CONFIG.exit);
+    let wait = config::cfg_to_kc(&config::CONFIG.wait);
+
     match ctx.key {
         None => return RunState::AwaitingInput, // Nothing happened
         Some(key) => match key {
@@ -109,8 +113,11 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
 
             _ if key == pick_up => get_item(&mut gs.ecs),
             _ if key == inventory => return RunState::ShowInventory { selection: 0 },
-            // Save and Quit
-            _ if key == exit => return RunState::SaveGame,
+
+            _ if key == exit => return RunState::MainMenu { menu_selection: gui::MainMenuSelection::NewGame },
+
+            // TODO: this only fires if i double-tap space
+            _ if key == wait => return RunState::PlayerTurn,
 
             _ => return RunState::AwaitingInput,
         },

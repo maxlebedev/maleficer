@@ -18,3 +18,11 @@ Leveling up grants spells from the chosen schools, but more can be learned.
 Might use a mana sytem at first, but maybe something more involved going forward? Like a stat for magic reserves, magnitude, duration, etc
 
 Going with spells because I don't want the combat loop to be about repeatedly making default attacks
+
+
+# TODO:
+* Pass turn with space
+* Keyboard controlls for fireball
+* Descriptions next to inventory items
+* Confirm Save/Load works
+* New spells, new monsters
