@@ -135,8 +135,7 @@ pub struct SerializationHelper {
     pub map: super::map::Map,
 }
 
-
-// Status system. Each status works in a predicable way. 
+// Status system. Each status works in a predicable way.
 // Bleed X means: take x dmg. X decreases every turn.
 // there are a bunch of different types of statuses. how to model this in ECS-land?
 pub struct Status {
@@ -144,9 +143,8 @@ pub struct Status {
     pub typ: str,
 }
 
-
 impl Status {
     fn _tick() {
-        // 
+        //
     }
 }

@@ -6,11 +6,10 @@ use super::map::{MAPHEIGHT, MAPWIDTH};
 use super::{components, config, GameLog, Player, RunState, State};
 pub use components::*;
 
-
 #[derive(PartialEq, Copy, Clone)]
 pub enum MainMenuSelection {
     NewGame,
-    LoadGame,
+    Continue,
     Quit,
 }
 
@@ -53,7 +52,6 @@ pub fn draw_ui(ecs: &World, ctx: &mut Rltk) {
         ctx.draw_bar_horizontal(28, MAPHEIGHT, 51, stats.hp, stats.max_hp, red, black);
     }
     let log = ecs.fetch::<GameLog>();
-
 
     let mut y = MAPHEIGHT + 1; // 44;
     for s in log.entries.iter().rev() {
@@ -181,7 +179,6 @@ pub fn ranged_target(gs: &mut State, ctx: &mut Rltk, range: i32) -> (SelectResul
 }
 
 pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
-    let save_exists = super::systems::save_load::does_save_exist();
     let runstate = gs.ecs.fetch::<RunState>();
 
     let white = RGB::named(rltk::WHITE);
@@ -193,7 +190,7 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
 
     let states = [
         MainMenuSelection::NewGame,
-        MainMenuSelection::LoadGame,
+        MainMenuSelection::Continue,
         MainMenuSelection::Quit,
     ];
 
@@ -212,7 +209,7 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
                 ngcolor = magenta;
                 idx = 0;
             }
-            MainMenuSelection::LoadGame => {
+            MainMenuSelection::Continue => {
                 lgcolor = magenta;
                 idx = 1;
             }
@@ -222,8 +219,9 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
             }
         }
 
+        // options should be New game, Continue, or Quit
         ctx.print_color_centered(24, ngcolor, black, "Begin New Game");
-        ctx.print_color_centered(25, lgcolor, black, "Load Game");
+        ctx.print_color_centered(25, lgcolor, black, "Continue");
         ctx.print_color_centered(26, qcolor, black, "Quit");
 
         let down = config::cfg_to_kc(&config::CONFIG.down);
@@ -241,27 +239,18 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
                         selected: MainMenuSelection::Quit,
                         // TODO: here we can continue. maybe?
                         // Alternatively there would need to be a continue button
-                    }
+                    };
                 }
                 _ if key == up => {
                     idx = max(0, idx - 1);
-                    let mut newselection = states[idx as usize];
-                    if newselection == MainMenuSelection::LoadGame && !save_exists {
-                        newselection = MainMenuSelection::NewGame;
-                    }
                     return MainMenuResult::NoSelection {
-                        selected: newselection,
+                        selected: states[idx as usize],
                     };
                 }
                 _ if key == down => {
-                    idx = min(state_num-1, idx + 1);
-                    let mut newselection = states[idx as usize];
-
-                    if newselection == MainMenuSelection::LoadGame && !save_exists {
-                        newselection = MainMenuSelection::Quit;
-                    }
+                    idx = min(state_num - 1, idx + 1);
                     return MainMenuResult::NoSelection {
-                        selected: newselection,
+                        selected: states[idx as usize],
                     };
                 }
                 VirtualKeyCode::Return => {

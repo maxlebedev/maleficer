@@ -1,6 +1,7 @@
 use crate::{CombatStats, GameLog, Name, Player, SufferDamage};
 use rltk::console;
 use specs::prelude::*;
+use super::save_load;
 
 pub struct Damage {}
 
@@ -43,6 +44,7 @@ pub fn delete_the_dead(ecs: &mut World) {
                     }
                     Some(_) => {
                         console::log("You are dead");
+                        save_load::delete_save();
                         ::std::process::exit(0);
                     }
                 }

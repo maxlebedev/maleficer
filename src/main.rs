@@ -86,10 +86,15 @@ impl GameState for State {
                     }
                     gui::MainMenuResult::Selected { selected } => match selected {
                         gui::MainMenuSelection::NewGame => newrunstate = RunState::PreRun,
-                        gui::MainMenuSelection::LoadGame => {
-                            systems::save_load::load_game(&mut self.ecs);
-                            newrunstate = RunState::AwaitingInput;
-                            systems::save_load::delete_save();
+                        gui::MainMenuSelection::Continue => {
+                            let save_exists = systems::save_load::does_save_exist();
+                            if save_exists {
+                                systems::save_load::load_game(&mut self.ecs);
+                                newrunstate = RunState::AwaitingInput;
+                                systems::save_load::delete_save();
+                            } else {
+                                newrunstate = RunState::PreRun;
+                            }
                         }
                         gui::MainMenuSelection::Quit => {
                             systems::save_load::save_game(&mut self.ecs);
@@ -99,6 +104,7 @@ impl GameState for State {
                 }
             }
             RunState::PreRun => {
+                self.new_game();
                 self.run_systems();
                 self.ecs.maintain();
                 newrunstate = RunState::AwaitingInput;
@@ -194,6 +200,7 @@ impl GameState for State {
         }
         systems::damage::delete_the_dead(&mut self.ecs);
     }
+
 }
 
 impl State {
@@ -216,6 +223,21 @@ impl State {
         drop_items.run_now(&self.ecs);
 
         self.ecs.maintain();
+    }
+
+    fn new_game(&mut self) {
+        let map = Map::new_map_rooms_and_corridors();
+        let (player_x, player_y) = map.rooms[0].center();
+
+        for room in map.rooms.iter().skip(1) {
+            spawner::spawn_room(&mut self.ecs, room);
+        }
+        self.ecs.insert(map);
+
+        let player_entity = spawner::player(&mut self.ecs, player_x, player_y);
+        self.ecs.insert(player_entity);
+
+        self.ecs.insert(rltk::Point::new(player_x, player_y));
     }
 }
 
@@ -251,28 +273,19 @@ fn main() -> rltk::BError {
 
     let mut context: Rltk = rb.unwrap().with_title("Malefactor").build()?;
     context.screen_burn_color(rltk::RGB::named(rltk::DARKGRAY));
-    // context.post_screenburn=true;
 
     context.with_post_scanlines(true);
     let mut gs = State { ecs: World::new() };
-    gs.ecs.insert(RunState::MainMenu { menu_selection: gui::MainMenuSelection::NewGame });
+    gs.ecs.insert(RunState::MainMenu {
+        menu_selection: gui::MainMenuSelection::NewGame,
+    });
     register_all(&mut gs);
 
     gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());
-
-    let map = Map::new_map_rooms_and_corridors();
-    let (player_x, player_y) = map.rooms[0].center();
-
     gs.ecs.insert(rltk::RandomNumberGenerator::new());
-    for room in map.rooms.iter().skip(1) {
-        spawner::spawn_room(&mut gs.ecs, room);
-    }
+
+    let map = Map::dummy_map();
     gs.ecs.insert(map);
-
-    let player_entity = spawner::player(&mut gs.ecs, player_x, player_y);
-    gs.ecs.insert(player_entity);
-
-    gs.ecs.insert(rltk::Point::new(player_x, player_y));
 
     let gamelog = GameLog {
         entries: vec!["Welcome to Malefactor".to_string()],

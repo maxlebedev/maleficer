@@ -9,8 +9,8 @@ pub const MAPHEIGHT: usize = 43;
 pub const MAPCOUNT: usize = MAPHEIGHT * MAPWIDTH;
 
 // TODO: there are places that we do absolute rather than relative math
-
 // TODO: things in crossterm update slowly, only when I spam keys
+
 #[derive(PartialEq, Copy, Clone, Serialize, Deserialize)]
 pub enum TileType {
     Wall,
@@ -86,6 +86,19 @@ impl Map {
         }
     }
 
+    pub fn dummy_map() -> Map {
+        Map {
+            tiles: vec![TileType::Wall; MAPCOUNT],
+            rooms: Vec::new(),
+            width: MAPWIDTH as i32,
+            height: MAPHEIGHT as i32,
+            revealed_tiles: vec![false; MAPCOUNT],
+            visible_tiles: vec![false; MAPCOUNT],
+            blocked: vec![false; MAPCOUNT],
+            tile_content: vec![Vec::new(); MAPCOUNT],
+        }
+    }
+
     /// Makes a new map using the algorithm from http://rogueliketutorials.com/tutorials/tcod/part-3/
     /// This gives a handful of random rooms and corridors joining them together.
     pub fn new_map_rooms_and_corridors() -> Map {
@@ -148,29 +161,13 @@ impl Map {
 
 fn is_revealed_and_wall(map: &Map, x: i32, y: i32) -> bool {
     let idx = map.xy_idx(x, y);
+    if idx > MAPCOUNT{
+        return false;
+    }
     map.tiles[idx] == TileType::Wall && map.revealed_tiles[idx]
 }
 
 fn wall_glyph(map: &Map, x: i32, y: i32) -> rltk::FontCharType {
-    // TODO: match once I learn how those work
-    if x == 0 && y == 0 {
-        return 201; // ╔
-    }
-    if x == map.width - 1 && y == 0 {
-        return 201; // ╗
-    }
-    if x == map.width - 1 && y == map.width - 1 {
-        return 201; // ╝
-    }
-    if x == 0 && y == map.height - 1 {
-        return 201; // ╚
-    }
-    if x < 1 || x > map.width - 2 {
-        return 186; // ║
-    }
-    if y < 1 || y > map.height - 2 {
-        return 205; // ═
-    }
     let mut mask: u8 = 0;
 
     if is_revealed_and_wall(map, x, y - 1) {
@@ -213,10 +210,9 @@ pub fn draw_map(ecs: &World, ctx: &mut Rltk) {
     let green = RGB::named(rltk::GREEN);
     let black = RGB::named(rltk::BLACK);
 
-    let mut y = 0;
-    let mut x = 0;
     for (idx, tile) in map.tiles.iter().enumerate() {
         // Render a tile depending upon the tile type
+        let (x, y) = Map::idx_xy(idx);
 
         if map.revealed_tiles[idx] {
             let glyph;
@@ -235,13 +231,6 @@ pub fn draw_map(ecs: &World, ctx: &mut Rltk) {
                 fg = fg.to_greyscale()
             }
             ctx.set(x, y, fg, black, glyph);
-        }
-
-        // Move the coordinates
-        x += 1;
-        if x > 79 {
-            x = 0;
-            y += 1;
         }
     }
 }

@@ -21,8 +21,8 @@ Going with spells because I don't want the combat loop to be about repeatedly ma
 
 
 # TODO:
-* Pass turn with space
 * Keyboard controlls for fireball
 * Descriptions next to inventory items
-* Confirm Save/Load works
 * New spells, new monsters
+* Nicer walls (parallel lines)
+* New game functionality

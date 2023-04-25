@@ -6,7 +6,6 @@ use specs::prelude::*;
 
 pub struct ItemCollection {}
 
-
 impl<'a> System<'a> for ItemCollection {
     #[allow(clippy::type_complexity)]
     type SystemData = (

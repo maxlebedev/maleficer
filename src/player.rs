@@ -114,9 +114,12 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
             _ if key == pick_up => get_item(&mut gs.ecs),
             _ if key == inventory => return RunState::ShowInventory { selection: 0 },
 
-            _ if key == exit => return RunState::MainMenu { menu_selection: gui::MainMenuSelection::NewGame },
+            _ if key == exit => {
+                return RunState::MainMenu {
+                    menu_selection: gui::MainMenuSelection::NewGame,
+                }
+            }
 
-            // TODO: this only fires if i double-tap space
             _ if key == wait => return RunState::PlayerTurn,
 
             _ => return RunState::AwaitingInput,
