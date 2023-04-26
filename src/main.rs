@@ -1,4 +1,4 @@
-use rltk::{GameState, Rltk};
+use rltk::{GameState, Rltk, Point};
 use specs::prelude::*;
 use specs::saveload::{SimpleMarker, SimpleMarkerAllocator};
 use std::cmp::{max, min};
@@ -177,6 +177,11 @@ impl GameState for State {
                                 range: is_item_ranged.range,
                                 item: item_entity,
                             };
+
+                            //this is: fn reset_cursor_pos
+                            let player_pos = self.ecs.fetch::<Point>();
+                            let mut cursor = self.ecs.fetch_mut::<Cursor>();
+                            cursor.point = *player_pos;
                         } else {
                             let mut intent = self.ecs.write_storage::<WantsToUseItem>();
                             intent
@@ -206,17 +211,18 @@ impl GameState for State {
             }
             RunState::ShowTargeting { range, item } => {
                 let result = gui::ranged_target(self, ctx, range);
-                match result.0 {
+                match result {
                     gui::SelectResult::Cancel => newrunstate = RunState::AwaitingInput,
                     gui::SelectResult::NoResponse => {}
                     gui::SelectResult::Selected => {
                         let mut intent = self.ecs.write_storage::<WantsToUseItem>();
+                        let cursor = self.ecs.fetch::<Cursor>();
                         intent
                             .insert(
                                 *self.ecs.fetch::<Entity>(),
                                 WantsToUseItem {
                                     item,
-                                    target: result.1,
+                                    target: Some(cursor.point),
                                 },
                             )
                             .expect("Unable to insert intent");
@@ -268,7 +274,9 @@ impl State {
         let player_entity = spawner::player(&mut self.ecs, player_x, player_y);
         self.ecs.insert(player_entity);
 
-        self.ecs.insert(rltk::Point::new(player_x, player_y));
+        self.ecs.insert(Cursor {point: Point::new(player_x, player_y)});
+
+        self.ecs.insert(Point::new(player_x, player_y));
     }
 }
 
@@ -295,6 +303,8 @@ fn register_all(gs: &mut State) {
     gs.ecs.register::<AreaOfEffect>();
     gs.ecs.register::<SimpleMarker<SerializeMe>>();
     gs.ecs.register::<SerializationHelper>();
+    gs.ecs.register::<SerializationHelper>();
+    gs.ecs.register::<Cursor>();
 }
 
 fn main() -> rltk::BError {

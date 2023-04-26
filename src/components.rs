@@ -148,3 +148,8 @@ impl Status {
         //
     }
 }
+
+#[derive(Component, Serialize, Deserialize, Clone)]
+pub struct Cursor{
+    pub point: rltk::Point,
+}

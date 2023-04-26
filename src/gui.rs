@@ -139,14 +139,17 @@ pub fn show_inventory(
     }
 }
 
-pub fn ranged_target(gs: &mut State, ctx: &mut Rltk, range: i32) -> (SelectResult, Option<Point>) {
+
+pub fn ranged_target(gs: &mut State, ctx: &mut Rltk, range: i32) -> SelectResult {
     let player_entity = gs.ecs.fetch::<Entity>();
     let player_pos = gs.ecs.fetch::<Point>();
     let viewsheds = gs.ecs.read_storage::<Viewshed>();
+    let mut cursor = gs.ecs.fetch_mut::<Cursor>();
 
     let yellow = RGB::named(rltk::YELLOW);
     let black = RGB::named(rltk::BLACK);
     let cyan = RGB::named(rltk::CYAN);
+    let red = RGB::named(rltk::RED);
     ctx.print_color(5, 0, yellow, black, "Select Target:");
 
     // Highlight available target cells
@@ -162,33 +165,54 @@ pub fn ranged_target(gs: &mut State, ctx: &mut Rltk, range: i32) -> (SelectResul
             }
         }
     } else {
-        return (SelectResult::Cancel, None);
+        return SelectResult::Cancel;
     }
 
-    // Draw mouse cursor
-    let mouse_pos = ctx.mouse_pos();
     let mut valid_target = false;
     for idx in available_cells.iter() {
-        if idx.x == mouse_pos.0 && idx.y == mouse_pos.1 {
+        if idx.x == cursor.point.x && idx.y == cursor.point.y {
             valid_target = true;
         }
     }
+    let mut curs_color = red;
     if valid_target {
-        ctx.set_bg(mouse_pos.0, mouse_pos.1, cyan);
-        if ctx.left_click {
-            return (
-                SelectResult::Selected,
-                Some(Point::new(mouse_pos.0, mouse_pos.1)),
-            );
-        }
-    } else {
-        ctx.set_bg(mouse_pos.0, mouse_pos.1, RGB::named(rltk::RED));
-        if ctx.left_click {
-            return (SelectResult::Cancel, None);
-        }
+        curs_color = cyan;
     }
+    ctx.set_bg(cursor.point.x, cursor.point.y, curs_color);
+    // TODO: if there is an AOE, highlight that too
 
-    (SelectResult::NoResponse, None)
+    let up = config::cfg_to_kc(&config::CONFIG.up);
+    let down = config::cfg_to_kc(&config::CONFIG.down);
+    let left = config::cfg_to_kc(&config::CONFIG.left);
+    let right = config::cfg_to_kc(&config::CONFIG.right);
+    let exit = config::cfg_to_kc(&config::CONFIG.exit);
+    let select = config::cfg_to_kc(&config::CONFIG.select);
+
+    match ctx.key {
+        None => SelectResult::NoResponse,
+        Some(key) => match key {
+            _ if key == exit => SelectResult::Cancel,
+            //TODO: bounds checking
+            _ if key == up => {
+                cursor.point.y -= 1;
+                return SelectResult::NoResponse;
+            },
+            _ if key == down => {
+                cursor.point.y += 1;
+                return SelectResult::NoResponse;
+            },
+            _ if key == left => {
+                cursor.point.x -= 1;
+                return SelectResult::NoResponse;
+            },
+            _ if key == right => {
+                cursor.point.x += 1;
+                return SelectResult::NoResponse;
+            },
+            _ if key == select => SelectResult::Selected,
+            _ => SelectResult::NoResponse,
+        },
+    }
 }
 
 // TODO: this is really close to the inventory one, might be able to dry it up
