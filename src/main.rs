@@ -24,6 +24,9 @@ mod spawner;
 pub enum RunState {
     AwaitingInput,
     PreRun,
+    CharGen {
+        selection: usize,
+    },
     PlayerTurn,
     MonsterTurn,
     ShowInventory {
@@ -85,15 +88,18 @@ impl GameState for State {
                         }
                     }
                     gui::MainMenuResult::Selected { selected } => match selected {
-                        gui::MainMenuSelection::NewGame => newrunstate = RunState::PreRun,
+                        gui::MainMenuSelection::NewGame => {
+                            newrunstate = RunState::CharGen { selection: 0 }
+                        }
                         gui::MainMenuSelection::Continue => {
                             let save_exists = systems::save_load::does_save_exist();
+                            newrunstate = RunState::AwaitingInput;
+                            if !self.ecs.has_value::<Player>() {
+                                newrunstate = RunState::CharGen { selection: 0 };
+                            }
                             if save_exists {
                                 systems::save_load::load_game(&mut self.ecs);
-                                newrunstate = RunState::AwaitingInput;
                                 systems::save_load::delete_save();
-                            } else {
-                                newrunstate = RunState::PreRun;
                             }
                         }
                         gui::MainMenuSelection::Quit => {
@@ -101,6 +107,31 @@ impl GameState for State {
                             ::std::process::exit(0);
                         }
                     },
+                }
+            }
+            RunState::CharGen { selection } => {
+                let (menu_result, th_selection) = gui::chargen_menu(self, ctx, selection);
+                match menu_result {
+                    gui::SelectMenuResult::Cancel => {
+                        newrunstate = RunState::MainMenu {
+                            menu_selection: gui::MainMenuSelection::NewGame,
+                        };
+                    },
+                    gui::SelectMenuResult::NoResponse => {},
+                    gui::SelectMenuResult::Up => {
+                        newrunstate = RunState::CharGen {
+                            selection: max(selection - 1, 0),
+                        }
+                    },
+                    gui::SelectMenuResult::Down => {
+                        newrunstate = RunState::CharGen {
+                            selection: min(selection + 1, 20),
+                        }
+                    },
+                    gui::SelectMenuResult::Selected => {
+                        println!("selected {}", gui::SCHOOLS[th_selection.unwrap()]);
+                        newrunstate = RunState::PreRun {};
+                    }
                 }
             }
             RunState::PreRun => {

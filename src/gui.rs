@@ -1,10 +1,13 @@
-use rltk::{Point, Rltk, VirtualKeyCode, RGB};
+use rltk::{Point, Rltk, RGB};
 use specs::prelude::*;
 use std::cmp::{max, min};
 
 use super::map::{MAPHEIGHT, MAPWIDTH};
 use super::{components, config, GameLog, Player, RunState, State};
 pub use components::*;
+
+// TODO: this shouldn't live here
+pub const SCHOOLS: [&'static str; 3] = ["fireball", "magic_missile", "healing"];
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum MainMenuSelection {
@@ -27,6 +30,15 @@ pub enum ItemMenuResult {
     Down,
     Selected,
     Drop,
+}
+
+#[derive(PartialEq, Copy, Clone)]
+pub enum SelectMenuResult {
+    Cancel,
+    NoResponse,
+    Up,
+    Down,
+    Selected,
 }
 
 #[derive(PartialEq, Copy, Clone)]
@@ -55,7 +67,8 @@ pub fn draw_ui(ecs: &World, ctx: &mut Rltk) {
 
     let mut y = MAPHEIGHT + 1; // 44;
     for s in log.entries.iter().rev() {
-        if y < MAPHEIGHT + 6 { // 49
+        if y < MAPHEIGHT + 6 {
+            // 49
             ctx.print(2, y, s);
         }
         y += 1;
@@ -178,6 +191,57 @@ pub fn ranged_target(gs: &mut State, ctx: &mut Rltk, range: i32) -> (SelectResul
     (SelectResult::NoResponse, None)
 }
 
+// TODO: this is really close to the inventory one, might be able to dry it up
+pub fn chargen_menu(
+    _gs: &mut State,
+    ctx: &mut Rltk,
+    selection: usize,
+) -> (SelectMenuResult, Option<usize>) {
+    let white = RGB::named(rltk::WHITE);
+    let black = RGB::named(rltk::BLACK);
+    let yellow = RGB::named(rltk::YELLOW);
+    let magenta = RGB::named(rltk::MAGENTA);
+
+    let fgcolor = white;
+    let bgcolor = black;
+    let hlcolor = magenta;
+
+    let halfwidth = MAPWIDTH / 2;
+    ctx.draw_box(0, 0, halfwidth, MAPHEIGHT, fgcolor, bgcolor);
+    ctx.draw_box(halfwidth + 1, 0, halfwidth, MAPHEIGHT, fgcolor, bgcolor);
+    ctx.print_color_centered(0, yellow, black, "Choose a spell school");
+
+    let inv_offset = 2;
+    for (y, school) in SCHOOLS.iter().enumerate() {
+        let mut color = fgcolor;
+        if y == selection {
+            color = hlcolor;
+        }
+        ctx.print_color(
+            inv_offset,
+            y + inv_offset,
+            color,
+            bgcolor,
+            &school.to_string(),
+        );
+    }
+
+    let up = config::cfg_to_kc(&config::CONFIG.up);
+    let down = config::cfg_to_kc(&config::CONFIG.down);
+    let exit = config::cfg_to_kc(&config::CONFIG.exit);
+    let select = config::cfg_to_kc(&config::CONFIG.select);
+    match ctx.key {
+        None => (SelectMenuResult::NoResponse, None),
+        Some(key) => match key {
+            _ if key == exit => (SelectMenuResult::Cancel, None),
+            _ if key == up => (SelectMenuResult::Up, None),
+            _ if key == down => (SelectMenuResult::Down, None),
+            _ if key == select => (SelectMenuResult::Selected, Some(selection)),
+            _ => (SelectMenuResult::NoResponse, None),
+        },
+    }
+}
+
 pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
     let runstate = gs.ecs.fetch::<RunState>();
 
@@ -226,6 +290,7 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
         let down = config::cfg_to_kc(&config::CONFIG.down);
         let up = config::cfg_to_kc(&config::CONFIG.up);
         let exit = config::cfg_to_kc(&config::CONFIG.exit);
+        let select = config::cfg_to_kc(&config::CONFIG.select);
         match ctx.key {
             None => {
                 return MainMenuResult::NoSelection {
@@ -252,7 +317,7 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
                         selected: states[idx as usize],
                     };
                 }
-                VirtualKeyCode::Return => {
+                _ if key == select => {
                     return MainMenuResult::Selected {
                         selected: selection,
                     }
