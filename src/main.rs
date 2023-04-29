@@ -1,4 +1,4 @@
-use rltk::{GameState, Rltk, Point};
+use rltk::{GameState, Point, Rltk};
 use specs::prelude::*;
 use specs::saveload::{SimpleMarker, SimpleMarkerAllocator};
 use std::cmp::{max, min};
@@ -116,18 +116,18 @@ impl GameState for State {
                         newrunstate = RunState::MainMenu {
                             menu_selection: gui::MainMenuSelection::NewGame,
                         };
-                    },
-                    gui::SelectMenuResult::NoResponse => {},
+                    }
+                    gui::SelectMenuResult::NoResponse => {}
                     gui::SelectMenuResult::Up => {
                         newrunstate = RunState::CharGen {
                             selection: max(selection - 1, 0),
                         }
-                    },
+                    }
                     gui::SelectMenuResult::Down => {
                         newrunstate = RunState::CharGen {
                             selection: min(selection + 1, 20),
                         }
-                    },
+                    }
                     gui::SelectMenuResult::Selected => {
                         println!("selected {}", gui::SCHOOLS[th_selection.unwrap()]);
                         newrunstate = RunState::PreRun {};
@@ -274,7 +274,9 @@ impl State {
         let player_entity = spawner::player(&mut self.ecs, player_x, player_y);
         self.ecs.insert(player_entity);
 
-        self.ecs.insert(Cursor {point: Point::new(player_x, player_y)});
+        self.ecs.insert(Cursor {
+            point: Point::new(player_x, player_y),
+        });
 
         self.ecs.insert(Point::new(player_x, player_y));
     }

@@ -139,7 +139,6 @@ pub fn show_inventory(
     }
 }
 
-
 pub fn ranged_target(gs: &mut State, ctx: &mut Rltk, range: i32) -> SelectResult {
     let player_entity = gs.ecs.fetch::<Entity>();
     let player_pos = gs.ecs.fetch::<Point>();
@@ -196,19 +195,19 @@ pub fn ranged_target(gs: &mut State, ctx: &mut Rltk, range: i32) -> SelectResult
             _ if key == up => {
                 cursor.point.y -= 1;
                 return SelectResult::NoResponse;
-            },
+            }
             _ if key == down => {
                 cursor.point.y += 1;
                 return SelectResult::NoResponse;
-            },
+            }
             _ if key == left => {
                 cursor.point.x -= 1;
                 return SelectResult::NoResponse;
-            },
+            }
             _ if key == right => {
                 cursor.point.x += 1;
                 return SelectResult::NoResponse;
-            },
+            }
             _ if key == select => SelectResult::Selected,
             _ => SelectResult::NoResponse,
         },

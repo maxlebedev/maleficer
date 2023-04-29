@@ -150,6 +150,17 @@ impl Status {
 }
 
 #[derive(Component, Serialize, Deserialize, Clone)]
-pub struct Cursor{
+pub struct Cursor {
     pub point: rltk::Point,
+}
+
+#[derive(Component, Serialize, Deserialize, Clone)]
+pub struct Spell {
+    pub point: rltk::Point,
+}
+
+#[derive(Component, Debug, ConvertSaveload)]
+pub struct WantsToCastSpell {
+    pub item: Entity,
+    pub target: Option<rltk::Point>,
 }
