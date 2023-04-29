@@ -133,17 +133,18 @@ pub fn show_inventory(
             _ if key == up => (ItemMenuResult::Up, None),
             _ if key == down => (ItemMenuResult::Down, None),
             _ if key == drop => (ItemMenuResult::Drop, Some(equippable[selection])),
+            //TODO: below breaks if inventory is empty
             _ if key == select => (ItemMenuResult::Selected, Some(equippable[selection])),
             _ => (ItemMenuResult::NoResponse, None),
         },
     }
 }
 
-pub fn ranged_target(gs: &mut State, ctx: &mut Rltk, range: i32) -> SelectResult {
-    let player_entity = gs.ecs.fetch::<Entity>();
-    let player_pos = gs.ecs.fetch::<Point>();
-    let viewsheds = gs.ecs.read_storage::<Viewshed>();
-    let mut cursor = gs.ecs.fetch_mut::<Cursor>();
+pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32) -> SelectResult {
+    let player_entity = ecs.fetch::<Entity>();
+    let player_pos = ecs.fetch::<Point>();
+    let viewsheds = ecs.read_storage::<Viewshed>();
+    let mut cursor = ecs.fetch_mut::<Cursor>();
 
     let yellow = RGB::named(rltk::YELLOW);
     let black = RGB::named(rltk::BLACK);

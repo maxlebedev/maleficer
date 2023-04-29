@@ -136,6 +136,7 @@ impl GameState for State {
             }
             RunState::PreRun => {
                 self.new_game();
+                player::make_character(&mut self.ecs);
                 self.run_systems();
                 self.ecs.maintain();
                 newrunstate = RunState::AwaitingInput;
@@ -210,7 +211,8 @@ impl GameState for State {
                 }
             }
             RunState::ShowTargeting { range, item } => {
-                let result = gui::ranged_target(self, ctx, range);
+
+                let result = gui::ranged_target(&mut self.ecs, ctx, range);
                 match result {
                     gui::SelectResult::Cancel => newrunstate = RunState::AwaitingInput,
                     gui::SelectResult::NoResponse => {}
@@ -307,6 +309,8 @@ fn register_all(gs: &mut State) {
     gs.ecs.register::<SerializationHelper>();
     gs.ecs.register::<SerializationHelper>();
     gs.ecs.register::<Cursor>();
+    gs.ecs.register::<Spell>();
+    gs.ecs.register::<WantsToCastSpell>();
 }
 
 fn main() -> rltk::BError {

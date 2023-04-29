@@ -4,12 +4,16 @@ use super::gamelog::GameLog;
 use rltk::{Point, Rltk};
 use specs::prelude::*;
 
-use super::{components, config, map, RunState, State};
+use super::{components, config, map, RunState, State, systems};
 pub use components::*;
 use num;
 
-fn _make_character() {
+pub fn make_character(ecs: &mut World) {
     // Here goes a function that initializes all of the rpgish character stuff
+    // for now we just add a spell to the hotbar
+
+    // TODO: look at the selection from prev menu and make diff spell
+    systems::spell::fireball_spell(ecs, config::CONFIG.hk1.clone());
 }
 
 fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
@@ -61,6 +65,35 @@ fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
     }
 }
 
+fn cast_spell(ecs: &mut World) {
+    let player_entity = ecs.fetch::<Entity>();
+    let cursor = ecs.fetch::<Cursor>();
+    let mut castables = ecs.write_storage::<WantsToCastSpell>();
+    // having some trouble with ecs here. spell isn't passed in here, we join it based on
+    // keypress???
+
+    // return RunState::ShowTargeting { range: (), item: () },
+
+
+    //gui::ranged_target(ecs, ctx: &mut Rltk, range: i32);
+    // -> SelectResult
+
+    // Flow: press C, 1
+    // move cursor, hit enter
+    // spell takes effect
+    //
+    // Do we have a 
+    castables 
+        .insert(
+            *player_entity,
+            WantsToCastSpell{
+                source: *player_entity,
+                target: Some(cursor.point),
+            },
+        )
+        .expect("Unable to insert want to cast");
+}
+
 fn get_item(ecs: &mut World) {
     let player_pos = ecs.fetch::<Point>();
     let player_entity = ecs.fetch::<Entity>();
@@ -106,6 +139,8 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
     let exit = config::cfg_to_kc(&config::CONFIG.exit);
     let wait = config::cfg_to_kc(&config::CONFIG.wait);
 
+
+    let hkone = config::cfg_to_kc(&config::CONFIG.hk1);
     match ctx.key {
         None => return RunState::AwaitingInput, // Nothing happened
         Some(key) => match key {
@@ -117,6 +152,8 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
 
             _ if key == pick_up => get_item(&mut gs.ecs),
             _ if key == inventory => return RunState::ShowInventory { selection: 0 },
+
+            _ if key == hkone => cast_spell(&mut gs.ecs)        ,
 
             _ if key == exit => {
                 return RunState::MainMenu {

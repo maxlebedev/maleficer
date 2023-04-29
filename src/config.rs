@@ -12,6 +12,10 @@ impl FromStr for VirtualKeyCode {
         //TODO: this is probably the dumbest way to do it
         //I hope this doesn't get instantiated every time we use from_str
         let key_map: HashMap<&str, VirtualKeyCode> = HashMap::from([
+            ("1", VirtualKeyCode::Key1),
+            ("2", VirtualKeyCode::Key2),
+            ("3", VirtualKeyCode::Key3),
+            ("4", VirtualKeyCode::Key4),
             ("a", VirtualKeyCode::A),
             ("b", VirtualKeyCode::B),
             ("d", VirtualKeyCode::D),
@@ -42,6 +46,7 @@ pub struct Config {
     pub exit: String,
     pub select: String,
     pub wait: String,
+    pub hk1: String,
 
     pub width: i32,
     pub height: i32,

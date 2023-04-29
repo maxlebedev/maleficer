@@ -156,11 +156,11 @@ pub struct Cursor {
 
 #[derive(Component, Serialize, Deserialize, Clone)]
 pub struct Spell {
-    pub point: rltk::Point,
+    pub hotkey : String,
 }
 
 #[derive(Component, Debug, ConvertSaveload)]
 pub struct WantsToCastSpell {
-    pub item: Entity,
+    pub source: Entity,
     pub target: Option<rltk::Point>,
 }
