@@ -1,8 +1,11 @@
+use std::collections::HashMap;
+
 use super::rect::Rect;
 use super::{
     components, BlocksTile, CombatStats, Monster, Name, Player, Position, Renderable, Viewshed,
 };
 use crate::map;
+use crate::systems::random_table::RandomTable;
 use rltk::{RandomNumberGenerator, RGB};
 use specs::prelude::*;
 use specs::saveload::SimpleMarker;
@@ -10,61 +13,50 @@ use specs::saveload::SimpleMarker;
 pub use components::*;
 use specs::saveload::MarkedBuilder;
 
-const MAX_MONSTERS: i32 = 4;
-const MAX_ITEMS: i32 = 7; //2
+const MAX_SPAWNS: i32 = 4;
 
 /// Fills a room with stuff!
+#[allow(clippy::map_entry)]
 pub fn spawn_room(ecs: &mut World, room: &Rect) {
-    let mut monster_spawn_points: Vec<usize> = Vec::new();
-    let mut item_spawn_points: Vec<usize> = Vec::new();
+    let spawn_table = room_table();
+    let mut spawn_points: HashMap<usize, String> = HashMap::new();
 
     // Scope to keep the borrow checker happy
     {
         let mut rng = ecs.write_resource::<RandomNumberGenerator>();
-        let num_monsters = rng.roll_dice(1, MAX_MONSTERS + 2) - 3;
-        let num_items = rng.roll_dice(1, MAX_ITEMS + 2) - 3;
+        let num_spawns = rng.roll_dice(1, MAX_SPAWNS + 3) - 3;
 
-        for _i in 0..num_monsters {
+        for _i in 0..num_spawns{
             let mut added = false;
-            while !added {
+            let mut tries = 0;
+            // We try to resolve collisions 20x
+            while !added  && tries < 20 {
                 let x = (room.x1 + rng.roll_dice(1, i32::abs(room.x2 - room.x1))) as usize;
                 let y = (room.y1 + rng.roll_dice(1, i32::abs(room.y2 - room.y1))) as usize;
                 let idx = (y * map::MAPWIDTH) + x;
-                // TODO: why are we making an idx from xy, then undoing that work later? does
-                // contains work porrly on tuples?
-                if !monster_spawn_points.contains(&idx) {
-                    monster_spawn_points.push(idx);
+                if !spawn_points.contains_key(&idx) {
+                    spawn_points.insert(idx, spawn_table.roll(&mut rng));
                     added = true;
-                }
-            }
-        }
-
-        for _i in 0..num_items {
-            let mut added = false;
-            while !added {
-                let x = (room.x1 + rng.roll_dice(1, i32::abs(room.x2 - room.x1))) as usize;
-                let y = (room.y1 + rng.roll_dice(1, i32::abs(room.y2 - room.y1))) as usize;
-                let idx = (y * map::MAPWIDTH) + x;
-                if !item_spawn_points.contains(&idx) {
-                    item_spawn_points.push(idx);
-                    added = true;
+                } else {
+                    tries += 1;
                 }
             }
         }
     }
 
-    // Actually spawn the monsters
-    for idx in monster_spawn_points.iter() {
-        let x = *idx % map::MAPWIDTH;
-        let y = *idx / map::MAPWIDTH;
-        random_monster(ecs, x as i32, y as i32);
-    }
+    for spawn in spawn_points.iter() {
+        let x = (*spawn.0 % map::MAPWIDTH) as i32;
+        let y = (*spawn.0 / map::MAPWIDTH) as i32;
 
-    // Actually spawn the potions
-    for idx in item_spawn_points.iter() {
-        let x = *idx % map::MAPWIDTH;
-        let y = *idx / map::MAPWIDTH;
-        random_item(ecs, x as i32, y as i32);
+        match spawn.1.as_ref() {
+            "Goblin" => goblin(ecs, x, y),
+            "Orc" => orc(ecs, x, y),
+            "Health Potion" => health_potion(ecs, x, y),
+            "Fireball Scroll" => fireball_scroll(ecs, x, y),
+            // "Confusion Scroll" => confusion_scroll(ecs, x, y),
+            "Magic Missile Scroll" => magic_missile_scroll(ecs, x, y),
+            _ => {}
+        }
     }
 }
 
@@ -220,4 +212,14 @@ fn fireball_scroll(ecs: &mut World, x: i32, y: i32) {
         .with(AreaOfEffect { radius: 3 })
         .marked::<SimpleMarker<SerializeMe>>()
         .build();
+}
+
+fn room_table() -> RandomTable {
+    RandomTable::new()
+        .add("Goblin", 10)
+        .add("Orc", 1)
+        .add("Health Potion", 7)
+        .add("Fireball Scroll", 2)
+        // .add("Confusion Scroll", 2)
+        .add("Magic Missile Scroll", 4)
 }
