@@ -9,7 +9,7 @@ use super::{components, config, GameLog, Player, RunState, State};
 pub use components::*;
 
 // TODO: this shouldn't live here
-pub const SCHOOLS: [&'static str; 3] = ["fireball", "magic_missile", "healing"];
+pub const SCHOOLS: [&str; 3] = ["fireball", "magic_missile", "healing"];
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum MainMenuSelection {
@@ -197,19 +197,19 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32) -> SelectResul
             //TODO: bounds checking
             _ if key == up => {
                 cursor.point.y -= 1;
-                return SelectResult::NoResponse;
+                SelectResult::NoResponse
             }
             _ if key == down => {
                 cursor.point.y += 1;
-                return SelectResult::NoResponse;
+                SelectResult::NoResponse
             }
             _ if key == left => {
                 cursor.point.x -= 1;
-                return SelectResult::NoResponse;
+                SelectResult::NoResponse
             }
             _ if key == right => {
                 cursor.point.x += 1;
-                return SelectResult::NoResponse;
+                SelectResult::NoResponse
             }
             _ if key == select => SelectResult::Selected,
             _ => SelectResult::NoResponse,

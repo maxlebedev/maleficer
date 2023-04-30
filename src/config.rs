@@ -66,5 +66,5 @@ fn get_config() -> Config {
 }
 
 pub fn cfg_to_kc(val: &str) -> VirtualKeyCode {
-    VirtualKeyCode::from_str(&val.to_string())
+    VirtualKeyCode::from_str(val)
 }

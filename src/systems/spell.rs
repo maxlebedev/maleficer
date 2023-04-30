@@ -20,7 +20,7 @@ impl<'a> System<'a> for SpellCast {
 
         for cast in wants_spellcast.join() {
             if cast.source == *player_entity {
-                gamelog.entries.push(format!("You cast a spell"));
+                gamelog.entries.push("You cast a spell".to_string());
             }
         }
         wants_spellcast.clear();

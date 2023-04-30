@@ -6,7 +6,6 @@ use specs::prelude::*;
 
 use super::{components, config, map, systems, RunState, State};
 pub use components::*;
-use num;
 
 pub fn make_character(ecs: &mut World) {
     // Here goes a function that initializes all of the rpgish character stuff

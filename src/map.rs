@@ -68,7 +68,7 @@ impl Map {
         for x in min(x1, x2)..=max(x1, x2) {
             let idx = self.xy_idx(x, y);
             if idx > 0 && idx < MAPCOUNT {
-                self.tiles[idx as usize] = TileType::Floor;
+                self.tiles[idx] = TileType::Floor;
             }
         }
     }
@@ -77,7 +77,7 @@ impl Map {
         for y in min(y1, y2)..=max(y1, y2) {
             let idx = self.xy_idx(x, y);
             if idx > 0 && idx < MAPCOUNT {
-                self.tiles[idx as usize] = TileType::Floor;
+                self.tiles[idx] = TileType::Floor;
             }
         }
     }
@@ -225,7 +225,7 @@ pub fn draw_map(ecs: &World, ctx: &mut Rltk) {
                     fg = cyan;
                 }
                 TileType::Wall => {
-                    glyph = wall_glyph(&*map, x, y);
+                    glyph = wall_glyph(&map, x, y);
                     fg = green;
                 }
             }
@@ -245,7 +245,7 @@ impl Algorithm2D for Map {
 
 impl BaseMap for Map {
     fn is_opaque(&self, idx: usize) -> bool {
-        self.tiles[idx as usize] == TileType::Wall
+        self.tiles[idx] == TileType::Wall
     }
 
     fn get_pathing_distance(&self, idx1: usize, idx2: usize) -> f32 {
