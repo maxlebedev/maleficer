@@ -101,17 +101,6 @@ impl<'a> System<'a> for ItemUse {
                             for mob in map.tile_content[idx].iter() {
                                 targets.push(*mob);
                             }
-                            let pos = positions.get(*mob);
-                            if let Some(pos) = pos {
-                                particle_builder.request(
-                                    pos.x,
-                                    pos.y,
-                                    rltk::COLORS.red,
-                                    rltk::COLORS.black,
-                                    rltk::to_cp437('‼'),
-                                    100.0,
-                                );
-                            }
                         }
                         Some(area_effect) => {
                             // AoE
@@ -125,6 +114,7 @@ impl<'a> System<'a> for ItemUse {
                                 for mob in map.tile_content[idx].iter() {
                                     targets.push(*mob);
                                 }
+                                particle_builder.request(tile_idx.x, tile_idx.y, COLORS.orange, COLORS.black, rltk::to_cp437('░'), 200.0);
                             }
                         }
                     }
@@ -155,7 +145,7 @@ impl<'a> System<'a> for ItemUse {
                                     COLORS.green,
                                     COLORS.black,
                                     rltk::to_cp437('♥'),
-                                    100.0,
+                                    200.0,
                                 );
                             }
                         }
@@ -184,6 +174,18 @@ impl<'a> System<'a> for ItemUse {
                                 "You use {} on {}, inflicting {} damage.",
                                 item_name.name, mob_name.name, damage.damage
                             ));
+
+                            let pos = positions.get(*mob);
+                            if let Some(pos) = pos {
+                                particle_builder.request(
+                                    pos.x,
+                                    pos.y,
+                                    COLORS.red,
+                                    COLORS.black,
+                                    rltk::to_cp437('‼'),
+                                    200.0,
+                                );
+                            }
                         }
                         used_item = true;
                     }
