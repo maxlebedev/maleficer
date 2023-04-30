@@ -164,3 +164,8 @@ pub struct WantsToCastSpell {
     pub source: Entity,
     pub target: Option<rltk::Point>,
 }
+
+#[derive(Component, Serialize, Deserialize, Clone)]
+pub struct ParticleLifetime {
+    pub lifetime_ms : f32
+}

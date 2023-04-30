@@ -53,6 +53,7 @@ impl GameState for State {
             newrunstate = *runstate;
         }
         ctx.cls();
+        systems::particle::cull_dead_particles(&mut self.ecs, ctx);
 
         match newrunstate {
             RunState::MainMenu { .. } => {}
@@ -259,6 +260,8 @@ impl State {
         items.run_now(&self.ecs);
         let mut drop_items = systems::item::ItemDrop {};
         drop_items.run_now(&self.ecs);
+        let mut particles = systems::particle::ParticleSpawn{};
+        particles.run_now(&self.ecs);
 
         self.ecs.maintain();
     }
@@ -311,6 +314,7 @@ fn register_all(gs: &mut State) {
     gs.ecs.register::<Cursor>();
     gs.ecs.register::<Spell>();
     gs.ecs.register::<WantsToCastSpell>();
+    gs.ecs.register::<ParticleLifetime>();
 }
 
 fn main() -> rltk::BError {
@@ -338,6 +342,8 @@ fn main() -> rltk::BError {
         entries: vec!["Welcome to Malefactor".to_string()],
     };
     gs.ecs.insert(gamelog);
+
+    gs.ecs.insert(systems::particle::ParticleBuilder::new());
 
     rltk::main_loop(context, gs)
 }

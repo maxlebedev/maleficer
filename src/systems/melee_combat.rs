@@ -1,4 +1,5 @@
-use crate::{CombatStats, GameLog, Name, SufferDamage, WantsToMelee};
+use crate::{CombatStats, GameLog, Name, SufferDamage, WantsToMelee, Position};
+use crate::systems::particle::ParticleBuilder;
 use specs::prelude::*;
 // use rltk::console;
 
@@ -12,10 +13,13 @@ impl<'a> System<'a> for MeleeCombat {
         ReadStorage<'a, Name>,
         ReadStorage<'a, CombatStats>,
         WriteStorage<'a, SufferDamage>,
+        WriteExpect<'a, ParticleBuilder>,
+        ReadStorage<'a, Position>,
     );
+    //TODO: what's the diff btw WriteStorage and WriteExpect
 
     fn run(&mut self, data: Self::SystemData) {
-        let (entities, mut log, mut wants_melee, names, combat_stats, mut inflict_damage) = data;
+        let (entities, mut log, mut wants_melee, names, combat_stats, mut inflict_damage, mut particle_builder, positions) = data;
 
         for (_entity, wants_melee, name, stats) in
             (&entities, &wants_melee, &names, &combat_stats).join()
@@ -25,6 +29,11 @@ impl<'a> System<'a> for MeleeCombat {
                 if target_stats.hp > 0 {
                     let target_name = names.get(wants_melee.target).unwrap();
 
+
+                    let pos = positions.get(wants_melee.target);
+                    if let Some(pos) = pos {
+                        particle_builder.request(pos.x, pos.y, rltk::RGB::named(rltk::ORANGE), rltk::RGB::named(rltk::BLACK), rltk::to_cp437('‼'), 100.0);
+                    }
                     let damage = i32::max(0, stats.power - target_stats.defense);
 
                     if damage == 0 {

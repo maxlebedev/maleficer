@@ -7,3 +7,4 @@ pub mod save_load;
 pub mod spell;
 pub mod visibility;
 pub mod random_table;
+pub mod particle;
