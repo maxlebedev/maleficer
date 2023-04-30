@@ -4,7 +4,7 @@ use super::gamelog::GameLog;
 use rltk::{Point, Rltk};
 use specs::prelude::*;
 
-use super::{components, config, map, RunState, State, systems};
+use super::{components, config, map, systems, RunState, State};
 pub use components::*;
 use num;
 
@@ -74,7 +74,6 @@ fn cast_spell(ecs: &mut World) {
 
     // return RunState::ShowTargeting { range: (), item: () },
 
-
     //gui::ranged_target(ecs, ctx: &mut Rltk, range: i32);
     // -> SelectResult
 
@@ -82,11 +81,11 @@ fn cast_spell(ecs: &mut World) {
     // move cursor, hit enter
     // spell takes effect
     //
-    // Do we have a 
-    castables 
+    // Do we have a
+    castables
         .insert(
             *player_entity,
-            WantsToCastSpell{
+            WantsToCastSpell {
                 source: *player_entity,
                 target: Some(cursor.point),
             },
@@ -139,7 +138,6 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
     let exit = config::cfg_to_kc(&config::CONFIG.exit);
     let wait = config::cfg_to_kc(&config::CONFIG.wait);
 
-
     let hkone = config::cfg_to_kc(&config::CONFIG.hk1);
     match ctx.key {
         None => return RunState::AwaitingInput, // Nothing happened
@@ -153,7 +151,7 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
             _ if key == pick_up => get_item(&mut gs.ecs),
             _ if key == inventory => return RunState::ShowInventory { selection: 0 },
 
-            _ if key == hkone => cast_spell(&mut gs.ecs)        ,
+            _ if key == hkone => cast_spell(&mut gs.ecs),
 
             _ if key == exit => {
                 return RunState::MainMenu {

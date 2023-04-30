@@ -2,7 +2,8 @@ use std::collections::HashMap;
 
 use super::rect::Rect;
 use super::{
-    components, BlocksTile, CombatStats, Monster, Name, Player, Position, Renderable, Viewshed, COLORS
+    components, BlocksTile, CombatStats, Monster, Name, Player, Position, Renderable, Viewshed,
+    COLORS,
 };
 use crate::map;
 use crate::systems::random_table::RandomTable;
@@ -26,11 +27,11 @@ pub fn spawn_room(ecs: &mut World, room: &Rect) {
         let mut rng = ecs.write_resource::<RandomNumberGenerator>();
         let num_spawns = rng.roll_dice(1, MAX_SPAWNS + 3) - 3;
 
-        for _i in 0..num_spawns{
+        for _i in 0..num_spawns {
             let mut added = false;
             let mut tries = 0;
             // We try to resolve collisions 20x
-            while !added  && tries < 20 {
+            while !added && tries < 20 {
                 let x = (room.x1 + rng.roll_dice(1, i32::abs(room.x2 - room.x1))) as usize;
                 let y = (room.y1 + rng.roll_dice(1, i32::abs(room.y2 - room.y1))) as usize;
                 let idx = (y * map::MAPWIDTH) + x;

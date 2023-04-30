@@ -47,7 +47,7 @@ pub struct Colors {
     pub red: rltk::RGB,
     pub yellow: rltk::RGB,
     pub magenta: rltk::RGB,
-    pub cyan : rltk::RGB,
+    pub cyan: rltk::RGB,
     pub green: rltk::RGB,
     pub blue: rltk::RGB,
     pub white: rltk::RGB,
@@ -55,14 +55,14 @@ pub struct Colors {
 
 lazy_static! {
     pub static ref COLORS: Colors = Colors {
-        orange : rltk::RGB::named(rltk::ORANGE),
-        black : rltk::RGB::named(rltk::BLACK),
-        red : rltk::RGB::named(rltk::RED),
-        yellow : rltk::RGB::named(rltk::YELLOW),
-        magenta : rltk::RGB::named(rltk::MAGENTA),
-        cyan : rltk::RGB::named(rltk::CYAN),
-        green : rltk::RGB::named(rltk::GREEN),
-        blue : rltk::RGB::named(rltk::BLUE),
+        orange: rltk::RGB::named(rltk::ORANGE),
+        black: rltk::RGB::named(rltk::BLACK),
+        red: rltk::RGB::named(rltk::RED),
+        yellow: rltk::RGB::named(rltk::YELLOW),
+        magenta: rltk::RGB::named(rltk::MAGENTA),
+        cyan: rltk::RGB::named(rltk::CYAN),
+        green: rltk::RGB::named(rltk::GREEN),
+        blue: rltk::RGB::named(rltk::BLUE),
         white: rltk::RGB::named(rltk::WHITE),
     };
 }
@@ -238,7 +238,6 @@ impl GameState for State {
                 }
             }
             RunState::ShowTargeting { range, item } => {
-
                 let result = gui::ranged_target(&mut self.ecs, ctx, range);
                 match result {
                     gui::SelectResult::Cancel => newrunstate = RunState::AwaitingInput,
@@ -286,7 +285,7 @@ impl State {
         items.run_now(&self.ecs);
         let mut drop_items = systems::item::ItemDrop {};
         drop_items.run_now(&self.ecs);
-        let mut particles = systems::particle::ParticleSpawn{};
+        let mut particles = systems::particle::ParticleSpawn {};
         particles.run_now(&self.ecs);
 
         self.ecs.maintain();

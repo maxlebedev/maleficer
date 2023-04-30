@@ -156,7 +156,7 @@ pub struct Cursor {
 
 #[derive(Component, Serialize, Deserialize, Clone)]
 pub struct Spell {
-    pub hotkey : String,
+    pub hotkey: String,
 }
 
 #[derive(Component, Debug, ConvertSaveload)]
@@ -167,5 +167,5 @@ pub struct WantsToCastSpell {
 
 #[derive(Component, Serialize, Deserialize, Clone)]
 pub struct ParticleLifetime {
-    pub lifetime_ms : f32
+    pub lifetime_ms: f32,
 }
