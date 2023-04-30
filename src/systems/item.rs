@@ -1,8 +1,11 @@
 use crate::{
     gamelog::GameLog, map, AreaOfEffect, CombatStats, Consumable, InBackpack, InflictsDamage, Name,
     Position, ProvidesHealing, SufferDamage, WantsToDropItem, WantsToPickupItem, WantsToUseItem,
+    COLORS,
 };
 use specs::prelude::*;
+
+use super::particle::ParticleBuilder;
 
 pub struct ItemCollection {}
 
@@ -61,6 +64,8 @@ impl<'a> System<'a> for ItemUse {
         ReadExpect<'a, map::Map>,
         WriteStorage<'a, CombatStats>,
         ReadStorage<'a, AreaOfEffect>,
+        WriteExpect<'a, ParticleBuilder>,
+        ReadStorage<'a, Position>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
@@ -77,6 +82,8 @@ impl<'a> System<'a> for ItemUse {
             map,
             mut combat_stats,
             aoe,
+            mut particle_builder,
+            positions,
         ) = data;
 
         for (entity, useitem) in (&entities, &wants_use).join() {
@@ -93,6 +100,17 @@ impl<'a> System<'a> for ItemUse {
                             let idx = map.xy_idx(target.x, target.y);
                             for mob in map.tile_content[idx].iter() {
                                 targets.push(*mob);
+                            }
+                            let pos = positions.get(*mob);
+                            if let Some(pos) = pos {
+                                particle_builder.request(
+                                    pos.x,
+                                    pos.y,
+                                    rltk::COLORS.red,
+                                    rltk::COLORS.black,
+                                    rltk::to_cp437('‼'),
+                                    100.0,
+                                );
                             }
                         }
                         Some(area_effect) => {
@@ -128,6 +146,17 @@ impl<'a> System<'a> for ItemUse {
                                     names.get(useitem.item).unwrap().name,
                                     healer.heal_amount
                                 ));
+                            }
+                            let pos = positions.get(*target);
+                            if let Some(pos) = pos {
+                                particle_builder.request(
+                                    pos.x,
+                                    pos.y,
+                                    COLORS.green,
+                                    COLORS.black,
+                                    rltk::to_cp437('♥'),
+                                    100.0,
+                                );
                             }
                         }
                     }
