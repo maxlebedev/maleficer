@@ -1,4 +1,4 @@
-use rltk::{Point, Rltk, RGB};
+use rltk::{Point, Rltk};
 use specs::prelude::*;
 use std::cmp::{max, min};
 

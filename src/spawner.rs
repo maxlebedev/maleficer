@@ -6,7 +6,7 @@ use super::{
 };
 use crate::map;
 use crate::systems::random_table::RandomTable;
-use rltk::{RandomNumberGenerator, RGB};
+use rltk::RandomNumberGenerator;
 use specs::prelude::*;
 use specs::saveload::SimpleMarker;
 

@@ -62,6 +62,7 @@ lazy_static! {
         magenta : rltk::RGB::named(rltk::MAGENTA),
         cyan : rltk::RGB::named(rltk::CYAN),
         green : rltk::RGB::named(rltk::GREEN),
+        blue : rltk::RGB::named(rltk::BLUE),
         white: rltk::RGB::named(rltk::WHITE),
     };
 }
