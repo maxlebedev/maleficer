@@ -2,6 +2,8 @@ use rltk::{Point, Rltk, RGB};
 use specs::prelude::*;
 use std::cmp::{max, min};
 
+use crate::COLORS;
+
 use super::map::{MAPHEIGHT, MAPWIDTH};
 use super::{components, config, GameLog, Player, RunState, State};
 pub use components::*;
@@ -49,10 +51,10 @@ pub enum SelectResult {
 }
 
 pub fn draw_ui(ecs: &World, ctx: &mut Rltk) {
-    let white = RGB::named(rltk::WHITE);
-    let black = RGB::named(rltk::BLACK);
-    let yellow = RGB::named(rltk::YELLOW);
-    let red = RGB::named(rltk::RED);
+    let white = COLORS.white;
+    let black = COLORS.black;
+    let yellow = COLORS.yellow;
+    let red = COLORS.red;
     ctx.draw_box(0, MAPHEIGHT, MAPWIDTH - 1, 6, white, black);
 
     let combat_stats = ecs.read_storage::<CombatStats>();
@@ -80,10 +82,10 @@ pub fn show_inventory(
     ctx: &mut Rltk,
     selection: usize,
 ) -> (ItemMenuResult, Option<Entity>) {
-    let white = RGB::named(rltk::WHITE);
-    let black = RGB::named(rltk::BLACK);
-    let yellow = RGB::named(rltk::YELLOW);
-    let magenta = RGB::named(rltk::MAGENTA);
+    let white = COLORS.white;
+    let black = COLORS.black;
+    let yellow = COLORS.yellow;
+    let magenta = COLORS.magenta;
 
     let fgcolor = white;
     let bgcolor = black;
@@ -146,10 +148,10 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32) -> SelectResul
     let viewsheds = ecs.read_storage::<Viewshed>();
     let mut cursor = ecs.fetch_mut::<Cursor>();
 
-    let yellow = RGB::named(rltk::YELLOW);
-    let black = RGB::named(rltk::BLACK);
-    let cyan = RGB::named(rltk::CYAN);
-    let red = RGB::named(rltk::RED);
+    let yellow = COLORS.yellow;
+    let black = COLORS.black;
+    let cyan = COLORS.cyan;
+    let red = COLORS.red;
     ctx.print_color(5, 0, yellow, black, "Select Target:");
 
     // Highlight available target cells
@@ -160,7 +162,7 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32) -> SelectResul
         for idx in visible.visible_tiles.iter() {
             let distance = rltk::DistanceAlg::Pythagoras.distance2d(*player_pos, *idx);
             if distance <= range as f32 {
-                ctx.set_bg(idx.x, idx.y, RGB::named(rltk::BLUE));
+                ctx.set_bg(idx.x, idx.y, COLORS.blue);
                 available_cells.push(idx);
             }
         }
@@ -221,10 +223,10 @@ pub fn chargen_menu(
     ctx: &mut Rltk,
     selection: usize,
 ) -> (SelectMenuResult, Option<usize>) {
-    let white = RGB::named(rltk::WHITE);
-    let black = RGB::named(rltk::BLACK);
-    let yellow = RGB::named(rltk::YELLOW);
-    let magenta = RGB::named(rltk::MAGENTA);
+    let white = COLORS.white;
+    let black = COLORS.black;
+    let yellow = COLORS.yellow;
+    let magenta = COLORS.magenta;
 
     let fgcolor = white;
     let bgcolor = black;
@@ -269,10 +271,10 @@ pub fn chargen_menu(
 pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
     let runstate = gs.ecs.fetch::<RunState>();
 
-    let white = RGB::named(rltk::WHITE);
-    let yellow = RGB::named(rltk::YELLOW);
-    let black = RGB::named(rltk::BLACK);
-    let magenta = RGB::named(rltk::MAGENTA);
+    let white = COLORS.white;
+    let yellow = COLORS.yellow;
+    let black = COLORS.black;
+    let magenta = COLORS.magenta;
 
     ctx.print_color_centered(15, yellow, black, "Malefactor");
 

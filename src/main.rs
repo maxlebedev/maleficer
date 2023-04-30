@@ -41,6 +41,31 @@ pub enum RunState {
     },
 }
 
+pub struct Colors {
+    pub orange: rltk::RGB,
+    pub black: rltk::RGB,
+    pub red: rltk::RGB,
+    pub yellow: rltk::RGB,
+    pub magenta: rltk::RGB,
+    pub cyan : rltk::RGB,
+    pub green: rltk::RGB,
+    pub blue: rltk::RGB,
+    pub white: rltk::RGB,
+}
+
+lazy_static! {
+    pub static ref COLORS: Colors = Colors {
+        orange : rltk::RGB::named(rltk::ORANGE),
+        black : rltk::RGB::named(rltk::BLACK),
+        red : rltk::RGB::named(rltk::RED),
+        yellow : rltk::RGB::named(rltk::YELLOW),
+        magenta : rltk::RGB::named(rltk::MAGENTA),
+        cyan : rltk::RGB::named(rltk::CYAN),
+        green : rltk::RGB::named(rltk::GREEN),
+        white: rltk::RGB::named(rltk::WHITE),
+    };
+}
+
 pub struct State {
     ecs: World,
 }

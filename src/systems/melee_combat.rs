@@ -1,4 +1,4 @@
-use crate::{CombatStats, GameLog, Name, SufferDamage, WantsToMelee, Position};
+use crate::{CombatStats, GameLog, Name, SufferDamage, WantsToMelee, Position, COLORS};
 use crate::systems::particle::ParticleBuilder;
 use specs::prelude::*;
 // use rltk::console;
@@ -32,7 +32,7 @@ impl<'a> System<'a> for MeleeCombat {
 
                     let pos = positions.get(wants_melee.target);
                     if let Some(pos) = pos {
-                        particle_builder.request(pos.x, pos.y, rltk::RGB::named(rltk::ORANGE), rltk::RGB::named(rltk::BLACK), rltk::to_cp437('‼'), 100.0);
+                        particle_builder.request(pos.x, pos.y, COLORS.orange, COLORS.black, rltk::to_cp437('‼'), 100.0);
                     }
                     let damage = i32::max(0, stats.power - target_stats.defense);
 

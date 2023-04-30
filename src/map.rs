@@ -1,3 +1,5 @@
+use crate::COLORS;
+
 use super::rect::Rect;
 use rltk::{Algorithm2D, BaseMap, Point, RandomNumberGenerator, Rltk, RGB};
 use serde::{Deserialize, Serialize};
@@ -207,8 +209,8 @@ fn wall_glyph(map: &Map, x: i32, y: i32) -> rltk::FontCharType {
 pub fn draw_map(ecs: &World, ctx: &mut Rltk) {
     let map = ecs.fetch::<Map>();
     let cyan = RGB::from_f32(0.0, 0.5, 0.5);
-    let green = RGB::named(rltk::GREEN);
-    let black = RGB::named(rltk::BLACK);
+    let green = COLORS.green;
+    let black = COLORS.black;
 
     for (idx, tile) in map.tiles.iter().enumerate() {
         // Render a tile depending upon the tile type

@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use super::rect::Rect;
 use super::{
-    components, BlocksTile, CombatStats, Monster, Name, Player, Position, Renderable, Viewshed,
+    components, BlocksTile, CombatStats, Monster, Name, Player, Position, Renderable, Viewshed, COLORS
 };
 use crate::map;
 use crate::systems::random_table::RandomTable;
@@ -69,8 +69,8 @@ pub fn player(ecs: &mut World, player_x: i32, player_y: i32) -> Entity {
         })
         .with(Renderable {
             glyph: rltk::to_cp437('@'),
-            fg: RGB::named(rltk::YELLOW),
-            bg: RGB::named(rltk::BLACK),
+            fg: COLORS.yellow,
+            bg: COLORS.black,
             render_order: 0,
         })
         .with(Player {})
@@ -104,8 +104,8 @@ fn monster<S: ToString>(ecs: &mut World, x: i32, y: i32, glyph: rltk::FontCharTy
         .with(Position { x, y })
         .with(Renderable {
             glyph,
-            fg: RGB::named(rltk::RED),
-            bg: RGB::named(rltk::BLACK),
+            fg: COLORS.red,
+            bg: COLORS.black,
             render_order: 1,
         })
         .with(Viewshed {
@@ -133,8 +133,8 @@ fn health_potion(ecs: &mut World, x: i32, y: i32) {
         .with(Position { x, y })
         .with(Renderable {
             glyph: rltk::to_cp437('¡'),
-            fg: RGB::named(rltk::MAGENTA),
-            bg: RGB::named(rltk::BLACK),
+            fg: COLORS.magenta,
+            bg: COLORS.black,
             render_order: 2,
         })
         .with(Name {
@@ -152,8 +152,8 @@ fn magic_missile_scroll(ecs: &mut World, x: i32, y: i32) {
         .with(Position { x, y })
         .with(Renderable {
             glyph: rltk::to_cp437(')'),
-            fg: RGB::named(rltk::CYAN),
-            bg: RGB::named(rltk::BLACK),
+            fg: COLORS.cyan,
+            bg: COLORS.black,
             render_order: 2,
         })
         .with(Name {
@@ -172,8 +172,8 @@ fn fireball_scroll(ecs: &mut World, x: i32, y: i32) {
         .with(Position { x, y })
         .with(Renderable {
             glyph: rltk::to_cp437(')'),
-            fg: RGB::named(rltk::ORANGE),
-            bg: RGB::named(rltk::BLACK),
+            fg: COLORS.orange,
+            bg: COLORS.black,
             render_order: 2,
         })
         .with(Name {
