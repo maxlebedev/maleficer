@@ -149,7 +149,7 @@ impl Status {
     }
 }
 
-#[derive(Component, Serialize, Deserialize, Clone)]
+#[derive(Component, ConvertSaveload, Clone)]
 pub struct Cursor {
     pub point: rltk::Point,
 }
@@ -165,7 +165,7 @@ pub struct WantsToCastSpell {
     pub target: Option<rltk::Point>,
 }
 
-#[derive(Component, Serialize, Deserialize, Clone)]
+#[derive(Component, ConvertSaveload, Clone)]
 pub struct ParticleLifetime {
     pub lifetime_ms: f32,
 }

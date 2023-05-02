@@ -80,7 +80,9 @@ pub fn save_game(ecs: &mut World) {
             WantsToPickupItem,
             WantsToUseItem,
             WantsToDropItem,
-            SerializationHelper //Confusion
+            Cursor,
+            ParticleLifetime,
+            SerializationHelper
         );
     }
 
@@ -113,6 +115,9 @@ pub fn load_game(ecs: &mut World) {
     let data = fs::read_to_string("./savegame.json").unwrap();
     let mut de = serde_json::Deserializer::from_str(&data);
 
+    // TOOD: loading is broken
+    // Continuing without load makes new game
+
     {
         let mut d = (
             &mut ecs.entities(),
@@ -144,6 +149,8 @@ pub fn load_game(ecs: &mut World) {
             WantsToPickupItem,
             WantsToUseItem,
             WantsToDropItem,
+            Cursor,
+            ParticleLifetime,
             SerializationHelper
         );
     }

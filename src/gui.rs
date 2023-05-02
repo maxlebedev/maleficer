@@ -2,7 +2,7 @@ use rltk::{Point, Rltk};
 use specs::prelude::*;
 use std::cmp::{max, min};
 
-use crate::COLORS;
+use crate::{Map, COLORS};
 
 use super::map::{MAPHEIGHT, MAPWIDTH};
 use super::{components, config, GameLog, Player, RunState, State};
@@ -51,19 +51,27 @@ pub enum SelectResult {
 }
 
 pub fn draw_ui(ecs: &World, ctx: &mut Rltk) {
-    let white = COLORS.white;
-    let black = COLORS.black;
-    let yellow = COLORS.yellow;
-    let red = COLORS.red;
-    ctx.draw_box(0, MAPHEIGHT, MAPWIDTH - 1, 6, white, black);
+    ctx.draw_box(0, MAPHEIGHT, MAPWIDTH - 1, 6, COLORS.white, COLORS.black);
+
+    let map = ecs.fetch::<Map>();
+    let depth = format!("Depth: {}", map.depth);
+    ctx.print_color(2, 43, COLORS.yellow, COLORS.black, &depth);
 
     let combat_stats = ecs.read_storage::<CombatStats>();
     let players = ecs.read_storage::<Player>();
     for (_player, stats) in (&players, &combat_stats).join() {
         let health = format!(" HP: {} / {} ", stats.hp, stats.max_hp);
-        ctx.print_color(12, MAPWIDTH, yellow, black, &health);
+        ctx.print_color(12, MAPWIDTH, COLORS.yellow, COLORS.black, &health);
 
-        ctx.draw_bar_horizontal(28, MAPHEIGHT, 51, stats.hp, stats.max_hp, red, black);
+        ctx.draw_bar_horizontal(
+            28,
+            MAPHEIGHT,
+            51,
+            stats.hp,
+            stats.max_hp,
+            COLORS.red,
+            COLORS.black,
+        );
     }
     let log = ecs.fetch::<GameLog>();
 

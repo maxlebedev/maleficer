@@ -28,6 +28,7 @@ pub struct Map {
     pub revealed_tiles: Vec<bool>,
     pub visible_tiles: Vec<bool>,
     pub blocked: Vec<bool>,
+    pub depth: i32,
 
     #[serde(skip_serializing)]
     #[serde(skip_deserializing)]
@@ -98,12 +99,13 @@ impl Map {
             visible_tiles: vec![false; MAPCOUNT],
             blocked: vec![false; MAPCOUNT],
             tile_content: vec![Vec::new(); MAPCOUNT],
+            depth: 0,
         }
     }
 
     /// Makes a new map using the algorithm from http://rogueliketutorials.com/tutorials/tcod/part-3/
     /// This gives a handful of random rooms and corridors joining them together.
-    pub fn new_map_rooms_and_corridors() -> Map {
+    pub fn new_map_rooms_and_corridors(new_depth: i32) -> Map {
         let mut map = Map {
             tiles: vec![TileType::Wall; MAPCOUNT],
             rooms: Vec::new(),
@@ -113,6 +115,7 @@ impl Map {
             visible_tiles: vec![false; MAPCOUNT],
             blocked: vec![false; MAPCOUNT],
             tile_content: vec![Vec::new(); MAPCOUNT],
+            depth: new_depth,
         };
 
         const MAX_ROOMS: i32 = 30;

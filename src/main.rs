@@ -294,7 +294,7 @@ impl State {
 
     fn new_game(&mut self) {
         self.ecs.delete_all();
-        let map = Map::new_map_rooms_and_corridors();
+        let map = Map::new_map_rooms_and_corridors(1);
         let (player_x, player_y) = map.rooms[0].center();
 
         for room in map.rooms.iter().skip(1) {
@@ -357,6 +357,7 @@ fn main() -> rltk::BError {
         menu_selection: gui::MainMenuSelection::NewGame,
     });
     register_all(&mut gs);
+
 
     gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());
     gs.ecs.insert(rltk::RandomNumberGenerator::new());
