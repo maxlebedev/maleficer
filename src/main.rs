@@ -18,8 +18,8 @@ mod rect;
 mod systems;
 pub use gamelog::GameLog;
 mod config;
-mod spawner;
 mod raws;
+mod spawner;
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum RunState {

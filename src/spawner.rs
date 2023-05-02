@@ -1,12 +1,9 @@
 use std::collections::HashMap;
 
 use super::rect::Rect;
-use super::{
-    components, CombatStats, Name, Player, Position, Renderable, Viewshed,
-    COLORS,
-};
+use super::{components, CombatStats, Name, Player, Position, Renderable, Viewshed, COLORS};
 use crate::map;
-use crate::raws::{spawn_named_entity, RAWS, SpawnType, get_spawn_table_for_depth};
+use crate::raws::{get_spawn_table_for_depth, spawn_named_entity, SpawnType, RAWS};
 use crate::systems::random_table::RandomTable;
 use rltk::RandomNumberGenerator;
 use specs::prelude::*;
@@ -50,12 +47,20 @@ pub fn spawn_room(ecs: &mut World, room: &Rect) {
         let x = (*spawn.0 % map::MAPWIDTH) as i32;
         let y = (*spawn.0 / map::MAPWIDTH) as i32;
 
-        let spawn_result = spawn_named_entity(&RAWS.lock().unwrap(), ecs.create_entity(), &spawn.1, SpawnType::AtPosition{ x, y});
+        let spawn_result = spawn_named_entity(
+            &RAWS.lock().unwrap(),
+            ecs.create_entity(),
+            &spawn.1,
+            SpawnType::AtPosition { x, y },
+        );
         if spawn_result.is_some() {
             return;
         }
         // sometimes the spawn table actually rolls None. that's expected
-        rltk::console::log(format!("WARNING: We don't know how to spawn [{:?}]!", spawn.1));
+        rltk::console::log(format!(
+            "WARNING: We don't know how to spawn [{:?}]!",
+            spawn.1
+        ));
     }
 }
 
