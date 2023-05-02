@@ -50,7 +50,7 @@ pub fn spawn_room(ecs: &mut World, room: &Rect) {
         let spawn_result = spawn_named_entity(
             &RAWS.lock().unwrap(),
             ecs.create_entity(),
-            &spawn.1,
+            spawn.1,
             SpawnType::AtPosition { x, y },
         );
         if spawn_result.is_some() {

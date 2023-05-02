@@ -136,7 +136,9 @@ pub fn show_inventory(
             _ if key == down => (ItemMenuResult::Down, None),
             _ if key == drop => (ItemMenuResult::Drop, Some(equippable[selection])),
             //TODO: below breaks if inventory is empty
-            _ if key == select => (ItemMenuResult::Selected, Some(equippable[selection])),
+            _ if key == select && selection < equippable.len() => {
+                (ItemMenuResult::Selected, Some(equippable[selection]))
+            }
             _ => (ItemMenuResult::NoResponse, None),
         },
     }
