@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use specs::prelude::*;
-use crate::components::*;
+use crate::{components::*, systems::random_table::RandomTable};
 use super::Raws;
 
 pub struct RawMaster {
@@ -12,9 +12,9 @@ pub struct RawMaster {
 impl RawMaster {
     pub fn empty() -> RawMaster {
         RawMaster {
-            raws : Raws{ items: Vec::new(), mobs: Vec::new()},
+            raws : Raws{ items: Vec::new(), mobs: Vec::new(), spawn_table: Vec::new()},
             item_index : HashMap::new(),
-            mob_index : HashMap::new()
+            mob_index : HashMap::new(),
         }
     }
 
@@ -135,4 +135,24 @@ pub fn spawn_named_entity(raws: &RawMaster, new_entity : EntityBuilder, key : &s
     }
 
     None
+}
+
+pub fn get_spawn_table_for_depth(raws: &RawMaster, depth: i32) -> RandomTable {
+    use super::SpawnTableEntry;
+
+    let available_options : Vec<&SpawnTableEntry> = raws.raws.spawn_table
+        .iter()
+        .filter(|a| depth >= a.min_depth && depth <= a.max_depth)
+        .collect();
+
+    let mut rt = RandomTable::new();
+    for e in available_options.iter() {
+        let mut weight = e.weight;
+        if e.add_map_depth_to_weight.is_some() {
+            weight += depth;
+        }
+        rt = rt.add(e.name.clone(), weight);
+    }
+
+    rt
 }

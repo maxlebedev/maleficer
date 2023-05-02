@@ -5,6 +5,9 @@ use serde::Deserialize;
 mod mob_structs;
 pub use mob_structs::*;
 
+mod spawn_table_structs;
+pub use spawn_table_structs::*;
+
 mod rawmaster;
 pub use rawmaster::*;
 use std::sync::Mutex;
@@ -13,6 +16,7 @@ use std::sync::Mutex;
 pub struct Raws {
     pub items : Vec<Item>,
     pub mobs : Vec<Mob>,
+    pub spawn_table: Vec<SpawnTableEntry>
 }
 
 lazy_static! {

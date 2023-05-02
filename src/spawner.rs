@@ -6,7 +6,7 @@ use super::{
     COLORS,
 };
 use crate::map;
-use crate::raws::{spawn_named_entity, RAWS, SpawnType};
+use crate::raws::{spawn_named_entity, RAWS, SpawnType, get_spawn_table_for_depth};
 use crate::systems::random_table::RandomTable;
 use rltk::RandomNumberGenerator;
 use specs::prelude::*;
@@ -92,11 +92,6 @@ pub fn player(ecs: &mut World, player_x: i32, player_y: i32) -> Entity {
 }
 
 fn room_table() -> RandomTable {
-    RandomTable::new()
-        .add("Goblin", 10)
-        .add("Orc", 1)
-        .add("Health Potion", 7)
-        .add("Fireball Scroll", 2)
-        .add("Magic Missile Scroll", 4)
-        .add("Shock Scroll", 4)
+    let depth = 0;
+    get_spawn_table_for_depth(&RAWS.lock().unwrap(), depth)
 }
