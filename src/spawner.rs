@@ -2,10 +2,11 @@ use std::collections::HashMap;
 
 use super::rect::Rect;
 use super::{
-    components, BlocksTile, CombatStats, Monster, Name, Player, Position, Renderable, Viewshed,
+    components, CombatStats, Name, Player, Position, Renderable, Viewshed,
     COLORS,
 };
 use crate::map;
+use crate::raws::{spawn_named_entity, RAWS, SpawnType};
 use crate::systems::random_table::RandomTable;
 use rltk::RandomNumberGenerator;
 use specs::prelude::*;
@@ -49,15 +50,12 @@ pub fn spawn_room(ecs: &mut World, room: &Rect) {
         let x = (*spawn.0 % map::MAPWIDTH) as i32;
         let y = (*spawn.0 / map::MAPWIDTH) as i32;
 
-        match spawn.1.as_ref() {
-            "Goblin" => goblin(ecs, x, y),
-            "Orc" => orc(ecs, x, y),
-            "Health Potion" => health_potion(ecs, x, y),
-            "Fireball Scroll" => fireball_scroll(ecs, x, y),
-            // "Confusion Scroll" => confusion_scroll(ecs, x, y),
-            "Magic Missile Scroll" => magic_missile_scroll(ecs, x, y),
-            _ => {}
+        let spawn_result = spawn_named_entity(&RAWS.lock().unwrap(), ecs.create_entity(), &spawn.1, SpawnType::AtPosition{ x, y});
+        if spawn_result.is_some() {
+            return;
         }
+        // sometimes the spawn table actually rolls None. that's expected
+        rltk::console::log(format!("WARNING: We don't know how to spawn [{:?}]!", spawn.1));
     }
 }
 
@@ -93,108 +91,12 @@ pub fn player(ecs: &mut World, player_x: i32, player_y: i32) -> Entity {
         .build()
 }
 
-fn orc(ecs: &mut World, x: i32, y: i32) {
-    monster(ecs, x, y, rltk::to_cp437('o'), "Orc");
-}
-fn goblin(ecs: &mut World, x: i32, y: i32) {
-    monster(ecs, x, y, rltk::to_cp437('g'), "Goblin");
-}
-
-fn monster<S: ToString>(ecs: &mut World, x: i32, y: i32, glyph: rltk::FontCharType, name: S) {
-    ecs.create_entity()
-        .with(Position { x, y })
-        .with(Renderable {
-            glyph,
-            fg: COLORS.red,
-            bg: COLORS.black,
-            render_order: 1,
-        })
-        .with(Viewshed {
-            visible_tiles: Vec::new(),
-            range: 8,
-            dirty: true,
-        })
-        .with(Monster {})
-        .with(Name {
-            name: name.to_string(),
-        })
-        .with(BlocksTile {})
-        .with(CombatStats {
-            max_hp: 16,
-            hp: 16,
-            defense: 1,
-            power: 4,
-        })
-        .marked::<SimpleMarker<SerializeMe>>()
-        .build();
-}
-
-fn health_potion(ecs: &mut World, x: i32, y: i32) {
-    ecs.create_entity()
-        .with(Position { x, y })
-        .with(Renderable {
-            glyph: rltk::to_cp437('¡'),
-            fg: COLORS.magenta,
-            bg: COLORS.black,
-            render_order: 2,
-        })
-        .with(Name {
-            name: "Health Potion".to_string(),
-        })
-        .with(Item {})
-        .with(Consumable {})
-        .with(ProvidesHealing { heal_amount: 8 })
-        .marked::<SimpleMarker<SerializeMe>>()
-        .build();
-}
-
-fn magic_missile_scroll(ecs: &mut World, x: i32, y: i32) {
-    ecs.create_entity()
-        .with(Position { x, y })
-        .with(Renderable {
-            glyph: rltk::to_cp437(')'),
-            fg: COLORS.cyan,
-            bg: COLORS.black,
-            render_order: 2,
-        })
-        .with(Name {
-            name: "Magic Missile Scroll".to_string(),
-        })
-        .with(Item {})
-        .with(Consumable {})
-        .with(Ranged { range: 6 })
-        .with(InflictsDamage { damage: 8 })
-        .marked::<SimpleMarker<SerializeMe>>()
-        .build();
-}
-
-fn fireball_scroll(ecs: &mut World, x: i32, y: i32) {
-    ecs.create_entity()
-        .with(Position { x, y })
-        .with(Renderable {
-            glyph: rltk::to_cp437(')'),
-            fg: COLORS.orange,
-            bg: COLORS.black,
-            render_order: 2,
-        })
-        .with(Name {
-            name: "Fireball Scroll".to_string(),
-        })
-        .with(Item {})
-        .with(Consumable {})
-        .with(Ranged { range: 6 })
-        .with(InflictsDamage { damage: 20 })
-        .with(AreaOfEffect { radius: 3 })
-        .marked::<SimpleMarker<SerializeMe>>()
-        .build();
-}
-
 fn room_table() -> RandomTable {
     RandomTable::new()
         .add("Goblin", 10)
         .add("Orc", 1)
         .add("Health Potion", 7)
         .add("Fireball Scroll", 2)
-        // .add("Confusion Scroll", 2)
         .add("Magic Missile Scroll", 4)
+        .add("Shock Scroll", 4)
 }

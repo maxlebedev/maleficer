@@ -19,6 +19,7 @@ mod systems;
 pub use gamelog::GameLog;
 mod config;
 mod spawner;
+mod raws;
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum RunState {
@@ -359,6 +360,8 @@ fn main() -> rltk::BError {
 
     gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());
     gs.ecs.insert(rltk::RandomNumberGenerator::new());
+
+    raws::load_raws();
 
     let map = Map::dummy_map();
     gs.ecs.insert(map);
