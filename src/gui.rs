@@ -298,6 +298,7 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
     let state_num: i8 = states.len() as i8;
 
     if let RunState::MainMenu {
+        game_started: _,
         menu_selection: selection,
     } = *runstate
     {

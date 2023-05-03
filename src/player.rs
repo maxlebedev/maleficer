@@ -154,6 +154,7 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
 
             _ if key == exit => {
                 return RunState::MainMenu {
+                    game_started: true,
                     menu_selection: gui::MainMenuSelection::NewGame,
                 }
             }

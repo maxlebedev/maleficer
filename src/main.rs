@@ -38,6 +38,7 @@ pub enum RunState {
         item: Entity,
     },
     MainMenu {
+        game_started: bool,
         menu_selection: gui::MainMenuSelection,
     },
 }
@@ -107,11 +108,12 @@ impl GameState for State {
         }
 
         match newrunstate {
-            RunState::MainMenu { .. } => {
+            RunState::MainMenu { game_started, menu_selection:_ } => {
                 let result = gui::main_menu(self, ctx);
                 match result {
                     gui::MainMenuResult::NoSelection { selected } => {
                         newrunstate = RunState::MainMenu {
+                            game_started,
                             menu_selection: selected,
                         }
                     }
@@ -122,20 +124,16 @@ impl GameState for State {
                         gui::MainMenuSelection::Continue => {
                             let save_exists = systems::save_load::does_save_exist();
                             newrunstate = RunState::AwaitingInput;
-                            // self.ecs.has_value()
-                            if self.ecs.try_fetch::<Player>().is_some() { // If in game, exit menu
-                                dbg!("game already started, so leaving menu");
-                                //TODO: this don't work. starts a new game
-                            }
-                            else if !save_exists { // if no save exists, new game
-                                dbg!("save don't exist, making new game");
-                                newrunstate = RunState::CharGen { selection: 0 };
-                            }
-                            else { // load
-                                self.insert_dummies();
-                                systems::save_load::load_game(&mut self.ecs);
-                                newrunstate = RunState::AwaitingInput;
-                                systems::save_load::delete_save();
+                            if !game_started { // If in game, exit menu
+                                if !save_exists { // if no save exists, new game
+                                    dbg!("save don't exist, making new game");
+                                    newrunstate = RunState::CharGen { selection: 0 };
+                                }
+                                else { // load
+                                    self.insert_dummies();
+                                    systems::save_load::load_game(&mut self.ecs);
+                                    systems::save_load::delete_save();
+                                }
                             }
                         }
                         gui::MainMenuSelection::Quit => {
@@ -146,10 +144,11 @@ impl GameState for State {
                 }
             }
             RunState::CharGen { selection } => {
-                let (menu_result, th_selection) = gui::chargen_menu(self, ctx, selection);
+                let (menu_result, ch_selection) = gui::chargen_menu(self, ctx, selection);
                 match menu_result {
                     gui::SelectMenuResult::Cancel => {
                         newrunstate = RunState::MainMenu {
+                            game_started: false,
                             menu_selection: gui::MainMenuSelection::NewGame,
                         };
                     }
@@ -165,7 +164,7 @@ impl GameState for State {
                         }
                     }
                     gui::SelectMenuResult::Selected => {
-                        println!("selected {}", gui::SCHOOLS[th_selection.unwrap()]);
+                        println!("selected {}", gui::SCHOOLS[ch_selection.unwrap()]);
                         newrunstate = RunState::PreRun {};
                     }
                 }
@@ -368,6 +367,7 @@ fn main() -> rltk::BError {
     context.with_post_scanlines(true);
     let mut gs = State { ecs: World::new() };
     gs.ecs.insert(RunState::MainMenu {
+        game_started: false,
         menu_selection: gui::MainMenuSelection::NewGame,
     });
     register_all(&mut gs);
