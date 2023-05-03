@@ -1,7 +1,8 @@
 use super::Raws;
 use crate::{components::*, systems::random_table::RandomTable};
-use specs::prelude::*;
+use specs::{prelude::*, saveload::SimpleMarker};
 use std::collections::{HashMap, HashSet};
+use specs::saveload::MarkedBuilder;
 
 pub struct RawMaster {
     raws: Raws,
@@ -142,7 +143,7 @@ pub fn spawn_named_item(
             }
         }
 
-        return Some(eb.build());
+        return Some(eb.marked::<SimpleMarker<SerializeMe>>().build());
     }
     None
 }
@@ -186,7 +187,7 @@ pub fn spawn_named_mob(
             dirty: true,
         });
 
-        return Some(eb.build());
+        return Some(eb.marked::<SimpleMarker<SerializeMe>>().build());
     }
     None
 }

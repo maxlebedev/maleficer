@@ -122,11 +122,19 @@ impl GameState for State {
                         gui::MainMenuSelection::Continue => {
                             let save_exists = systems::save_load::does_save_exist();
                             newrunstate = RunState::AwaitingInput;
-                            if !self.ecs.has_value::<Player>() {
+                            // self.ecs.has_value()
+                            if self.ecs.try_fetch::<Player>().is_some() { // If in game, exit menu
+                                dbg!("game already started, so leaving menu");
+                                //TODO: this don't work. starts a new game
+                            }
+                            else if !save_exists { // if no save exists, new game
+                                dbg!("save don't exist, making new game");
                                 newrunstate = RunState::CharGen { selection: 0 };
                             }
-                            if save_exists {
+                            else { // load
+                                self.insert_dummies();
                                 systems::save_load::load_game(&mut self.ecs);
+                                newrunstate = RunState::AwaitingInput;
                                 systems::save_load::delete_save();
                             }
                         }
@@ -310,6 +318,12 @@ impl State {
         });
 
         self.ecs.insert(Point::new(player_x, player_y));
+    }
+
+    fn insert_dummies(&mut self) {
+        let player_entity = spawner::player(&mut self.ecs, 0, 0);
+        self.ecs.insert(player_entity);
+        self.ecs.insert(Point::new(0, 0));
     }
 }
 
