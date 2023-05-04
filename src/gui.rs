@@ -142,7 +142,7 @@ pub fn show_inventory(
         Some(key) => match key {
             _ if key == exit => (ItemMenuResult::Cancel, None),
             _ if key == up && selection > 0 => (ItemMenuResult::Up, None),
-            _ if key == down && selection < equippable.len()-1 => (ItemMenuResult::Down, None),
+            _ if key == down && selection < equippable.len() - 1 => (ItemMenuResult::Down, None),
             _ if key == drop => (ItemMenuResult::Drop, Some(equippable[selection])),
             _ if key == select && selection < equippable.len() => {
                 (ItemMenuResult::Selected, Some(equippable[selection]))
@@ -271,7 +271,7 @@ pub fn chargen_menu(
         Some(key) => match key {
             _ if key == exit => (SelectMenuResult::Cancel, None),
             _ if key == up && selection > 0 => (SelectMenuResult::Up, None),
-            _ if key == down && selection < SCHOOLS.len()-1 => (SelectMenuResult::Down, None),
+            _ if key == down && selection < SCHOOLS.len() - 1 => (SelectMenuResult::Down, None),
             _ if key == select => (SelectMenuResult::Selected, Some(selection)),
             _ => (SelectMenuResult::NoResponse, None),
         },

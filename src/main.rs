@@ -110,7 +110,10 @@ impl GameState for State {
         }
 
         match newrunstate {
-            RunState::MainMenu { game_started, menu_selection:_ } => {
+            RunState::MainMenu {
+                game_started,
+                menu_selection: _,
+            } => {
                 let result = gui::main_menu(self, ctx);
                 match result {
                     gui::MainMenuResult::NoSelection { selected } => {
@@ -126,12 +129,14 @@ impl GameState for State {
                         gui::MainMenuSelection::Continue => {
                             let save_exists = systems::save_load::does_save_exist();
                             newrunstate = RunState::AwaitingInput;
-                            if !game_started { // If in game, exit menu
-                                if !save_exists { // if no save exists, new game
+                            if !game_started {
+                                // If in game, exit menu
+                                if !save_exists {
+                                    // if no save exists, new game
                                     dbg!("save don't exist, making new game");
                                     newrunstate = RunState::CharGen { selection: 0 };
-                                }
-                                else { // load
+                                } else {
+                                    // load
                                     self.insert_dummies();
                                     systems::save_load::load_game(&mut self.ecs);
                                     systems::save_load::delete_save();
@@ -157,12 +162,12 @@ impl GameState for State {
                     gui::SelectMenuResult::NoResponse => {}
                     gui::SelectMenuResult::Up => {
                         newrunstate = RunState::CharGen {
-                            selection: selection-1,
+                            selection: selection - 1,
                         }
                     }
                     gui::SelectMenuResult::Down => {
                         newrunstate = RunState::CharGen {
-                            selection: selection+1,
+                            selection: selection + 1,
                         }
                     }
                     gui::SelectMenuResult::Selected => {
@@ -205,12 +210,12 @@ impl GameState for State {
                     gui::ItemMenuResult::NoResponse => {}
                     gui::ItemMenuResult::Up => {
                         newrunstate = RunState::ShowInventory {
-                            selection: selection-1,
+                            selection: selection - 1,
                         }
                     }
                     gui::ItemMenuResult::Down => {
                         newrunstate = RunState::ShowInventory {
-                            selection: selection+1,
+                            selection: selection + 1,
                         }
                     }
                     gui::ItemMenuResult::Selected => {
@@ -334,7 +339,7 @@ impl State {
         self.ecs.insert(Point::new(0, 0));
     }
 
-    // TODO: we would have to edit this every time we add a player-thing. 
+    // TODO: we would have to edit this every time we add a player-thing.
     // better to instead remove mobs, map, uncollected items
     fn entities_to_remove_on_level_change(&mut self) -> Vec<Entity> {
         let entities = self.ecs.entities();
@@ -342,7 +347,7 @@ impl State {
         let backpack = self.ecs.read_storage::<InBackpack>();
         let player_entity = self.ecs.fetch::<Entity>();
 
-        let mut to_delete : Vec<Entity> = Vec::new();
+        let mut to_delete: Vec<Entity> = Vec::new();
         for entity in entities.join() {
             let mut should_delete = true;
 
@@ -360,7 +365,7 @@ impl State {
                 }
             }
 
-            if should_delete { 
+            if should_delete {
                 to_delete.push(entity);
             }
         }
@@ -371,7 +376,9 @@ impl State {
         // Delete entities that aren't the player or his/her equipment
         let to_delete = self.entities_to_remove_on_level_change();
         for target in to_delete {
-            self.ecs.delete_entity(target).expect("Unable to delete entity");
+            self.ecs
+                .delete_entity(target)
+                .expect("Unable to delete entity");
         }
 
         // Build a new map and place the player
@@ -409,7 +416,9 @@ impl State {
 
         // Notify the player and give them some health
         let mut gamelog = self.ecs.fetch_mut::<gamelog::GameLog>();
-        gamelog.entries.push("You descend to the next level, and take a moment to heal.".to_string());
+        gamelog
+            .entries
+            .push("You descend to the next level, and take a moment to heal.".to_string());
         let mut player_health_store = self.ecs.write_storage::<CombatStats>();
         let player_health = player_health_store.get_mut(*player_entity);
         if let Some(player_health) = player_health {
@@ -463,7 +472,6 @@ fn main() -> rltk::BError {
         menu_selection: gui::MainMenuSelection::NewGame,
     });
     register_all(&mut gs);
-
 
     gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());
     gs.ecs.insert(rltk::RandomNumberGenerator::new());
