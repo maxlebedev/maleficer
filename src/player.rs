@@ -4,7 +4,7 @@ use super::gamelog::GameLog;
 use rltk::{Point, Rltk};
 use specs::prelude::*;
 
-use super::{components, config, map, systems, RunState, State};
+use super::{components, config, config::INPUT, map, systems, RunState, State};
 pub use components::*;
 
 pub fn make_character(ecs: &mut World) {
@@ -126,40 +126,39 @@ fn get_item(ecs: &mut World) {
     }
 }
 
+
+// TODO: protect from overflow on char/item select window
+
 pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
-    let left = config::cfg_to_kc(&config::CONFIG.left);
-    let down = config::cfg_to_kc(&config::CONFIG.down);
-    let up = config::cfg_to_kc(&config::CONFIG.up);
-    let right = config::cfg_to_kc(&config::CONFIG.right);
-
-    let pick_up = config::cfg_to_kc(&config::CONFIG.pick_up);
-    let inventory = config::cfg_to_kc(&config::CONFIG.inventory);
-    let exit = config::cfg_to_kc(&config::CONFIG.exit);
-    let wait = config::cfg_to_kc(&config::CONFIG.wait);
-
-    let hkone = config::cfg_to_kc(&config::CONFIG.hk1);
     match ctx.key {
         None => return RunState::AwaitingInput, // Nothing happened
         Some(key) => match key {
             // TODO: I still don't understand why I have to do do `_ if key ==`
-            _ if key == left => try_move_player(-1, 0, &mut gs.ecs),
-            _ if key == down => try_move_player(0, 1, &mut gs.ecs),
-            _ if key == up => try_move_player(0, -1, &mut gs.ecs),
-            _ if key == right => try_move_player(1, 0, &mut gs.ecs),
+            _ if key == INPUT.left => try_move_player(-1, 0, &mut gs.ecs),
+            _ if key == INPUT.down => try_move_player(0, 1, &mut gs.ecs),
+            _ if key == INPUT.up => try_move_player(0, -1, &mut gs.ecs),
+            _ if key == INPUT.right => try_move_player(1, 0, &mut gs.ecs),
 
-            _ if key == pick_up => get_item(&mut gs.ecs),
-            _ if key == inventory => return RunState::ShowInventory { selection: 0 },
+            _ if key == INPUT.pick_up => get_item(&mut gs.ecs),
+            _ if key == INPUT.inventory => return RunState::ShowInventory { selection: 0 },
 
-            _ if key == hkone => cast_spell(&mut gs.ecs),
+            _ if key == INPUT.hk1 => cast_spell(&mut gs.ecs),
 
-            _ if key == exit => {
+            _ if key == INPUT.select => {
+                // refactor to be context-dependant on tile
+                if map::try_next_level(&mut gs.ecs) {
+                    return RunState::NextLevel;
+                }
+            }
+
+            _ if key == INPUT.exit => {
                 return RunState::MainMenu {
                     game_started: true,
                     menu_selection: gui::MainMenuSelection::NewGame,
                 }
             }
 
-            _ if key == wait => return RunState::PlayerTurn,
+            _ if key == INPUT.wait => return RunState::PlayerTurn,
 
             _ => return RunState::AwaitingInput,
         },

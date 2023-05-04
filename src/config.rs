@@ -52,8 +52,36 @@ pub struct Config {
     pub height: i32,
 }
 
+
+pub struct Input{
+    pub left: VirtualKeyCode,
+    pub down: VirtualKeyCode,
+    pub up: VirtualKeyCode,
+    pub right: VirtualKeyCode,
+    pub pick_up: VirtualKeyCode,
+    pub inventory: VirtualKeyCode,
+    pub drop: VirtualKeyCode,
+    pub exit: VirtualKeyCode,
+    pub select: VirtualKeyCode,
+    pub wait: VirtualKeyCode,
+    pub hk1: VirtualKeyCode,
+}
+
 lazy_static! {
     pub static ref CONFIG: Config = get_config();
+    pub static ref INPUT: Input = Input{
+        left: VirtualKeyCode::from_str(CONFIG.left.as_str()),
+        down: VirtualKeyCode::from_str(CONFIG.down.as_str()),
+        up: VirtualKeyCode::from_str(CONFIG.up.as_str()),
+        right: VirtualKeyCode::from_str(CONFIG.right.as_str()),
+        pick_up: VirtualKeyCode::from_str(CONFIG.pick_up.as_str()),
+        inventory: VirtualKeyCode::from_str(CONFIG.inventory.as_str()),
+        drop: VirtualKeyCode::from_str(CONFIG.drop.as_str()),
+        exit: VirtualKeyCode::from_str(CONFIG.exit.as_str()),
+        select: VirtualKeyCode::from_str(CONFIG.select.as_str()),
+        wait: VirtualKeyCode::from_str(CONFIG.wait.as_str()),
+        hk1: VirtualKeyCode::from_str(CONFIG.hk1.as_str()),
+    };
 }
 
 fn get_config() -> Config {

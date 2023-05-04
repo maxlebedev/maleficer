@@ -47,20 +47,12 @@ pub fn spawn_room(ecs: &mut World, room: &Rect) {
         let x = (*spawn.0 % map::MAPWIDTH) as i32;
         let y = (*spawn.0 / map::MAPWIDTH) as i32;
 
-        let spawn_result = spawn_named_entity(
+        spawn_named_entity(
             &RAWS.lock().unwrap(),
             ecs.create_entity(),
             spawn.1,
             SpawnType::AtPosition { x, y },
         );
-        if spawn_result.is_some() {
-            return;
-        }
-        // sometimes the spawn table actually rolls None. that's expected
-        rltk::console::log(format!(
-            "WARNING: We don't know how to spawn [{:?}]!",
-            spawn.1
-        ));
     }
 }
 

@@ -55,18 +55,20 @@ pub fn draw_ui(ecs: &World, ctx: &mut Rltk) {
 
     let map = ecs.fetch::<Map>();
     let depth = format!("Depth: {}", map.depth);
-    ctx.print_color(2, 43, COLORS.yellow, COLORS.black, &depth);
+    ctx.print_color(2, map.height, COLORS.yellow, COLORS.black, &depth);
 
     let combat_stats = ecs.read_storage::<CombatStats>();
     let players = ecs.read_storage::<Player>();
     for (_player, stats) in (&players, &combat_stats).join() {
         let health = format!(" HP: {} / {} ", stats.hp, stats.max_hp);
-        ctx.print_color(12, MAPWIDTH, COLORS.yellow, COLORS.black, &health);
+        ctx.print_color(12, map.height, COLORS.yellow, COLORS.black, &health);
 
+        let hp_bar_left = 28;
+        let hp_bar_right = 51;
         ctx.draw_bar_horizontal(
-            28,
+            hp_bar_left,
             MAPHEIGHT,
-            51,
+            hp_bar_right,
             stats.hp,
             stats.max_hp,
             COLORS.red,
@@ -78,7 +80,6 @@ pub fn draw_ui(ecs: &World, ctx: &mut Rltk) {
     let mut y = MAPHEIGHT + 1; // 44;
     for s in log.entries.iter().rev() {
         if y < MAPHEIGHT + 6 {
-            // 49
             ctx.print(2, y, s);
         }
         y += 1;

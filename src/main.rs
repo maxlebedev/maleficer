@@ -41,6 +41,7 @@ pub enum RunState {
         game_started: bool,
         menu_selection: gui::MainMenuSelection,
     },
+    NextLevel,
 }
 
 pub struct Colors {
@@ -50,6 +51,7 @@ pub struct Colors {
     pub yellow: rltk::RGB,
     pub magenta: rltk::RGB,
     pub cyan: rltk::RGB,
+    pub dark_cyan: rltk::RGB,
     pub green: rltk::RGB,
     pub blue: rltk::RGB,
     pub white: rltk::RGB,
@@ -63,6 +65,7 @@ lazy_static! {
         yellow: rltk::RGB::named(rltk::YELLOW),
         magenta: rltk::RGB::named(rltk::MAGENTA),
         cyan: rltk::RGB::named(rltk::CYAN),
+        dark_cyan: rltk::RGB::named(rltk::DARK_CYAN),
         green: rltk::RGB::named(rltk::GREEN),
         blue: rltk::RGB::named(rltk::BLUE),
         white: rltk::RGB::named(rltk::WHITE),
@@ -154,13 +157,21 @@ impl GameState for State {
                     }
                     gui::SelectMenuResult::NoResponse => {}
                     gui::SelectMenuResult::Up => {
+                        let new_selection = match selection {
+                            0 => 0,
+                            _ => selection-1,
+                        };
                         newrunstate = RunState::CharGen {
-                            selection: max(selection - 1, 0),
+                            selection: new_selection,
                         }
                     }
                     gui::SelectMenuResult::Down => {
+                        let new_selection = match selection {
+                            //TODO: max => max
+                            _ => selection+1,
+                        };
                         newrunstate = RunState::CharGen {
-                            selection: min(selection + 1, 20),
+                            selection: new_selection,
                         }
                     }
                     gui::SelectMenuResult::Selected => {
@@ -189,6 +200,13 @@ impl GameState for State {
                 self.ecs.maintain();
                 newrunstate = RunState::AwaitingInput;
             }
+            RunState::NextLevel => {
+                self.goto_next_level();
+                self.run_systems();
+                self.ecs.maintain();
+                newrunstate = RunState::AwaitingInput;
+            }
+
             RunState::ShowInventory { selection } => {
                 let result = gui::show_inventory(self, ctx, selection);
                 match result.0 {
@@ -323,6 +341,89 @@ impl State {
         let player_entity = spawner::player(&mut self.ecs, 0, 0);
         self.ecs.insert(player_entity);
         self.ecs.insert(Point::new(0, 0));
+    }
+
+    // TODO: we would have to edit this every time we add a player-thing. 
+    // better to instead remove mobs, map, uncollected items
+    fn entities_to_remove_on_level_change(&mut self) -> Vec<Entity> {
+        let entities = self.ecs.entities();
+        let player = self.ecs.read_storage::<Player>();
+        let backpack = self.ecs.read_storage::<InBackpack>();
+        let player_entity = self.ecs.fetch::<Entity>();
+
+        let mut to_delete : Vec<Entity> = Vec::new();
+        for entity in entities.join() {
+            let mut should_delete = true;
+
+            // Don't delete the player
+            let p = player.get(entity);
+            if let Some(_p) = p {
+                should_delete = false;
+            }
+
+            // Don't delete the player's equipment
+            let bp = backpack.get(entity);
+            if let Some(bp) = bp {
+                if bp.owner == *player_entity {
+                    should_delete = false;
+                }
+            }
+
+            if should_delete { 
+                to_delete.push(entity);
+            }
+        }
+        to_delete
+    }
+    // TODO: understand this
+    fn goto_next_level(&mut self) {
+        // Delete entities that aren't the player or his/her equipment
+        let to_delete = self.entities_to_remove_on_level_change();
+        for target in to_delete {
+            self.ecs.delete_entity(target).expect("Unable to delete entity");
+        }
+
+        // Build a new map and place the player
+        let worldmap;
+        {
+            let mut worldmap_resource = self.ecs.write_resource::<Map>();
+            let current_depth = worldmap_resource.depth;
+            *worldmap_resource = Map::new_map_rooms_and_corridors(current_depth + 1);
+            worldmap = worldmap_resource.clone();
+        }
+
+        // Spawn bad guys
+        for room in worldmap.rooms.iter().skip(1) {
+            spawner::spawn_room(&mut self.ecs, room);
+        }
+
+        // Place the player and update resources
+        let (player_x, player_y) = worldmap.rooms[0].center();
+        let mut player_position = self.ecs.write_resource::<Point>();
+        *player_position = Point::new(player_x, player_y);
+        let mut position_components = self.ecs.write_storage::<Position>();
+        let player_entity = self.ecs.fetch::<Entity>();
+        let player_pos_comp = position_components.get_mut(*player_entity);
+        if let Some(player_pos_comp) = player_pos_comp {
+            player_pos_comp.x = player_x;
+            player_pos_comp.y = player_y;
+        }
+
+        // Mark the player's visibility as dirty
+        let mut viewshed_components = self.ecs.write_storage::<Viewshed>();
+        let vs = viewshed_components.get_mut(*player_entity);
+        if let Some(vs) = vs {
+            vs.dirty = true;
+        }
+
+        // Notify the player and give them some health
+        let mut gamelog = self.ecs.fetch_mut::<gamelog::GameLog>();
+        gamelog.entries.push("You descend to the next level, and take a moment to heal.".to_string());
+        let mut player_health_store = self.ecs.write_storage::<CombatStats>();
+        let player_health = player_health_store.get_mut(*player_entity);
+        if let Some(player_health) = player_health {
+            player_health.hp = i32::max(player_health.hp, player_health.max_hp / 2);
+        }
     }
 }
 

@@ -1,7 +1,7 @@
-use crate::COLORS;
+use crate::{COLORS, GameLog};
 
 use super::rect::Rect;
-use rltk::{Algorithm2D, BaseMap, Point, RandomNumberGenerator, Rltk, RGB};
+use rltk::{Algorithm2D, BaseMap, Point, RandomNumberGenerator, Rltk};
 use serde::{Deserialize, Serialize};
 use specs::prelude::*;
 use std::cmp::{max, min};
@@ -17,6 +17,7 @@ pub const MAPCOUNT: usize = MAPHEIGHT * MAPWIDTH;
 pub enum TileType {
     Wall,
     Floor,
+    DownStairs,
 }
 
 #[derive(Default, Serialize, Deserialize, Clone)]
@@ -154,6 +155,10 @@ impl Map {
             }
         }
 
+        let stairs_position = map.rooms[map.rooms.len()-1].center();
+        let stairs_idx = map.xy_idx(stairs_position.0, stairs_position.1);
+        map.tiles[stairs_idx] = TileType::DownStairs;
+
         map
     }
 
@@ -209,11 +214,22 @@ fn wall_glyph(map: &Map, x: i32, y: i32) -> rltk::FontCharType {
     }
 }
 
+// TODO: move
+pub fn try_next_level(ecs: &mut World) -> bool {
+    let player_pos = ecs.fetch::<Point>();
+    let map = ecs.fetch::<Map>();
+    let player_idx = map.xy_idx(player_pos.x, player_pos.y);
+    if map.tiles[player_idx] == TileType::DownStairs {
+        true
+    } else {
+        let mut gamelog = ecs.fetch_mut::<GameLog>();
+        gamelog.entries.push("There is no way down from here.".to_string());
+        false
+    }
+}
+
 pub fn draw_map(ecs: &World, ctx: &mut Rltk) {
     let map = ecs.fetch::<Map>();
-    let cyan = RGB::from_f32(0.0, 0.5, 0.5);
-    let green = COLORS.green;
-    let black = COLORS.black;
 
     for (idx, tile) in map.tiles.iter().enumerate() {
         // Render a tile depending upon the tile type
@@ -225,17 +241,21 @@ pub fn draw_map(ecs: &World, ctx: &mut Rltk) {
             match tile {
                 TileType::Floor => {
                     glyph = rltk::to_cp437('.');
-                    fg = cyan;
+                    fg = COLORS.dark_cyan;
                 }
                 TileType::Wall => {
                     glyph = wall_glyph(&map, x, y);
-                    fg = green;
+                    fg = COLORS.green;
+                }
+                TileType::DownStairs => {
+                    glyph = rltk::to_cp437('▼');
+                    fg = COLORS.dark_cyan;
                 }
             }
             if !map.visible_tiles[idx] {
                 fg = fg.to_greyscale()
             }
-            ctx.set(x, y, fg, black, glyph);
+            ctx.set(x, y, fg, COLORS.black, glyph);
         }
     }
 }
