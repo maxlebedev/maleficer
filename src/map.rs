@@ -1,4 +1,4 @@
-use crate::{COLORS, GameLog};
+use crate::{GameLog, COLORS};
 
 use super::rect::Rect;
 use rltk::{Algorithm2D, BaseMap, Point, RandomNumberGenerator, Rltk};
@@ -155,7 +155,7 @@ impl Map {
             }
         }
 
-        let stairs_position = map.rooms[map.rooms.len()-1].center();
+        let stairs_position = map.rooms[map.rooms.len() - 1].center();
         let stairs_idx = map.xy_idx(stairs_position.0, stairs_position.1);
         map.tiles[stairs_idx] = TileType::DownStairs;
 
@@ -223,7 +223,9 @@ pub fn try_next_level(ecs: &mut World) -> bool {
         true
     } else {
         let mut gamelog = ecs.fetch_mut::<GameLog>();
-        gamelog.entries.push("There is no way down from here.".to_string());
+        gamelog
+            .entries
+            .push("There is no way down from here.".to_string());
         false
     }
 }

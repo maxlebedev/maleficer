@@ -126,7 +126,6 @@ fn get_item(ecs: &mut World) {
     }
 }
 
-
 // TODO: protect from overflow on char/item select window
 
 pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {

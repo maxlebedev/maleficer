@@ -1,8 +1,8 @@
 use super::Raws;
 use crate::{components::*, systems::random_table::RandomTable};
+use specs::saveload::MarkedBuilder;
 use specs::{prelude::*, saveload::SimpleMarker};
 use std::collections::{HashMap, HashSet};
-use specs::saveload::MarkedBuilder;
 
 pub struct RawMaster {
     raws: Raws,

@@ -1,7 +1,6 @@
 use rltk::{GameState, Point, Rltk};
 use specs::prelude::*;
 use specs::saveload::{SimpleMarker, SimpleMarkerAllocator};
-use std::cmp::{max, min};
 
 #[macro_use]
 extern crate lazy_static;
@@ -157,21 +156,13 @@ impl GameState for State {
                     }
                     gui::SelectMenuResult::NoResponse => {}
                     gui::SelectMenuResult::Up => {
-                        let new_selection = match selection {
-                            0 => 0,
-                            _ => selection-1,
-                        };
                         newrunstate = RunState::CharGen {
-                            selection: new_selection,
+                            selection: selection-1,
                         }
                     }
                     gui::SelectMenuResult::Down => {
-                        let new_selection = match selection {
-                            //TODO: max => max
-                            _ => selection+1,
-                        };
                         newrunstate = RunState::CharGen {
-                            selection: new_selection,
+                            selection: selection+1,
                         }
                     }
                     gui::SelectMenuResult::Selected => {
@@ -214,12 +205,12 @@ impl GameState for State {
                     gui::ItemMenuResult::NoResponse => {}
                     gui::ItemMenuResult::Up => {
                         newrunstate = RunState::ShowInventory {
-                            selection: max(selection - 1, 0),
+                            selection: selection-1,
                         }
                     }
                     gui::ItemMenuResult::Down => {
                         newrunstate = RunState::ShowInventory {
-                            selection: min(selection + 1, 20),
+                            selection: selection+1,
                         }
                     }
                     gui::ItemMenuResult::Selected => {

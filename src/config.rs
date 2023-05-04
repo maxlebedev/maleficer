@@ -52,8 +52,7 @@ pub struct Config {
     pub height: i32,
 }
 
-
-pub struct Input{
+pub struct Input {
     pub left: VirtualKeyCode,
     pub down: VirtualKeyCode,
     pub up: VirtualKeyCode,
@@ -69,7 +68,7 @@ pub struct Input{
 
 lazy_static! {
     pub static ref CONFIG: Config = get_config();
-    pub static ref INPUT: Input = Input{
+    pub static ref INPUT: Input = Input {
         left: VirtualKeyCode::from_str(CONFIG.left.as_str()),
         down: VirtualKeyCode::from_str(CONFIG.down.as_str()),
         up: VirtualKeyCode::from_str(CONFIG.up.as_str()),

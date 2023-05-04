@@ -9,7 +9,6 @@ use std::fs;
 use std::fs::File;
 use std::path::Path;
 
-
 macro_rules! serialize_individually {
     ($ecs:expr, $ser:expr, $data:expr, $( $type:ty),*) => {
         $(
