@@ -16,8 +16,8 @@ const MAX_SPAWNS: i32 = 4;
 
 /// Fills a room with stuff!
 #[allow(clippy::map_entry)]
-pub fn spawn_room(ecs: &mut World, room: &Rect) {
-    let spawn_table = room_table();
+pub fn spawn_room(ecs: &mut World, room: &Rect, depth: i32) {
+    let spawn_table = room_table(depth);
     let mut spawn_points: HashMap<usize, String> = HashMap::new();
 
     // Scope to keep the borrow checker happy
@@ -56,7 +56,6 @@ pub fn spawn_room(ecs: &mut World, room: &Rect) {
     }
 }
 
-/// Spawns the player and returns his/her entity object.
 pub fn player(ecs: &mut World, player_x: i32, player_y: i32) -> Entity {
     ecs.create_entity()
         .with(Position {
@@ -88,7 +87,6 @@ pub fn player(ecs: &mut World, player_x: i32, player_y: i32) -> Entity {
         .build()
 }
 
-fn room_table() -> RandomTable {
-    let depth = 0;
+fn room_table(depth: i32) -> RandomTable {
     get_spawn_table_for_depth(&RAWS.lock().unwrap(), depth)
 }

@@ -319,7 +319,7 @@ impl State {
         let (player_x, player_y) = map.rooms[0].center();
 
         for room in map.rooms.iter().skip(1) {
-            spawner::spawn_room(&mut self.ecs, room);
+            spawner::spawn_room(&mut self.ecs, room, map.depth);
         }
         self.ecs.insert(map);
 
@@ -392,7 +392,7 @@ impl State {
 
         // Spawn bad guys
         for room in worldmap.rooms.iter().skip(1) {
-            spawner::spawn_room(&mut self.ecs, room);
+            spawner::spawn_room(&mut self.ecs, room, worldmap.depth);
         }
 
         // Place the player and update resources
