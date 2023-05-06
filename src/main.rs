@@ -174,6 +174,7 @@ impl GameState for State {
                         println!("selected {}", gui::SCHOOLS[ch_selection.unwrap()]);
                         newrunstate = RunState::PreRun {};
                     }
+                    _ => {}
                 }
             }
             RunState::PreRun => {
@@ -206,19 +207,19 @@ impl GameState for State {
             RunState::ShowInventory { selection } => {
                 let result = gui::show_inventory(self, ctx, selection);
                 match result.0 {
-                    gui::ItemMenuResult::Cancel => newrunstate = RunState::AwaitingInput,
-                    gui::ItemMenuResult::NoResponse => {}
-                    gui::ItemMenuResult::Up => {
+                    gui::SelectMenuResult::Cancel => newrunstate = RunState::AwaitingInput,
+                    gui::SelectMenuResult::NoResponse => {}
+                    gui::SelectMenuResult::Up => {
                         newrunstate = RunState::ShowInventory {
                             selection: selection - 1,
                         }
                     }
-                    gui::ItemMenuResult::Down => {
+                    gui::SelectMenuResult::Down => {
                         newrunstate = RunState::ShowInventory {
                             selection: selection + 1,
                         }
                     }
-                    gui::ItemMenuResult::Selected => {
+                    gui::SelectMenuResult::Selected => {
                         let item_entity = result.1.unwrap();
                         let is_ranged = self.ecs.read_storage::<Ranged>();
                         let is_item_ranged = is_ranged.get(item_entity);
@@ -246,7 +247,7 @@ impl GameState for State {
                             newrunstate = RunState::PlayerTurn;
                         }
                     }
-                    gui::ItemMenuResult::Drop => {
+                    gui::SelectMenuResult::Drop => {
                         let item_entity = result.1.unwrap();
                         let mut intent = self.ecs.write_storage::<WantsToDropItem>();
                         intent
@@ -262,9 +263,8 @@ impl GameState for State {
             RunState::ShowTargeting { range, item } => {
                 let result = gui::ranged_target(&mut self.ecs, ctx, range);
                 match result {
-                    gui::SelectResult::Cancel => newrunstate = RunState::AwaitingInput,
-                    gui::SelectResult::NoResponse => {}
-                    gui::SelectResult::Selected => {
+                    gui::SelectMenuResult::Cancel => newrunstate = RunState::AwaitingInput,
+                    gui::SelectMenuResult::Selected => {
                         let mut intent = self.ecs.write_storage::<WantsToUseItem>();
                         let cursor = self.ecs.fetch::<Cursor>();
                         intent
@@ -278,6 +278,7 @@ impl GameState for State {
                             .expect("Unable to insert intent");
                         newrunstate = RunState::PlayerTurn;
                     }
+                    _ => {}
                 }
             }
         }

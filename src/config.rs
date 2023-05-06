@@ -91,7 +91,3 @@ fn get_config() -> Config {
         .expect("Config deserialize err");
     configs
 }
-
-pub fn cfg_to_kc(val: &str) -> VirtualKeyCode {
-    VirtualKeyCode::from_str(val)
-}

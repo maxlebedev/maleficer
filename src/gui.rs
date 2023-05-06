@@ -1,11 +1,11 @@
 use rltk::{Point, Rltk};
 use specs::prelude::*;
-use std::cmp::{max, min};
 
+use crate::config::INPUT;
 use crate::{Map, COLORS};
 
 use super::map::{MAPHEIGHT, MAPWIDTH};
-use super::{components, config, GameLog, Player, RunState, State};
+use super::{components, GameLog, Player, RunState, State};
 pub use components::*;
 
 // TODO: this shouldn't live here
@@ -25,29 +25,13 @@ pub enum MainMenuResult {
 }
 
 #[derive(PartialEq, Copy, Clone)]
-pub enum ItemMenuResult {
-    Cancel,
-    NoResponse,
-    Up,
-    Down,
-    Selected,
-    Drop,
-}
-
-#[derive(PartialEq, Copy, Clone)]
 pub enum SelectMenuResult {
     Cancel,
     NoResponse,
     Up,
     Down,
     Selected,
-}
-
-#[derive(PartialEq, Copy, Clone)]
-pub enum SelectResult {
-    Cancel,
-    NoResponse,
-    Selected,
+    Drop,
 }
 
 pub fn draw_ui(ecs: &World, ctx: &mut Rltk) {
@@ -90,15 +74,11 @@ pub fn show_inventory(
     gs: &mut State,
     ctx: &mut Rltk,
     selection: usize,
-) -> (ItemMenuResult, Option<Entity>) {
-    let white = COLORS.white;
-    let black = COLORS.black;
-    let yellow = COLORS.yellow;
-    let magenta = COLORS.magenta;
+) -> (SelectMenuResult, Option<Entity>) {
 
-    let fgcolor = white;
-    let bgcolor = black;
-    let hlcolor = magenta;
+    let fgcolor = COLORS.white;
+    let bgcolor = COLORS.black;
+    let hlcolor = COLORS.magenta;
 
     let player_entity = gs.ecs.fetch::<Entity>();
     let names = gs.ecs.read_storage::<Name>();
@@ -112,8 +92,8 @@ pub fn show_inventory(
     let halfwidth = MAPWIDTH / 2;
     ctx.draw_box(0, 0, halfwidth, MAPHEIGHT, fgcolor, bgcolor);
     ctx.draw_box(halfwidth + 1, 0, halfwidth, MAPHEIGHT, fgcolor, bgcolor);
-    ctx.print_color_centered(0, yellow, bgcolor, "Inventory");
-    ctx.print_color_centered(MAPHEIGHT, yellow, bgcolor, "ESCAPE to cancel");
+    ctx.print_color_centered(0, COLORS.yellow, bgcolor, "Inventory");
+    ctx.print_color_centered(MAPHEIGHT, COLORS.yellow, bgcolor, "ESCAPE to cancel");
 
     let inv_offset = 2;
     let mut equippable: Vec<Entity> = Vec::new();
@@ -132,37 +112,28 @@ pub fn show_inventory(
         equippable.push(item.2);
     }
 
-    let up = config::cfg_to_kc(&config::CONFIG.up);
-    let down = config::cfg_to_kc(&config::CONFIG.down);
-    let exit = config::cfg_to_kc(&config::CONFIG.exit);
-    let drop = config::cfg_to_kc(&config::CONFIG.drop);
-    let select = config::cfg_to_kc(&config::CONFIG.select);
     match ctx.key {
-        None => (ItemMenuResult::NoResponse, None),
+        None => (SelectMenuResult::NoResponse, None),
         Some(key) => match key {
-            _ if key == exit => (ItemMenuResult::Cancel, None),
-            _ if key == up && selection > 0 => (ItemMenuResult::Up, None),
-            _ if key == down && selection < equippable.len() - 1 => (ItemMenuResult::Down, None),
-            _ if key == drop => (ItemMenuResult::Drop, Some(equippable[selection])),
-            _ if key == select && selection < equippable.len() => {
-                (ItemMenuResult::Selected, Some(equippable[selection]))
+            _ if key == INPUT.exit => (SelectMenuResult::Cancel, None),
+            _ if key == INPUT.up && selection > 0 => (SelectMenuResult::Up, None),
+            _ if key == INPUT.down && selection < equippable.len() - 1 => (SelectMenuResult::Down, None),
+            _ if key == INPUT.drop => (SelectMenuResult::Drop, Some(equippable[selection])),
+            _ if key == INPUT.select && selection < equippable.len() => {
+                (SelectMenuResult::Selected, Some(equippable[selection]))
             }
-            _ => (ItemMenuResult::NoResponse, None),
+            _ => (SelectMenuResult::NoResponse, None),
         },
     }
 }
 
-pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32) -> SelectResult {
+pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32) -> SelectMenuResult {
     let player_entity = ecs.fetch::<Entity>();
     let player_pos = ecs.fetch::<Point>();
     let viewsheds = ecs.read_storage::<Viewshed>();
     let mut cursor = ecs.fetch_mut::<Cursor>();
 
-    let yellow = COLORS.yellow;
-    let black = COLORS.black;
-    let cyan = COLORS.cyan;
-    let red = COLORS.red;
-    ctx.print_color(5, 0, yellow, black, "Select Target:");
+    ctx.print_color(5, 0, COLORS.yellow, COLORS.black, "Select Target:");
 
     // Highlight available target cells
     let mut available_cells = Vec::new();
@@ -177,7 +148,7 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32) -> SelectResul
             }
         }
     } else {
-        return SelectResult::Cancel;
+        return SelectMenuResult::Cancel;
     }
 
     let mut valid_target = false;
@@ -186,43 +157,36 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32) -> SelectResul
             valid_target = true;
         }
     }
-    let mut curs_color = red;
+    let mut curs_color = COLORS.red;
     if valid_target {
-        curs_color = cyan;
+        curs_color = COLORS.cyan;
     }
     ctx.set_bg(cursor.point.x, cursor.point.y, curs_color);
     // TODO: if there is an AOE, highlight that too
 
-    let up = config::cfg_to_kc(&config::CONFIG.up);
-    let down = config::cfg_to_kc(&config::CONFIG.down);
-    let left = config::cfg_to_kc(&config::CONFIG.left);
-    let right = config::cfg_to_kc(&config::CONFIG.right);
-    let exit = config::cfg_to_kc(&config::CONFIG.exit);
-    let select = config::cfg_to_kc(&config::CONFIG.select);
-
     match ctx.key {
-        None => SelectResult::NoResponse,
+        None => SelectMenuResult::NoResponse,
         Some(key) => match key {
-            _ if key == exit => SelectResult::Cancel,
+            _ if key == INPUT.exit => SelectMenuResult::Cancel,
             //TODO: bounds checking
-            _ if key == up => {
+            _ if key == INPUT.up => {
                 cursor.point.y -= 1;
-                SelectResult::NoResponse
+                SelectMenuResult::NoResponse
             }
-            _ if key == down => {
+            _ if key == INPUT.down => {
                 cursor.point.y += 1;
-                SelectResult::NoResponse
+                SelectMenuResult::NoResponse
             }
-            _ if key == left => {
+            _ if key == INPUT.left => {
                 cursor.point.x -= 1;
-                SelectResult::NoResponse
+                SelectMenuResult::NoResponse
             }
-            _ if key == right => {
+            _ if key == INPUT.right => {
                 cursor.point.x += 1;
-                SelectResult::NoResponse
+                SelectMenuResult::NoResponse
             }
-            _ if key == select => SelectResult::Selected,
-            _ => SelectResult::NoResponse,
+            _ if key == INPUT.select => SelectMenuResult::Selected,
+            _ => SelectMenuResult::NoResponse,
         },
     }
 }
@@ -233,19 +197,15 @@ pub fn chargen_menu(
     ctx: &mut Rltk,
     selection: usize,
 ) -> (SelectMenuResult, Option<usize>) {
-    let white = COLORS.white;
-    let black = COLORS.black;
-    let yellow = COLORS.yellow;
-    let magenta = COLORS.magenta;
 
-    let fgcolor = white;
-    let bgcolor = black;
-    let hlcolor = magenta;
+    let fgcolor = COLORS.white;
+    let bgcolor = COLORS.black;
+    let hlcolor = COLORS.magenta;
 
     let halfwidth = MAPWIDTH / 2;
     ctx.draw_box(0, 0, halfwidth, MAPHEIGHT, fgcolor, bgcolor);
     ctx.draw_box(halfwidth + 1, 0, halfwidth, MAPHEIGHT, fgcolor, bgcolor);
-    ctx.print_color_centered(0, yellow, black, "Choose a spell school");
+    ctx.print_color_centered(0, COLORS.yellow, COLORS.black, "Choose a spell school");
 
     let inv_offset = 2;
     for (y, school) in SCHOOLS.iter().enumerate() {
@@ -262,17 +222,13 @@ pub fn chargen_menu(
         );
     }
 
-    let up = config::cfg_to_kc(&config::CONFIG.up);
-    let down = config::cfg_to_kc(&config::CONFIG.down);
-    let exit = config::cfg_to_kc(&config::CONFIG.exit);
-    let select = config::cfg_to_kc(&config::CONFIG.select);
     match ctx.key {
         None => (SelectMenuResult::NoResponse, None),
         Some(key) => match key {
-            _ if key == exit => (SelectMenuResult::Cancel, None),
-            _ if key == up && selection > 0 => (SelectMenuResult::Up, None),
-            _ if key == down && selection < SCHOOLS.len() - 1 => (SelectMenuResult::Down, None),
-            _ if key == select => (SelectMenuResult::Selected, Some(selection)),
+            _ if key == INPUT.exit => (SelectMenuResult::Cancel, None),
+            _ if key == INPUT.up && selection > 0 => (SelectMenuResult::Up, None),
+            _ if key == INPUT.down && selection < SCHOOLS.len() - 1 => (SelectMenuResult::Down, None),
+            _ if key == INPUT.select => (SelectMenuResult::Selected, Some(selection)),
             _ => (SelectMenuResult::NoResponse, None),
         },
     }
@@ -281,12 +237,7 @@ pub fn chargen_menu(
 pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
     let runstate = gs.ecs.fetch::<RunState>();
 
-    let white = COLORS.white;
-    let yellow = COLORS.yellow;
-    let black = COLORS.black;
-    let magenta = COLORS.magenta;
-
-    ctx.print_color_centered(15, yellow, black, "Malefactor");
+    ctx.print_color_centered(15, COLORS.yellow, COLORS.black, "Malefactor");
 
     let states = [
         MainMenuSelection::NewGame,
@@ -294,40 +245,36 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
         MainMenuSelection::Quit,
     ];
 
-    let mut idx: i8;
-    let state_num: i8 = states.len() as i8;
+    let idx: usize;
+    let state_num = states.len();
 
     if let RunState::MainMenu {
         game_started: _,
         menu_selection: selection,
     } = *runstate
     {
-        let mut ngcolor = white;
-        let mut lgcolor = white;
-        let mut qcolor = white;
+        let mut ngcolor = COLORS.white;
+        let mut lgcolor = COLORS.white;
+        let mut qcolor = COLORS.white;
         match selection {
             MainMenuSelection::NewGame => {
-                ngcolor = magenta;
+                ngcolor = COLORS.magenta;
                 idx = 0;
             }
             MainMenuSelection::Continue => {
-                lgcolor = magenta;
+                lgcolor = COLORS.magenta;
                 idx = 1;
             }
             MainMenuSelection::Quit => {
-                qcolor = magenta;
+                qcolor = COLORS.magenta;
                 idx = 2;
             }
         }
 
-        ctx.print_color_centered(24, ngcolor, black, "Begin New Game");
-        ctx.print_color_centered(25, lgcolor, black, "Continue");
-        ctx.print_color_centered(26, qcolor, black, "Quit");
+        ctx.print_color_centered(24, ngcolor, COLORS.black, "Begin New Game");
+        ctx.print_color_centered(25, lgcolor, COLORS.black, "Continue");
+        ctx.print_color_centered(26, qcolor, COLORS.black, "Quit");
 
-        let down = config::cfg_to_kc(&config::CONFIG.down);
-        let up = config::cfg_to_kc(&config::CONFIG.up);
-        let exit = config::cfg_to_kc(&config::CONFIG.exit);
-        let select = config::cfg_to_kc(&config::CONFIG.select);
         match ctx.key {
             None => {
                 return MainMenuResult::NoSelection {
@@ -335,26 +282,24 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
                 }
             }
             Some(key) => match key {
-                _ if key == exit => {
+                _ if key == INPUT.exit => {
                     return MainMenuResult::NoSelection {
                         selected: MainMenuSelection::Quit,
                         // TODO: here we can continue. maybe?
                         // Alternatively there would need to be a continue button
                     };
                 }
-                _ if key == up => {
-                    idx = max(0, idx - 1);
+                _ if key == INPUT.up && idx > 0 => {
                     return MainMenuResult::NoSelection {
-                        selected: states[idx as usize],
+                        selected: states[idx-1],
                     };
                 }
-                _ if key == down => {
-                    idx = min(state_num - 1, idx + 1);
+                _ if key == INPUT.down && idx < state_num -1 => {
                     return MainMenuResult::NoSelection {
-                        selected: states[idx as usize],
+                        selected: states[idx+1],
                     };
                 }
-                _ if key == select => {
+                _ if key == INPUT.select => {
                     return MainMenuResult::Selected {
                         selected: selection,
                     }
