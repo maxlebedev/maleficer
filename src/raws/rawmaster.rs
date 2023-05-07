@@ -108,6 +108,15 @@ pub fn spawn_named_item(
 
         eb = eb.with(crate::components::Item {});
 
+        if let Some(stats) = &item_template.stats {
+            eb = eb.with(CombatStats {
+                max_hp: stats.max_hp,
+                hp: stats.hp,
+                power: 0,
+                defense: 0,
+            });
+        }
+
         if let Some(consumable) = &item_template.consumable {
             eb = eb.with(crate::components::Consumable {});
             for effect in consumable.effects.iter() {

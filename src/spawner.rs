@@ -23,6 +23,8 @@ pub fn spawn_room(ecs: &mut World, room: &Rect, depth: i32) {
     {
         let mut rng = ecs.write_resource::<RandomNumberGenerator>();
         let num_spawns = rng.roll_dice(1, MAX_SPAWNS + 3) - 3;
+        // 1d7-3 = -2, -1, 0, 1, 2, 3, 4
+        // rng.range(0, 4);
 
         for _i in 0..num_spawns {
             let mut added = false;

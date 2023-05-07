@@ -1,7 +1,10 @@
+use rltk::Point;
 use specs::prelude::*;
 use specs::saveload::{
     DeserializeComponents, MarkedBuilder, SerializeComponents, SimpleMarker, SimpleMarkerAllocator,
 };
+use crate::spawner;
+
 // use specs::error::NoError;
 use super::super::components::*;
 use std::convert::Infallible;
@@ -102,6 +105,11 @@ pub fn delete_save() {
 }
 
 pub fn load_game(ecs: &mut World) {
+
+    let player_entity = spawner::player(ecs, 0, 0);
+    ecs.insert(player_entity);
+    ecs.insert(Point::new(0, 0));
+    ecs.insert(Cursor { point: Point::new(0, 0), });
     {
         // Delete everything
         let mut to_delete = Vec::new();
