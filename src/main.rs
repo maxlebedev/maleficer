@@ -35,7 +35,6 @@ pub enum RunState {
     ShowTargeting {
         range: i32,
         item: Entity,
-        radius: i32,
     },
     MainMenu {
         game_started: bool,
@@ -55,8 +54,6 @@ pub struct Colors {
     pub green: rltk::RGB,
     pub blue: rltk::RGB,
     pub white: rltk::RGB,
-    pub grey: rltk::RGB,
-    pub dark_grey: rltk::RGB,
 }
 
 lazy_static! {
@@ -71,8 +68,6 @@ lazy_static! {
         green: rltk::RGB::named(rltk::GREEN),
         blue: rltk::RGB::named(rltk::BLUE),
         white: rltk::RGB::named(rltk::WHITE),
-        grey: rltk::RGB::named(rltk::GREY),
-        dark_grey: rltk::RGB::named(rltk::DARK_GREY),
     };
 }
 
@@ -142,6 +137,7 @@ impl GameState for State {
                                     newrunstate = RunState::CharGen { selection: 0 };
                                 } else {
                                     // load
+                                    self.insert_dummies();
                                     systems::save_load::load_game(&mut self.ecs);
                                     systems::save_load::delete_save();
                                 }
@@ -227,17 +223,10 @@ impl GameState for State {
                         let item_entity = result.1.unwrap();
                         let is_ranged = self.ecs.read_storage::<Ranged>();
                         let is_item_ranged = is_ranged.get(item_entity);
-
                         if let Some(is_item_ranged) = is_item_ranged {
-                            let is_aoe = self.ecs.read_storage::<AreaOfEffect>();
-                            let radius =  match is_aoe.get(item_entity) {
-                                Some(is_item_aoe) => is_item_aoe.radius,
-                                None => 0,
-                            };
                             newrunstate = RunState::ShowTargeting {
                                 range: is_item_ranged.range,
                                 item: item_entity,
-                                radius
                             };
 
                             //this is: fn reset_cursor_pos
@@ -271,8 +260,8 @@ impl GameState for State {
                     }
                 }
             }
-            RunState::ShowTargeting { range, item, radius } => {
-                let result = gui::ranged_target(&mut self.ecs, ctx, range, radius);
+            RunState::ShowTargeting { range, item } => {
+                let result = gui::ranged_target(&mut self.ecs, ctx, range);
                 match result {
                     gui::MenuAction::Cancel => newrunstate = RunState::AwaitingInput,
                     gui::MenuAction::Selected => {
@@ -343,6 +332,12 @@ impl State {
         });
 
         self.ecs.insert(Point::new(player_x, player_y));
+    }
+
+    fn insert_dummies(&mut self) {
+        let player_entity = spawner::player(&mut self.ecs, 0, 0);
+        self.ecs.insert(player_entity);
+        self.ecs.insert(Point::new(0, 0));
     }
 
     // TODO: we would have to edit this every time we add a player-thing.

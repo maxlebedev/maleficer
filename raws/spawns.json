@@ -2,7 +2,6 @@
 "spawn_table" : [
     { "name" : "Goblin", "weight" : 10, "min_depth" : 0, "max_depth" : 100 },
     { "name" : "Orc", "weight" : 1, "min_depth" : 0, "max_depth" : 100, "add_map_depth_to_weight" : true },
-    { "name" : "Troll", "weight" : 1, "min_depth" : 3, "max_depth" : 100, "add_map_depth_to_weight" : true },
     { "name" : "Health Potion", "weight" : 7, "min_depth" : 0, "max_depth" : 100 },
     { "name" : "Fireball Scroll", "weight" : 2, "min_depth" : 0, "max_depth" : 100, "add_map_depth_to_weight" : true },
     { "name" : "Shock Scroll", "weight" : 2, "min_depth" : 0, "max_depth" : 100, "add_map_depth_to_weight" : true },
@@ -13,23 +12,19 @@
         "name" : "Health Potion",
         "renderable": {
             "glyph" : "¡",
-            "fg" : "#FF4778",
+            "fg" : "#FF00FF",
             "bg" : "#000000",
             "order" : 2
         },
         "consumable" : {
             "effects" : { "provides_healing" : "8" }
-        },
-        "stats" : {
-            "max_hp" : 1,
-            "hp" : 1
         }
     },
     {
         "name" : "Magic Missile Scroll",
         "renderable": {
             "glyph" : ")",
-            "fg" : "#F768F7",
+            "fg" : "#00FFFF",
             "bg" : "#000000",
             "order" : 2
         },
@@ -107,23 +102,6 @@
             "power" : 3
         },
         "vision_range" : 8
-    },
-    {
-        "name" : "Troll",
-        "renderable": {
-            "glyph" : "T",
-            "fg" : "#FF0000",
-            "bg" : "#000000",
-            "order" : 1
-        },
-        "blocks_tile" : true,
-        "stats" : {
-            "max_hp" : 30,
-            "hp" : 30,
-            "defense" : 1,
-            "power" : 8
-        },
-        "vision_range" : 6
     }
 ]
 }
