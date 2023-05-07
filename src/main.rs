@@ -461,6 +461,7 @@ fn register_all(gs: &mut State) {
     gs.ecs.register::<Spell>();
     gs.ecs.register::<WantsToCastSpell>();
     gs.ecs.register::<ParticleLifetime>();
+    gs.ecs.register::<Destructable>();
 }
 
 fn main() -> rltk::BError {
@@ -493,6 +494,16 @@ fn main() -> rltk::BError {
     gs.ecs.insert(gamelog);
 
     gs.ecs.insert(systems::particle::ParticleBuilder::new());
-
     rltk::main_loop(context, gs)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::*;
+
+    #[test]
+    fn test_register() {
+        let mut test_state = State { ecs: World::new() };
+        register_all(&mut test_state);
+    }
 }
