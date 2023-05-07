@@ -14,7 +14,6 @@ use specs::saveload::MarkedBuilder;
 
 const MAX_SPAWNS: i32 = 4;
 
-/// Fills a room with stuff!
 #[allow(clippy::map_entry)]
 pub fn spawn_room(ecs: &mut World, room: &Rect, depth: i32) {
     let spawn_table = room_table(depth);

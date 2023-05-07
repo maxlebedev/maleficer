@@ -153,24 +153,24 @@ impl GameState for State {
             RunState::CharGen { selection } => {
                 let (menu_result, ch_selection) = gui::chargen_menu(self, ctx, selection);
                 match menu_result {
-                    gui::SelectMenuResult::Cancel => {
+                    gui::MenuAction::Cancel => {
                         newrunstate = RunState::MainMenu {
                             game_started: false,
                             menu_selection: gui::MainMenuSelection::NewGame,
                         };
                     }
-                    gui::SelectMenuResult::NoResponse => {}
-                    gui::SelectMenuResult::Up => {
+                    gui::MenuAction::NoResponse => {}
+                    gui::MenuAction::Up => {
                         newrunstate = RunState::CharGen {
                             selection: selection - 1,
                         }
                     }
-                    gui::SelectMenuResult::Down => {
+                    gui::MenuAction::Down => {
                         newrunstate = RunState::CharGen {
                             selection: selection + 1,
                         }
                     }
-                    gui::SelectMenuResult::Selected => {
+                    gui::MenuAction::Selected => {
                         println!("selected {}", gui::SCHOOLS[ch_selection.unwrap()]);
                         newrunstate = RunState::PreRun {};
                     }
@@ -207,19 +207,19 @@ impl GameState for State {
             RunState::ShowInventory { selection } => {
                 let result = gui::show_inventory(self, ctx, selection);
                 match result.0 {
-                    gui::SelectMenuResult::Cancel => newrunstate = RunState::AwaitingInput,
-                    gui::SelectMenuResult::NoResponse => {}
-                    gui::SelectMenuResult::Up => {
+                    gui::MenuAction::Cancel => newrunstate = RunState::AwaitingInput,
+                    gui::MenuAction::NoResponse => {}
+                    gui::MenuAction::Up => {
                         newrunstate = RunState::ShowInventory {
                             selection: selection - 1,
                         }
                     }
-                    gui::SelectMenuResult::Down => {
+                    gui::MenuAction::Down => {
                         newrunstate = RunState::ShowInventory {
                             selection: selection + 1,
                         }
                     }
-                    gui::SelectMenuResult::Selected => {
+                    gui::MenuAction::Selected => {
                         let item_entity = result.1.unwrap();
                         let is_ranged = self.ecs.read_storage::<Ranged>();
                         let is_item_ranged = is_ranged.get(item_entity);
@@ -247,7 +247,7 @@ impl GameState for State {
                             newrunstate = RunState::PlayerTurn;
                         }
                     }
-                    gui::SelectMenuResult::Drop => {
+                    gui::MenuAction::Drop => {
                         let item_entity = result.1.unwrap();
                         let mut intent = self.ecs.write_storage::<WantsToDropItem>();
                         intent
@@ -263,8 +263,8 @@ impl GameState for State {
             RunState::ShowTargeting { range, item } => {
                 let result = gui::ranged_target(&mut self.ecs, ctx, range);
                 match result {
-                    gui::SelectMenuResult::Cancel => newrunstate = RunState::AwaitingInput,
-                    gui::SelectMenuResult::Selected => {
+                    gui::MenuAction::Cancel => newrunstate = RunState::AwaitingInput,
+                    gui::MenuAction::Selected => {
                         let mut intent = self.ecs.write_storage::<WantsToUseItem>();
                         let cursor = self.ecs.fetch::<Cursor>();
                         intent

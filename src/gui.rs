@@ -25,7 +25,7 @@ pub enum MainMenuResult {
 }
 
 #[derive(PartialEq, Copy, Clone)]
-pub enum SelectMenuResult {
+pub enum MenuAction {
     Cancel,
     NoResponse,
     Up,
@@ -74,7 +74,7 @@ pub fn show_inventory(
     gs: &mut State,
     ctx: &mut Rltk,
     selection: usize,
-) -> (SelectMenuResult, Option<Entity>) {
+) -> (MenuAction, Option<Entity>) {
 
     let fgcolor = COLORS.white;
     let bgcolor = COLORS.black;
@@ -113,21 +113,21 @@ pub fn show_inventory(
     }
 
     match ctx.key {
-        None => (SelectMenuResult::NoResponse, None),
+        None => (MenuAction::NoResponse, None),
         Some(key) => match key {
-            _ if key == INPUT.exit => (SelectMenuResult::Cancel, None),
-            _ if key == INPUT.up && selection > 0 => (SelectMenuResult::Up, None),
-            _ if key == INPUT.down && selection < equippable.len() - 1 => (SelectMenuResult::Down, None),
-            _ if key == INPUT.drop => (SelectMenuResult::Drop, Some(equippable[selection])),
+            _ if key == INPUT.exit => (MenuAction::Cancel, None),
+            _ if key == INPUT.up && selection > 0 => (MenuAction::Up, None),
+            _ if key == INPUT.down && selection < equippable.len() - 1 => (MenuAction::Down, None),
+            _ if key == INPUT.drop => (MenuAction::Drop, Some(equippable[selection])),
             _ if key == INPUT.select && selection < equippable.len() => {
-                (SelectMenuResult::Selected, Some(equippable[selection]))
+                (MenuAction::Selected, Some(equippable[selection]))
             }
-            _ => (SelectMenuResult::NoResponse, None),
+            _ => (MenuAction::NoResponse, None),
         },
     }
 }
 
-pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32) -> SelectMenuResult {
+pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32) -> MenuAction {
     let player_entity = ecs.fetch::<Entity>();
     let player_pos = ecs.fetch::<Point>();
     let viewsheds = ecs.read_storage::<Viewshed>();
@@ -148,7 +148,7 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32) -> SelectMenuR
             }
         }
     } else {
-        return SelectMenuResult::Cancel;
+        return MenuAction::Cancel;
     }
 
     let mut valid_target = false;
@@ -165,28 +165,28 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32) -> SelectMenuR
     // TODO: if there is an AOE, highlight that too
 
     match ctx.key {
-        None => SelectMenuResult::NoResponse,
+        None => MenuAction::NoResponse,
         Some(key) => match key {
-            _ if key == INPUT.exit => SelectMenuResult::Cancel,
+            _ if key == INPUT.exit => MenuAction::Cancel,
             //TODO: bounds checking
             _ if key == INPUT.up => {
                 cursor.point.y -= 1;
-                SelectMenuResult::NoResponse
+                MenuAction::NoResponse
             }
             _ if key == INPUT.down => {
                 cursor.point.y += 1;
-                SelectMenuResult::NoResponse
+                MenuAction::NoResponse
             }
             _ if key == INPUT.left => {
                 cursor.point.x -= 1;
-                SelectMenuResult::NoResponse
+                MenuAction::NoResponse
             }
             _ if key == INPUT.right => {
                 cursor.point.x += 1;
-                SelectMenuResult::NoResponse
+                MenuAction::NoResponse
             }
-            _ if key == INPUT.select => SelectMenuResult::Selected,
-            _ => SelectMenuResult::NoResponse,
+            _ if key == INPUT.select => MenuAction::Selected,
+            _ => MenuAction::NoResponse,
         },
     }
 }
@@ -196,7 +196,7 @@ pub fn chargen_menu(
     _gs: &mut State,
     ctx: &mut Rltk,
     selection: usize,
-) -> (SelectMenuResult, Option<usize>) {
+) -> (MenuAction, Option<usize>) {
 
     let fgcolor = COLORS.white;
     let bgcolor = COLORS.black;
@@ -223,13 +223,13 @@ pub fn chargen_menu(
     }
 
     match ctx.key {
-        None => (SelectMenuResult::NoResponse, None),
+        None => (MenuAction::NoResponse, None),
         Some(key) => match key {
-            _ if key == INPUT.exit => (SelectMenuResult::Cancel, None),
-            _ if key == INPUT.up && selection > 0 => (SelectMenuResult::Up, None),
-            _ if key == INPUT.down && selection < SCHOOLS.len() - 1 => (SelectMenuResult::Down, None),
-            _ if key == INPUT.select => (SelectMenuResult::Selected, Some(selection)),
-            _ => (SelectMenuResult::NoResponse, None),
+            _ if key == INPUT.exit => (MenuAction::Cancel, None),
+            _ if key == INPUT.up && selection > 0 => (MenuAction::Up, None),
+            _ if key == INPUT.down && selection < SCHOOLS.len() - 1 => (MenuAction::Down, None),
+            _ if key == INPUT.select => (MenuAction::Selected, Some(selection)),
+            _ => (MenuAction::NoResponse, None),
         },
     }
 }
