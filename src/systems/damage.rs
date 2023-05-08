@@ -1,5 +1,5 @@
 use super::save_load;
-use crate::{CombatStats, GameLog, Name, Player, SufferDamage, Destructable};
+use crate::{CombatStats, GameLog, Name, Player, SufferDamage};
 use rltk::console;
 use specs::prelude::*;
 
@@ -22,8 +22,6 @@ impl<'a> System<'a> for Damage {
     }
 }
 
-// TODO: not only entities with combatstats can die. items have an hp and can be destoyed
-
 pub fn delete_the_dead(ecs: &mut World) {
     let mut dead: Vec<Entity> = Vec::new();
     // Using a scope to make the borrow checker happy
@@ -31,32 +29,25 @@ pub fn delete_the_dead(ecs: &mut World) {
         let combat_stats = ecs.read_storage::<CombatStats>();
         let players = ecs.read_storage::<Player>();
         let names = ecs.read_storage::<Name>();
-        let destructables = ecs.read_storage::<Destructable>();
         let entities = ecs.entities();
         let mut log = ecs.write_resource::<GameLog>();
-        for (entity, destructable) in (&entities, &destructables).join() {
-            let stats = combat_stats.get(entity);
-            if let Some(stats) = stats{
-                if stats.hp < 1 {
-                    let player = players.get(entity);
-                    match player {
-                        None => {
-                            let victim_name = names.get(entity);
-                            if let Some(victim_name) = victim_name {
-                                log.entries.push(format!("{} is destroyed", &victim_name.name));
-                            }
-                            dead.push(entity)
+        for (entity, stats) in (&entities, &combat_stats).join() {
+            if stats.hp < 1 {
+                let player = players.get(entity);
+                match player {
+                    None => {
+                        let victim_name = names.get(entity);
+                        if let Some(victim_name) = victim_name {
+                            log.entries.push(format!("{} is destroyed", &victim_name.name));
                         }
-                        Some(_) => {
-                            console::log("You are dead");
-                            save_load::delete_save();
-                            ::std::process::exit(0);
-                        }
+                        dead.push(entity)
+                    }
+                    Some(_) => {
+                        console::log("You are dead");
+                        save_load::delete_save();
+                        ::std::process::exit(0);
                     }
                 }
-            }
-            else { // we destroy an item
-                dead.push(entity);
             }
         }
     }

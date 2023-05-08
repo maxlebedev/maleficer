@@ -461,7 +461,7 @@ fn register_all(gs: &mut State) {
     gs.ecs.register::<Spell>();
     gs.ecs.register::<WantsToCastSpell>();
     gs.ecs.register::<ParticleLifetime>();
-    gs.ecs.register::<Destructable>();
+    gs.ecs.register::<Antagonistic>();
 }
 
 fn main() -> rltk::BError {

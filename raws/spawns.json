@@ -20,7 +20,9 @@
         "consumable" : {
             "effects" : { "provides_healing" : "8" }
         },
-        "hp" : 1
+        "stats": {
+            "hp" : 1
+        }
     },
     {
         "name" : "Magic Missile Scroll",
@@ -36,7 +38,9 @@
                 "damage" : "20"
             }
         },
-        "hp" : 1
+        "stats": {
+            "hp" : 1
+        }
     },
     {
         "name" : "Fireball Scroll",
@@ -53,7 +57,9 @@
                 "aoe": "3"
             }
         },
-        "hp" : 1
+        "stats": {
+            "hp" : 1
+        }
     },
     {
         "name" : "Shock Scroll",
@@ -70,7 +76,9 @@
                 "aoe": "1"
             }
         },
-        "hp" : 1
+        "stats": {
+            "hp" : 1
+        }
     }
 ],
 "mobs" : [

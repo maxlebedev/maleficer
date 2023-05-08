@@ -106,11 +106,16 @@ pub fn spawn_named_item(
             name: item_template.name.clone(),
         });
 
-        eb = eb.with(crate::components::Destructable{});
+        eb = eb.with(crate::components::Item { });
 
-        eb = eb.with(crate::components::Item {
-            hp : item_template.hp
-        });
+        if let Some(stats) = &item_template.stats {
+            eb = eb.with(CombatStats {
+                max_hp: stats.hp,
+                hp: stats.hp,
+                power: 0,
+                defense: 0,
+            });
+        }
 
         if let Some(consumable) = &item_template.consumable {
             eb = eb.with(crate::components::Consumable {});
@@ -176,7 +181,7 @@ pub fn spawn_named_mob(
             name: mob_template.name.clone(),
         });
 
-        eb = eb.with(crate::components::Destructable{});
+        eb = eb.with(crate::components::Antagonistic{});
 
         eb = eb.with(Monster {});
         if mob_template.blocks_tile {

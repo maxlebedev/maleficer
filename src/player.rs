@@ -20,7 +20,7 @@ fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
     let mut players = ecs.write_storage::<Player>();
     let mut viewsheds = ecs.write_storage::<Viewshed>();
 
-    let combat_stats = ecs.read_storage::<CombatStats>();
+    let antagonists = ecs.read_storage::<Antagonistic>();
     let map = ecs.fetch::<map::Map>();
 
     let entities = ecs.entities();
@@ -39,7 +39,7 @@ fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
 
         let destination_idx = map.xy_idx(pos.x + delta_x, pos.y + delta_y);
         for potential_target in map.tile_content[destination_idx].iter() {
-            let target = combat_stats.get(*potential_target);
+            let target = antagonists.get(*potential_target);
             if let Some(_target) = target {
                 wants_to_melee
                     .insert(
