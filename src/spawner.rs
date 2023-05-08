@@ -89,3 +89,29 @@ pub fn player(ecs: &mut World, player_x: i32, player_y: i32) -> Entity {
 fn room_table(depth: i32) -> RandomTable {
     get_spawn_table_for_depth(&RAWS.lock().unwrap(), depth)
 }
+
+
+#[cfg(test)]
+mod tests {
+    use crate::*;
+    use super::spawn_room;
+
+    #[test]
+    fn test_room() {
+        // TODO: this goes in a setup function
+        let mut test_state = State { ecs: World::new() };
+        test_state.ecs.insert(rltk::RandomNumberGenerator::new());
+        test_state.ecs.register::<Renderable>();
+
+        let new_room = rect::Rect::new(1, 1, 10, 10);
+        let depth = 0;
+        for _i in 0..100{
+            spawn_room(&mut test_state.ecs, &new_room, depth);
+        }
+
+        let num_ent = test_state.ecs.entities().join().count();
+
+        assert!(num_ent < 500);
+        assert!(num_ent > 0);
+    }
+}

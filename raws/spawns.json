@@ -18,6 +18,9 @@
         },
         "consumable" : {
             "effects" : { "provides_healing" : "8" }
+        },
+        "stats": {
+            "hp" : 1
         }
     },
     {
@@ -33,6 +36,9 @@
                 "ranged" : "6",
                 "damage" : "20"
             }
+        },
+        "stats": {
+            "hp" : 1
         }
     },
     {
@@ -49,6 +55,9 @@
                 "damage" : "20",
                 "aoe": "3"
             }
+        },
+        "stats": {
+            "hp" : 1
         }
     },
     {
@@ -65,6 +74,9 @@
                 "damage" : "10",
                 "aoe": "1"
             }
+        },
+        "stats": {
+            "hp" : 1
         }
     }
 ],

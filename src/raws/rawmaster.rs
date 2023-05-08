@@ -106,10 +106,21 @@ pub fn spawn_named_item(
             name: item_template.name.clone(),
         });
 
-        eb = eb.with(crate::components::Item {});
+        eb = eb.with(crate::components::Item { });
+
+        if let Some(stats) = &item_template.stats {
+            //TODO: 'CombatStats' might be a poor name for these
+            eb = eb.with(CombatStats {
+                max_hp: stats.hp,
+                hp: stats.hp,
+                power: 0,
+                defense: 0,
+            });
+        }
 
         if let Some(consumable) = &item_template.consumable {
             eb = eb.with(crate::components::Consumable {});
+            // TODO: consumable might be better as a bool
             for effect in consumable.effects.iter() {
                 let effect_name = effect.0.as_str();
                 match effect_name {
@@ -170,6 +181,8 @@ pub fn spawn_named_mob(
         eb = eb.with(Name {
             name: mob_template.name.clone(),
         });
+
+        eb = eb.with(crate::components::Antagonistic{});
 
         eb = eb.with(Monster {});
         if mob_template.blocks_tile {
