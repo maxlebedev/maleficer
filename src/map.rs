@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use specs::prelude::*;
 use std::cmp::{max, min};
 
+// TOOD: game breaks when these constants are changed
 pub const MAPWIDTH: usize = 80;
 pub const MAPHEIGHT: usize = 43;
 pub const MAPCOUNT: usize = MAPHEIGHT * MAPWIDTH;

@@ -75,7 +75,6 @@ pub fn show_inventory(
     ctx: &mut Rltk,
     selection: usize,
 ) -> (MenuAction, Option<Entity>) {
-
     let fgcolor = COLORS.white;
     let bgcolor = COLORS.black;
     let hlcolor = COLORS.magenta;
@@ -197,7 +196,6 @@ pub fn chargen_menu(
     ctx: &mut Rltk,
     selection: usize,
 ) -> (MenuAction, Option<usize>) {
-
     let fgcolor = COLORS.white;
     let bgcolor = COLORS.black;
     let hlcolor = COLORS.magenta;
@@ -291,12 +289,12 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
                 }
                 _ if key == INPUT.up && idx > 0 => {
                     return MainMenuResult::NoSelection {
-                        selected: states[idx-1],
+                        selected: states[idx - 1],
                     };
                 }
-                _ if key == INPUT.down && idx < state_num -1 => {
+                _ if key == INPUT.down && idx < state_num - 1 => {
                     return MainMenuResult::NoSelection {
-                        selected: states[idx+1],
+                        selected: states[idx + 1],
                     };
                 }
                 _ if key == INPUT.select => {

@@ -90,11 +90,10 @@ fn room_table(depth: i32) -> RandomTable {
     get_spawn_table_for_depth(&RAWS.lock().unwrap(), depth)
 }
 
-
 #[cfg(test)]
 mod tests {
-    use crate::*;
     use super::spawn_room;
+    use crate::*;
 
     #[test]
     fn test_room() {
@@ -105,7 +104,7 @@ mod tests {
 
         let new_room = rect::Rect::new(1, 1, 10, 10);
         let depth = 0;
-        for _i in 0..100{
+        for _i in 0..100 {
             spawn_room(&mut test_state.ecs, &new_room, depth);
         }
 

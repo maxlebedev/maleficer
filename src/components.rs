@@ -73,12 +73,10 @@ impl SufferDamage {
 }
 
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
-pub struct Item {
-}
+pub struct Item {}
 
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
-pub struct Destructable {
-}
+pub struct Destructable {}
 
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
 pub struct Consumable {}
@@ -175,7 +173,5 @@ pub struct ParticleLifetime {
     pub lifetime_ms: f32,
 }
 
-
 #[derive(Component, Serialize, Deserialize, Clone)]
-pub struct Antagonistic{
-}
+pub struct Antagonistic {}

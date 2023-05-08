@@ -10,6 +10,8 @@ pub struct RawMaster {
     mob_index: HashMap<String, usize>,
 }
 
+// lime_green bfff47
+
 impl RawMaster {
     pub fn empty() -> RawMaster {
         RawMaster {
@@ -106,7 +108,7 @@ pub fn spawn_named_item(
             name: item_template.name.clone(),
         });
 
-        eb = eb.with(crate::components::Item { });
+        eb = eb.with(crate::components::Item {});
 
         if let Some(stats) = &item_template.stats {
             //TODO: 'CombatStats' might be a poor name for these
@@ -182,7 +184,7 @@ pub fn spawn_named_mob(
             name: mob_template.name.clone(),
         });
 
-        eb = eb.with(crate::components::Antagonistic{});
+        eb = eb.with(crate::components::Antagonistic {});
 
         eb = eb.with(Monster {});
         if mob_template.blocks_tile {
