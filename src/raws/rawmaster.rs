@@ -109,6 +109,7 @@ pub fn spawn_named_item(
         eb = eb.with(crate::components::Item { });
 
         if let Some(stats) = &item_template.stats {
+            //TODO: 'CombatStats' might be a poor name for these
             eb = eb.with(CombatStats {
                 max_hp: stats.hp,
                 hp: stats.hp,
