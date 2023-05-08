@@ -1,4 +1,4 @@
-use crate::{GameLog, COLORS};
+use crate::{GameLog, COLORS, config::CONFIG};
 
 use super::rect::Rect;
 use rltk::{Algorithm2D, BaseMap, Point, RandomNumberGenerator, Rltk};
@@ -6,9 +6,9 @@ use serde::{Deserialize, Serialize};
 use specs::prelude::*;
 use std::cmp::{max, min};
 
-// TOOD: game breaks when these constants are changed
-pub const MAPWIDTH: usize = 80;
-pub const MAPHEIGHT: usize = 43;
+// TOOD: these need to be the same as config
+pub const MAPWIDTH: usize = 160; // 80
+pub const MAPHEIGHT: usize = 93; // 43
 pub const MAPCOUNT: usize = MAPHEIGHT * MAPWIDTH;
 
 // TODO: there are places that we do absolute rather than relative math

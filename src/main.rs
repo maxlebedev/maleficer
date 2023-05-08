@@ -35,6 +35,7 @@ pub enum RunState {
     ShowTargeting {
         range: i32,
         item: Entity,
+        radius: i32,
     },
     MainMenu {
         game_started: bool,
@@ -54,6 +55,7 @@ pub struct Colors {
     pub green: rltk::RGB,
     pub blue: rltk::RGB,
     pub white: rltk::RGB,
+    pub dark_grey: rltk::RGB,
 }
 
 lazy_static! {
@@ -68,6 +70,7 @@ lazy_static! {
         green: rltk::RGB::named(rltk::GREEN),
         blue: rltk::RGB::named(rltk::BLUE),
         white: rltk::RGB::named(rltk::WHITE),
+        dark_grey: rltk::RGB::named(rltk::DARK_GREY),
     };
 }
 
@@ -224,9 +227,15 @@ impl GameState for State {
                         let is_ranged = self.ecs.read_storage::<Ranged>();
                         let is_item_ranged = is_ranged.get(item_entity);
                         if let Some(is_item_ranged) = is_item_ranged {
+                            let is_aoe = self.ecs.read_storage::<AreaOfEffect>();
+                            let radius = match is_aoe.get(item_entity) {
+                                Some(is_item_aoe) => is_item_aoe.radius,
+                                None => 0,
+                            };
                             newrunstate = RunState::ShowTargeting {
                                 range: is_item_ranged.range,
                                 item: item_entity,
+                                radius,
                             };
 
                             //this is: fn reset_cursor_pos
@@ -260,8 +269,12 @@ impl GameState for State {
                     }
                 }
             }
-            RunState::ShowTargeting { range, item } => {
-                let result = gui::ranged_target(&mut self.ecs, ctx, range);
+            RunState::ShowTargeting {
+                range,
+                item,
+                radius,
+            } => {
+                let result = gui::ranged_target(&mut self.ecs, ctx, range, radius);
                 match result {
                     gui::MenuAction::Cancel => newrunstate = RunState::AwaitingInput,
                     gui::MenuAction::Selected => {
@@ -338,6 +351,9 @@ impl State {
         let player_entity = spawner::player(&mut self.ecs, 0, 0);
         self.ecs.insert(player_entity);
         self.ecs.insert(Point::new(0, 0));
+        self.ecs.insert(Cursor {
+            point: Point::new(0, 0),
+        });
     }
 
     // TODO: we would have to edit this every time we add a player-thing.
@@ -466,6 +482,7 @@ fn main() -> rltk::BError {
 
     let mut context: Rltk = rb.unwrap().with_title("Malefactor").build()?;
     context.screen_burn_color(rltk::RGB::named(rltk::DARKGRAY));
+    // TODO: how to actually resize?
 
     context.with_post_scanlines(true);
     let mut gs = State { ecs: World::new() };

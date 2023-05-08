@@ -126,11 +126,12 @@ pub fn show_inventory(
     }
 }
 
-pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32) -> MenuAction {
+pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32, radius: i32) -> MenuAction {
     let player_entity = ecs.fetch::<Entity>();
     let player_pos = ecs.fetch::<Point>();
     let viewsheds = ecs.read_storage::<Viewshed>();
     let mut cursor = ecs.fetch_mut::<Cursor>();
+    let map = ecs.fetch::<Map>();
 
     ctx.print_color(5, 0, COLORS.yellow, COLORS.black, "Select Target:");
 
@@ -162,6 +163,13 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32) -> MenuAction 
     }
     ctx.set_bg(cursor.point.x, cursor.point.y, curs_color);
     // TODO: if there is an AOE, highlight that too
+    let blast_tiles = rltk::field_of_view(cursor.point, radius, &*map);
+    for tile in blast_tiles.iter(){
+        if *tile == cursor.point {
+            continue;
+        }
+        ctx.set_bg(tile.x, tile.y, COLORS.dark_grey);
+    }
 
     match ctx.key {
         None => MenuAction::NoResponse,
