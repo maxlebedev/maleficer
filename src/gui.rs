@@ -2,7 +2,7 @@ use rltk::{Point, Rltk};
 use specs::prelude::*;
 
 use crate::config::INPUT;
-use crate::{Map, COLORS, MAPHEIGHT, MAPWIDTH};
+use crate::{Map, COLORS, MAPHEIGHT, MAPWIDTH, camera};
 
 use super::{components, GameLog, Player, RunState, State};
 pub use components::*;
@@ -142,8 +142,10 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32, radius: i32) -
         for idx in visible.visible_tiles.iter() {
             let distance = rltk::DistanceAlg::Pythagoras.distance2d(*player_pos, *idx);
             if distance <= range as f32 {
-                ctx.set_bg(idx.x, idx.y, COLORS.blue);
-                available_cells.push(idx);
+                if camera::in_screen_bounds(ecs, ctx, idx.x, idx.y) {
+                    ctx.set_bg(idx.x, idx.y, COLORS.blue);
+                    available_cells.push(idx);
+                }
             }
         }
     } else {

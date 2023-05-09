@@ -19,6 +19,7 @@ pub use gamelog::GameLog;
 mod config;
 mod raws;
 mod spawner;
+mod camera;
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum RunState {
@@ -55,6 +56,7 @@ pub struct Colors {
     pub green: rltk::RGB,
     pub blue: rltk::RGB,
     pub white: rltk::RGB,
+    pub grey: rltk::RGB,
     pub dark_grey: rltk::RGB,
 }
 
@@ -70,6 +72,7 @@ lazy_static! {
         green: rltk::RGB::named(rltk::GREEN),
         blue: rltk::RGB::named(rltk::BLUE),
         white: rltk::RGB::named(rltk::WHITE),
+        grey: rltk::RGB::named(rltk::GREY),
         dark_grey: rltk::RGB::named(rltk::DARK_GREY),
     };
 }
@@ -91,24 +94,8 @@ impl GameState for State {
         match newrunstate {
             RunState::MainMenu { .. } => {}
             _ => {
-                draw_map(&self.ecs, ctx);
-
-                {
-                    let positions = self.ecs.read_storage::<Position>();
-                    let renderables = self.ecs.read_storage::<Renderable>();
-                    let map = self.ecs.fetch::<Map>();
-
-                    let mut data = (&positions, &renderables).join().collect::<Vec<_>>();
-                    data.sort_by(|&a, &b| b.1.render_order.cmp(&a.1.render_order));
-                    for (pos, render) in data.iter() {
-                        let idx = map.xy_idx(pos.x, pos.y);
-                        if map.visible_tiles[idx] {
-                            ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph)
-                        }
-                    }
-
-                    gui::draw_ui(&self.ecs, ctx);
-                }
+                camera::render_camera(&self.ecs, ctx);
+                gui::draw_ui(&self.ecs, ctx);
             }
         }
 
@@ -126,6 +113,7 @@ impl GameState for State {
                         }
                     }
                     gui::MainMenuResult::Selected { selected } => match selected {
+
                         gui::MainMenuSelection::NewGame => {
                             newrunstate = RunState::CharGen { selection: 0 }
                         }
@@ -140,7 +128,6 @@ impl GameState for State {
                                     newrunstate = RunState::CharGen { selection: 0 };
                                 } else {
                                     // load
-                                    self.insert_dummies();
                                     systems::save_load::load_game(&mut self.ecs);
                                     systems::save_load::delete_save();
                                 }
@@ -347,15 +334,6 @@ impl State {
         self.ecs.insert(Point::new(player_x, player_y));
     }
 
-    fn insert_dummies(&mut self) {
-        let player_entity = spawner::player(&mut self.ecs, 0, 0);
-        self.ecs.insert(player_entity);
-        self.ecs.insert(Point::new(0, 0));
-        self.ecs.insert(Cursor {
-            point: Point::new(0, 0),
-        });
-    }
-
     // TODO: we would have to edit this every time we add a player-thing.
     // better to instead remove mobs, map, uncollected items
     fn entities_to_remove_on_level_change(&mut self) -> Vec<Entity> {
@@ -473,6 +451,17 @@ fn register_all(gs: &mut State) {
     gs.ecs.register::<WantsToCastSpell>();
     gs.ecs.register::<ParticleLifetime>();
     gs.ecs.register::<Antagonistic>();
+    gs.ecs.register::<Hidden>();
+
+
+    gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());
+    gs.ecs.insert(rltk::RandomNumberGenerator::new());
+
+
+    let player_entity = spawner::player(&mut gs.ecs, 0, 0);
+    gs.ecs.insert(player_entity);
+    gs.ecs.insert(Point::new(0, 0));
+    gs.ecs.insert(Cursor { point: Point::new(0, 0) });
 }
 
 fn main() -> rltk::BError {
@@ -490,10 +479,9 @@ fn main() -> rltk::BError {
         game_started: false,
         menu_selection: gui::MainMenuSelection::NewGame,
     });
+
     register_all(&mut gs);
 
-    gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());
-    gs.ecs.insert(rltk::RandomNumberGenerator::new());
 
     raws::load_raws();
 
