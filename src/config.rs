@@ -48,8 +48,8 @@ pub struct Config {
     pub wait: String,
     pub hk1: String,
 
-    pub width: i32,
-    pub height: i32,
+    pub width: usize,
+    pub height: usize,
 }
 
 pub struct Input {

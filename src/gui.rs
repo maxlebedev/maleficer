@@ -2,9 +2,8 @@ use rltk::{Point, Rltk};
 use specs::prelude::*;
 
 use crate::config::INPUT;
-use crate::{Map, COLORS};
+use crate::{Map, COLORS, MAPHEIGHT, MAPWIDTH};
 
-use super::map::{MAPHEIGHT, MAPWIDTH};
 use super::{components, GameLog, Player, RunState, State};
 pub use components::*;
 
@@ -47,8 +46,8 @@ pub fn draw_ui(ecs: &World, ctx: &mut Rltk) {
         let health = format!(" HP: {} / {} ", stats.hp, stats.max_hp);
         ctx.print_color(12, map.height, COLORS.yellow, COLORS.black, &health);
 
-        let hp_bar_left = 28;
-        let hp_bar_right = 51;
+        let hp_bar_left = MAPWIDTH/3; // was 28
+        let hp_bar_right = (MAPWIDTH/3)*2; // was 51
         ctx.draw_bar_horizontal(
             hp_bar_left,
             MAPHEIGHT,
@@ -210,7 +209,7 @@ pub fn chargen_menu(
 
     let halfwidth = MAPWIDTH / 2;
     ctx.draw_box(0, 0, halfwidth, MAPHEIGHT, fgcolor, bgcolor);
-    ctx.draw_box(halfwidth + 1, 0, halfwidth, MAPHEIGHT, fgcolor, bgcolor);
+    ctx.draw_box(halfwidth + 1, 0, halfwidth -1, MAPHEIGHT, fgcolor, bgcolor);
     ctx.print_color_centered(0, COLORS.yellow, COLORS.black, "Choose a spell school");
 
     let inv_offset = 2;
