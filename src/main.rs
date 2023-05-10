@@ -16,6 +16,7 @@ mod gui;
 mod rect;
 mod systems;
 pub use gamelog::GameLog;
+mod camera;
 mod config;
 mod raws;
 mod spawner;
@@ -55,6 +56,7 @@ pub struct Colors {
     pub green: rltk::RGB,
     pub blue: rltk::RGB,
     pub white: rltk::RGB,
+    pub grey: rltk::RGB,
     pub dark_grey: rltk::RGB,
 }
 
@@ -70,6 +72,7 @@ lazy_static! {
         green: rltk::RGB::named(rltk::GREEN),
         blue: rltk::RGB::named(rltk::BLUE),
         white: rltk::RGB::named(rltk::WHITE),
+        grey: rltk::RGB::named(rltk::GREY),
         dark_grey: rltk::RGB::named(rltk::DARK_GREY),
     };
 }
@@ -91,24 +94,8 @@ impl GameState for State {
         match newrunstate {
             RunState::MainMenu { .. } => {}
             _ => {
-                draw_map(&self.ecs, ctx);
-
-                {
-                    let positions = self.ecs.read_storage::<Position>();
-                    let renderables = self.ecs.read_storage::<Renderable>();
-                    let map = self.ecs.fetch::<Map>();
-
-                    let mut data = (&positions, &renderables).join().collect::<Vec<_>>();
-                    data.sort_by(|&a, &b| b.1.render_order.cmp(&a.1.render_order));
-                    for (pos, render) in data.iter() {
-                        let idx = map.xy_idx(pos.x, pos.y);
-                        if map.visible_tiles[idx] {
-                            ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph)
-                        }
-                    }
-
-                    gui::draw_ui(&self.ecs, ctx);
-                }
+                camera::render_camera(&self.ecs, ctx);
+                gui::draw_ui(&self.ecs, ctx);
             }
         }
 
@@ -140,7 +127,6 @@ impl GameState for State {
                                     newrunstate = RunState::CharGen { selection: 0 };
                                 } else {
                                     // load
-                                    self.insert_dummies();
                                     systems::save_load::load_game(&mut self.ecs);
                                     systems::save_load::delete_save();
                                 }
@@ -241,7 +227,7 @@ impl GameState for State {
                             //this is: fn reset_cursor_pos
                             let player_pos = self.ecs.fetch::<Point>();
                             let mut cursor = self.ecs.fetch_mut::<Cursor>();
-                            cursor.point = *player_pos;
+                            cursor.point = camera::tile_to_screen(&self.ecs, ctx, *player_pos);
                         } else {
                             let mut intent = self.ecs.write_storage::<WantsToUseItem>();
                             intent
@@ -280,12 +266,14 @@ impl GameState for State {
                     gui::MenuAction::Selected => {
                         let mut intent = self.ecs.write_storage::<WantsToUseItem>();
                         let cursor = self.ecs.fetch::<Cursor>();
+                        // TODO: should screen_to_tile be an impl in cursor?
+                        let target = camera::screen_to_tile(&self.ecs, ctx, cursor.point);
                         intent
                             .insert(
                                 *self.ecs.fetch::<Entity>(),
                                 WantsToUseItem {
                                     item,
-                                    target: Some(cursor.point),
+                                    target: Some(target),
                                 },
                             )
                             .expect("Unable to insert intent");
@@ -345,15 +333,6 @@ impl State {
         });
 
         self.ecs.insert(Point::new(player_x, player_y));
-    }
-
-    fn insert_dummies(&mut self) {
-        let player_entity = spawner::player(&mut self.ecs, 0, 0);
-        self.ecs.insert(player_entity);
-        self.ecs.insert(Point::new(0, 0));
-        self.ecs.insert(Cursor {
-            point: Point::new(0, 0),
-        });
     }
 
     // TODO: we would have to edit this every time we add a player-thing.
@@ -473,6 +452,17 @@ fn register_all(gs: &mut State) {
     gs.ecs.register::<WantsToCastSpell>();
     gs.ecs.register::<ParticleLifetime>();
     gs.ecs.register::<Antagonistic>();
+    gs.ecs.register::<Hidden>();
+
+    gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());
+    gs.ecs.insert(rltk::RandomNumberGenerator::new());
+
+    let player_entity = spawner::player(&mut gs.ecs, 0, 0);
+    gs.ecs.insert(player_entity);
+    gs.ecs.insert(Point::new(0, 0));
+    gs.ecs.insert(Cursor {
+        point: Point::new(0, 0),
+    });
 }
 
 fn main() -> rltk::BError {
@@ -481,7 +471,7 @@ fn main() -> rltk::BError {
     let rb = RltkBuilder::simple(config::CONFIG.width, config::CONFIG.height);
 
     let mut context: Rltk = rb.unwrap().with_title("Malefactor").build()?;
-    context.screen_burn_color(rltk::RGB::named(rltk::DARKGRAY));
+    context.screen_burn_color(COLORS.dark_grey);
     // TODO: how to actually resize?
 
     context.with_post_scanlines(true);
@@ -490,10 +480,8 @@ fn main() -> rltk::BError {
         game_started: false,
         menu_selection: gui::MainMenuSelection::NewGame,
     });
-    register_all(&mut gs);
 
-    gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());
-    gs.ecs.insert(rltk::RandomNumberGenerator::new());
+    register_all(&mut gs);
 
     raws::load_raws();
 

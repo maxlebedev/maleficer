@@ -175,3 +175,6 @@ pub struct ParticleLifetime {
 
 #[derive(Component, Serialize, Deserialize, Clone)]
 pub struct Antagonistic {}
+
+#[derive(Component, Debug, Serialize, Deserialize, Clone)]
+pub struct Hidden {}
