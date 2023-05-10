@@ -6,11 +6,11 @@ use serde::{Deserialize, Serialize};
 use specs::prelude::*;
 use std::cmp::{max, min};
 
-pub const MAPWIDTH: usize = 80;
-pub const MAPHEIGHT: usize = 43;
+// These are for the map tiles only
+pub const MAPWIDTH: usize = 128;
+pub const MAPHEIGHT: usize = 128;
 pub const MAPCOUNT: usize = MAPHEIGHT * MAPWIDTH;
 
-// TODO: there are places that we do absolute rather than relative math
 // TODO: things in crossterm update slowly, only when I spam keys
 
 #[derive(PartialEq, Copy, Clone, Serialize, Deserialize)]

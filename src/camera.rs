@@ -1,4 +1,4 @@
-use crate::COLORS;
+use crate::{COLORS, map};
 use specs::prelude::*;
 
 use super::{Hidden, Map, Position, Renderable, TileType};
@@ -92,7 +92,7 @@ pub fn render_camera(ecs: &World, ctx: &mut Rltk) {
                     ctx.set(x, y, fg, bg, glyph);
                 }
             } else if SHOW_BOUNDARIES {
-                ctx.set(x, y, COLORS.grey, COLORS.black, rltk::to_cp437('·'));
+                ctx.set(x, y, COLORS.grey, COLORS.black, rltk::to_cp437('+'));
             }
             x += 1;
         }
@@ -158,13 +158,10 @@ fn get_tile_glyph(idx: usize, map: &Map) -> (rltk::FontCharType, RGB, RGB) {
     (glyph, fg, bg)
 }
 
-pub const MAPWIDTH: usize = 80;
-pub const MAPHEIGHT: usize = 43;
-pub const MAPCOUNT: usize = MAPHEIGHT * MAPWIDTH;
-
+// is the guard here on total tiles, or on window dimentions?
 fn is_revealed_and_wall(map: &Map, x: i32, y: i32) -> bool {
     let idx = map.xy_idx(x, y);
-    if idx >= MAPCOUNT {
+    if idx >= map::MAPCOUNT {
         return false;
     }
     map.tiles[idx] == TileType::Wall && map.revealed_tiles[idx]

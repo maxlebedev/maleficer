@@ -471,7 +471,7 @@ fn main() -> rltk::BError {
     let rb = RltkBuilder::simple(config::CONFIG.width, config::CONFIG.height);
 
     let mut context: Rltk = rb.unwrap().with_title("Malefactor").build()?;
-    context.screen_burn_color(rltk::RGB::named(rltk::DARKGRAY));
+    context.screen_burn_color(COLORS.dark_grey);
     // TODO: how to actually resize?
 
     context.with_post_scanlines(true);

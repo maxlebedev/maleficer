@@ -2,7 +2,6 @@ use specs::prelude::*;
 use specs::saveload::{
     DeserializeComponents, MarkedBuilder, SerializeComponents, SimpleMarker, SimpleMarkerAllocator,
 };
-// use specs::error::NoError;
 use super::super::components::*;
 use std::convert::Infallible;
 use std::fs;

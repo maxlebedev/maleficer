@@ -1,8 +1,8 @@
 use rltk::{Point, Rltk};
 use specs::prelude::*;
 
-use crate::config::INPUT;
-use crate::{camera, Map, COLORS, MAPHEIGHT, MAPWIDTH};
+use crate::config::{INPUT, CONFIG};
+use crate::{camera, Map, COLORS};
 
 use super::{components, GameLog, Player, RunState, State};
 pub use components::*;
@@ -34,23 +34,26 @@ pub enum MenuAction {
 }
 
 pub fn draw_ui(ecs: &World, ctx: &mut Rltk) {
-    ctx.draw_box(0, MAPHEIGHT, MAPWIDTH - 1, 6, COLORS.white, COLORS.black);
+    let ui_height = 7;
+    let height = CONFIG.height - ui_height;
+    let width = CONFIG.width;
+    ctx.draw_box(0, height, width - 1, 6, COLORS.white, COLORS.black);
 
     let map = ecs.fetch::<Map>();
     let depth = format!("Depth: {}", map.depth);
-    ctx.print_color(2, map.height, COLORS.yellow, COLORS.black, &depth);
+    ctx.print_color(2, height, COLORS.yellow, COLORS.black, &depth);
 
     let combat_stats = ecs.read_storage::<CombatStats>();
     let players = ecs.read_storage::<Player>();
     for (_player, stats) in (&players, &combat_stats).join() {
         let health = format!(" HP: {} / {} ", stats.hp, stats.max_hp);
-        ctx.print_color(12, map.height, COLORS.yellow, COLORS.black, &health);
+        ctx.print_color(12, height, COLORS.yellow, COLORS.black, &health);
 
-        let hp_bar_left = MAPWIDTH / 3; // was 28
-        let hp_bar_right = (MAPWIDTH / 3) * 2; // was 51
+        let hp_bar_left = width / 3; // was 28
+        let hp_bar_right = (width / 3) * 2; // was 51
         ctx.draw_bar_horizontal(
             hp_bar_left,
-            MAPHEIGHT,
+            height,
             hp_bar_right,
             stats.hp,
             stats.max_hp,
@@ -60,9 +63,9 @@ pub fn draw_ui(ecs: &World, ctx: &mut Rltk) {
     }
     let log = ecs.fetch::<GameLog>();
 
-    let mut y = MAPHEIGHT + 1; // 44;
+    let mut y = height + 1; // 44;
     for s in log.entries.iter().rev() {
-        if y < MAPHEIGHT + 6 {
+        if y < height + ui_height {
             ctx.print(2, y, s);
         }
         y += 1;
@@ -83,15 +86,19 @@ pub fn show_inventory(
     let backpack = gs.ecs.read_storage::<InBackpack>();
     let entities = gs.ecs.entities();
 
+    let ui_height = 7;
+    let height = CONFIG.height - ui_height;
+    let width = CONFIG.width;
+
     let inventory = (&backpack, &names, &entities)
         .join()
         .filter(|item| item.0.owner == *player_entity);
 
-    let halfwidth = MAPWIDTH / 2;
-    ctx.draw_box(0, 0, halfwidth, MAPHEIGHT, fgcolor, bgcolor);
-    ctx.draw_box(halfwidth + 1, 0, halfwidth, MAPHEIGHT, fgcolor, bgcolor);
+    let halfwidth = width / 2;
+    ctx.draw_box(0, 0, halfwidth, height, fgcolor, bgcolor);
+    ctx.draw_box(halfwidth + 1, 0, halfwidth, height, fgcolor, bgcolor);
     ctx.print_color_centered(0, COLORS.yellow, bgcolor, "Inventory");
-    ctx.print_color_centered(MAPHEIGHT, COLORS.yellow, bgcolor, "ESCAPE to cancel");
+    ctx.print_color_centered(height, COLORS.yellow, bgcolor, "ESCAPE to cancel");
 
     let inv_offset = 2;
     let mut equippable: Vec<Entity> = Vec::new();
@@ -210,9 +217,13 @@ pub fn chargen_menu(
     let bgcolor = COLORS.black;
     let hlcolor = COLORS.magenta;
 
-    let halfwidth = MAPWIDTH / 2;
-    ctx.draw_box(0, 0, halfwidth, MAPHEIGHT, fgcolor, bgcolor);
-    ctx.draw_box(halfwidth + 1, 0, halfwidth - 1, MAPHEIGHT, fgcolor, bgcolor);
+    let ui_height = 7;
+    let height = CONFIG.height - ui_height;
+    let width = CONFIG.width;
+
+    let halfwidth = width / 2;
+    ctx.draw_box(0, 0, halfwidth, height, fgcolor, bgcolor);
+    ctx.draw_box(halfwidth + 1, 0, halfwidth - 1, height, fgcolor, bgcolor);
     ctx.print_color_centered(0, COLORS.yellow, COLORS.black, "Choose a spell school");
 
     let inv_offset = 2;
