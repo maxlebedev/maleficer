@@ -169,7 +169,6 @@ impl Map {
     }
 }
 
-
 // TODO: move
 pub fn try_next_level(ecs: &mut World) -> bool {
     let player_pos = ecs.fetch::<Point>();

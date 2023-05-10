@@ -2,7 +2,7 @@ use rltk::{Point, Rltk};
 use specs::prelude::*;
 
 use crate::config::INPUT;
-use crate::{Map, COLORS, MAPHEIGHT, MAPWIDTH, camera};
+use crate::{camera, Map, COLORS, MAPHEIGHT, MAPWIDTH};
 
 use super::{components, GameLog, Player, RunState, State};
 pub use components::*;
@@ -46,8 +46,8 @@ pub fn draw_ui(ecs: &World, ctx: &mut Rltk) {
         let health = format!(" HP: {} / {} ", stats.hp, stats.max_hp);
         ctx.print_color(12, map.height, COLORS.yellow, COLORS.black, &health);
 
-        let hp_bar_left = MAPWIDTH/3; // was 28
-        let hp_bar_right = (MAPWIDTH/3)*2; // was 51
+        let hp_bar_left = MAPWIDTH / 3; // was 28
+        let hp_bar_right = (MAPWIDTH / 3) * 2; // was 51
         ctx.draw_bar_horizontal(
             hp_bar_left,
             MAPHEIGHT,
@@ -143,8 +143,9 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32, radius: i32) -
             let distance = rltk::DistanceAlg::Pythagoras.distance2d(*player_pos, *idx);
             if distance <= range as f32 {
                 if camera::in_screen_bounds(ecs, ctx, idx.x, idx.y) {
-                    ctx.set_bg(idx.x, idx.y, COLORS.blue);
-                    available_cells.push(idx);
+                    let screen_pt = camera::tile_to_screen(ecs, ctx, *idx);
+                    ctx.set_bg(screen_pt.x, screen_pt.y, COLORS.blue);
+                    available_cells.push(*idx);
                 }
             }
         }
@@ -154,7 +155,8 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32, radius: i32) -
 
     let mut valid_target = false;
     for idx in available_cells.iter() {
-        if idx.x == cursor.point.x && idx.y == cursor.point.y {
+        let scr_pt = camera::tile_to_screen(ecs, ctx, *idx);
+        if scr_pt.x == cursor.point.x && scr_pt.y == cursor.point.y {
             valid_target = true;
         }
     }
@@ -163,9 +165,8 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32, radius: i32) -
         curs_color = COLORS.cyan;
     }
     ctx.set_bg(cursor.point.x, cursor.point.y, curs_color);
-    // TODO: if there is an AOE, highlight that too
     let blast_tiles = rltk::field_of_view(cursor.point, radius, &*map);
-    for tile in blast_tiles.iter(){
+    for tile in blast_tiles.iter() {
         if *tile == cursor.point {
             continue;
         }
@@ -211,7 +212,7 @@ pub fn chargen_menu(
 
     let halfwidth = MAPWIDTH / 2;
     ctx.draw_box(0, 0, halfwidth, MAPHEIGHT, fgcolor, bgcolor);
-    ctx.draw_box(halfwidth + 1, 0, halfwidth -1, MAPHEIGHT, fgcolor, bgcolor);
+    ctx.draw_box(halfwidth + 1, 0, halfwidth - 1, MAPHEIGHT, fgcolor, bgcolor);
     ctx.print_color_centered(0, COLORS.yellow, COLORS.black, "Choose a spell school");
 
     let inv_offset = 2;

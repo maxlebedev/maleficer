@@ -16,10 +16,10 @@ mod gui;
 mod rect;
 mod systems;
 pub use gamelog::GameLog;
+mod camera;
 mod config;
 mod raws;
 mod spawner;
-mod camera;
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum RunState {
@@ -113,7 +113,6 @@ impl GameState for State {
                         }
                     }
                     gui::MainMenuResult::Selected { selected } => match selected {
-
                         gui::MainMenuSelection::NewGame => {
                             newrunstate = RunState::CharGen { selection: 0 }
                         }
@@ -228,7 +227,7 @@ impl GameState for State {
                             //this is: fn reset_cursor_pos
                             let player_pos = self.ecs.fetch::<Point>();
                             let mut cursor = self.ecs.fetch_mut::<Cursor>();
-                            cursor.point = *player_pos;
+                            cursor.point = camera::tile_to_screen(&self.ecs, ctx, *player_pos);
                         } else {
                             let mut intent = self.ecs.write_storage::<WantsToUseItem>();
                             intent
@@ -267,12 +266,14 @@ impl GameState for State {
                     gui::MenuAction::Selected => {
                         let mut intent = self.ecs.write_storage::<WantsToUseItem>();
                         let cursor = self.ecs.fetch::<Cursor>();
+                        // TODO: should screen_to_tile be an impl in cursor?
+                        let target = camera::screen_to_tile(&self.ecs, ctx, cursor.point);
                         intent
                             .insert(
                                 *self.ecs.fetch::<Entity>(),
                                 WantsToUseItem {
                                     item,
-                                    target: Some(cursor.point),
+                                    target: Some(target),
                                 },
                             )
                             .expect("Unable to insert intent");
@@ -453,15 +454,15 @@ fn register_all(gs: &mut State) {
     gs.ecs.register::<Antagonistic>();
     gs.ecs.register::<Hidden>();
 
-
     gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());
     gs.ecs.insert(rltk::RandomNumberGenerator::new());
-
 
     let player_entity = spawner::player(&mut gs.ecs, 0, 0);
     gs.ecs.insert(player_entity);
     gs.ecs.insert(Point::new(0, 0));
-    gs.ecs.insert(Cursor { point: Point::new(0, 0) });
+    gs.ecs.insert(Cursor {
+        point: Point::new(0, 0),
+    });
 }
 
 fn main() -> rltk::BError {
@@ -481,7 +482,6 @@ fn main() -> rltk::BError {
     });
 
     register_all(&mut gs);
-
 
     raws::load_raws();
 
