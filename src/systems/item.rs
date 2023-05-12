@@ -1,7 +1,7 @@
 use crate::{
     gamelog::GameLog, map, AreaOfEffect, CombatStats, Consumable, InBackpack, InflictsDamage, Name,
     Position, ProvidesHealing, SufferDamage, WantsToDropItem, WantsToPickupItem, WantsToUseItem,
-    COLORS,
+    COLORS, camera,
 };
 use specs::prelude::*;
 
@@ -104,8 +104,7 @@ impl<'a> System<'a> for ItemUse {
                         }
                         Some(area_effect) => {
                             // AoE
-                            let mut blast_tiles =
-                                rltk::field_of_view(target, area_effect.radius, &*map);
+                            let mut blast_tiles = rltk::field_of_view(target, area_effect.radius, &*map);
                             blast_tiles.retain(|p| {
                                 p.x > 0 && p.x < map.width - 1 && p.y > 0 && p.y < map.height - 1
                             });

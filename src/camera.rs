@@ -1,4 +1,4 @@
-use crate::{COLORS, map};
+use crate::{COLORS, config::CONFIG};
 use specs::prelude::*;
 
 use super::{Hidden, Map, Position, Renderable, TileType};
@@ -7,76 +7,75 @@ use rltk::{Point, Rltk, RGB};
 const SHOW_BOUNDARIES: bool = true;
 
 // TODO: memoize?
-pub fn get_screen_bounds(ecs: &World, ctx: &mut Rltk) -> (i32, i32, i32, i32) {
+pub fn get_screen_bounds(ecs: &World) -> (i32, i32, i32, i32) {
     let player_pos = ecs.fetch::<Point>();
-    let (x_chars, y_chars) = ctx.get_char_size();
 
-    let center_x = (x_chars / 2) as i32;
-    let center_y = (y_chars / 2) as i32;
+    let center_x = (CONFIG.width/ 2) as i32;
+    let center_y = (CONFIG.height/ 2) as i32;
 
     let min_x = player_pos.x - center_x;
-    let max_x = min_x + x_chars as i32;
+    let max_x = min_x + CONFIG.width as i32;
     let min_y = player_pos.y - center_y;
-    let max_y = min_y + y_chars as i32;
+    let max_y = min_y + CONFIG.height as i32;
 
     (min_x, max_x, min_y, max_y)
+
 }
 
-pub fn tile_to_screen(ecs: &World, ctx: &mut Rltk, tile: rltk::Point) -> rltk::Point {
+pub fn tile_to_screen(ecs: &World, tile: Point) -> Point {
     let player_pos = ecs.fetch::<Point>();
-    let (x_chars, y_chars) = ctx.get_char_size();
 
-    let center_x = (x_chars / 2) as i32;
-    let center_y = (y_chars / 2) as i32;
+    let center_x = (CONFIG.width / 2) as i32;
+    let center_y = (CONFIG.height / 2) as i32;
 
     let min_x = player_pos.x - center_x;
     let min_y = player_pos.y - center_y;
 
-    let screen_x = tile.x - min_x;
-    let screen_y = tile.y - min_y;
+    let x = tile.x - min_x;
+    let y = tile.y - min_y;
 
-    return rltk::Point {
-        x: screen_x,
-        y: screen_y,
-    };
+    rltk::Point { x, y }
 }
 
-pub fn screen_to_tile(ecs: &World, ctx: &mut Rltk, point: rltk::Point) -> rltk::Point {
+pub fn screen_to_tile(ecs: &World, point: Point) -> Point {
     let player_pos = ecs.fetch::<Point>();
-    let (x_chars, y_chars) = ctx.get_char_size();
 
-    let center_x = (x_chars / 2) as i32;
-    let center_y = (y_chars / 2) as i32;
+    let center_x = (CONFIG.width / 2) as i32;
+    let center_y = (CONFIG.height / 2) as i32;
 
     let min_x = player_pos.x - center_x;
     let min_y = player_pos.y - center_y;
 
-    let tile_x = point.x + min_x;
-    let tile_y = point.y + min_y;
-    return rltk::Point {
-        x: tile_x,
-        y: tile_y,
-    };
+    let x = point.x + min_x;
+    let y = point.y + min_y;
+    rltk::Point { x, y }
 }
 
-pub fn in_screen_bounds(ecs: &World, ctx: &mut Rltk, x: i32, y: i32) -> bool {
-    let (min_x, max_x, min_y, max_y) = get_screen_bounds(ecs, ctx);
-    let screen_x = x - min_x;
-    let screen_y = y - min_y;
+pub fn in_screen_bounds(ecs: &World, x: i32, y: i32) -> bool {
+    let tile = Point{x, y};
+    let screen_pt = tile_to_screen(ecs, tile);
 
-    if screen_x > 1
-        && screen_x < (max_x - min_x) - 1
-        && screen_y > 1
-        && screen_y < (max_y - min_y) - 1
+    if screen_pt.x > 1
+        && screen_pt.x < CONFIG.width as i32 - 1
+        && screen_pt.y > 1
+        && screen_pt.y < CONFIG.height as i32 - 1
     {
         return true;
     }
     return false;
 }
 
+pub fn screen_fov(ecs: &World, screen_pt: Point, radius: i32, ) -> Vec<Point>{
+    let curs_tile = screen_to_tile(ecs, screen_pt);
+    let map = ecs.fetch::<Map>();
+    let blast_tiles = rltk::field_of_view(curs_tile, radius, &*map);
+    // let mut ret = Vec::<Point>::new();
+    blast_tiles.iter().map(|x| tile_to_screen(ecs, *x)).collect()
+}
+
 pub fn render_camera(ecs: &World, ctx: &mut Rltk) {
     let map = ecs.fetch::<Map>();
-    let (min_x, max_x, min_y, max_y) = get_screen_bounds(ecs, ctx);
+    let (min_x, max_x, min_y, max_y) = get_screen_bounds(ecs);
 
     let map_width = map.width - 1;
     let map_height = map.height - 1;
@@ -110,22 +109,15 @@ pub fn render_camera(ecs: &World, ctx: &mut Rltk) {
     data.sort_by(|&a, &b| b.1.render_order.cmp(&a.1.render_order));
     for (pos, render, _hidden) in data.iter() {
         let idx = map.xy_idx(pos.x, pos.y);
-        if map.visible_tiles[idx] {
-            let entity_screen_x = pos.x - min_x;
-            let entity_screen_y = pos.y - min_y;
-            if entity_screen_x > 0
-                && entity_screen_x < map_width
-                && entity_screen_y > 0
-                && entity_screen_y < map_height
-            {
-                ctx.set(
-                    entity_screen_x,
-                    entity_screen_y,
-                    render.fg,
-                    render.bg,
-                    render.glyph,
-                );
-            }
+        if map.visible_tiles[idx] && in_screen_bounds(ecs, pos.x, pos.y) {
+            let screen_pt = tile_to_screen(ecs, rltk::Point { x: pos.x, y: pos.y });
+            ctx.set(
+                screen_pt.x,
+                screen_pt.y,
+                render.fg,
+                render.bg,
+                render.glyph,
+            );
         }
     }
 }
@@ -161,7 +153,7 @@ fn get_tile_glyph(idx: usize, map: &Map) -> (rltk::FontCharType, RGB, RGB) {
 // is the guard here on total tiles, or on window dimentions?
 fn is_revealed_and_wall(map: &Map, x: i32, y: i32) -> bool {
     let idx = map.xy_idx(x, y);
-    if idx >= map::MAPCOUNT {
+    if idx >= map.tile_count {
         return false;
     }
     map.tiles[idx] == TileType::Wall && map.revealed_tiles[idx]

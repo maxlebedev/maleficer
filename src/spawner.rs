@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use super::rect::Rect;
 use super::{components, CombatStats, Name, Player, Position, Renderable, Viewshed, COLORS};
-use crate::map;
+use crate::Map;
 use crate::raws::{get_spawn_table_for_depth, spawn_named_entity, SpawnType, RAWS};
 use crate::systems::random_table::RandomTable;
 use rltk::RandomNumberGenerator;
@@ -23,15 +23,16 @@ pub fn spawn_room(ecs: &mut World, room: &Rect, depth: i32) {
     {
         let mut rng = ecs.write_resource::<RandomNumberGenerator>();
         let num_spawns = rng.roll_dice(1, MAX_SPAWNS + 3) - 3;
+        let map = ecs.fetch::<Map>();
 
         for _i in 0..num_spawns {
             let mut added = false;
             let mut tries = 0;
             // We try to resolve collisions 20x
             while !added && tries < 20 {
-                let x = (room.x1 + rng.roll_dice(1, i32::abs(room.x2 - room.x1))) as usize;
-                let y = (room.y1 + rng.roll_dice(1, i32::abs(room.y2 - room.y1))) as usize;
-                let idx = (y * map::MAPWIDTH) + x;
+                let x = room.x1 + rng.roll_dice(1, i32::abs(room.x2 - room.x1));
+                let y = room.y1 + rng.roll_dice(1, i32::abs(room.y2 - room.y1));
+                let idx = map.xy_idx(x, y);
                 if !spawn_points.contains_key(&idx) {
                     spawn_points.insert(idx, spawn_table.roll(&mut rng));
                     added = true;
@@ -43,8 +44,11 @@ pub fn spawn_room(ecs: &mut World, room: &Rect, depth: i32) {
     }
 
     for spawn in spawn_points.iter() {
-        let x = (*spawn.0 % map::MAPWIDTH) as i32;
-        let y = (*spawn.0 / map::MAPWIDTH) as i32;
+        let (x, y);
+        {
+            let map = ecs.fetch::<Map>();
+            (x, y) = map.idx_xy(*spawn.0);
+        }
 
         spawn_named_entity(
             &RAWS.lock().unwrap(),
@@ -101,6 +105,9 @@ mod tests {
         let mut test_state = State { ecs: World::new() };
         test_state.ecs.insert(rltk::RandomNumberGenerator::new());
         test_state.ecs.register::<Renderable>();
+
+        let map = Map::new(1, 64, 64);
+        test_state.ecs.insert(map);
 
         let new_room = rect::Rect::new(1, 1, 10, 10);
         let depth = 0;

@@ -137,7 +137,6 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32, radius: i32) -
     let player_pos = ecs.fetch::<Point>();
     let viewsheds = ecs.read_storage::<Viewshed>();
     let mut cursor = ecs.fetch_mut::<Cursor>();
-    let map = ecs.fetch::<Map>();
 
     ctx.print_color(5, 0, COLORS.yellow, COLORS.black, "Select Target:");
 
@@ -149,8 +148,8 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32, radius: i32) -
         for idx in visible.visible_tiles.iter() {
             let distance = rltk::DistanceAlg::Pythagoras.distance2d(*player_pos, *idx);
             if distance <= range as f32 {
-                if camera::in_screen_bounds(ecs, ctx, idx.x, idx.y) {
-                    let screen_pt = camera::tile_to_screen(ecs, ctx, *idx);
+                if camera::in_screen_bounds(ecs, idx.x, idx.y) {
+                    let screen_pt = camera::tile_to_screen(ecs, *idx);
                     ctx.set_bg(screen_pt.x, screen_pt.y, COLORS.blue);
                     available_cells.push(*idx);
                 }
@@ -162,7 +161,7 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32, radius: i32) -
 
     let mut valid_target = false;
     for idx in available_cells.iter() {
-        let scr_pt = camera::tile_to_screen(ecs, ctx, *idx);
+        let scr_pt = camera::tile_to_screen(ecs, *idx);
         if scr_pt.x == cursor.point.x && scr_pt.y == cursor.point.y {
             valid_target = true;
         }

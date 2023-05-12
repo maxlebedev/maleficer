@@ -227,7 +227,7 @@ impl GameState for State {
                             //this is: fn reset_cursor_pos
                             let player_pos = self.ecs.fetch::<Point>();
                             let mut cursor = self.ecs.fetch_mut::<Cursor>();
-                            cursor.point = camera::tile_to_screen(&self.ecs, ctx, *player_pos);
+                            cursor.point = camera::tile_to_screen(&self.ecs, *player_pos);
                         } else {
                             let mut intent = self.ecs.write_storage::<WantsToUseItem>();
                             intent
@@ -267,7 +267,7 @@ impl GameState for State {
                         let mut intent = self.ecs.write_storage::<WantsToUseItem>();
                         let cursor = self.ecs.fetch::<Cursor>();
                         // TODO: should screen_to_tile be an impl in cursor?
-                        let target = camera::screen_to_tile(&self.ecs, ctx, cursor.point);
+                        let target = camera::screen_to_tile(&self.ecs, cursor.point);
                         intent
                             .insert(
                                 *self.ecs.fetch::<Entity>(),
@@ -317,7 +317,7 @@ impl State {
 
     fn new_game(&mut self) {
         self.ecs.delete_all();
-        let map = Map::new_map_rooms_and_corridors(1);
+        let map = Map::new_map_rooms_and_corridors(1, 64, 64);
         let (player_x, player_y) = map.rooms[0].center();
 
         for room in map.rooms.iter().skip(1) {
@@ -382,7 +382,7 @@ impl State {
         {
             let mut worldmap_resource = self.ecs.write_resource::<Map>();
             let current_depth = worldmap_resource.depth;
-            *worldmap_resource = Map::new_map_rooms_and_corridors(current_depth + 1);
+            *worldmap_resource = Map::new_map_rooms_and_corridors(current_depth + 1, 64,64);
             worldmap = worldmap_resource.clone();
         }
 
@@ -472,7 +472,6 @@ fn main() -> rltk::BError {
 
     let mut context: Rltk = rb.unwrap().with_title("Malefactor").build()?;
     context.screen_burn_color(COLORS.dark_grey);
-    // TODO: how to actually resize?
 
     context.with_post_scanlines(true);
     let mut gs = State { ecs: World::new() };
@@ -485,7 +484,7 @@ fn main() -> rltk::BError {
 
     raws::load_raws();
 
-    let map = Map::dummy_map();
+    let map = Map::new(1, 64, 64);
     gs.ecs.insert(map);
 
     let gamelog = GameLog {
@@ -507,3 +506,6 @@ mod tests {
         register_all(&mut test_state);
     }
 }
+
+// TODO: broken
+// * rooms spawn at the edge and don't get a 4th wall

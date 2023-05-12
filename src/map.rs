@@ -6,11 +6,6 @@ use serde::{Deserialize, Serialize};
 use specs::prelude::*;
 use std::cmp::{max, min};
 
-// These are for the map tiles only
-pub const MAPWIDTH: usize = 128;
-pub const MAPHEIGHT: usize = 128;
-pub const MAPCOUNT: usize = MAPHEIGHT * MAPWIDTH;
-
 // TODO: things in crossterm update slowly, only when I spam keys
 
 #[derive(PartialEq, Copy, Clone, Serialize, Deserialize)]
@@ -30,6 +25,7 @@ pub struct Map {
     pub visible_tiles: Vec<bool>,
     pub blocked: Vec<bool>,
     pub depth: i32,
+    pub tile_count: usize,
 
     #[serde(skip_serializing)]
     #[serde(skip_deserializing)]
@@ -42,9 +38,10 @@ impl Map {
     }
 
     /// for DRY reasons. TODO: actually use this
-    pub fn idx_xy(idx: usize) -> (i32, i32) {
-        let x = idx % MAPWIDTH;
-        let y = idx / MAPWIDTH;
+    pub fn idx_xy(&self, idx: usize) -> (i32, i32) {
+        let id = idx as i32;
+        let x = id % self.width;
+        let y = id / self.width;
         (x as i32, y as i32)
     }
 
@@ -69,7 +66,7 @@ impl Map {
     fn apply_horizontal_tunnel(&mut self, x1: i32, x2: i32, y: i32) {
         for x in min(x1, x2)..=max(x1, x2) {
             let idx = self.xy_idx(x, y);
-            if idx > 0 && idx < MAPCOUNT {
+            if idx > 0 && idx < self.tile_count {
                 self.tiles[idx] = TileType::Floor;
             }
         }
@@ -78,7 +75,7 @@ impl Map {
     fn apply_vertical_tunnel(&mut self, y1: i32, y2: i32, x: i32) {
         for y in min(y1, y2)..=max(y1, y2) {
             let idx = self.xy_idx(x, y);
-            if idx > 0 && idx < MAPCOUNT {
+            if idx > 0 && idx < self.tile_count {
                 self.tiles[idx] = TileType::Floor;
             }
         }
@@ -90,33 +87,38 @@ impl Map {
         }
     }
 
-    pub fn dummy_map() -> Map {
+    pub fn new(new_depth: i32, width: i32, height: i32) -> Map {
+        let map_tile_count = (width*height) as usize;
         Map {
-            tiles: vec![TileType::Wall; MAPCOUNT],
+            tiles: vec![TileType::Wall; map_tile_count],
             rooms: Vec::new(),
-            width: MAPWIDTH as i32,
-            height: MAPHEIGHT as i32,
-            revealed_tiles: vec![false; MAPCOUNT],
-            visible_tiles: vec![false; MAPCOUNT],
-            blocked: vec![false; MAPCOUNT],
-            tile_content: vec![Vec::new(); MAPCOUNT],
-            depth: 0,
+            width,
+            height,
+            revealed_tiles: vec![false; map_tile_count],
+            visible_tiles: vec![false; map_tile_count],
+            blocked: vec![false; map_tile_count],
+            tile_content: vec![Vec::new(); map_tile_count],
+            depth: new_depth,
+            tile_count: map_tile_count,
+            // TODO: no view_blocked?
         }
     }
 
     /// Makes a new map using the algorithm from http://rogueliketutorials.com/tutorials/tcod/part-3/
     /// This gives a handful of random rooms and corridors joining them together.
-    pub fn new_map_rooms_and_corridors(new_depth: i32) -> Map {
+    pub fn new_map_rooms_and_corridors(new_depth: i32, width: i32, height: i32) -> Map {
+        let map_tile_count = (width*height) as usize;
         let mut map = Map {
-            tiles: vec![TileType::Wall; MAPCOUNT],
+            tiles: vec![TileType::Wall; map_tile_count],
             rooms: Vec::new(),
-            width: MAPWIDTH as i32,
-            height: MAPHEIGHT as i32,
-            revealed_tiles: vec![false; MAPCOUNT],
-            visible_tiles: vec![false; MAPCOUNT],
-            blocked: vec![false; MAPCOUNT],
-            tile_content: vec![Vec::new(); MAPCOUNT],
+            width,
+            height,
+            revealed_tiles: vec![false; map_tile_count],
+            visible_tiles: vec![false; map_tile_count],
+            blocked: vec![false; map_tile_count],
+            tile_content: vec![Vec::new(); map_tile_count],
             depth: new_depth,
+            tile_count: map_tile_count,
         };
 
         const MAX_ROOMS: i32 = 30;
