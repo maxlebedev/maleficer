@@ -171,7 +171,7 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32, radius: i32) -
         curs_color = COLORS.cyan;
     }
     ctx.set_bg(cursor.point.x, cursor.point.y, curs_color);
-    let blast_tiles = rltk::field_of_view(cursor.point, radius, &*map);
+    let blast_tiles = camera::screen_fov(ecs, cursor.point, radius);
     for tile in blast_tiles.iter() {
         if *tile == cursor.point {
             continue;
