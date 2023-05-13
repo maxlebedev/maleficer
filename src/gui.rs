@@ -1,14 +1,18 @@
 use rltk::{Point, Rltk};
 use specs::prelude::*;
 
-use crate::config::{INPUT, CONFIG};
+use crate::config::{CONFIG, INPUT};
 use crate::{camera, Map, COLORS};
 
 use super::{components, GameLog, Player, RunState, State};
 pub use components::*;
 
 // TODO: this shouldn't live here
-pub const SCHOOLS: [&str; 3] = ["fireball", "magic_missile", "healing"];
+pub const SCHOOLS: [&str; 3] = [
+    "unimplemented spells school 1",
+    "unimplemented spells school 2",
+    "unimplemented spells school 3",
+];
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum MainMenuSelection {

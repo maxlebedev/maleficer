@@ -88,7 +88,7 @@ impl Map {
     }
 
     pub fn new(new_depth: i32, width: i32, height: i32) -> Map {
-        let map_tile_count = (width*height) as usize;
+        let map_tile_count = (width * height) as usize;
         Map {
             tiles: vec![TileType::Wall; map_tile_count],
             rooms: Vec::new(),
@@ -107,7 +107,7 @@ impl Map {
     /// Makes a new map using the algorithm from http://rogueliketutorials.com/tutorials/tcod/part-3/
     /// This gives a handful of random rooms and corridors joining them together.
     pub fn new_map_rooms_and_corridors(new_depth: i32, width: i32, height: i32) -> Map {
-        let map_tile_count = (width*height) as usize;
+        let map_tile_count = (width * height) as usize;
         let mut map = Map {
             tiles: vec![TileType::Wall; map_tile_count],
             rooms: Vec::new(),
@@ -226,5 +226,15 @@ impl BaseMap for Map {
         };
 
         exits
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::map::*;
+
+    #[test]
+    fn test_map_new() {
+        Map::new_map_rooms_and_corridors(1, 64, 64);
     }
 }
