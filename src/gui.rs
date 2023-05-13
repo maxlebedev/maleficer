@@ -69,7 +69,7 @@ pub fn draw_ui(ecs: &World, ctx: &mut Rltk) {
 
     let mut y = height + 1; // 44;
     for s in log.entries.iter().rev() {
-        if y < height + ui_height {
+        if y < height + ui_height -1 {
             ctx.print(2, y, s);
         }
         y += 1;

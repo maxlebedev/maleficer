@@ -38,7 +38,7 @@ pub fn delete_the_dead(ecs: &mut World) {
                     None => {
                         let victim_name = names.get(entity);
                         if let Some(victim_name) = victim_name {
-                            log.entries.push(format!("{} is dead", &victim_name.name));
+                            log.entries.push(format!("{} is no more", &victim_name.name));
                         }
                         dead.push(entity)
                     }
