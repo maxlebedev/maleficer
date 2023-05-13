@@ -194,49 +194,29 @@ fn wall_glyph(map: &Map, x: i32, y: i32) -> rltk::FontCharType {
         5 => rltk::to_cp437('╝'), // ╝ Wall to the north and west
         6 => rltk::to_cp437('╗'), // ╗ Wall to the south and west
         7 => match diag {
-            1 | 2 | 3 | 6 | 7 | 9 | 11 => rltk::to_cp437('║'),
-            5 => rltk::to_cp437('╗'),
-            10 => rltk::to_cp437('╝'),
+            3 | 6 | 7 | 9 | 11 => rltk::to_cp437('║'),
             _ => rltk::to_cp437('╣'), // ╣ Wall to the north, south and west
         },
         8 => rltk::to_cp437('═'),  // ═ Wall only to the east
         9 => rltk::to_cp437('╚'),  // ╚ Wall to the north and east
         10 => rltk::to_cp437('╔'), // ╔ Wall to the south and east
         11 => match diag {
-            4 | 6 | 8 | 9 | 12 | 13 | 14 => rltk::to_cp437('║'),
-            5 => rltk::to_cp437('╔'),
-            10 => rltk::to_cp437('╚'),
+            6 | 9 | 12 | 13 | 14 => rltk::to_cp437('║'),
             _ => rltk::to_cp437('╠'), // ╠ Wall to the north, south and east
         },
         12 => rltk::to_cp437('═'), // ═ Wall to the east and west
         13 => match diag {
-            1 | 4 | 5 | 6 | 7 | 9 | 10 | 13 => rltk::to_cp437('═'),
-            3 => rltk::to_cp437('╚'),
-            12 => rltk::to_cp437('╝'),
-            _ => rltk::to_cp437('╩'),
+            5 | 6 | 7 | 9 | 10 | 13 => rltk::to_cp437('═'),
+            _ => rltk::to_cp437('╩'), // ╦ Wall to the east, west, and north
+
         },
         14 => match diag {
-            2 | 6 | 8 | 9 | 10 | 11 | 14 => rltk::to_cp437('═'),
-            12 => rltk::to_cp437('╗'), // TODO: probs wrong?
-            3 => rltk::to_cp437('╔'),
-            _ => rltk::to_cp437('╦'), // ╦ Wall to the east, west, and north
+            6 | 9 | 10 | 11 | 14 => rltk::to_cp437('═'),
+            _ => rltk::to_cp437('╦'), // ╦ Wall to the east, west, and south
         },
-        15 => match diag {
-            3 => rltk::to_cp437('╣'),
-            12 => rltk::to_cp437('╠'),
-            5 => rltk::to_cp437('╦'),
-            10 => rltk::to_cp437('╩'),
-            7 => rltk::to_cp437('╔'),
-            11 => rltk::to_cp437('╚'),
-            13 => rltk::to_cp437('╗'),
-            14 => rltk::to_cp437('╝'),
-            _ => rltk::to_cp437('╬'),
-        },
+        15 => rltk::to_cp437('╬'),
         _ => rltk::to_cp437('#'), // # We missed one?
     }
-    // TODO: One big visual bug:
-    // when ╦ diag=2 ie, a wall to the southwest. Its ambiguous if that wall connects to the south
-    // wall or runs parallel to it
 }
 
 #[cfg(test)]
