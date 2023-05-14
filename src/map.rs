@@ -42,7 +42,7 @@ impl Map {
         let id = idx as i32;
         let x = id % self.width;
         let y = id / self.width;
-        (x as i32, y as i32)
+        (x, y)
     }
 
     fn is_exit_valid(&self, x: i32, y: i32) -> bool {

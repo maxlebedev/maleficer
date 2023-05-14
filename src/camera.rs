@@ -82,22 +82,18 @@ pub fn render_camera(ecs: &World, ctx: &mut Rltk) {
     let map_width = map.width - 1;
     let map_height = map.height - 1;
 
-    let mut y = 0;
-    for ty in min_y..max_y {
-        let mut x = 0;
-        for tx in min_x..max_x {
+    for (y, ty) in (min_y..max_y).enumerate() {
+        for (x, tx) in (min_x..max_x).enumerate() {
             if tx > 0 && tx < map_width && ty > 0 && ty < map_height {
                 let idx = map.xy_idx(tx, ty);
                 if map.revealed_tiles[idx] {
-                    let (glyph, fg, bg) = get_tile_glyph(idx, &*map);
+                    let (glyph, fg, bg) = get_tile_glyph(idx, &map);
                     ctx.set(x, y, fg, bg, glyph);
                 }
             } else if SHOW_BOUNDARIES {
                 ctx.set(x, y, COLORS.grey, COLORS.black, rltk::to_cp437('+'));
             }
-            x += 1;
         }
-        y += 1;
     }
 
     let positions = ecs.read_storage::<Position>();
@@ -131,7 +127,7 @@ fn get_tile_glyph(idx: usize, map: &Map) -> (rltk::FontCharType, RGB, RGB) {
         TileType::Wall => {
             let x = idx as i32 % map.width;
             let y = idx as i32 / map.width;
-            glyph = wall_glyph(&*map, x, y);
+            glyph = wall_glyph(&map, x, y);
             fg = COLORS.green;
         }
         TileType::DownStairs => {
@@ -150,7 +146,7 @@ fn get_tile_glyph(idx: usize, map: &Map) -> (rltk::FontCharType, RGB, RGB) {
 fn is_revealed_and_wall(map: &Map, x: i32, y: i32) -> bool {
     let idx = map.xy_idx(x, y);
     if idx >= map.tile_count {
-        return false;
+        false;
     }
     map.tiles[idx] == TileType::Wall && map.revealed_tiles[idx]
 }

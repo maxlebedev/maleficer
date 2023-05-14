@@ -151,12 +151,10 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32, radius: i32) -
         // We have a viewshed
         for idx in visible.visible_tiles.iter() {
             let distance = rltk::DistanceAlg::Pythagoras.distance2d(*player_pos, *idx);
-            if distance <= range as f32 {
-                if camera::in_screen_bounds(ecs, idx.x, idx.y) {
-                    let screen_pt = camera::tile_to_screen(ecs, *idx);
-                    ctx.set_bg(screen_pt.x, screen_pt.y, COLORS.blue);
-                    available_cells.push(*idx);
-                }
+            if distance <= range as f32 && camera::in_screen_bounds(ecs, idx.x, idx.y) {
+                let screen_pt = camera::tile_to_screen(ecs, *idx);
+                ctx.set_bg(screen_pt.x, screen_pt.y, COLORS.blue);
+                available_cells.push(*idx);
             }
         }
     } else {
