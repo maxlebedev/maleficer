@@ -29,6 +29,10 @@ impl FromStr for VirtualKeyCode {
             ("return", VirtualKeyCode::Return),
             ("space", VirtualKeyCode::Space),
             ("w", VirtualKeyCode::W),
+            ("a", VirtualKeyCode::A),
+            ("s", VirtualKeyCode::S),
+            ("q", VirtualKeyCode::Q),
+            ("e", VirtualKeyCode::E),
         ]);
         *key_map.get(&chr).unwrap()
     }
