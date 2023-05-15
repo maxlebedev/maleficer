@@ -140,6 +140,10 @@ impl GameState for State {
                 }
             }
             RunState::CharGen { selection } => {
+                {
+                    let mut gamelog = self.ecs.fetch_mut::<gamelog::GameLog>();
+                    gamelog.entries.clear();
+                }
                 let (menu_result, ch_selection) = gui::chargen_menu(self, ctx, selection);
                 match menu_result {
                     gui::MenuAction::Cancel => {
@@ -325,6 +329,7 @@ impl State {
         }
         self.ecs.insert(map);
 
+        // TODO: consider making this its own function?
         let player_entity = spawner::player(&mut self.ecs, player_x, player_y);
         self.ecs.insert(player_entity);
 

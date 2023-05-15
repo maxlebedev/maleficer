@@ -53,8 +53,8 @@ fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
             }
         }
         if !map.blocked[destination_idx] {
-            pos.x = num::clamp(pos.x + delta_x, 0, map.width - 1);
-            pos.y = num::clamp(pos.y + delta_y, 0, map.height - 1);
+            pos.x = i32::clamp(pos.x + delta_x, 0, map.width - 1);
+            pos.y = i32::clamp(pos.y + delta_y, 0, map.height - 1);
 
             let mut ppos = ecs.write_resource::<Point>();
             ppos.x = pos.x;

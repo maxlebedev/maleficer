@@ -63,6 +63,13 @@ impl FromStr for VirtualKeyCode {
             ("shift", VirtualKeyCode::LShift),
             ("alt", VirtualKeyCode::LAlt),
             ("ctrl", VirtualKeyCode::LControl),
+            ("tab", VirtualKeyCode::Tab),
+
+            ("/", VirtualKeyCode::Slash),
+            (";", VirtualKeyCode::Semicolon),
+            (":", VirtualKeyCode::Colon),
+            (",", VirtualKeyCode::Comma),
+            (".", VirtualKeyCode::Period),
         ]);
         *key_map.get(&chr).unwrap()
     }
