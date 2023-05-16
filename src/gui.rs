@@ -9,9 +9,9 @@ pub use components::*;
 
 // TODO: this shouldn't live here
 pub const SCHOOLS: [&str; 3] = [
-    "unimplemented spells school 1",
-    "unimplemented spells school 2",
-    "unimplemented spells school 3",
+    "School of Famine",
+    "School of the Flood",
+    "School of the Unknown Void",
 ];
 
 #[derive(PartialEq, Copy, Clone)]
@@ -99,8 +99,14 @@ pub fn show_inventory(
         .filter(|item| item.0.owner == *player_entity);
 
     let halfwidth = width / 2;
+        
+    # Item Name Box
     ctx.draw_box(0, 0, halfwidth, height, fgcolor, bgcolor);
+        
+    # Item Description Box
     ctx.draw_box(halfwidth + 1, 0, halfwidth, height, fgcolor, bgcolor);
+    
+    # Information Boxes
     ctx.print_color_centered(0, COLORS.yellow, bgcolor, "Inventory");
     ctx.print_color_centered(height, COLORS.yellow, bgcolor, "ESCAPE to cancel");
 
