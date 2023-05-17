@@ -146,7 +146,7 @@ fn get_tile_glyph(idx: usize, map: &Map) -> (rltk::FontCharType, RGB, RGB) {
 fn is_revealed_and_wall(map: &Map, x: i32, y: i32) -> bool {
     let idx = map.xy_idx(x, y);
     if idx >= map.tile_count {
-        false;
+        return false;
     }
     map.tiles[idx] == TileType::Wall && map.revealed_tiles[idx]
 }
