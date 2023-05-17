@@ -14,42 +14,58 @@ use specs::saveload::MarkedBuilder;
 
 const MAX_SPAWNS: i32 = 4;
 
-#[allow(clippy::map_entry)]
-pub fn spawn_room(ecs: &mut World, room: &Rect, depth: i32) {
-    let spawn_table = room_table(depth);
-    let mut spawn_points: HashMap<usize, String> = HashMap::new();
-
-    // Scope to keep the borrow checker happy
-    {
-        let mut rng = ecs.write_resource::<RandomNumberGenerator>();
-        let num_spawns = rng.roll_dice(1, MAX_SPAWNS + 3) - 3;
+pub fn spawn_room(ecs: &mut World, room : &Rect, map_depth: i32) {
+    let mut possible_targets : Vec<usize> = Vec::new();
+    { // Borrow scope - to keep access to the map separated
         let map = ecs.fetch::<Map>();
-
-        for _i in 0..num_spawns {
-            let mut added = false;
-            let mut tries = 0;
-            // We try to resolve collisions 20x
-            while !added && tries < 20 {
-                let x = room.x1 + rng.roll_dice(1, i32::abs(room.x2 - room.x1));
-                let y = room.y1 + rng.roll_dice(1, i32::abs(room.y2 - room.y1));
+        for y in room.y1 + 1 .. room.y2 {
+            for x in room.x1 + 1 .. room.x2 {
                 let idx = map.xy_idx(x, y);
-                if !spawn_points.contains_key(&idx) {
-                    spawn_points.insert(idx, spawn_table.roll(&mut rng));
-                    added = true;
-                } else {
-                    tries += 1;
+                if map.in_bounds(idx){
+                    possible_targets.push(idx);
                 }
+                /* TODO: this code had an out-of-bounds error, meaning the room coords are sus?
+                let idx = map.xy_idx(x, y);
+                if map.tiles[idx] == TileType::Floor {
+                    possible_targets.push(idx);
+                }*/
             }
         }
     }
 
+    spawn_region(ecs, &possible_targets, map_depth);
+}
+
+/// Fills a region with stuff!
+pub fn spawn_region(ecs: &mut World, area : &[usize], map_depth: i32) {
+    let spawn_table = room_table(map_depth);
+    let mut spawn_points : HashMap<usize, String> = HashMap::new();
+    let mut areas : Vec<usize> = Vec::from(area);
+
+    // Scope to keep the borrow checker happy
+    {
+        let mut rng = ecs.write_resource::<RandomNumberGenerator>();
+        let num_spawns = i32::min(areas.len() as i32, rng.roll_dice(1, MAX_SPAWNS + 3) + (map_depth - 1) - 3);
+        if num_spawns == 0 { return; }
+
+        for _i in 0 .. num_spawns {
+            let array_index = if areas.len() == 1 { 0usize } else { (rng.roll_dice(1, areas.len() as i32)-1) as usize };
+
+            let map_idx = areas[array_index];
+            spawn_points.insert(map_idx, spawn_table.roll(&mut rng));
+            areas.remove(array_index);
+        }
+    }
+
+    // Actually spawn the monsters
     for spawn in spawn_points.iter() {
+        // spawn_entity(ecs, &spawn);
         let (x, y);
         {
             let map = ecs.fetch::<Map>();
             (x, y) = map.idx_xy(*spawn.0);
         }
-
+        
         spawn_named_entity(
             &RAWS.lock().unwrap(),
             ecs.create_entity(),

@@ -47,6 +47,11 @@ pub fn draw_ui(ecs: &World, ctx: &mut Rltk) {
     let depth = format!("Depth: {}", map.depth);
     ctx.print_color(2, height, COLORS.yellow, COLORS.black, &depth);
 
+    // TODO: consider removing this for release?
+    let point = ecs.fetch::<Point>();
+    let coords = format!("Player Coords: {}:{}", point.x, point.y);
+    ctx.print_color(25, height, COLORS.yellow, COLORS.black, &coords);
+
     let combat_stats = ecs.read_storage::<CombatStats>();
     let players = ecs.read_storage::<Player>();
     for (_player, stats) in (&players, &combat_stats).join() {
