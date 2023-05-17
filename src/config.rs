@@ -24,7 +24,6 @@ impl FromStr for VirtualKeyCode {
             ("0", VirtualKeyCode::Key0),
             ("-", VirtualKeyCode::Minus),
             ("+", VirtualKeyCode::Plus),
-
             ("a", VirtualKeyCode::A),
             ("b", VirtualKeyCode::B),
             ("c", VirtualKeyCode::C),
@@ -54,7 +53,6 @@ impl FromStr for VirtualKeyCode {
             ("escape", VirtualKeyCode::Escape),
             ("return", VirtualKeyCode::Return),
             ("space", VirtualKeyCode::Space),
-
             ("left", VirtualKeyCode::Left),
             ("down", VirtualKeyCode::Down),
             ("right", VirtualKeyCode::Right),
@@ -64,7 +62,6 @@ impl FromStr for VirtualKeyCode {
             ("alt", VirtualKeyCode::LAlt),
             ("ctrl", VirtualKeyCode::LControl),
             ("tab", VirtualKeyCode::Tab),
-
             ("/", VirtualKeyCode::Slash),
             (";", VirtualKeyCode::Semicolon),
             (":", VirtualKeyCode::Colon),

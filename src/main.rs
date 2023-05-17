@@ -387,7 +387,7 @@ impl State {
         {
             let mut worldmap_resource = self.ecs.write_resource::<Map>();
             let current_depth = worldmap_resource.depth;
-            *worldmap_resource = Map::new_map_rooms_and_corridors(current_depth + 1, 100,100);
+            *worldmap_resource = Map::new_map_rooms_and_corridors(current_depth + 1, 100, 100);
             worldmap = worldmap_resource.clone();
         }
 

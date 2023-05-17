@@ -2,9 +2,9 @@ use std::collections::HashMap;
 
 use super::rect::Rect;
 use super::{components, CombatStats, Name, Player, Position, Renderable, Viewshed, COLORS};
-use crate::Map;
 use crate::raws::{get_spawn_table_for_depth, spawn_named_entity, SpawnType, RAWS};
 use crate::systems::random_table::RandomTable;
+use crate::Map;
 use rltk::RandomNumberGenerator;
 use specs::prelude::*;
 use specs::saveload::SimpleMarker;
@@ -14,14 +14,15 @@ use specs::saveload::MarkedBuilder;
 
 const MAX_SPAWNS: i32 = 4;
 
-pub fn spawn_room(ecs: &mut World, room : &Rect, map_depth: i32) {
-    let mut possible_targets : Vec<usize> = Vec::new();
-    { // Borrow scope - to keep access to the map separated
+pub fn spawn_room(ecs: &mut World, room: &Rect, map_depth: i32) {
+    let mut possible_targets: Vec<usize> = Vec::new();
+    {
+        // Borrow scope - to keep access to the map separated
         let map = ecs.fetch::<Map>();
-        for y in room.y1 + 1 .. room.y2 {
-            for x in room.x1 + 1 .. room.x2 {
+        for y in room.y1 + 1..room.y2 {
+            for x in room.x1 + 1..room.x2 {
                 let idx = map.xy_idx(x, y);
-                if map.in_bounds(idx){
+                if map.in_bounds(idx) {
                     possible_targets.push(idx);
                 }
                 /* TODO: this code had an out-of-bounds error, meaning the room coords are sus?
@@ -37,19 +38,28 @@ pub fn spawn_room(ecs: &mut World, room : &Rect, map_depth: i32) {
 }
 
 /// Fills a region with stuff!
-pub fn spawn_region(ecs: &mut World, area : &[usize], map_depth: i32) {
+pub fn spawn_region(ecs: &mut World, area: &[usize], map_depth: i32) {
     let spawn_table = room_table(map_depth);
-    let mut spawn_points : HashMap<usize, String> = HashMap::new();
-    let mut areas : Vec<usize> = Vec::from(area);
+    let mut spawn_points: HashMap<usize, String> = HashMap::new();
+    let mut areas: Vec<usize> = Vec::from(area);
 
     // Scope to keep the borrow checker happy
     {
         let mut rng = ecs.write_resource::<RandomNumberGenerator>();
-        let num_spawns = i32::min(areas.len() as i32, rng.roll_dice(1, MAX_SPAWNS + 3) + (map_depth - 1) - 3);
-        if num_spawns == 0 { return; }
+        let num_spawns = i32::min(
+            areas.len() as i32,
+            rng.roll_dice(1, MAX_SPAWNS + 3) + (map_depth - 1) - 3,
+        );
+        if num_spawns == 0 {
+            return;
+        }
 
-        for _i in 0 .. num_spawns {
-            let array_index = if areas.len() == 1 { 0usize } else { (rng.roll_dice(1, areas.len() as i32)-1) as usize };
+        for _i in 0..num_spawns {
+            let array_index = if areas.len() == 1 {
+                0usize
+            } else {
+                (rng.roll_dice(1, areas.len() as i32) - 1) as usize
+            };
 
             let map_idx = areas[array_index];
             spawn_points.insert(map_idx, spawn_table.roll(&mut rng));
@@ -65,7 +75,7 @@ pub fn spawn_region(ecs: &mut World, area : &[usize], map_depth: i32) {
             let map = ecs.fetch::<Map>();
             (x, y) = map.idx_xy(*spawn.0);
         }
-        
+
         spawn_named_entity(
             &RAWS.lock().unwrap(),
             ecs.create_entity(),

@@ -204,7 +204,6 @@ fn wall_glyph(map: &Map, x: i32, y: i32) -> rltk::FontCharType {
         13 => match diag {
             5 | 6 | 7 | 9 | 10 | 13 => rltk::to_cp437('═'),
             _ => rltk::to_cp437('╩'), // ╦ Wall to the east, west, and north
-
         },
         14 => match diag {
             6 | 9 | 10 | 11 | 14 => rltk::to_cp437('═'),
