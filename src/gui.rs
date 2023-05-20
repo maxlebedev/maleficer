@@ -130,6 +130,7 @@ pub fn show_inventory(
         None => (MenuAction::NoResponse, None),
         Some(key) => match key {
             _ if key == INPUT.exit => (MenuAction::Cancel, None),
+            _ if key == INPUT.inventory => (MenuAction::Cancel, None),
             _ if key == INPUT.up && selection > 0 => (MenuAction::Up, None),
             _ if key == INPUT.down && selection < equippable.len() - 1 => (MenuAction::Down, None),
             _ if key == INPUT.drop => (MenuAction::Drop, Some(equippable[selection])),
