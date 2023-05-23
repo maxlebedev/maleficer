@@ -1,7 +1,7 @@
 use crate::{gui, config::INPUT};
 
 use super::gamelog::GameLog;
-use rltk::{Point, Rltk};
+use rltk::{Point, Rltk, VirtualKeyCode};
 use specs::prelude::*;
 
 use super::{components, config, map, systems, RunState, State};
@@ -64,7 +64,7 @@ fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
     }
 }
 
-fn cast_spell(ecs: &mut World) {
+fn _cast_spell(ecs: &mut World) {
     let player_entity = ecs.fetch::<Entity>();
     let cursor = ecs.fetch::<Cursor>();
     let mut castables = ecs.write_storage::<WantsToCastSpell>();
@@ -126,9 +126,15 @@ fn get_item(ecs: &mut World) {
     }
 }
 
+fn use_hotkey(_ecs: &mut World, key: VirtualKeyCode) {
+    // TODO: some kind of key:item entity lookup
+    dbg!(key);
+}
+
 // TODO: protect from overflow on char/item select window
 
 pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
+    let hotkeys = vec![INPUT.hk1, INPUT.hk2, INPUT.hk3, INPUT.hk4];
     match ctx.key {
         None => return RunState::AwaitingInput, // Nothing happened
         Some(key) => match key {
@@ -141,8 +147,8 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
             _ if key == INPUT.pick_up => get_item(&mut gs.ecs),
             _ if key == INPUT.inventory => return RunState::ShowInventory { selection: 0 },
 
-            _ if key == INPUT.hk1 => cast_spell(&mut gs.ecs),
-
+            _ if hotkeys.contains(&key) => use_hotkey(&mut gs.ecs, key),
+                // cast_spell(&mut gs.ecs),
             _ if key == INPUT.select => {
                 // refactor to be context-dependant on tile
                 if map::try_next_level(&mut gs.ecs) {

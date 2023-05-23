@@ -87,6 +87,9 @@ pub struct Config {
     pub select: String,
     pub wait: String,
     pub hk1: String,
+    pub hk2: String,
+    pub hk3: String,
+    pub hk4: String,
 }
 
 pub struct Input {
@@ -101,6 +104,9 @@ pub struct Input {
     pub select: VirtualKeyCode,
     pub wait: VirtualKeyCode,
     pub hk1: VirtualKeyCode,
+    pub hk2: VirtualKeyCode,
+    pub hk3: VirtualKeyCode,
+    pub hk4: VirtualKeyCode,
 }
 
 lazy_static! {
@@ -117,6 +123,9 @@ lazy_static! {
         select: VirtualKeyCode::from_str(CONFIG.select.as_str()),
         wait: VirtualKeyCode::from_str(CONFIG.wait.as_str()),
         hk1: VirtualKeyCode::from_str(CONFIG.hk1.as_str()),
+        hk2: VirtualKeyCode::from_str(CONFIG.hk2.as_str()),
+        hk3: VirtualKeyCode::from_str(CONFIG.hk3.as_str()),
+        hk4: VirtualKeyCode::from_str(CONFIG.hk4.as_str()),
     };
 }
 

@@ -102,50 +102,6 @@ pub fn draw_world_ui(ecs: &World, ctx: &mut Rltk) {
     }
 }
 
-pub fn _draw_ui(ecs: &World, ctx: &mut Rltk) {
-    let ui_height = 7;
-    let height = BOUNDS.win_height - ui_height;
-    let width = BOUNDS.win_width;
-    ctx.draw_box(0, height, width - 1, 6, COLORS.white, COLORS.black);
-
-    let map = ecs.fetch::<Map>();
-    let depth = format!("Depth: {}", map.depth);
-    ctx.print_color(2, height, COLORS.yellow, COLORS.black, &depth);
-
-    // TODO: consider removing this for release?
-    let point = ecs.fetch::<Point>();
-    let coords = format!("Player Coords: {}:{}", point.x, point.y);
-    ctx.print_color(25, height, COLORS.yellow, COLORS.black, &coords);
-
-    let combat_stats = ecs.read_storage::<CombatStats>();
-    let players = ecs.read_storage::<Player>();
-    for (_player, stats) in (&players, &combat_stats).join() {
-        let health = format!(" HP: {} / {} ", stats.hp, stats.max_hp);
-        ctx.print_color(12, height, COLORS.yellow, COLORS.black, &health);
-
-        let hp_bar_left = width / 3;
-        let hp_bar_right = (width / 3) * 2;
-        ctx.draw_bar_horizontal(
-            hp_bar_left,
-            height,
-            hp_bar_right,
-            stats.hp,
-            stats.max_hp,
-            COLORS.red,
-            COLORS.black,
-        );
-    }
-    let log = ecs.fetch::<GameLog>();
-
-    let mut y = height + 1; // 44;
-    for s in log.entries.iter().rev() {
-        if y < height + ui_height - 1 {
-            ctx.print(2, y, s);
-        }
-        y += 1;
-    }
-}
-
 pub fn show_inventory(
     gs: &mut State,
     ctx: &mut Rltk,
@@ -162,11 +118,11 @@ pub fn show_inventory(
 
     let height = BOUNDS.view_height;
 
+    // TODO: sort inventory, and group similar items
     let inventory = (&backpack, &names, &entities)
         .join()
         .filter(|item| item.0.owner == *player_entity);
 
-    // this width math is icky, why?
     let halfwidth = BOUNDS.view_width / 2;
     ctx.draw_box(UI_WIDTH, 0, halfwidth-1, height, fgcolor, bgcolor);
     ctx.draw_box(halfwidth+UI_WIDTH, 0, halfwidth-1, height, fgcolor, bgcolor);
