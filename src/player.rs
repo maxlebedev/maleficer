@@ -1,10 +1,10 @@
-use crate::gui;
+use crate::{gui, config::INPUT};
 
 use super::gamelog::GameLog;
 use rltk::{Point, Rltk};
 use specs::prelude::*;
 
-use super::{components, config, config::INPUT, map, systems, RunState, State};
+use super::{components, config, map, systems, RunState, State};
 pub use components::*;
 
 pub fn make_character(ecs: &mut World) {

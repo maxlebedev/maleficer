@@ -1,7 +1,9 @@
+use std::cmp::min;
+
 use rltk::{Point, Rltk};
 use specs::prelude::*;
 
-use crate::config::{CONFIG, INPUT};
+use crate::config::{INPUT, BOUNDS};
 use crate::{camera, Map, COLORS};
 
 use super::{components, GameLog, Player, RunState, State};
@@ -37,10 +39,73 @@ pub enum MenuAction {
     Drop,
 }
 
-pub fn draw_ui(ecs: &World, ctx: &mut Rltk) {
+pub const UI_WIDTH: usize = 40;
+
+pub fn draw_char_ui(ecs: &World, ctx: &mut Rltk) {
+    // Sidebar with sections
+    // Char info
+    // Hotkeys
+    // Status Effects
+    // Inventory
+    let ui_height = BOUNDS.win_height;
+    let ui_start_x = 0;
+    let ui_start_y = 0;
+    let ui_width = UI_WIDTH -1; // the inside
+    ctx.draw_box(ui_start_x, ui_start_y, ui_width, ui_height, COLORS.white, COLORS.black);
+
+    let combat_stats = ecs.read_storage::<CombatStats>();
+    let players = ecs.read_storage::<Player>();
+    for (_player, stats) in (&players, &combat_stats).join() {
+        let health = format!("HP:{}/{} ", stats.hp, stats.max_hp);
+        ctx.print_color(ui_start_x+1, ui_start_y+1, COLORS.yellow, COLORS.black, &health);
+
+        let hp_bar_left = health.len();
+        let hp_bar_right = ui_width-10;
+        ctx.draw_bar_horizontal(
+            hp_bar_left,
+            ui_start_y+1,
+            hp_bar_right,
+            stats.hp,
+            stats.max_hp,
+            COLORS.red,
+            COLORS.black,
+        );
+    }
+}
+
+pub fn draw_world_ui(ecs: &World, ctx: &mut Rltk) {
+    // Sidebar with sections
+    // Depth
+    // cursor tile description
+    // Log
+    let ui_height = BOUNDS.win_height;
+    let ui_width = UI_WIDTH -1;
+    let ui_start_x = BOUNDS.win_width-UI_WIDTH;
+    let ui_start_y = 0;
+    ctx.draw_box(ui_start_x, ui_start_y, ui_width, ui_height, COLORS.white, COLORS.black);
+    let map = ecs.fetch::<Map>();
+    let depth = format!("Depth: {}", map.depth);
+    ctx.print_color(ui_start_x+1, 1, COLORS.yellow, COLORS.black, &depth);
+
+
+    let history = 20;
+    let log = ecs.fetch::<GameLog>();
+    let log_start = ui_height - min(history, log.entries.len());
+
+    // TODO: wrap log lines
+    let mut y = log_start;
+    for s in log.entries.iter().rev() {
+        if y < ui_height - 1 {
+            ctx.print(ui_start_x+1, y, s);
+        }
+        y += 1;
+    }
+}
+
+pub fn _draw_ui(ecs: &World, ctx: &mut Rltk) {
     let ui_height = 7;
-    let height = CONFIG.height - ui_height;
-    let width = CONFIG.width;
+    let height = BOUNDS.win_height - ui_height;
+    let width = BOUNDS.win_width;
     ctx.draw_box(0, height, width - 1, 6, COLORS.white, COLORS.black);
 
     let map = ecs.fetch::<Map>();
@@ -58,8 +123,8 @@ pub fn draw_ui(ecs: &World, ctx: &mut Rltk) {
         let health = format!(" HP: {} / {} ", stats.hp, stats.max_hp);
         ctx.print_color(12, height, COLORS.yellow, COLORS.black, &health);
 
-        let hp_bar_left = width / 3; // was 28
-        let hp_bar_right = (width / 3) * 2; // was 51
+        let hp_bar_left = width / 3;
+        let hp_bar_right = (width / 3) * 2;
         ctx.draw_bar_horizontal(
             hp_bar_left,
             height,
@@ -95,21 +160,21 @@ pub fn show_inventory(
     let backpack = gs.ecs.read_storage::<InBackpack>();
     let entities = gs.ecs.entities();
 
-    let ui_height = 7;
-    let height = CONFIG.height - ui_height;
-    let width = CONFIG.width;
+    let height = BOUNDS.view_height;
 
     let inventory = (&backpack, &names, &entities)
         .join()
         .filter(|item| item.0.owner == *player_entity);
 
-    let halfwidth = width / 2;
-    ctx.draw_box(0, 0, halfwidth, height, fgcolor, bgcolor);
-    ctx.draw_box(halfwidth + 1, 0, halfwidth, height, fgcolor, bgcolor);
+    // this width math is icky, why?
+    let halfwidth = BOUNDS.view_width / 2;
+    ctx.draw_box(UI_WIDTH, 0, halfwidth-1, height, fgcolor, bgcolor);
+    ctx.draw_box(halfwidth+UI_WIDTH, 0, halfwidth-1, height, fgcolor, bgcolor);
     ctx.print_color_centered(0, COLORS.yellow, bgcolor, "Inventory");
     ctx.print_color_centered(height, COLORS.yellow, bgcolor, "ESCAPE to cancel");
 
-    let inv_offset = 2;
+    let x_offset = UI_WIDTH+2;
+    let y_offset = 2;
     let mut equippable: Vec<Entity> = Vec::new();
     for (y, item) in inventory.enumerate() {
         let mut color = fgcolor;
@@ -117,8 +182,8 @@ pub fn show_inventory(
             color = hlcolor;
         }
         ctx.print_color(
-            inv_offset,
-            y + inv_offset,
+            x_offset,
+            y + y_offset,
             color,
             bgcolor,
             &item.1.name.to_string(),
@@ -179,7 +244,7 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32, radius: i32) -
         curs_color = COLORS.cyan;
     }
     ctx.set_bg(cursor.point.x, cursor.point.y, curs_color);
-    let blast_tiles = camera::screen_fov(ecs, cursor.point, radius);
+    let blast_tiles = camera::blast_tiles(ecs, cursor.point, radius);
     for tile in blast_tiles.iter() {
         if *tile == cursor.point {
             continue;
@@ -224,9 +289,8 @@ pub fn chargen_menu(
     let bgcolor = COLORS.black;
     let hlcolor = COLORS.magenta;
 
-    let ui_height = 7;
-    let height = CONFIG.height - ui_height;
-    let width = CONFIG.width;
+    let height = BOUNDS.win_height;
+    let width = BOUNDS.win_width;
 
     let halfwidth = width / 2;
     ctx.draw_box(0, 0, halfwidth, height, fgcolor, bgcolor);
@@ -311,8 +375,6 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
                 _ if key == INPUT.exit => {
                     return MainMenuResult::NoSelection {
                         selected: MainMenuSelection::Quit,
-                        // TODO: here we can continue. maybe?
-                        // Alternatively there would need to be a continue button
                     };
                 }
                 _ if key == INPUT.up && idx > 0 => {

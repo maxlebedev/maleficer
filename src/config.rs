@@ -3,6 +3,8 @@ pub use rltk::VirtualKeyCode;
 use serde::Deserialize;
 use std::collections::HashMap;
 
+use crate::gui;
+
 trait FromStr {
     fn from_str(chr: &str) -> Self;
 }
@@ -85,9 +87,6 @@ pub struct Config {
     pub select: String,
     pub wait: String,
     pub hk1: String,
-
-    pub width: usize,
-    pub height: usize,
 }
 
 pub struct Input {
@@ -120,6 +119,26 @@ lazy_static! {
         hk1: VirtualKeyCode::from_str(CONFIG.hk1.as_str()),
     };
 }
+
+
+#[derive(Deserialize, Debug)]
+pub struct Bounds{
+    pub win_width: usize,
+    pub win_height: usize,
+    // pub map_width: usize,
+    // pub map_height: usize,
+    pub view_width: usize,
+    pub view_height: usize,
+}
+
+pub const BOUNDS: Bounds = Bounds {
+    win_width: 180 + gui::UI_WIDTH + gui::UI_WIDTH,
+    win_height: 120,
+    // map_width: 100, // these are better stored in map.width
+    // map_height: 100, // and map.height
+    view_width: 180,
+    view_height: 120,
+};
 
 fn get_config() -> Config {
     let configs: Config = HoconLoader::new()
