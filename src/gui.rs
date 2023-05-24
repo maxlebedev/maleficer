@@ -1,9 +1,10 @@
 use std::cmp::min;
 
+use itertools::Itertools;
 use rltk::{Point, Rltk};
 use specs::prelude::*;
 
-use crate::config::{INPUT, BOUNDS};
+use crate::config::{BOUNDS, INPUT};
 use crate::{camera, Map, COLORS};
 
 use super::{components, GameLog, Player, RunState, State};
@@ -50,20 +51,33 @@ pub fn draw_char_ui(ecs: &World, ctx: &mut Rltk) {
     let ui_height = BOUNDS.win_height;
     let ui_start_x = 0;
     let ui_start_y = 0;
-    let ui_width = UI_WIDTH -1; // the inside
-    ctx.draw_box(ui_start_x, ui_start_y, ui_width, ui_height, COLORS.white, COLORS.black);
+    let ui_width = UI_WIDTH - 1; // the inside
+    ctx.draw_box(
+        ui_start_x,
+        ui_start_y,
+        ui_width,
+        ui_height,
+        COLORS.white,
+        COLORS.black,
+    );
 
     let combat_stats = ecs.read_storage::<CombatStats>();
     let players = ecs.read_storage::<Player>();
     for (_player, stats) in (&players, &combat_stats).join() {
         let health = format!("HP:{}/{} ", stats.hp, stats.max_hp);
-        ctx.print_color(ui_start_x+1, ui_start_y+1, COLORS.yellow, COLORS.black, &health);
+        ctx.print_color(
+            ui_start_x + 1,
+            ui_start_y + 1,
+            COLORS.yellow,
+            COLORS.black,
+            &health,
+        );
 
         let hp_bar_left = health.len();
-        let hp_bar_right = ui_width-10;
+        let hp_bar_right = ui_width - 10;
         ctx.draw_bar_horizontal(
             hp_bar_left,
-            ui_start_y+1,
+            ui_start_y + 1,
             hp_bar_right,
             stats.hp,
             stats.max_hp,
@@ -79,24 +93,36 @@ pub fn draw_world_ui(ecs: &World, ctx: &mut Rltk) {
     // cursor tile description
     // Log
     let ui_height = BOUNDS.win_height;
-    let ui_width = UI_WIDTH -1;
-    let ui_start_x = BOUNDS.win_width-UI_WIDTH;
+    let ui_width = UI_WIDTH - 1;
+    let ui_start_x = BOUNDS.win_width - UI_WIDTH;
     let ui_start_y = 0;
-    ctx.draw_box(ui_start_x, ui_start_y, ui_width, ui_height, COLORS.white, COLORS.black);
+    ctx.draw_box(
+        ui_start_x,
+        ui_start_y,
+        ui_width,
+        ui_height,
+        COLORS.white,
+        COLORS.black,
+    );
     let map = ecs.fetch::<Map>();
     let depth = format!("Depth: {}", map.depth);
-    ctx.print_color(ui_start_x+1, 1, COLORS.yellow, COLORS.black, &depth);
-
+    ctx.print_color(ui_start_x + 1, 1, COLORS.yellow, COLORS.black, &depth);
 
     let history = 20;
     let log = ecs.fetch::<GameLog>();
-    let log_start = ui_height - min(history, log.entries.len());
+    let log_start = ui_height - min(history, log.entries.len()) - 1;
 
-    // TODO: wrap log lines
+    let to_print = log.entries.iter().rev().flat_map(|s| {
+        s.chars()
+            .chunks(UI_WIDTH - 2)
+            .into_iter()
+            .map(|chunk| chunk.collect::<String>())
+            .collect::<Vec<_>>()
+    });
     let mut y = log_start;
-    for s in log.entries.iter().rev() {
+    for s in to_print {
         if y < ui_height - 1 {
-            ctx.print(ui_start_x+1, y, s);
+            ctx.print(ui_start_x + 1, y, s);
         }
         y += 1;
     }
@@ -121,15 +147,23 @@ pub fn show_inventory(
     // TODO: sort inventory, and group similar items
     let inventory = (&backpack, &names, &entities)
         .join()
+        .sorted_by(|a, b| Ord::cmp(&a.1.name, &b.1.name))
         .filter(|item| item.0.owner == *player_entity);
 
     let halfwidth = BOUNDS.view_width / 2;
-    ctx.draw_box(UI_WIDTH, 0, halfwidth-1, height, fgcolor, bgcolor);
-    ctx.draw_box(halfwidth+UI_WIDTH, 0, halfwidth-1, height, fgcolor, bgcolor);
+    ctx.draw_box(UI_WIDTH, 0, halfwidth - 1, height, fgcolor, bgcolor);
+    ctx.draw_box(
+        halfwidth + UI_WIDTH,
+        0,
+        halfwidth - 1,
+        height,
+        fgcolor,
+        bgcolor,
+    );
     ctx.print_color_centered(0, COLORS.yellow, bgcolor, "Inventory");
     ctx.print_color_centered(height, COLORS.yellow, bgcolor, "ESCAPE to cancel");
 
-    let x_offset = UI_WIDTH+2;
+    let x_offset = UI_WIDTH + 2;
     let y_offset = 2;
     let mut equippable: Vec<Entity> = Vec::new();
 
