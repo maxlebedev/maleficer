@@ -3,6 +3,8 @@ pub use rltk::VirtualKeyCode;
 use serde::Deserialize;
 use std::collections::HashMap;
 
+use crate::gui;
+
 trait FromStr {
     fn from_str(chr: &str) -> Self;
 }
@@ -85,9 +87,9 @@ pub struct Config {
     pub select: String,
     pub wait: String,
     pub hk1: String,
-
-    pub width: usize,
-    pub height: usize,
+    pub hk2: String,
+    pub hk3: String,
+    pub hk4: String,
 }
 
 pub struct Input {
@@ -102,6 +104,9 @@ pub struct Input {
     pub select: VirtualKeyCode,
     pub wait: VirtualKeyCode,
     pub hk1: VirtualKeyCode,
+    pub hk2: VirtualKeyCode,
+    pub hk3: VirtualKeyCode,
+    pub hk4: VirtualKeyCode,
 }
 
 lazy_static! {
@@ -118,8 +123,31 @@ lazy_static! {
         select: VirtualKeyCode::from_str(CONFIG.select.as_str()),
         wait: VirtualKeyCode::from_str(CONFIG.wait.as_str()),
         hk1: VirtualKeyCode::from_str(CONFIG.hk1.as_str()),
+        hk2: VirtualKeyCode::from_str(CONFIG.hk2.as_str()),
+        hk3: VirtualKeyCode::from_str(CONFIG.hk3.as_str()),
+        hk4: VirtualKeyCode::from_str(CONFIG.hk4.as_str()),
     };
 }
+
+
+#[derive(Deserialize, Debug)]
+pub struct Bounds{
+    pub win_width: usize,
+    pub win_height: usize,
+    // pub map_width: usize,
+    // pub map_height: usize,
+    pub view_width: usize,
+    pub view_height: usize,
+}
+
+pub const BOUNDS: Bounds = Bounds {
+    win_width: 240,
+    win_height: 120,
+    // map_width: 100, // these are better stored in map.width
+    // map_height: 100, // and map.height
+    view_width: 240 - gui::UI_WIDTH - gui::UI_WIDTH,
+    view_height: 120,
+};
 
 fn get_config() -> Config {
     let configs: Config = HoconLoader::new()

@@ -95,7 +95,8 @@ impl GameState for State {
             RunState::MainMenu { .. } => {}
             _ => {
                 camera::render_camera(&self.ecs, ctx);
-                gui::draw_ui(&self.ecs, ctx);
+                gui::draw_char_ui(&self.ecs, ctx);
+                gui::draw_world_ui(&self.ecs, ctx);
             }
         }
 
@@ -321,13 +322,20 @@ impl State {
 
     fn new_game(&mut self) {
         self.ecs.delete_all();
-        let map = Map::new_map_rooms_and_corridors(1, 100, 100);
+
+        let map;
+        {
+            let mut worldmap_resource = self.ecs.write_resource::<Map>();
+            *worldmap_resource = Map::new_map_rooms_and_corridors(1, 100, 100);
+            map = worldmap_resource.clone();
+        }
+
+        //let map = Map::new_map_rooms_and_corridors(1, 100, 100);
         let (player_x, player_y) = map.rooms[0].center();
 
         for room in map.rooms.iter().skip(1) {
             spawner::spawn_room(&mut self.ecs, room, map.depth);
         }
-        self.ecs.insert(map);
 
         // TODO: consider making this its own function?
         let player_entity = spawner::player(&mut self.ecs, player_x, player_y);
@@ -472,7 +480,7 @@ fn register_all(gs: &mut State) {
 fn main() -> rltk::BError {
     use rltk::RltkBuilder;
 
-    let rb = RltkBuilder::simple(config::CONFIG.width, config::CONFIG.height);
+    let rb = RltkBuilder::simple(config::BOUNDS.win_width, config::BOUNDS.win_height);
 
     let mut context: Rltk = rb.unwrap().with_title("Malefactor").build()?;
     context.screen_burn_color(COLORS.dark_grey);
@@ -488,7 +496,8 @@ fn main() -> rltk::BError {
 
     raws::load_raws();
 
-    let map = Map::new(1, 64, 64);
+    // TODO: this dummy map breaks item spawns
+    let map = Map::new(1, 1, 1);
     gs.ecs.insert(map);
 
     let gamelog = GameLog {

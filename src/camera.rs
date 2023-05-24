@@ -1,4 +1,4 @@
-use crate::{config::CONFIG, COLORS};
+use crate::{config::BOUNDS, COLORS};
 use specs::prelude::*;
 
 use super::{Hidden, Map, Position, Renderable, TileType};
@@ -10,13 +10,13 @@ const SHOW_BOUNDARIES: bool = true;
 pub fn get_screen_bounds(ecs: &World) -> (i32, i32, i32, i32) {
     let player_pos = ecs.fetch::<Point>();
 
-    let center_x = (CONFIG.width / 2) as i32;
-    let center_y = (CONFIG.height / 2) as i32;
+    let center_x = (BOUNDS.view_width / 2) as i32;
+    let center_y = (BOUNDS.view_height / 2) as i32;
 
     let min_x = player_pos.x - center_x;
-    let max_x = min_x + CONFIG.width as i32;
+    let max_x = min_x + BOUNDS.view_width as i32;
     let min_y = player_pos.y - center_y;
-    let max_y = min_y + CONFIG.height as i32;
+    let max_y = min_y + BOUNDS.view_height as i32;
 
     (min_x, max_x, min_y, max_y)
 }
@@ -24,8 +24,8 @@ pub fn get_screen_bounds(ecs: &World) -> (i32, i32, i32, i32) {
 pub fn tile_to_screen(ecs: &World, tile: Point) -> Point {
     let player_pos = ecs.fetch::<Point>();
 
-    let center_x = (CONFIG.width / 2) as i32;
-    let center_y = (CONFIG.height / 2) as i32;
+    let center_x = (BOUNDS.view_width / 2) as i32;
+    let center_y = (BOUNDS.view_height / 2) as i32;
 
     let min_x = player_pos.x - center_x;
     let min_y = player_pos.y - center_y;
@@ -39,8 +39,8 @@ pub fn tile_to_screen(ecs: &World, tile: Point) -> Point {
 pub fn screen_to_tile(ecs: &World, point: Point) -> Point {
     let player_pos = ecs.fetch::<Point>();
 
-    let center_x = (CONFIG.width / 2) as i32;
-    let center_y = (CONFIG.height / 2) as i32;
+    let center_x = (BOUNDS.view_width / 2) as i32;
+    let center_y = (BOUNDS.view_height / 2) as i32;
 
     let min_x = player_pos.x - center_x;
     let min_y = player_pos.y - center_y;
@@ -55,16 +55,16 @@ pub fn in_screen_bounds(ecs: &World, x: i32, y: i32) -> bool {
     let screen_pt = tile_to_screen(ecs, tile);
 
     if screen_pt.x > 1
-        && screen_pt.x < CONFIG.width as i32 - 1
+        && screen_pt.x < BOUNDS.view_width as i32 - 1
         && screen_pt.y > 1
-        && screen_pt.y < CONFIG.height as i32 - 1
+        && screen_pt.y < BOUNDS.view_height as i32 - 1
     {
         return true;
     }
     return false;
 }
 
-pub fn screen_fov(ecs: &World, screen_pt: Point, radius: i32) -> Vec<Point> {
+pub fn blast_tiles(ecs: &World, screen_pt: Point, radius: i32) -> Vec<Point> {
     let curs_tile = screen_to_tile(ecs, screen_pt);
     let map = ecs.fetch::<Map>();
     let blast_tiles = rltk::field_of_view(curs_tile, radius, &*map);
@@ -224,7 +224,7 @@ mod tests {
         let mut state = State { ecs: World::new() };
         state.ecs.insert(Point::new(player_x, player_y));
         let (min_x, max_x, min_y, max_y) = get_screen_bounds(&state.ecs);
-        // these are relative to CONFIG.height/width
+        // these are relative to BOUNDS.height/width
         assert_eq!(min_x, -70);
         assert_eq!(max_x, 110);
 

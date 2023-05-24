@@ -67,9 +67,7 @@ pub fn spawn_region(ecs: &mut World, area: &[usize], map_depth: i32) {
         }
     }
 
-    // Actually spawn the monsters
     for spawn in spawn_points.iter() {
-        // spawn_entity(ecs, &spawn);
         let (x, y);
         {
             let map = ecs.fetch::<Map>();
