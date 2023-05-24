@@ -132,6 +132,7 @@ pub fn show_inventory(
     let x_offset = UI_WIDTH+2;
     let y_offset = 2;
     let mut equippable: Vec<Entity> = Vec::new();
+
     for (y, item) in inventory.enumerate() {
         let mut color = fgcolor;
         if y == selection {
@@ -283,7 +284,7 @@ pub fn chargen_menu(
 pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
     let runstate = gs.ecs.fetch::<RunState>();
 
-    ctx.print_color_centered(15, COLORS.yellow, COLORS.black, "Malefactor");
+    ctx.print_color_centered(15, COLORS.yellow, COLORS.black, "Maleficer");
 
     let states = [
         MainMenuSelection::NewGame,

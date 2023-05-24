@@ -482,7 +482,7 @@ fn main() -> rltk::BError {
 
     let rb = RltkBuilder::simple(config::BOUNDS.win_width, config::BOUNDS.win_height);
 
-    let mut context: Rltk = rb.unwrap().with_title("Malefactor").build()?;
+    let mut context: Rltk = rb.unwrap().with_title("Maleficer").build()?;
     context.screen_burn_color(COLORS.dark_grey);
 
     context.with_post_scanlines(true);
@@ -501,7 +501,7 @@ fn main() -> rltk::BError {
     gs.ecs.insert(map);
 
     let gamelog = GameLog {
-        entries: vec!["Welcome to Malefactor".to_string()],
+        entries: vec!["Welcome to Maleficer".to_string()],
     };
     gs.ecs.insert(gamelog);
 
