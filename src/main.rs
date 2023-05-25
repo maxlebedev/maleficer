@@ -496,7 +496,6 @@ fn main() -> rltk::BError {
 
     raws::load_raws();
 
-    // TODO: this dummy map breaks item spawns
     let map = Map::new(1, 1, 1);
     gs.ecs.insert(map);
 
@@ -519,6 +518,3 @@ mod tests {
         register_all(&mut test_state);
     }
 }
-
-// TODO: broken
-// * rooms spawn at the edge and don't get a 4th wall

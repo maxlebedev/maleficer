@@ -146,7 +146,7 @@ impl<'a> System<'a> for ItemUse {
                             stats.hp = i32::min(stats.max_hp, stats.hp + healer.heal_amount);
                             if entity == *player_entity {
                                 gamelog.entries.push(format!(
-                                    "You drink the {}, healing {} hp.",
+                                    "The {} heals you for {} hp.",
                                     names.get(useitem.item).unwrap().name,
                                     healer.heal_amount
                                 ));
