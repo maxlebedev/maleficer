@@ -1,7 +1,7 @@
 use crate::{
     gamelog::GameLog, map::Map, AreaOfEffect, CombatStats, Consumable, InBackpack, InflictsDamage,
     Name, Position, ProvidesHealing, SufferDamage, WantsToDropItem, WantsToPickupItem,
-    WantsToUseItem, COLORS,
+    WantsToUseItem, COLORS, Antagonistic,
 };
 use specs::prelude::*;
 
@@ -66,6 +66,7 @@ impl<'a> System<'a> for ItemUse {
         ReadStorage<'a, AreaOfEffect>,
         WriteExpect<'a, ParticleBuilder>,
         ReadStorage<'a, Position>,
+        ReadStorage<'a, Antagonistic>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
@@ -84,6 +85,7 @@ impl<'a> System<'a> for ItemUse {
             aoe,
             mut particle_builder,
             positions,
+            antagonists,
         ) = data;
 
         for (entity, useitem) in (&entities, &wants_use).join() {
@@ -133,7 +135,12 @@ impl<'a> System<'a> for ItemUse {
             match item_heals {
                 None => {}
                 Some(healer) => {
-                    for target in targets.iter() {
+                    for potential_target in targets.iter() {
+                        let mut target = potential_target;
+                        let selected_antagonist = antagonists.get(*target);
+                        if let Some(_target) = selected_antagonist{
+                            target = &player_entity;
+                        }
                         let stats = combat_stats.get_mut(*target);
                         if let Some(stats) = stats {
                             stats.hp = i32::min(stats.max_hp, stats.hp + healer.heal_amount);
@@ -157,13 +164,6 @@ impl<'a> System<'a> for ItemUse {
                             }
                         }
                     }
-                }
-            }
-            let consumable = consumables.get(useitem.item);
-            match consumable {
-                None => {}
-                Some(_) => {
-                    entities.delete(useitem.item).expect("Delete failed");
                 }
             }
             // If it inflicts damage, apply it to the target cell
