@@ -1,6 +1,5 @@
 use crate::GameLog;
 
-use super::rect::Rect;
 use rltk::{Algorithm2D, BaseMap, Point};
 use serde::{Deserialize, Serialize};
 use specs::prelude::*;
@@ -16,7 +15,6 @@ pub enum TileType {
 #[derive(Default, Serialize, Deserialize, Clone)]
 pub struct Map {
     pub tiles: Vec<TileType>,
-    pub rooms: Vec<Rect>,
     pub width: i32,
     pub height: i32,
     pub revealed_tiles: Vec<bool>,
@@ -61,7 +59,6 @@ impl Map {
         let map_tile_count = (width * height) as usize;
         Map {
             tiles: vec![TileType::Wall; map_tile_count],
-            rooms: Vec::new(),
             width,
             height,
             revealed_tiles: vec![false; map_tile_count],
