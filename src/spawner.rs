@@ -11,6 +11,7 @@ use specs::saveload::SimpleMarker;
 
 pub use components::*;
 use specs::saveload::MarkedBuilder;
+use super::map_builders::common::in_bounds;
 
 const MAX_SPAWNS: i32 = 4;
 
@@ -22,14 +23,9 @@ pub fn spawn_room(ecs: &mut World, room: &Rect, map_depth: i32) {
         for y in room.y1 + 1..room.y2 {
             for x in room.x1 + 1..room.x2 {
                 let idx = map.xy_idx(x, y);
-                if map.in_bounds(idx) {
+                if in_bounds(&map, idx) {
                     possible_targets.push(idx);
                 }
-                /* TODO: this code had an out-of-bounds error, meaning the room coords are sus?
-                let idx = map.xy_idx(x, y);
-                if map.tiles[idx] == TileType::Floor {
-                    possible_targets.push(idx);
-                }*/
             }
         }
     }

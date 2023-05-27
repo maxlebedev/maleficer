@@ -20,6 +20,7 @@ mod camera;
 mod config;
 mod raws;
 mod spawner;
+pub mod map_builders;
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum RunState {
@@ -326,7 +327,7 @@ impl State {
         let map;
         {
             let mut worldmap_resource = self.ecs.write_resource::<Map>();
-            *worldmap_resource = Map::new_map_rooms_and_corridors(1, 100, 100);
+            *worldmap_resource = map_builders::build_random_map(1, 100, 100);
             map = worldmap_resource.clone();
         }
 
@@ -395,7 +396,7 @@ impl State {
         {
             let mut worldmap_resource = self.ecs.write_resource::<Map>();
             let current_depth = worldmap_resource.depth;
-            *worldmap_resource = Map::new_map_rooms_and_corridors(current_depth + 1, 100, 100);
+            *worldmap_resource = map_builders::build_random_map(current_depth + 1, 100, 100);
             worldmap = worldmap_resource.clone();
         }
 
