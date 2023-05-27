@@ -325,18 +325,16 @@ impl State {
         self.ecs.delete_all();
 
         let map;
+        let start;
         {
             let mut worldmap_resource = self.ecs.write_resource::<Map>();
-            *worldmap_resource = map_builders::build_random_map(1, 100, 100);
+            (*worldmap_resource,start) = map_builders::build_random_map(1, 100, 100);
             map = worldmap_resource.clone();
         }
 
-        //let map = Map::new_map_rooms_and_corridors(1, 100, 100);
-        let (player_x, player_y) = map.rooms[0].center();
+        let (player_x, player_y) = (start.x, start.y);
 
-        for room in map.rooms.iter().skip(1) {
-            spawner::spawn_room(&mut self.ecs, room, map.depth);
-        }
+        map_builders::spawn(&map, &mut self.ecs);
 
         // TODO: consider making this its own function?
         let player_entity = spawner::player(&mut self.ecs, player_x, player_y);
@@ -393,21 +391,24 @@ impl State {
 
         // Build a new map and place the player
         let worldmap;
+        let player_start;
         {
             let mut worldmap_resource = self.ecs.write_resource::<Map>();
             let current_depth = worldmap_resource.depth;
-            *worldmap_resource = map_builders::build_random_map(current_depth + 1, 100, 100);
+            let (newmap, start) = map_builders::build_random_map(current_depth + 1, 100, 100);
+            *worldmap_resource = newmap;
+            player_start = start;
             worldmap = worldmap_resource.clone();
         }
 
-        for room in worldmap.rooms.iter().skip(1) {
-            spawner::spawn_room(&mut self.ecs, room, worldmap.depth);
-        }
+
+        map_builders::spawn(&worldmap, &mut self.ecs);
 
         // Place the player and update resources
-        let (player_x, player_y) = worldmap.rooms[0].center();
+        let (player_x, player_y) = (player_start.x, player_start.y);
         let mut player_position = self.ecs.write_resource::<Point>();
         *player_position = Point::new(player_x, player_y);
+
         let mut position_components = self.ecs.write_storage::<Position>();
         let player_entity = self.ecs.fetch::<Entity>();
         let player_pos_comp = position_components.get_mut(*player_entity);
@@ -486,7 +487,6 @@ fn main() -> rltk::BError {
     let mut context: Rltk = rb.unwrap().with_title("Maleficer").build()?;
     context.screen_burn_color(COLORS.dark_grey);
 
-    context.with_post_scanlines(true);
     let mut gs = State { ecs: World::new() };
     gs.ecs.insert(RunState::MainMenu {
         game_started: false,
