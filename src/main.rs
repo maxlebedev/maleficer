@@ -484,8 +484,7 @@ fn main() -> rltk::BError {
 
     let rb = RltkBuilder::simple(config::BOUNDS.win_width, config::BOUNDS.win_height);
 
-    let mut context: Rltk = rb.unwrap().with_title("Maleficer").build()?;
-    context.screen_burn_color(COLORS.dark_grey);
+    let context: Rltk = rb.unwrap().with_title("Maleficer").build()?;
 
     let mut gs = State { ecs: World::new() };
     gs.ecs.insert(RunState::MainMenu {
