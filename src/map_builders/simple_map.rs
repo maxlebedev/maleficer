@@ -13,13 +13,14 @@ use specs::World;
 pub struct SimpleMapBuilder {}
 
 impl MapBuilder for SimpleMapBuilder {
-    fn build(new_depth: i32, width: i32, height: i32) -> (Map, Position) {
+
+    fn build_map(&mut self, new_depth: i32, width: i32, height: i32) -> (Map, Position) {
         let mut map = Map::new(new_depth, width, height);
         let playerpos = SimpleMapBuilder::rooms_and_corridors(&mut map);
         (map, playerpos)
     }
 
-    fn spawn(map : &Map, ecs : &mut World) {
+    fn spawn_entities(&mut self, map : &Map, ecs : &mut World) {
         for room in map.rooms.iter().skip(1) {
             spawner::spawn_room(ecs, room, map.depth);
         }
@@ -28,6 +29,10 @@ impl MapBuilder for SimpleMapBuilder {
 }
 
 impl SimpleMapBuilder {
+
+    pub fn new() -> SimpleMapBuilder {
+        SimpleMapBuilder {}
+    }
 
     /// Makes a new map using the algorithm from http://rogueliketutorials.com/tutorials/tcod/part-3/
     /// This gives a handful of random rooms and corridors joining them together.

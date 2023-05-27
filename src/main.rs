@@ -324,17 +324,18 @@ impl State {
     fn new_game(&mut self) {
         self.ecs.delete_all();
 
+        let mut builder = map_builders::random_builder();
         let map;
         let start;
         {
             let mut worldmap_resource = self.ecs.write_resource::<Map>();
-            (*worldmap_resource,start) = map_builders::build_random_map(1, 100, 100);
+            (*worldmap_resource,start) = builder.build_map(1, 100, 100);
             map = worldmap_resource.clone();
         }
 
         let (player_x, player_y) = (start.x, start.y);
 
-        map_builders::spawn(&map, &mut self.ecs);
+        builder.spawn_entities(&map, &mut self.ecs);
 
         // TODO: consider making this its own function?
         let player_entity = spawner::player(&mut self.ecs, player_x, player_y);
@@ -390,19 +391,19 @@ impl State {
         }
 
         // Build a new map and place the player
+        let mut builder = map_builders::random_builder();
         let worldmap;
         let player_start;
         {
             let mut worldmap_resource = self.ecs.write_resource::<Map>();
             let current_depth = worldmap_resource.depth;
-            let (newmap, start) = map_builders::build_random_map(current_depth + 1, 100, 100);
+            let (newmap, start) = builder.build_map(current_depth + 1, 100, 100);
             *worldmap_resource = newmap;
             player_start = start;
             worldmap = worldmap_resource.clone();
         }
 
-
-        map_builders::spawn(&worldmap, &mut self.ecs);
+        builder.spawn_entities(&worldmap, &mut self.ecs);
 
         // Place the player and update resources
         let (player_x, player_y) = (player_start.x, player_start.y);

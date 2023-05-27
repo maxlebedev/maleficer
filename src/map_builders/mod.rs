@@ -6,15 +6,13 @@ use simple_map::SimpleMapBuilder;
 use specs::World;
 pub mod common;
 
-trait MapBuilder {
-    fn build(new_depth: i32, width: i32, height: i32) -> (Map, Position);
-    fn spawn(map: &Map, ecs: &mut World);
+pub trait MapBuilder {
+    fn build_map(&mut self, new_depth: i32, width: i32, height: i32) -> (Map, Position);
+    fn spawn_entities(&mut self, map: &Map, ecs: &mut World);
 
 }
-pub fn build_random_map(new_depth: i32, width: i32, height: i32) -> (Map, Position) {
-    SimpleMapBuilder::build(new_depth, width, height)
-}
 
-pub fn spawn(map : &Map, ecs : &mut World) {
-    SimpleMapBuilder::spawn(map, ecs);
+pub fn random_builder() -> Box<dyn MapBuilder> {
+    // Note that until we have a second map type, this isn't even slighlty random
+    Box::new(SimpleMapBuilder::new())
 }
