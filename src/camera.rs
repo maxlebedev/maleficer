@@ -6,6 +6,8 @@ use rltk::{Point, Rltk, RGB};
 
 const SHOW_BOUNDARIES: bool = true;
 
+// TODO: shift everything over by UI_WIDTH
+
 // TODO: memoize?
 pub fn get_screen_bounds(ecs: &World) -> (i32, i32, i32, i32) {
     let player_pos = ecs.fetch::<Point>();

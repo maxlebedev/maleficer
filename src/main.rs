@@ -485,7 +485,7 @@ fn main() -> rltk::BError {
 
     let rb = RltkBuilder::simple(config::BOUNDS.win_width, config::BOUNDS.win_height);
 
-    let context: Rltk = rb.unwrap().with_title("Maleficer").build()?;
+    let context: Rltk = rb.unwrap().with_title("Maleficer").with_tile_dimensions(8,8).build()?;
 
     let mut gs = State { ecs: World::new() };
     gs.ecs.insert(RunState::MainMenu {
