@@ -112,13 +112,7 @@ pub fn draw_world_ui(ecs: &World, ctx: &mut Rltk) {
     let log = ecs.fetch::<GameLog>();
     let log_start = ui_height - min(history, log.entries.len()) - 1;
 
-    let to_print = log.entries.iter().rev().flat_map(|s| {
-        s.chars()
-            .chunks(UI_WIDTH - 2)
-            .into_iter()
-            .map(|chunk| chunk.collect::<String>())
-            .collect::<Vec<_>>()
-    });
+    let to_print = log.entries.iter().rev().flat_map(|s| {wrap_text(s, UI_WIDTH-2)});
     let mut y = log_start;
     for s in to_print {
         if y < ui_height - 1 {
@@ -126,6 +120,14 @@ pub fn draw_world_ui(ecs: &World, ctx: &mut Rltk) {
         }
         y += 1;
     }
+}
+
+fn wrap_text(text: &String, max_width: usize) -> Vec<String> {
+    text.chars()
+        .chunks(max_width)
+        .into_iter()
+        .map(|chunk| chunk.collect::<String>())
+        .collect::<Vec<String>>()
 }
 
 pub fn show_inventory(

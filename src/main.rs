@@ -482,7 +482,7 @@ fn main() -> rltk::BError {
 
     let rb = RltkBuilder::simple(config::BOUNDS.win_width, config::BOUNDS.win_height);
 
-    let mut context: Rltk = rb.unwrap().with_title("Maleficer").build()?;
+    let mut context: Rltk = rb.unwrap().with_title("Maleficer").with_tile_dimensions(8,8).build()?;
     context.screen_burn_color(COLORS.dark_grey);
 
     context.with_post_scanlines(true);
