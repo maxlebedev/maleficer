@@ -20,6 +20,7 @@ mod camera;
 mod config;
 mod raws;
 mod spawner;
+pub mod map_builders;
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum RunState {
@@ -323,19 +324,19 @@ impl State {
     fn new_game(&mut self) {
         self.ecs.delete_all();
 
-        let map;
+        let mut builder = map_builders::random_builder(1, 100, 100);
+        let start;
+        builder.build_map();
         {
             let mut worldmap_resource = self.ecs.write_resource::<Map>();
-            *worldmap_resource = Map::new_map_rooms_and_corridors(1, 100, 100);
-            map = worldmap_resource.clone();
+            *worldmap_resource = builder.get_map();
         }
+        start = builder.get_starting_position();
 
-        //let map = Map::new_map_rooms_and_corridors(1, 100, 100);
-        let (player_x, player_y) = map.rooms[0].center();
 
-        for room in map.rooms.iter().skip(1) {
-            spawner::spawn_room(&mut self.ecs, room, map.depth);
-        }
+        let (player_x, player_y) = (start.x, start.y);
+
+        builder.spawn_entities(&mut self.ecs);
 
         // TODO: consider making this its own function?
         let player_entity = spawner::player(&mut self.ecs, player_x, player_y);
@@ -391,22 +392,24 @@ impl State {
         }
 
         // Build a new map and place the player
-        let worldmap;
+        let mut builder;
+        let player_start;
         {
             let mut worldmap_resource = self.ecs.write_resource::<Map>();
             let current_depth = worldmap_resource.depth;
-            *worldmap_resource = Map::new_map_rooms_and_corridors(current_depth + 1, 100, 100);
-            worldmap = worldmap_resource.clone();
+            builder = map_builders::random_builder(current_depth + 1, 100, 100);
+            builder.build_map();
+            *worldmap_resource = builder.get_map();
+            player_start = builder.get_starting_position();
         }
 
-        for room in worldmap.rooms.iter().skip(1) {
-            spawner::spawn_room(&mut self.ecs, room, worldmap.depth);
-        }
+        builder.spawn_entities(&mut self.ecs);
 
         // Place the player and update resources
-        let (player_x, player_y) = worldmap.rooms[0].center();
+        let (player_x, player_y) = (player_start.x, player_start.y);
         let mut player_position = self.ecs.write_resource::<Point>();
         *player_position = Point::new(player_x, player_y);
+
         let mut position_components = self.ecs.write_storage::<Position>();
         let player_entity = self.ecs.fetch::<Entity>();
         let player_pos_comp = position_components.get_mut(*player_entity);
@@ -482,10 +485,8 @@ fn main() -> rltk::BError {
 
     let rb = RltkBuilder::simple(config::BOUNDS.win_width, config::BOUNDS.win_height);
 
-    let mut context: Rltk = rb.unwrap().with_title("Maleficer").with_tile_dimensions(8,8).build()?;
-    context.screen_burn_color(COLORS.dark_grey);
+    let context: Rltk = rb.unwrap().with_title("Maleficer").with_tile_dimensions(8,8).build()?;
 
-    context.with_post_scanlines(true);
     let mut gs = State { ecs: World::new() };
     gs.ecs.insert(RunState::MainMenu {
         game_started: false,
