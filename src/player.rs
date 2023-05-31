@@ -1,4 +1,4 @@
-use crate::{gui, config::INPUT};
+use crate::{config::INPUT, gui};
 
 use super::gamelog::GameLog;
 use rltk::{Point, Rltk, VirtualKeyCode};

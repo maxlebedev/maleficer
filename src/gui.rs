@@ -112,7 +112,11 @@ pub fn draw_world_ui(ecs: &World, ctx: &mut Rltk) {
     let log = ecs.fetch::<GameLog>();
     let log_start = ui_height - min(history, log.entries.len()) - 1;
 
-    let to_print = log.entries.iter().rev().flat_map(|s| {wrap_text(s, UI_WIDTH-2)});
+    let to_print = log
+        .entries
+        .iter()
+        .rev()
+        .flat_map(|s| wrap_text(s, UI_WIDTH - 2));
     let mut y = log_start;
     for s in to_print {
         if y < ui_height - 1 {

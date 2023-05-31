@@ -1,30 +1,27 @@
-use crate::Position;
-use crate::TileType;
 use crate::rect::Rect;
 use crate::spawner;
+use crate::Position;
+use crate::TileType;
 
-use super::MapBuilder;
-use super::Map;
 use super::common::*;
+use super::Map;
+use super::MapBuilder;
 use rltk::RandomNumberGenerator;
 use specs::World;
-
 
 pub struct SimpleMapBuilder {
     map: Map,
     starting_position: Position,
     depth: i32,
-    rooms: Vec<Rect>
+    rooms: Vec<Rect>,
 }
 
 impl MapBuilder for SimpleMapBuilder {
-
-
-    fn build_map(&mut self){
+    fn build_map(&mut self) {
         self.rooms_and_corridors();
     }
 
-    fn spawn_entities(&mut self, ecs : &mut World) {
+    fn spawn_entities(&mut self, ecs: &mut World) {
         for room in self.rooms.iter().skip(1) {
             spawner::spawn_room(ecs, room, self.depth);
         }
@@ -37,23 +34,21 @@ impl MapBuilder for SimpleMapBuilder {
     fn get_starting_position(&self) -> Position {
         self.starting_position.clone()
     }
-
 }
 
 impl SimpleMapBuilder {
-
-    pub fn new(depth:i32,width: i32, height: i32 ) -> SimpleMapBuilder {
-        SimpleMapBuilder{
-            map : Map::new(depth, width, height),
-            starting_position : Position{ x: 0, y : 0 },
+    pub fn new(depth: i32, width: i32, height: i32) -> SimpleMapBuilder {
+        SimpleMapBuilder {
+            map: Map::new(depth, width, height),
+            starting_position: Position { x: 0, y: 0 },
             depth,
-            rooms: Vec::new()
+            rooms: Vec::new(),
         }
     }
 
     /// Makes a new map using the algorithm from http://rogueliketutorials.com/tutorials/tcod/part-3/
     /// This gives a handful of random rooms and corridors joining them together.
-    pub fn rooms_and_corridors(&mut self){
+    pub fn rooms_and_corridors(&mut self) {
         const MAX_ROOMS: i32 = 30;
         const MIN_SIZE: i32 = 6;
         const MAX_SIZE: i32 = 10;
@@ -95,6 +90,9 @@ impl SimpleMapBuilder {
         let stairs_idx = self.map.xy_idx(stairs_position.0, stairs_position.1);
         self.map.tiles[stairs_idx] = TileType::DownStairs;
         let start_pos = self.rooms[0].center();
-        self.starting_position = Position { x: start_pos.0, y: start_pos.1}
+        self.starting_position = Position {
+            x: start_pos.0,
+            y: start_pos.1,
+        }
     }
 }

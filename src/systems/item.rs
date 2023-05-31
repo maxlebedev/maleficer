@@ -1,7 +1,7 @@
 use crate::{
-    gamelog::GameLog, map::Map, AreaOfEffect, CombatStats, Consumable, InBackpack, InflictsDamage,
-    Name, Position, ProvidesHealing, SufferDamage, WantsToDropItem, WantsToPickupItem,
-    WantsToUseItem, COLORS, Antagonistic,
+    gamelog::GameLog, map::Map, Antagonistic, AreaOfEffect, CombatStats, Consumable, InBackpack,
+    InflictsDamage, Name, Position, ProvidesHealing, SufferDamage, WantsToDropItem,
+    WantsToPickupItem, WantsToUseItem, COLORS,
 };
 use specs::prelude::*;
 
@@ -138,7 +138,7 @@ impl<'a> System<'a> for ItemUse {
                     for potential_target in targets.iter() {
                         let mut target = potential_target;
                         let selected_antagonist = antagonists.get(*target);
-                        if let Some(_target) = selected_antagonist{
+                        if let Some(_target) = selected_antagonist {
                             target = &player_entity;
                         }
                         let stats = combat_stats.get_mut(*target);

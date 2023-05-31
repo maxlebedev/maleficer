@@ -9,9 +9,9 @@ use rltk::RandomNumberGenerator;
 use specs::prelude::*;
 use specs::saveload::SimpleMarker;
 
+use super::map_builders::common::in_bounds;
 pub use components::*;
 use specs::saveload::MarkedBuilder;
-use super::map_builders::common::in_bounds;
 
 const MAX_SPAWNS: i32 = 4;
 

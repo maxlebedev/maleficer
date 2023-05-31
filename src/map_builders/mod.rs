@@ -13,7 +13,7 @@ pub trait MapBuilder {
     fn get_starting_position(&self) -> Position;
 }
 
-pub fn random_builder(depth:i32,width: i32, height: i32) -> Box<dyn MapBuilder> {
+pub fn random_builder(depth: i32, width: i32, height: i32) -> Box<dyn MapBuilder> {
     // Note that until we have a second map type, this isn't even slighlty random
-    Box::new(SimpleMapBuilder::new(depth,width, height))
+    Box::new(SimpleMapBuilder::new(depth, width, height))
 }

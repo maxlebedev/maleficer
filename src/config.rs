@@ -129,9 +129,8 @@ lazy_static! {
     };
 }
 
-
 #[derive(Deserialize, Debug)]
-pub struct Bounds{
+pub struct Bounds {
     pub win_width: usize,
     pub win_height: usize,
     // pub map_width: usize,

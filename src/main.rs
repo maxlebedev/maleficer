@@ -18,9 +18,9 @@ mod systems;
 pub use gamelog::GameLog;
 mod camera;
 mod config;
+pub mod map_builders;
 mod raws;
 mod spawner;
-pub mod map_builders;
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum RunState {
@@ -485,7 +485,12 @@ fn main() -> rltk::BError {
 
     let rb = RltkBuilder::simple(config::BOUNDS.win_width, config::BOUNDS.win_height);
 
-    let context: Rltk = rb.unwrap().with_title("Maleficer").with_tile_dimensions(8,8).build()?;
+    let context: Rltk = rb
+        .unwrap()
+        .with_title("Maleficer")
+        .with_tile_dimensions(8, 8)
+        .with_fullscreen(true)
+        .build()?;
 
     let mut gs = State { ecs: World::new() };
     gs.ecs.insert(RunState::MainMenu {
