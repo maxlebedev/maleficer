@@ -324,29 +324,13 @@ impl State {
     fn new_game(&mut self) {
         self.ecs.delete_all();
 
-        let mut builder = map_builders::random_builder(1, 100, 100);
-        let start;
-        builder.build_map();
+        let player_entity = spawner::player(&mut self.ecs, 0, 0);
         {
-            let mut worldmap_resource = self.ecs.write_resource::<Map>();
-            *worldmap_resource = builder.get_map();
+            let mut player_entity_writer = self.ecs.write_resource::<Entity>();
+            *player_entity_writer = player_entity;
         }
-        start = builder.get_starting_position();
 
-
-        let (player_x, player_y) = (start.x, start.y);
-
-        builder.spawn_entities(&mut self.ecs);
-
-        // TODO: consider making this its own function?
-        let player_entity = spawner::player(&mut self.ecs, player_x, player_y);
-        self.ecs.insert(player_entity);
-
-        self.ecs.insert(Cursor {
-            point: Point::new(player_x, player_y),
-        });
-
-        self.ecs.insert(Point::new(player_x, player_y));
+        self.generate_world_map(1)
     }
 
     // TODO: we would have to edit this every time we add a player-thing.
@@ -381,35 +365,22 @@ impl State {
         }
         to_delete
     }
-    // TODO: understand this
-    fn goto_next_level(&mut self) {
-        // Delete entities that aren't the player or his/her equipment
-        let to_delete = self.entities_to_remove_on_level_change();
-        for target in to_delete {
-            self.ecs
-                .delete_entity(target)
-                .expect("Unable to delete entity");
-        }
 
-        // Build a new map and place the player
-        let mut builder;
+    fn generate_world_map(&mut self, new_depth: i32) {
+        let mut builder = map_builders::random_builder(new_depth, 100, 100);
+        builder.build_map();
         let player_start;
         {
             let mut worldmap_resource = self.ecs.write_resource::<Map>();
-            let current_depth = worldmap_resource.depth;
-            builder = map_builders::random_builder(current_depth + 1, 100, 100);
-            builder.build_map();
             *worldmap_resource = builder.get_map();
             player_start = builder.get_starting_position();
         }
-
         builder.spawn_entities(&mut self.ecs);
 
         // Place the player and update resources
         let (player_x, player_y) = (player_start.x, player_start.y);
         let mut player_position = self.ecs.write_resource::<Point>();
         *player_position = Point::new(player_x, player_y);
-
         let mut position_components = self.ecs.write_storage::<Position>();
         let player_entity = self.ecs.fetch::<Entity>();
         let player_pos_comp = position_components.get_mut(*player_entity);
@@ -424,8 +395,25 @@ impl State {
         if let Some(vs) = vs {
             vs.dirty = true;
         }
+    }
+
+    fn goto_next_level(&mut self) {
+        // Delete entities that aren't the player or his/her equipment
+        let to_delete = self.entities_to_remove_on_level_change();
+        for target in to_delete {
+            self.ecs
+                .delete_entity(target)
+                .expect("Unable to delete entity");
+        }
+        let current_depth;
+        {
+            let worldmap_resource = self.ecs.fetch::<Map>();
+            current_depth = worldmap_resource.depth;
+        }
+        self.generate_world_map(current_depth + 1);
 
         // Notify the player and give them some health
+        let player_entity = self.ecs.fetch::<Entity>();
         let mut gamelog = self.ecs.fetch_mut::<gamelog::GameLog>();
         gamelog
             .entries
@@ -489,7 +477,6 @@ fn main() -> rltk::BError {
         .unwrap()
         .with_title("Maleficer")
         .with_tile_dimensions(8, 8)
-        .with_fullscreen(true)
         .build()?;
 
     let mut gs = State { ecs: World::new() };

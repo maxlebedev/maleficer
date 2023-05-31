@@ -150,16 +150,24 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
         None => return RunState::AwaitingInput, // Nothing happened
         Some(key) => match key {
             // TODO: I still don't understand why I have to do do `_ if key ==`
-            _ if key == INPUT.left && is_turn_blocked(-1,0, &mut gs.ecs) == true  => try_move_player(-1, 0, &mut gs.ecs),
-            _ if key == INPUT.down && is_turn_blocked(0,1, &mut gs.ecs) == true  => try_move_player(0, 1, &mut gs.ecs),
-            _ if key == INPUT.up && is_turn_blocked(0,-1, &mut gs.ecs) == true    => try_move_player(0, -1, &mut gs.ecs),
-            _ if key == INPUT.right && is_turn_blocked(1,0, &mut gs.ecs) == true => try_move_player(1, 0, &mut gs.ecs),
+            _ if key == INPUT.left && is_turn_blocked(-1, 0, &mut gs.ecs) == true => {
+                try_move_player(-1, 0, &mut gs.ecs)
+            }
+            _ if key == INPUT.down && is_turn_blocked(0, 1, &mut gs.ecs) == true => {
+                try_move_player(0, 1, &mut gs.ecs)
+            }
+            _ if key == INPUT.up && is_turn_blocked(0, -1, &mut gs.ecs) == true => {
+                try_move_player(0, -1, &mut gs.ecs)
+            }
+            _ if key == INPUT.right && is_turn_blocked(1, 0, &mut gs.ecs) == true => {
+                try_move_player(1, 0, &mut gs.ecs)
+            }
 
             _ if key == INPUT.pick_up => get_item(&mut gs.ecs),
             _ if key == INPUT.inventory => return RunState::ShowInventory { selection: 0 },
 
             _ if hotkeys.contains(&key) => use_hotkey(&mut gs.ecs, key),
-                // cast_spell(&mut gs.ecs),
+            // cast_spell(&mut gs.ecs),
             _ if key == INPUT.select => {
                 // refactor to be context-dependant on tile
                 if map::try_next_level(&mut gs.ecs) {
