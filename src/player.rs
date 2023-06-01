@@ -15,17 +15,6 @@ pub fn make_character(ecs: &mut World) {
     systems::spell::fireball_spell(ecs, config::CONFIG.hk1.clone());
 }
 
-pub fn is_turn_blocked(x: i32, y: i32, ecs: &mut World) -> bool {
-    let player_pos = ecs.fetch::<Point>();
-    let map = ecs.fetch::<map::Map>();
-    let dest_idx = map.xy_idx(player_pos.x + x, player_pos.y + y);
-
-    if map.blocked[dest_idx] {
-        return false;
-    }
-    return true;
-}
-
 fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
     let mut positions = ecs.write_storage::<Position>();
     let mut players = ecs.write_storage::<Player>();
@@ -150,10 +139,10 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
         None => return RunState::AwaitingInput, // Nothing happened
         Some(key) => match key {
             // TODO: I still don't understand why I have to do do `_ if key ==`
-            _ if key == INPUT.left && is_turn_blocked(-1,0, &mut gs.ecs) == true  => try_move_player(-1, 0, &mut gs.ecs),
-            _ if key == INPUT.down && is_turn_blocked(0,1, &mut gs.ecs) == true  => try_move_player(0, 1, &mut gs.ecs),
-            _ if key == INPUT.up && is_turn_blocked(0,-1, &mut gs.ecs) == true    => try_move_player(0, -1, &mut gs.ecs),
-            _ if key == INPUT.right && is_turn_blocked(1,0, &mut gs.ecs) == true => try_move_player(1, 0, &mut gs.ecs),
+            _ if key == INPUT.left => try_move_player(-1, 0, &mut gs.ecs),
+            _ if key == INPUT.down => try_move_player(0, 1, &mut gs.ecs),
+            _ if key == INPUT.up => try_move_player(0, -1, &mut gs.ecs),
+            _ if key == INPUT.right => try_move_player(1, 0, &mut gs.ecs),
 
             _ if key == INPUT.pick_up => get_item(&mut gs.ecs),
             _ if key == INPUT.inventory => return RunState::ShowInventory { selection: 0 },
