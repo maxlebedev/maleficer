@@ -333,7 +333,6 @@ impl State {
         }
         start = builder.get_starting_position();
 
-
         let (player_x, player_y) = (start.x, start.y);
 
         builder.spawn_entities(&mut self.ecs);
@@ -430,10 +429,12 @@ impl State {
         gamelog
             .entries
             .push("You descend to the next level, and take a moment to heal.".to_string());
-        let mut player_health_store = self.ecs.write_storage::<CombatStats>();
-        let player_health = player_health_store.get_mut(*player_entity);
-        if let Some(player_health) = player_health {
-            player_health.hp = i32::max(player_health.hp, player_health.max_hp / 2);
+        let mut player_health_store = self.ecs.write_storage::<EntityStats>();
+        let player_stats = player_health_store.get_mut(*player_entity);
+        if let Some(player_stats) = player_stats {
+            let (current, max) = player_stats.get("hit_points");
+            let new_hp = i32::max(current, max / 2);
+            player_stats.set_current("hit_points", new_hp);
         }
     }
 }
@@ -446,7 +447,7 @@ fn register_all(gs: &mut State) {
     gs.ecs.register::<Monster>();
     gs.ecs.register::<Name>();
     gs.ecs.register::<BlocksTile>();
-    gs.ecs.register::<CombatStats>();
+    gs.ecs.register::<EntityStats>();
     gs.ecs.register::<WantsToMelee>();
     gs.ecs.register::<SufferDamage>();
     gs.ecs.register::<Item>();

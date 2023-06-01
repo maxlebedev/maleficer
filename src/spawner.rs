@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use super::rect::Rect;
-use super::{components, CombatStats, Name, Player, Position, Renderable, Viewshed, COLORS};
+use super::{components, EntityStats, Name, Player, Position, Renderable, Viewshed, COLORS};
 use crate::raws::{get_spawn_table_for_depth, spawn_named_entity, SpawnType, RAWS};
 use crate::systems::random_table::RandomTable;
 use crate::Map;
@@ -100,11 +100,25 @@ pub fn player(ecs: &mut World, player_x: i32, player_y: i32) -> Entity {
         .with(Name {
             name: "Player".to_string(),
         })
-        .with(CombatStats {
-            max_hp: 30,
-            hp: 30,
+        .with(EntityStats {
             defense: 2,
             power: 5,
+            pools: HashMap::from([
+                (
+                    "hit_points".to_string(),
+                    Pool {
+                        max: 30,
+                        current: 30,
+                    },
+                ),
+                (
+                    "mana".to_string(),
+                    Pool {
+                        max: 10,
+                        current: 10,
+                    },
+                ),
+            ]),
         })
         .marked::<SimpleMarker<SerializeMe>>()
         .build()

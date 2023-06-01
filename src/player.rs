@@ -148,7 +148,7 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
             _ if key == INPUT.inventory => return RunState::ShowInventory { selection: 0 },
 
             _ if hotkeys.contains(&key) => use_hotkey(&mut gs.ecs, key),
-                // cast_spell(&mut gs.ecs),
+            // cast_spell(&mut gs.ecs),
             _ if key == INPUT.select => {
                 // refactor to be context-dependant on tile
                 if map::try_next_level(&mut gs.ecs) {

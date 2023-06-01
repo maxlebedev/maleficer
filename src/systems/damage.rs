@@ -1,5 +1,5 @@
 use super::save_load;
-use crate::{CombatStats, GameLog, Name, Player, SufferDamage};
+use crate::{EntityStats, GameLog, Name, Player, SufferDamage};
 use rltk::console;
 use specs::prelude::*;
 
@@ -7,15 +7,15 @@ pub struct Damage {}
 
 impl<'a> System<'a> for Damage {
     type SystemData = (
-        WriteStorage<'a, CombatStats>,
+        WriteStorage<'a, EntityStats>,
         WriteStorage<'a, SufferDamage>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
         let (mut stats, mut damage) = data;
 
-        for (mut stats, damage) in (&mut stats, &damage).join() {
-            stats.hp -= damage.amount.iter().sum::<i32>();
+        for (stats, damage) in (&mut stats, &damage).join() {
+            stats.deplete("hit_points", damage.amount.iter().sum::<i32>());
         }
 
         damage.clear();
@@ -26,13 +26,13 @@ pub fn delete_the_dead(ecs: &mut World) {
     let mut dead: Vec<Entity> = Vec::new();
     // Using a scope to make the borrow checker happy
     {
-        let combat_stats = ecs.read_storage::<CombatStats>();
+        let combat_stats = ecs.read_storage::<EntityStats>();
         let players = ecs.read_storage::<Player>();
         let names = ecs.read_storage::<Name>();
         let entities = ecs.entities();
         let mut log = ecs.write_resource::<GameLog>();
         for (entity, stats) in (&entities, &combat_stats).join() {
-            if stats.hp < 1 {
+            if stats.get("hit_points").0 < 1 {
                 let player = players.get(entity);
                 match player {
                     None => {

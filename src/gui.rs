@@ -61,10 +61,11 @@ pub fn draw_char_ui(ecs: &World, ctx: &mut Rltk) {
         COLORS.black,
     );
 
-    let combat_stats = ecs.read_storage::<CombatStats>();
+    let combat_stats = ecs.read_storage::<EntityStats>();
     let players = ecs.read_storage::<Player>();
     for (_player, stats) in (&players, &combat_stats).join() {
-        let health = format!("HP:{}/{} ", stats.hp, stats.max_hp);
+        let (current_hp, max_hp) = stats.get("hit_points");
+        let health = format!("HP:{}/{} ", current_hp, max_hp);
         ctx.print_color(
             ui_start_x + 1,
             ui_start_y + 1,
@@ -79,8 +80,8 @@ pub fn draw_char_ui(ecs: &World, ctx: &mut Rltk) {
             hp_bar_left,
             ui_start_y + 1,
             hp_bar_right,
-            stats.hp,
-            stats.max_hp,
+            current_hp,
+            max_hp,
             COLORS.red,
             COLORS.black,
         );
