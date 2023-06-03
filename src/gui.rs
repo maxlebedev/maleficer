@@ -1,7 +1,7 @@
 use std::cmp::min;
 
 use itertools::Itertools;
-use rltk::{Point, Rltk};
+use rltk::{Point, Rltk, RGB};
 use specs::prelude::*;
 
 use crate::config::{BOUNDS, INPUT};
@@ -38,6 +38,24 @@ pub enum MenuAction {
     Down,
     Selected,
     Drop,
+}
+
+pub fn draw_horizontal_line(
+    ctx: &mut Rltk,
+    sx: i32,
+    sy: i32,
+    width: i32,
+    fg: RGB,
+    bg: RGB,
+    ends: bool,
+) {
+    for x in 0..width {
+        ctx.set(sx + x, sy, fg, bg, rltk::to_cp437('─'));
+    }
+    if ends {
+        ctx.set(sx, sy, fg, bg, rltk::to_cp437('├'));
+        ctx.set(sx + width, sy, fg, bg, rltk::to_cp437('┤'));
+    }
 }
 
 pub const UI_WIDTH: usize = 40;
@@ -83,6 +101,37 @@ pub fn draw_char_ui(ecs: &World, ctx: &mut Rltk) {
             stats.max_hp,
             COLORS.red,
             COLORS.black,
+        );
+    }
+
+    //inventory
+    let player_entity = ecs.fetch::<Entity>();
+    let names = ecs.read_storage::<Name>();
+    let backpack = ecs.read_storage::<InBackpack>();
+    let entities = ecs.entities();
+    let inventory = (&backpack, &names, &entities)
+        .join()
+        .sorted_by(|a, b| Ord::cmp(&a.1.name, &b.1.name))
+        .filter(|item| item.0.owner == *player_entity);
+
+    draw_horizontal_line(
+        ctx,
+        ui_start_x,
+        19,
+        ui_width as i32,
+        COLORS.white,
+        COLORS.black,
+        true,
+    );
+
+    let inventory_start = 20;
+    for (y, item) in inventory.enumerate() {
+        ctx.print_color(
+            ui_start_x + 1,
+            y + inventory_start,
+            COLORS.white,
+            COLORS.black,
+            &item.1.name.to_string(),
         );
     }
 }

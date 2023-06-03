@@ -16,6 +16,7 @@ mod gui;
 mod rect;
 mod systems;
 pub use gamelog::GameLog;
+use systems::item::use_item;
 mod camera;
 mod config;
 pub mod map_builders;
@@ -216,37 +217,7 @@ impl GameState for State {
                     }
                     gui::MenuAction::Selected => {
                         let item_entity = result.1.unwrap();
-                        let is_ranged = self.ecs.read_storage::<Ranged>();
-                        let is_item_ranged = is_ranged.get(item_entity);
-                        if let Some(is_item_ranged) = is_item_ranged {
-                            let is_aoe = self.ecs.read_storage::<AreaOfEffect>();
-                            let radius = match is_aoe.get(item_entity) {
-                                Some(is_item_aoe) => is_item_aoe.radius,
-                                None => 0,
-                            };
-                            newrunstate = RunState::ShowTargeting {
-                                range: is_item_ranged.range,
-                                item: item_entity,
-                                radius,
-                            };
-
-                            //this is: fn reset_cursor_pos
-                            let player_pos = self.ecs.fetch::<Point>();
-                            let mut cursor = self.ecs.fetch_mut::<Cursor>();
-                            cursor.point = camera::tile_to_screen(&self.ecs, *player_pos);
-                        } else {
-                            let mut intent = self.ecs.write_storage::<WantsToUseItem>();
-                            intent
-                                .insert(
-                                    *self.ecs.fetch::<Entity>(),
-                                    WantsToUseItem {
-                                        item: item_entity,
-                                        target: None,
-                                    },
-                                )
-                                .expect("Unable to insert intent");
-                            newrunstate = RunState::PlayerTurn;
-                        }
+                        newrunstate = use_item(&mut self.ecs, item_entity);
                     }
                     gui::MenuAction::Drop => {
                         let item_entity = result.1.unwrap();
