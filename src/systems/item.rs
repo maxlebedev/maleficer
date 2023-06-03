@@ -280,7 +280,7 @@ pub fn use_item(ecs: &mut World, item: Entity) -> RunState {
         //reset cursor position
         let player_pos = ecs.fetch::<Point>();
         let mut cursor = ecs.fetch_mut::<Cursor>();
-        cursor.point = camera::tile_to_screen(&ecs, *player_pos);
+        cursor.point = camera::tile_to_screen(ecs, *player_pos);
         return RunState::ShowTargeting {
             range: ranged.range,
             item,

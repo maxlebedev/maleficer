@@ -174,7 +174,7 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
     let hotkeys = vec![INPUT.hk1, INPUT.hk2, INPUT.hk3, INPUT.hk4];
 
     match ctx.key {
-        None => return RunState::AwaitingInput, // Nothing happened
+        None => RunState::AwaitingInput, // Nothing happened
         Some(key) => match key {
             // TODO: I still don't understand why I have to do do `_ if key ==`
             _ if key == INPUT.left => try_move_player(-1, 0, &mut gs.ecs),
@@ -183,7 +183,7 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
             _ if key == INPUT.right => try_move_player(1, 0, &mut gs.ecs),
 
             _ if key == INPUT.pick_up => get_item(&mut gs.ecs),
-            _ if key == INPUT.inventory => return RunState::ShowInventory { selection: 0 },
+            _ if key == INPUT.inventory => RunState::ShowInventory { selection: 0 },
 
             _ if hotkeys.contains(&key) => use_hotkey(&mut gs.ecs, key),
             // cast_spell(&mut gs.ecs),
@@ -195,13 +195,13 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
                 RunState::AwaitingInput
             }
             _ if key == INPUT.exit => {
-                return RunState::MainMenu {
+                RunState::MainMenu {
                     game_started: true,
                     menu_selection: gui::MainMenuSelection::NewGame,
                 }
             }
-            _ if key == INPUT.wait => return RunState::PlayerTurn,
-            _ => return RunState::AwaitingInput,
+            _ if key == INPUT.wait => RunState::PlayerTurn,
+            _ => RunState::AwaitingInput,
         },
     }
 }

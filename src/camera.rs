@@ -63,7 +63,7 @@ pub fn in_screen_bounds(ecs: &World, x: i32, y: i32) -> bool {
     {
         return true;
     }
-    return false;
+    false
 }
 
 pub fn blast_tiles(ecs: &World, screen_pt: Point, radius: i32) -> Vec<Point> {
@@ -129,7 +129,7 @@ fn get_tile_glyph(idx: usize, map: &Map) -> (rltk::FontCharType, RGB, RGB) {
         TileType::Wall => {
             let x = idx as i32 % map.width;
             let y = idx as i32 / map.width;
-            glyph = wall_glyph(&map, x, y);
+            glyph = wall_glyph(map, x, y);
             fg = COLORS.green;
         }
         TileType::DownStairs => {

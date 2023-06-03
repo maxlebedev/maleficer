@@ -69,7 +69,7 @@ fn count_strings(strings: Vec<&String>) -> Vec<String> {
     let result: Vec<String> = counts
         .iter()
         .sorted_by(|a, b| Ord::cmp(&a, &b))
-        .map(|(&string, &count)| format!("{} {}", count, string.to_string()))
+        .map(|(&string, &count)| format!("{} {}", count, string))
         .collect();
     result
 }
@@ -195,7 +195,7 @@ pub fn draw_world_ui(ecs: &World, ctx: &mut Rltk) {
     }
 }
 
-fn wrap_text(text: &String, max_width: usize) -> Vec<String> {
+fn wrap_text(text: &str, max_width: usize) -> Vec<String> {
     text.chars()
         .chunks(max_width)
         .into_iter()

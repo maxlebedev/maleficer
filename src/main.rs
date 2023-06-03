@@ -296,13 +296,12 @@ impl State {
         self.ecs.delete_all();
 
         let mut builder = map_builders::random_builder(1, 100, 100);
-        let start;
         builder.build_map();
         {
             let mut worldmap_resource = self.ecs.write_resource::<Map>();
             *worldmap_resource = builder.get_map();
         }
-        start = builder.get_starting_position();
+        let start = builder.get_starting_position();
 
         let (player_x, player_y) = (start.x, start.y);
 
