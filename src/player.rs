@@ -1,6 +1,9 @@
+use std::collections::HashSet;
+
 use crate::{config::INPUT, gui, systems::item::use_item};
 
 use super::gamelog::GameLog;
+use itertools::Itertools;
 use rltk::{Point, Rltk, VirtualKeyCode};
 use specs::prelude::*;
 
@@ -138,20 +141,27 @@ fn use_hotkey(ecs: &mut World, key: VirtualKeyCode) -> RunState{
 
     let mut carried_consumables = Vec::new();
     {
-        let consumables = ecs.read_storage::<Consumable>();
+        let mut seen = HashSet::<String>::new();
         let backpack = ecs.read_storage::<InBackpack>();
+        let names = ecs.read_storage::<Name>();
         let player_entity = ecs.fetch::<Entity>();
         let entities = ecs.entities();
-        for (entity, carried_by, _consumable) in (&entities, &backpack, &consumables).join() {
-            if carried_by.owner == *player_entity {
-                carried_consumables.push(entity);
+        for (entity, _carried_by, name) in (&entities, &backpack, &names).join()
+            .filter( |item| item.1.owner == *player_entity)
+            .sorted_by(|a, b| Ord::cmp(&a.2.name, &b.2.name)) {
+                if !seen.contains(&name.name) {
+                    carried_consumables.push(entity);
+                    seen.insert(name.name.clone());
+                }
             }
-        }
     }
 
     if index < carried_consumables.len() {
-        let item = carried_consumables[index];
-        return use_item(ecs, item);
+        let item = carried_consumables.get(index);
+        match item {
+            Some(item) => return use_item(ecs, *item),
+            None => return RunState::AwaitingInput,
+        }
     }
     RunState::PlayerTurn
 }

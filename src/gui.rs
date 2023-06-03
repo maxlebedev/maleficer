@@ -1,4 +1,5 @@
 use std::cmp::min;
+use std::collections::HashMap;
 
 use itertools::Itertools;
 use rltk::{Point, Rltk, RGB};
@@ -57,6 +58,23 @@ pub fn draw_horizontal_line(
         ctx.set(sx + width, sy, fg, bg, rltk::to_cp437('┤'));
     }
 }
+
+
+fn count_strings(strings: Vec<&String>) -> Vec<String> {
+    let mut counts: HashMap<&String, usize> = HashMap::new();
+
+    for string in strings {
+        *counts.entry(string).or_insert(0) += 1;
+    }
+
+   let result: Vec<String> = counts
+        .iter()
+        .sorted_by(|a, b| Ord::cmp(&a, &b))
+        .map(|(&string, &count)| format!("{} {}", count, string.to_string()))
+        .collect();
+    result
+}
+
 
 pub const UI_WIDTH: usize = 40;
 
@@ -125,13 +143,17 @@ pub fn draw_char_ui(ecs: &World, ctx: &mut Rltk) {
     );
 
     let inventory_start = 20;
-    for (y, item) in inventory.enumerate() {
+
+    let just_names:Vec<&String> = inventory.into_iter().map(|el| &el.1.name).collect();
+    let distinct_counts = count_strings(just_names);
+
+    for (y, item) in distinct_counts.iter().enumerate() {
         ctx.print_color(
             ui_start_x + 1,
             y + inventory_start,
             COLORS.white,
             COLORS.black,
-            &item.1.name.to_string(),
+            &item.to_string(),
         );
     }
 }
