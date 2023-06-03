@@ -304,7 +304,6 @@ impl State {
         }
         start = builder.get_starting_position();
 
-
         let (player_x, player_y) = (start.x, start.y);
 
         builder.spawn_entities(&mut self.ecs);

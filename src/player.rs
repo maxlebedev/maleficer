@@ -63,8 +63,7 @@ fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) -> RunState {
             ppos.x = pos.x;
             ppos.y = pos.y;
             viewshed.dirty = true;
-        }
-        else {
+        } else {
             return RunState::AwaitingInput;
         }
     }
@@ -134,7 +133,7 @@ fn get_item(ecs: &mut World) -> RunState {
     RunState::PlayerTurn
 }
 
-fn use_hotkey(ecs: &mut World, key: VirtualKeyCode) -> RunState{
+fn use_hotkey(ecs: &mut World, key: VirtualKeyCode) -> RunState {
     let hotkeys = vec![INPUT.hk1, INPUT.hk2, INPUT.hk3, INPUT.hk4];
 
     let index = hotkeys.iter().position(|obj| *obj == key).unwrap();
@@ -146,14 +145,16 @@ fn use_hotkey(ecs: &mut World, key: VirtualKeyCode) -> RunState{
         let names = ecs.read_storage::<Name>();
         let player_entity = ecs.fetch::<Entity>();
         let entities = ecs.entities();
-        for (entity, _carried_by, name) in (&entities, &backpack, &names).join()
-            .filter( |item| item.1.owner == *player_entity)
-            .sorted_by(|a, b| Ord::cmp(&a.2.name, &b.2.name)) {
-                if !seen.contains(&name.name) {
-                    carried_consumables.push(entity);
-                    seen.insert(name.name.clone());
-                }
+        for (entity, _carried_by, name) in (&entities, &backpack, &names)
+            .join()
+            .filter(|item| item.1.owner == *player_entity)
+            .sorted_by(|a, b| Ord::cmp(&a.2.name, &b.2.name))
+        {
+            if !seen.contains(&name.name) {
+                carried_consumables.push(entity);
+                seen.insert(name.name.clone());
             }
+        }
     }
 
     if index < carried_consumables.len() {
@@ -167,7 +168,6 @@ fn use_hotkey(ecs: &mut World, key: VirtualKeyCode) -> RunState{
 }
 
 // TODO: walking into a corpse doesn't work. maybe we aren't marking the right thing as dirty?
-
 
 // TODO: protect from overflow on char/item select window
 pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
@@ -186,7 +186,7 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
             _ if key == INPUT.inventory => return RunState::ShowInventory { selection: 0 },
 
             _ if hotkeys.contains(&key) => use_hotkey(&mut gs.ecs, key),
-                // cast_spell(&mut gs.ecs),
+            // cast_spell(&mut gs.ecs),
             _ if key == INPUT.select => {
                 // refactor to be context-dependant on tile
                 if map::try_next_level(&mut gs.ecs) {

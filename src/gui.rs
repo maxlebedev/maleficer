@@ -59,7 +59,6 @@ pub fn draw_horizontal_line(
     }
 }
 
-
 fn count_strings(strings: Vec<&String>) -> Vec<String> {
     let mut counts: HashMap<&String, usize> = HashMap::new();
 
@@ -67,14 +66,13 @@ fn count_strings(strings: Vec<&String>) -> Vec<String> {
         *counts.entry(string).or_insert(0) += 1;
     }
 
-   let result: Vec<String> = counts
+    let result: Vec<String> = counts
         .iter()
         .sorted_by(|a, b| Ord::cmp(&a, &b))
         .map(|(&string, &count)| format!("{} {}", count, string.to_string()))
         .collect();
     result
 }
-
 
 pub const UI_WIDTH: usize = 40;
 
@@ -144,7 +142,7 @@ pub fn draw_char_ui(ecs: &World, ctx: &mut Rltk) {
 
     let inventory_start = 20;
 
-    let just_names:Vec<&String> = inventory.into_iter().map(|el| &el.1.name).collect();
+    let just_names: Vec<&String> = inventory.into_iter().map(|el| &el.1.name).collect();
     let distinct_counts = count_strings(just_names);
 
     for (y, item) in distinct_counts.iter().enumerate() {
@@ -205,6 +203,7 @@ fn wrap_text(text: &String, max_width: usize) -> Vec<String> {
         .collect::<Vec<String>>()
 }
 
+// TODO: this is maybe deprecated
 pub fn show_inventory(
     gs: &mut State,
     ctx: &mut Rltk,

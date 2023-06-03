@@ -1,7 +1,7 @@
 use crate::{
-    gamelog::GameLog, map::Map, Antagonistic, AreaOfEffect, CombatStats, Consumable, InBackpack,
-    InflictsDamage, Name, Position, ProvidesHealing, SufferDamage, WantsToDropItem,
-    WantsToPickupItem, WantsToUseItem, COLORS, RunState, Ranged, Cursor, camera,
+    camera, gamelog::GameLog, map::Map, Antagonistic, AreaOfEffect, CombatStats, Consumable,
+    Cursor, InBackpack, InflictsDamage, Name, Position, ProvidesHealing, Ranged, RunState,
+    SufferDamage, WantsToDropItem, WantsToPickupItem, WantsToUseItem, COLORS,
 };
 use rltk::Point;
 use specs::prelude::*;
@@ -281,12 +281,18 @@ pub fn use_item(ecs: &mut World, item: Entity) -> RunState {
         let player_pos = ecs.fetch::<Point>();
         let mut cursor = ecs.fetch_mut::<Cursor>();
         cursor.point = camera::tile_to_screen(&ecs, *player_pos);
-        return RunState::ShowTargeting{ range: ranged.range, item, radius };
+        return RunState::ShowTargeting {
+            range: ranged.range,
+            item,
+            radius,
+        };
     }
     let mut intent = ecs.write_storage::<WantsToUseItem>();
-    intent.insert(
-        *ecs.fetch::<Entity>(),
-        WantsToUseItem{ item, target: None }
-    ).expect("Unable to insert intent");
+    intent
+        .insert(
+            *ecs.fetch::<Entity>(),
+            WantsToUseItem { item, target: None },
+        )
+        .expect("Unable to insert intent");
     RunState::PlayerTurn
 }
