@@ -179,6 +179,7 @@ impl GameState for State {
                 newrunstate = RunState::AwaitingInput;
             }
             RunState::AwaitingInput => {
+                self.run_systems();
                 newrunstate = player_input(self, ctx);
             }
             RunState::PlayerTurn => {
@@ -186,8 +187,8 @@ impl GameState for State {
                 newrunstate = RunState::MonsterTurn;
             }
             RunState::MonsterTurn => {
-                self.run_systems();
                 let mut mob = systems::monster_ai::MonsterAI {};
+                self.run_systems();
                 mob.run_now(&self.ecs);
                 newrunstate = RunState::AwaitingInput;
             }
