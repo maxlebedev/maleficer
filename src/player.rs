@@ -137,7 +137,7 @@ fn use_hotkey(_ecs: &mut World, key: VirtualKeyCode) -> RunState{
     RunState::PlayerTurn
 }
 
-fn tnl(ecs: &mut World) -> RunState{
+fn descend(ecs: &mut World) -> RunState{
     if map::try_next_level(ecs) {
         return RunState::NextLevel;
     }
@@ -151,29 +151,29 @@ fn to_main_menu() -> RunState {
 // TODO: protect from overflow on char/item select window
 
 pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
-    let mut closure_map: HashMap<VirtualKeyCode, Box<dyn Fn(&mut World) -> RunState>> = HashMap::new();
-    closure_map.insert(INPUT.left, Box::new(|w| try_move_player(-1, 0, w)));
-    closure_map.insert(INPUT.down, Box::new(|w| try_move_player(0, 1, w)));
-    closure_map.insert(INPUT.up, Box::new(|w| try_move_player(0, -1, w)));
-    closure_map.insert(INPUT.right, Box::new(|w| try_move_player(1, 0, w)));
-    closure_map.insert(INPUT.pick_up, Box::new(|w| get_item(w)));
-    closure_map.insert(INPUT.inventory, Box::new(|_| return RunState::ShowInventory { selection: 0 }));
-    closure_map.insert(INPUT.select, Box::new(|w| tnl(w)));
-    closure_map.insert(INPUT.exit, Box::new(|_| to_main_menu()));
-    closure_map.insert(INPUT.wait, Box::new(|_| return RunState::PlayerTurn));
+    let mut player_action_map: HashMap<VirtualKeyCode, Box<dyn Fn(&mut World) -> RunState>> = HashMap::new();
+    player_action_map.insert(INPUT.left, Box::new(|w| try_move_player(-1, 0, w)));
+    player_action_map.insert(INPUT.down, Box::new(|w| try_move_player(0, 1, w)));
+    player_action_map.insert(INPUT.up, Box::new(|w| try_move_player(0, -1, w)));
+    player_action_map.insert(INPUT.right, Box::new(|w| try_move_player(1, 0, w)));
+    player_action_map.insert(INPUT.pick_up, Box::new(|w| get_item(w)));
+    player_action_map.insert(INPUT.inventory, Box::new(|_| return RunState::ShowInventory { selection: 0 }));
+    player_action_map.insert(INPUT.select, Box::new(|w| descend(w)));
+    player_action_map.insert(INPUT.exit, Box::new(|_| to_main_menu()));
+    player_action_map.insert(INPUT.wait, Box::new(|_| return RunState::PlayerTurn));
 
-    closure_map.insert(INPUT.hk1, Box::new(|w| use_hotkey(w, INPUT.hk1)));
-    closure_map.insert(INPUT.hk2, Box::new(|w| use_hotkey(w, INPUT.hk2)));
-    closure_map.insert(INPUT.hk3, Box::new(|w| use_hotkey(w, INPUT.hk3)));
-    closure_map.insert(INPUT.hk4, Box::new(|w| use_hotkey(w, INPUT.hk4)));
+    player_action_map.insert(INPUT.hk1, Box::new(|w| use_hotkey(w, INPUT.hk1)));
+    player_action_map.insert(INPUT.hk2, Box::new(|w| use_hotkey(w, INPUT.hk2)));
+    player_action_map.insert(INPUT.hk3, Box::new(|w| use_hotkey(w, INPUT.hk3)));
+    player_action_map.insert(INPUT.hk4, Box::new(|w| use_hotkey(w, INPUT.hk4)));
 
     match ctx.key {
         None => return RunState::AwaitingInput,
         Some(key) => {
-            if !closure_map.contains_key(&key){
+            if !player_action_map.contains_key(&key){
                 return RunState::PlayerTurn;
             }
-            return closure_map.get(&key).unwrap()(&mut gs.ecs);
+            return player_action_map.get(&key).unwrap()(&mut gs.ecs);
         }
     }
 }
