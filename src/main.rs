@@ -176,26 +176,25 @@ impl GameState for State {
                 self.new_game();
                 player::make_character(&mut self.ecs);
                 self.run_systems();
-                self.ecs.maintain();
                 newrunstate = RunState::AwaitingInput;
             }
             RunState::AwaitingInput => {
+                self.run_systems();
                 newrunstate = player_input(self, ctx);
             }
             RunState::PlayerTurn => {
                 self.run_systems();
-                self.ecs.maintain();
                 newrunstate = RunState::MonsterTurn;
             }
             RunState::MonsterTurn => {
+                let mut mob = systems::monster_ai::MonsterAI {};
                 self.run_systems();
-                self.ecs.maintain();
+                mob.run_now(&self.ecs);
                 newrunstate = RunState::AwaitingInput;
             }
             RunState::NextLevel => {
                 self.goto_next_level();
                 self.run_systems();
-                self.ecs.maintain();
                 newrunstate = RunState::AwaitingInput;
             }
 
@@ -301,8 +300,6 @@ impl State {
     fn run_systems(&mut self) {
         let mut vis = systems::visibility::Visibility {};
         vis.run_now(&self.ecs);
-        let mut mob = systems::monster_ai::MonsterAI {};
-        mob.run_now(&self.ecs);
         let mut mapindex = systems::map_indexing::MapIndexing {};
         mapindex.run_now(&self.ecs);
         let mut melee = systems::melee_combat::MeleeCombat {};
