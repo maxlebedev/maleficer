@@ -1,12 +1,10 @@
-use crate::{config::BOUNDS, COLORS};
+use crate::{config::BOUNDS, gui::UI_WIDTH, COLORS};
 use specs::prelude::*;
 
 use super::{Hidden, Map, Position, Renderable, TileType};
 use rltk::{Point, Rltk, RGB};
 
 const SHOW_BOUNDARIES: bool = true;
-
-// TODO: shift everything over by UI_WIDTH
 
 // TODO: memoize?
 pub fn get_screen_bounds(ecs: &World) -> (i32, i32, i32, i32) {
@@ -77,6 +75,16 @@ pub fn blast_tiles(ecs: &World, screen_pt: Point, radius: i32) -> Vec<Point> {
         .collect()
 }
 
+pub fn set_view(ctx: &mut Rltk, x: i32, y: i32, fg: RGB, bg: RGB, glyph: u16) {
+    // there's a thing where we can specify x,y are types that convert to usize, but idk how to do that yet
+    ctx.set(x + UI_WIDTH as i32, y, fg, bg, glyph);
+}
+
+pub fn set_bg_view(ctx: &mut Rltk, x: i32, y: i32, bg: RGB) {
+    let ui_width = UI_WIDTH as i32;
+    ctx.set_bg(x + ui_width, y, bg);
+}
+
 pub fn render_camera(ecs: &World, ctx: &mut Rltk) {
     let map = ecs.fetch::<Map>();
     let (min_x, max_x, min_y, max_y) = get_screen_bounds(ecs);
@@ -90,10 +98,17 @@ pub fn render_camera(ecs: &World, ctx: &mut Rltk) {
                 let idx = map.xy_idx(tx, ty);
                 if map.revealed_tiles[idx] {
                     let (glyph, fg, bg) = get_tile_glyph(idx, &map);
-                    ctx.set(x, y, fg, bg, glyph);
+                    set_view(ctx, x as i32, y as i32, fg, bg, glyph);
                 }
             } else if SHOW_BOUNDARIES {
-                ctx.set(x, y, COLORS.grey, COLORS.black, rltk::to_cp437('+'));
+                set_view(
+                    ctx,
+                    x as i32,
+                    y as i32,
+                    COLORS.grey,
+                    COLORS.black,
+                    rltk::to_cp437('+'),
+                );
             }
         }
     }
@@ -111,7 +126,14 @@ pub fn render_camera(ecs: &World, ctx: &mut Rltk) {
         let idx = map.xy_idx(pos.x, pos.y);
         if map.visible_tiles[idx] && in_screen_bounds(ecs, pos.x, pos.y) {
             let screen_pt = tile_to_screen(ecs, rltk::Point { x: pos.x, y: pos.y });
-            ctx.set(screen_pt.x, screen_pt.y, render.fg, render.bg, render.glyph);
+            set_view(
+                ctx,
+                screen_pt.x,
+                screen_pt.y,
+                render.fg,
+                render.bg,
+                render.glyph,
+            );
         }
     }
 }

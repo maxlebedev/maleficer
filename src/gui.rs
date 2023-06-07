@@ -221,7 +221,7 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32, radius: i32) -
             let distance = rltk::DistanceAlg::Pythagoras.distance2d(*player_pos, *idx);
             if distance <= range as f32 && camera::in_screen_bounds(ecs, idx.x, idx.y) {
                 let screen_pt = camera::tile_to_screen(ecs, *idx);
-                ctx.set_bg(screen_pt.x, screen_pt.y, COLORS.blue);
+                camera::set_bg_view(ctx, screen_pt.x, screen_pt.y, COLORS.blue);
                 available_cells.push(*idx);
             }
         }
@@ -240,13 +240,13 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32, radius: i32) -
     if valid_target {
         curs_color = COLORS.cyan;
     }
-    ctx.set_bg(cursor.point.x, cursor.point.y, curs_color);
+    camera::set_bg_view(ctx, cursor.point.x, cursor.point.y, curs_color);
     let blast_tiles = camera::blast_tiles(ecs, cursor.point, radius);
     for tile in blast_tiles.iter() {
         if *tile == cursor.point {
             continue;
         }
-        ctx.set_bg(tile.x, tile.y, COLORS.dark_grey);
+        camera::set_bg_view(ctx, tile.x, tile.y, COLORS.dark_grey);
     }
 
     match ctx.key {
