@@ -1,8 +1,9 @@
 use crate::{
-    gamelog::GameLog, map::Map, Antagonistic, AreaOfEffect, Consumable, EntityStats, InBackpack,
-    InflictsDamage, Name, Position, ProvidesHealing, SufferDamage, WantsToDropItem,
-    WantsToPickupItem, WantsToUseItem, COLORS,
+    camera, gamelog::GameLog, map::Map, Antagonistic, AreaOfEffect, EntityStats, Consumable,
+    Cursor, InBackpack, InflictsDamage, Name, Position, ProvidesHealing, Ranged, RunState,
+    SufferDamage, WantsToDropItem, WantsToPickupItem, WantsToUseItem, COLORS,
 };
+use rltk::Point;
 use specs::prelude::*;
 
 use super::particle::ParticleBuilder;
@@ -268,4 +269,31 @@ impl<'a> System<'a> for ItemDrop {
 
         wants_drop.clear();
     }
+}
+
+pub fn use_item(ecs: &mut World, item: Entity) -> RunState {
+    let is_aoe = ecs.read_storage::<AreaOfEffect>();
+    let radius = match is_aoe.get(item) {
+        Some(is_item_aoe) => is_item_aoe.radius,
+        None => 0,
+    };
+    if let Some(ranged) = ecs.read_storage::<Ranged>().get(item) {
+        //reset cursor position
+        let player_pos = ecs.fetch::<Point>();
+        let mut cursor = ecs.fetch_mut::<Cursor>();
+        cursor.point = camera::tile_to_screen(ecs, *player_pos);
+        return RunState::ShowTargeting {
+            range: ranged.range,
+            item,
+            radius,
+        };
+    }
+    let mut intent = ecs.write_storage::<WantsToUseItem>();
+    intent
+        .insert(
+            *ecs.fetch::<Entity>(),
+            WantsToUseItem { item, target: None },
+        )
+        .expect("Unable to insert intent");
+    RunState::PlayerTurn
 }
