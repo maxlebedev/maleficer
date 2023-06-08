@@ -1,5 +1,5 @@
 use crate::{
-    camera, gamelog::GameLog, map::Map, Antagonistic, AreaOfEffect, CombatStats, Consumable,
+    camera, gamelog::GameLog, map::Map, Antagonistic, AreaOfEffect, EntityStats, Consumable,
     Cursor, InBackpack, InflictsDamage, Name, Position, ProvidesHealing, Ranged, RunState,
     SufferDamage, WantsToDropItem, WantsToPickupItem, WantsToUseItem, COLORS,
 };
@@ -63,7 +63,7 @@ impl<'a> System<'a> for ItemUse {
         ReadStorage<'a, InflictsDamage>,
         WriteStorage<'a, SufferDamage>,
         ReadExpect<'a, Map>,
-        WriteStorage<'a, CombatStats>,
+        WriteStorage<'a, EntityStats>,
         ReadStorage<'a, AreaOfEffect>,
         WriteExpect<'a, ParticleBuilder>,
         ReadStorage<'a, Position>,
@@ -133,6 +133,7 @@ impl<'a> System<'a> for ItemUse {
 
             let mut used_item = true;
             let item_heals = healing.get(useitem.item);
+
             match item_heals {
                 None => {}
                 Some(healer) => {
@@ -142,27 +143,27 @@ impl<'a> System<'a> for ItemUse {
                         if let Some(_target) = selected_antagonist {
                             target = &player_entity;
                         }
-                        let stats = combat_stats.get_mut(*target);
-                        if let Some(stats) = stats {
-                            stats.hp = i32::min(stats.max_hp, stats.hp + healer.heal_amount);
-                            if entity == *player_entity {
-                                gamelog.entries.push(format!(
-                                    "The {} heals you for {} hp.",
-                                    names.get(useitem.item).unwrap().name,
-                                    healer.heal_amount
-                                ));
-                            }
-                            let pos = positions.get(*target);
-                            if let Some(pos) = pos {
-                                particle_builder.request(
-                                    pos.x,
-                                    pos.y,
-                                    COLORS.green,
-                                    COLORS.black,
-                                    rltk::to_cp437('♥'),
-                                    200.0,
-                                );
-                            }
+                        let stats = combat_stats.get_mut(*target).unwrap();
+                        let (curr_hp, max_hp) = stats.get("hit_points");
+                        let new_hp = i32::min(max_hp, curr_hp + healer.heal_amount);
+                        stats.set_current("hit_points", new_hp);
+                        if entity == *player_entity {
+                            gamelog.entries.push(format!(
+                                "The {} heals you for {} hp.",
+                                names.get(useitem.item).unwrap().name,
+                                healer.heal_amount
+                            ));
+                        }
+                        let pos = positions.get(*target);
+                        if let Some(pos) = pos {
+                            particle_builder.request(
+                                pos.x,
+                                pos.y,
+                                COLORS.green,
+                                COLORS.black,
+                                rltk::to_cp437('♥'),
+                                200.0,
+                            );
                         }
                     }
                 }

@@ -111,12 +111,16 @@ pub fn spawn_named_item(
         eb = eb.with(crate::components::Item {});
 
         if let Some(stats) = &item_template.stats {
-            //TODO: 'CombatStats' might be a poor name for these
-            eb = eb.with(CombatStats {
-                max_hp: stats.hp,
-                hp: stats.hp,
+            eb = eb.with(EntityStats {
                 power: 0,
                 defense: 0,
+                pools: HashMap::from([(
+                    "hit_points".to_string(),
+                    Pool {
+                        max: stats.hp,
+                        current: stats.hp,
+                    },
+                )]),
             });
         }
 
@@ -180,27 +184,31 @@ pub fn spawn_named_mob(
             eb = eb.with(get_renderable_component(renderable));
         }
 
-        eb = eb.with(Name {
-            name: mob_template.name.clone(),
-        });
-
-        eb = eb.with(crate::components::Antagonistic {});
-
-        eb = eb.with(Monster {});
+        eb = eb
+            .with(Name {
+                name: mob_template.name.clone(),
+            })
+            .with(crate::components::Antagonistic {})
+            .with(Monster {})
+            .with(EntityStats {
+                power: mob_template.stats.power,
+                defense: mob_template.stats.defense,
+                pools: HashMap::from([(
+                    "hit_points".to_string(),
+                    Pool {
+                        max: mob_template.stats.max_hp,
+                        current: mob_template.stats.hp,
+                    },
+                )]),
+            })
+            .with(Viewshed {
+                visible_tiles: Vec::new(),
+                range: mob_template.vision_range,
+                dirty: true,
+            });
         if mob_template.blocks_tile {
             eb = eb.with(BlocksTile {});
         }
-        eb = eb.with(CombatStats {
-            max_hp: mob_template.stats.max_hp,
-            hp: mob_template.stats.hp,
-            power: mob_template.stats.power,
-            defense: mob_template.stats.defense,
-        });
-        eb = eb.with(Viewshed {
-            visible_tiles: Vec::new(),
-            range: mob_template.vision_range,
-            dirty: true,
-        });
 
         return Some(eb.marked::<SimpleMarker<SerializeMe>>().build());
     }

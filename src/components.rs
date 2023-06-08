@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use rltk::RGB;
 use serde::{Deserialize, Serialize};
 #[allow(deprecated)]
@@ -41,12 +43,41 @@ pub struct Name {
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
 pub struct BlocksTile {}
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Pool {
+    pub max: i32,
+    pub current: i32,
+}
+
 #[derive(Component, Debug, ConvertSaveload, Clone)]
-pub struct CombatStats {
-    pub max_hp: i32,
-    pub hp: i32,
+pub struct EntityStats {
+    // As opposed to stats for a run or w.e
     pub defense: i32,
     pub power: i32,
+    pub pools: HashMap<String, Pool>,
+}
+
+impl EntityStats {
+    pub fn get(&self, stat: &str) -> (i32, i32) {
+        match self.pools.get(stat) {
+            Some(stat_pool) => (stat_pool.current, stat_pool.max),
+            _ => (0, 0),
+        }
+    }
+    pub fn set_current(&mut self, key: &str, value: i32) {
+        let mut pool = self.pools.get_mut(key).unwrap();
+        pool.current = value;
+    }
+
+    pub fn set_max(&mut self, key: &str, value: i32) {
+        let mut pool = self.pools.get_mut(key).unwrap();
+        pool.max = value;
+    }
+
+    pub fn deplete(&mut self, key: &str, value: i32) {
+        let mut pool = self.pools.get_mut(key).unwrap();
+        pool.current -= value;
+    }
 }
 
 #[derive(Component, Debug, ConvertSaveload, Clone)]
