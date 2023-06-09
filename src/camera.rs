@@ -141,7 +141,7 @@ pub fn render_camera(ecs: &World, ctx: &mut Rltk) {
 fn get_tile_glyph(idx: usize, map: &Map) -> (rltk::FontCharType, RGB, RGB) {
     let glyph;
     let mut fg;
-    let bg = COLORS.black;
+    let mut bg = COLORS.black;
 
     match map.tiles[idx] {
         TileType::Floor => {
@@ -161,6 +161,11 @@ fn get_tile_glyph(idx: usize, map: &Map) -> (rltk::FontCharType, RGB, RGB) {
     }
     if !map.visible_tiles[idx] {
         fg = fg.to_greyscale();
+    }
+
+    if map.bloodstains.contains(&idx) {
+        bg = COLORS.blood;
+        // maybe change floor tiles to this? '▓'
     }
 
     (glyph, fg, bg)

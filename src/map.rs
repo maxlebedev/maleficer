@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use crate::GameLog;
 
 use rltk::{Algorithm2D, BaseMap, Point};
@@ -22,6 +24,7 @@ pub struct Map {
     pub blocked: Vec<bool>,
     pub depth: i32,
     pub tile_count: usize,
+    pub bloodstains : HashSet<usize>,
 
     #[serde(skip_serializing)]
     #[serde(skip_deserializing)]
@@ -33,7 +36,7 @@ impl Map {
         ((y * self.width) + x) as usize
     }
 
-    /// for DRY reasons. TODO: actually use this
+    /// for DRY reasons. TODO: let it take i32s and actually use the func
     pub fn idx_xy(&self, idx: usize) -> (i32, i32) {
         let id = idx as i32;
         let x = id % self.width;
@@ -67,6 +70,7 @@ impl Map {
             tile_content: vec![Vec::new(); map_tile_count],
             depth: new_depth,
             tile_count: map_tile_count,
+            bloodstains: HashSet::new(),
             // TODO: no view_blocked?
         }
     }

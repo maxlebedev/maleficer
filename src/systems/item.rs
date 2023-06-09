@@ -1,7 +1,7 @@
 use crate::{
-    camera, gamelog::GameLog, map::Map, Antagonistic, AreaOfEffect, EntityStats, Consumable,
-    Cursor, InBackpack, InflictsDamage, Name, Position, ProvidesHealing, Ranged, RunState,
-    SufferDamage, WantsToDropItem, WantsToPickupItem, WantsToUseItem, COLORS,
+    camera, gamelog::GameLog, map::Map, Antagonistic, AreaOfEffect, Consumable, Cursor,
+    EntityStats, InBackpack, InflictsDamage, Name, Position, ProvidesHealing, Ranged, RunState,
+    WantsToDropItem, WantsToPickupItem, WantsToUseItem, COLORS, effects::*,
 };
 use rltk::Point;
 use specs::prelude::*;
@@ -61,7 +61,6 @@ impl<'a> System<'a> for ItemUse {
         ReadStorage<'a, Consumable>,
         ReadStorage<'a, ProvidesHealing>,
         ReadStorage<'a, InflictsDamage>,
-        WriteStorage<'a, SufferDamage>,
         ReadExpect<'a, Map>,
         WriteStorage<'a, EntityStats>,
         ReadStorage<'a, AreaOfEffect>,
@@ -80,7 +79,6 @@ impl<'a> System<'a> for ItemUse {
             consumables,
             healing,
             inflict_damage,
-            mut suffer_damage,
             map,
             mut combat_stats,
             aoe,
@@ -175,7 +173,13 @@ impl<'a> System<'a> for ItemUse {
                 Some(damage) => {
                     used_item = false;
                     for mob in targets.iter() {
-                        SufferDamage::new_damage(&mut suffer_damage, *mob, damage.damage);
+                        add_effect(
+                            Some(*player_entity),
+                            EffectType::Damage {
+                                amount: damage.damage,
+                            },
+                            Targets::Single { target: *mob },
+                        );
                         if entity == *player_entity {
                             let mob_name = names.get(*mob).unwrap();
                             let item_name = names.get(useitem.item).unwrap();
