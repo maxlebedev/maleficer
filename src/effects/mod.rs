@@ -85,7 +85,6 @@ fn tile_effect_hits_entities(effect: &EffectType) -> bool {
     match effect {
         EffectType::Damage { .. } => true,
         EffectType::Healing { .. } => true,
-        EffectType::TeleportTo { .. } => true,
         // EffectType::Particle { .. } => true,
         _ => false,
     }
@@ -101,6 +100,7 @@ fn affect_tile(ecs: &mut World, effect: &EffectSpawner, tile_idx: i32) {
     match &effect.effect_type {
         EffectType::Bloodstain => damage::bloodstain(ecs, tile_idx),
         EffectType::Particle { .. } => particles::particle_to_tile(ecs, tile_idx, &effect),
+        EffectType::TeleportTo{..} => movement::apply_teleport(ecs, effect, tile_idx),
         _ => {}
     }
 }
@@ -115,7 +115,6 @@ fn affect_entity(ecs: &mut World, effect: &EffectSpawner, target: Entity) {
                 damage::bloodstain(ecs, pos)
             }
         }
-        EffectType::TeleportTo{..} => movement::apply_teleport(ecs, effect, target),
         EffectType::Particle { .. } => {
             if let Some(pos) = entity_position(ecs, target) {
                 particles::particle_to_tile(ecs, pos, &effect)

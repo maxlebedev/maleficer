@@ -118,6 +118,7 @@ macro_rules! apply_effects {
                 "damage" => $eb = $eb.with(InflictsDamage{ damage : effect.1.parse::<i32>().unwrap() }),
                 "area_of_effect" => $eb = $eb.with(AreaOfEffect{ radius: effect.1.parse::<i32>().unwrap() }),
                 "single_activation" => $eb = $eb.with(SingleActivation{}),
+                "teleportation" => $eb = $eb.with(TeleportTo{x:0, y:0}),
                 "particle_line" => $eb = $eb.with(parse_particle_line(&effect.1)),
                 "particle" => $eb = $eb.with(parse_particle(&effect.1)),
                 _ => rltk::console::log(format!("Warning: consumable effect {} not implemented.", effect_name))

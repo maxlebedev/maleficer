@@ -7,7 +7,8 @@
     { "name" : "Fireball Scroll", "weight" : 2, "min_depth" : 0, "max_depth" : 100, "add_map_depth_to_weight" : true },
     { "name" : "Shock Scroll", "weight" : 2, "min_depth" : 0, "max_depth" : 100, "add_map_depth_to_weight" : true },
     { "name" : "Magic Missile Scroll", "weight" : 4, "min_depth" : 0, "max_depth" : 100 },
-    { "name" : "Drain Scroll", "weight" : 2, "min_depth" : 0, "max_depth" : 100 }
+    { "name" : "Drain Scroll", "weight" : 2, "min_depth" : 0, "max_depth" : 100 },
+    { "name" : "Displacement Scroll", "weight" : 20, "min_depth" : 0, "max_depth" : 100 }
 ],
 "items" : [
     {
@@ -57,6 +58,24 @@
                 "provides_healing" : "8",
                 "ranged" : "4",
                 "damage" : "8"
+            }
+        },
+        "stats": {
+            "hp" : 1
+        }
+    },
+    {
+        "name" : "Displacement Scroll",
+        "renderable": {
+            "glyph" : ")",
+            "fg" : "#FF4778",
+            "bg" : "#000000",
+            "order" : 2
+        },
+        "consumable" : {
+            "effects" : {
+                "ranged" : "4",
+                "teleportation": "foo"
             }
         },
         "stats": {

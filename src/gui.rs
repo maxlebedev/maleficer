@@ -341,7 +341,7 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32, radius: i32) -
                 cursor.point.x += 1;
                 MenuAction::NoResponse
             }
-            _ if key == INPUT.select => MenuAction::Selected,
+            _ if key == INPUT.select && valid_target => MenuAction::Selected,
             _ => MenuAction::NoResponse,
         },
     }
