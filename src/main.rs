@@ -435,9 +435,15 @@ fn register_all(gs: &mut State) {
     gs.ecs.register::<Spell>();
     gs.ecs.register::<WantsToCastSpell>();
     gs.ecs.register::<ParticleLifetime>();
-    gs.ecs.register::<Antagonistic>();
+    gs.ecs.register::<SpawnParticleLine>();
+    gs.ecs.register::<SpawnParticleBurst>();
     gs.ecs.register::<Hidden>();
+    gs.ecs.register::<Antagonistic>();
+    gs.ecs.register::<SingleActivation>();
+    gs.ecs.register::<TeleportTo>();
+    gs.ecs.register::<ApplyTeleport>();
 
+    // gs.ecs.insert(TeleportTo{x:0,y:0});
     gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());
     gs.ecs.insert(rltk::RandomNumberGenerator::new());
 

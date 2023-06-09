@@ -8,6 +8,7 @@ use std::fs;
 use std::fs::File;
 use std::path::Path;
 
+
 macro_rules! serialize_individually {
     ($ecs:expr, $ser:expr, $data:expr, $( $type:ty),*) => {
         $(
@@ -83,6 +84,11 @@ pub fn save_game(ecs: &mut World) {
             SerializationHelper,
             WantsToCastSpell,
             Antagonistic,
+            SingleActivation,
+            ApplyTeleport,
+            TeleportTo,
+            SpawnParticleLine,
+            SpawnParticleBurst,
             Hidden
         );
     }
@@ -151,6 +157,11 @@ pub fn load_game(ecs: &mut World) {
             SerializationHelper,
             WantsToCastSpell,
             Antagonistic,
+            SingleActivation,
+            ApplyTeleport,
+            TeleportTo,
+            SpawnParticleLine,
+            SpawnParticleBurst,
             Hidden
         );
     }

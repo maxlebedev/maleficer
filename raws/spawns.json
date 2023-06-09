@@ -36,7 +36,8 @@
         "consumable" : {
             "effects" : { 
                 "ranged" : "6",
-                "damage" : "20"
+                "damage" : "20",
+                "particle_line": "*;#00FFFF;200.0"
             }
         },
         "stats": {
@@ -74,7 +75,8 @@
             "effects" : { 
                 "ranged" : "6",
                 "damage" : "20",
-                "aoe": "3"
+                "area_of_effect": "3",
+                "particle" : "*;#FFA500;200.0"
             }
         },
         "stats": {
@@ -93,7 +95,7 @@
             "effects" : { 
                 "ranged" : "8",
                 "damage" : "10",
-                "aoe": "1"
+                "area_of_effect": "1"
             }
         },
         "stats": {

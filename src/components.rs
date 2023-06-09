@@ -78,6 +78,11 @@ impl EntityStats {
         let mut pool = self.pools.get_mut(key).unwrap();
         pool.current -= value;
     }
+
+    pub fn restore(&mut self, key: &str, value: i32) {
+        let mut pool = self.pools.get_mut(key).unwrap();
+        pool.current = std::cmp::min(pool.current+value, pool.max);
+    }
 }
 
 #[derive(Component, Debug, ConvertSaveload, Clone)]
@@ -93,6 +98,9 @@ pub struct Destructable {}
 
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
 pub struct Consumable {}
+
+#[derive(Component, Debug, Serialize, Deserialize, Clone)]
+pub struct SingleActivation {}
 
 #[derive(Component, Debug, ConvertSaveload, Clone)]
 pub struct Ranged {
@@ -191,3 +199,29 @@ pub struct Antagonistic {}
 
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
 pub struct Hidden {}
+
+#[derive(Component, Debug, Serialize, Deserialize, Clone)]
+pub struct ApplyTeleport {
+    pub dest_x : i32,
+    pub dest_y : i32,
+}
+
+#[derive(Component, Debug, Serialize, Deserialize, Clone)]
+pub struct TeleportTo {
+    pub x: i32,
+    pub y: i32,
+}
+
+#[derive(Component, Serialize, Deserialize, Clone)]
+pub struct SpawnParticleLine {
+    pub glyph : rltk::FontCharType,
+    pub color : RGB,
+    pub lifetime_ms : f32
+}
+
+#[derive(Component, Serialize, Deserialize, Clone)]
+pub struct SpawnParticleBurst {
+    pub glyph : rltk::FontCharType,
+    pub color : RGB,
+    pub lifetime_ms : f32
+}

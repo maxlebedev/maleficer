@@ -89,6 +89,44 @@ fn get_renderable_component(
     }
 }
 
+
+fn parse_particle_line(n : &str) -> SpawnParticleLine {
+    let tokens : Vec<_> = n.split(';').collect();
+    SpawnParticleLine{
+        glyph : rltk::to_cp437(tokens[0].chars().next().unwrap()),
+        color : rltk::RGB::from_hex(tokens[1]).expect("Bad RGB"),
+        lifetime_ms : tokens[2].parse::<f32>().unwrap()
+    }
+}
+
+fn parse_particle(n : &str) -> SpawnParticleBurst {
+    let tokens : Vec<_> = n.split(';').collect();
+    SpawnParticleBurst{
+        glyph : rltk::to_cp437(tokens[0].chars().next().unwrap()),
+        color : rltk::RGB::from_hex(tokens[1]).expect("Bad RGB"),
+        lifetime_ms : tokens[2].parse::<f32>().unwrap()
+    }
+}
+
+macro_rules! apply_effects {
+    ( $effects:expr, $eb:expr ) => {
+        for effect in $effects.iter() {
+        let effect_name = effect.0.as_str();
+            match effect_name {
+                "provides_healing" => $eb = $eb.with(ProvidesHealing{ heal_amount: effect.1.parse::<i32>().unwrap() }),
+                "ranged" => $eb = $eb.with(Ranged{ range: effect.1.parse::<i32>().unwrap() }),
+                "damage" => $eb = $eb.with(InflictsDamage{ damage : effect.1.parse::<i32>().unwrap() }),
+                "area_of_effect" => $eb = $eb.with(AreaOfEffect{ radius: effect.1.parse::<i32>().unwrap() }),
+                "single_activation" => $eb = $eb.with(SingleActivation{}),
+                "particle_line" => $eb = $eb.with(parse_particle_line(&effect.1)),
+                "particle" => $eb = $eb.with(parse_particle(&effect.1)),
+                _ => rltk::console::log(format!("Warning: consumable effect {} not implemented.", effect_name))
+
+            }
+        }
+    };
+}
+
 pub fn spawn_named_item(
     raws: &RawMaster,
     new_entity: EntityBuilder,
@@ -125,39 +163,8 @@ pub fn spawn_named_item(
         }
 
         if let Some(consumable) = &item_template.consumable {
-            eb = eb.with(crate::components::Consumable {});
-            // TODO: consumable might be better as a bool
-            for effect in consumable.effects.iter() {
-                let effect_name = effect.0.as_str();
-                match effect_name {
-                    "provides_healing" => {
-                        eb = eb.with(ProvidesHealing {
-                            heal_amount: effect.1.parse::<i32>().unwrap(),
-                        })
-                    }
-                    "ranged" => {
-                        eb = eb.with(Ranged {
-                            range: effect.1.parse::<i32>().unwrap(),
-                        })
-                    }
-                    "aoe" => {
-                        eb = eb.with(AreaOfEffect {
-                            radius: effect.1.parse::<i32>().unwrap(),
-                        })
-                    }
-                    "damage" => {
-                        eb = eb.with(InflictsDamage {
-                            damage: effect.1.parse::<i32>().unwrap(),
-                        })
-                    }
-                    _ => {
-                        rltk::console::log(format!(
-                            "Warning: consumable effect {} not implemented.",
-                            effect_name
-                        ));
-                    }
-                }
-            }
+            eb = eb.with(crate::components::Consumable{});
+            apply_effects!(consumable.effects, eb);
         }
 
         return Some(eb.marked::<SimpleMarker<SerializeMe>>().build());
