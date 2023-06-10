@@ -1,3 +1,5 @@
+use std::f32::INFINITY;
+
 use crate::rect::Rect;
 use crate::spawner;
 use crate::Position;
@@ -6,6 +8,7 @@ use crate::TileType;
 use super::common::*;
 use super::Map;
 use super::MapBuilder;
+use rltk::Point;
 use rltk::RandomNumberGenerator;
 use specs::World;
 
@@ -70,21 +73,34 @@ impl SimpleMapBuilder {
             }
             if ok {
                 apply_room_to_map(&mut self.map, &new_room);
-                if !self.rooms.is_empty() {
-                    let (new_x, new_y) = new_room.center();
-                    let (prev_x, prev_y) = self.rooms[self.rooms.len() - 1].center();
-                    // prev is the most recent one, not the closest one
-                    if rng.range(0, 2) == 1 {
-                        apply_horizontal_tunnel(&mut self.map, prev_x, new_x, prev_y);
-                        apply_vertical_tunnel(&mut self.map, prev_y, new_y, new_x);
-                    } else {
-                        apply_vertical_tunnel(&mut self.map, prev_y, new_y, prev_x);
-                        apply_horizontal_tunnel(&mut self.map, prev_x, new_x, new_y);
-                    }
-                }
                 self.rooms.push(new_room);
             }
         }
+
+        for i in 0..self.rooms.len()-1{
+            let (x,y) = self.rooms[i].center();
+            let this_room = Point{x,y};
+            let mut closest_room = Point{x:0,y:0};
+            let mut min_distance = INFINITY;
+            for j in i+1..self.rooms.len(){
+                let (x,y) = self.rooms[j].center();
+                let old_room = Point{x, y};
+                let distance = rltk::DistanceAlg::Pythagoras.distance2d(this_room, old_room);
+                if distance < min_distance {
+                    min_distance = distance;
+                    closest_room = old_room;
+                }
+
+            }
+            if rng.range(0, 2) == 1 {
+                apply_horizontal_tunnel(&mut self.map, closest_room.x, this_room.x, closest_room.y);
+                apply_vertical_tunnel(&mut self.map, closest_room.y, this_room.y, this_room.x);
+            } else {
+                apply_vertical_tunnel(&mut self.map, closest_room.y, this_room.y, closest_room.x);
+                apply_horizontal_tunnel(&mut self.map, closest_room.x, this_room.x, this_room.y);
+            }
+        }
+
 
         let stairs_position = self.rooms[self.rooms.len() - 1].center();
         let stairs_idx = self.map.xy_idx(stairs_position.0, stairs_position.1);
