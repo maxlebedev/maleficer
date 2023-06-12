@@ -7,15 +7,16 @@ pub fn inflict_damage(ecs: &mut World, damage: &EffectSpawner, target: Entity) {
     if let Some(pool) = entity_stats.get_mut(target) {
         if let EffectType::Damage { amount } = damage.effect_type {
             pool.deplete("hit_points", amount);
-            add_effect(None, 
-                    EffectType::Particle{ 
-                        glyph: rltk::to_cp437('‼'),
-                        fg : COLORS.orange,
-                        bg : COLORS.black,
-                        lifespan: 100.0
-                    }, 
-                    Targets::Single{target}
-                );
+            add_effect(
+                None,
+                EffectType::Particle {
+                    glyph: rltk::to_cp437('‼'),
+                    fg: COLORS.orange,
+                    bg: COLORS.black,
+                    lifespan: 100.0,
+                },
+                Targets::Single { target },
+            );
         }
     }
 }
@@ -23,17 +24,18 @@ pub fn inflict_damage(ecs: &mut World, damage: &EffectSpawner, target: Entity) {
 pub fn heal_damage(ecs: &mut World, damage: &EffectSpawner, target: Entity) {
     let mut entity_stats = ecs.write_storage::<EntityStats>();
     if let Some(pool) = entity_stats.get_mut(target) {
-        if let EffectType::Healing{ amount } = damage.effect_type {
+        if let EffectType::Healing { amount } = damage.effect_type {
             pool.restore("hit_points", amount);
-            add_effect(None, 
-                    EffectType::Particle{ 
-                        glyph: rltk::to_cp437('♥'),
-                        fg : COLORS.green,
-                        bg : COLORS.black,
-                        lifespan: 100.0
-                    }, 
-                    Targets::Single{target}
-                );
+            add_effect(
+                None,
+                EffectType::Particle {
+                    glyph: rltk::to_cp437('♥'),
+                    fg: COLORS.green,
+                    bg: COLORS.black,
+                    lifespan: 100.0,
+                },
+                Targets::Single { target },
+            );
         }
     }
 }

@@ -24,7 +24,7 @@ pub struct Map {
     pub blocked: Vec<bool>,
     pub depth: i32,
     pub tile_count: usize,
-    pub bloodstains : HashSet<usize>,
+    pub bloodstains: HashSet<usize>,
 
     #[serde(skip_serializing)]
     #[serde(skip_deserializing)]

@@ -1,8 +1,8 @@
 mod damage;
-mod particles;
-mod triggers;
-mod targeting;
 mod movement;
+mod particles;
+mod targeting;
+mod triggers;
 pub use targeting::*;
 
 use specs::prelude::*;
@@ -19,7 +19,9 @@ pub enum EffectType {
     Damage {
         amount: i32,
     },
-    Healing { amount: i32},
+    Healing {
+        amount: i32,
+    },
     Bloodstain,
     Particle {
         glyph: rltk::FontCharType,
@@ -27,8 +29,13 @@ pub enum EffectType {
         bg: rltk::RGB,
         lifespan: f32,
     },
-    ItemUse { item: Entity},
-    TeleportTo {x: i32, y: i32 }
+    ItemUse {
+        item: Entity,
+    },
+    TeleportTo {
+        x: i32,
+        y: i32,
+    },
 }
 
 #[derive(Clone)]
@@ -65,7 +72,7 @@ pub fn run_effects_queue(ecs: &mut World) {
 }
 
 fn target_applicator(ecs: &mut World, effect: &EffectSpawner) {
-    if let EffectType::ItemUse{item} = effect.effect_type {
+    if let EffectType::ItemUse { item } = effect.effect_type {
         triggers::item_trigger(effect.creator, item, &effect.targets, ecs);
     } else {
         match &effect.targets {
@@ -100,7 +107,7 @@ fn affect_tile(ecs: &mut World, effect: &EffectSpawner, tile_idx: i32) {
     match &effect.effect_type {
         EffectType::Bloodstain => damage::bloodstain(ecs, tile_idx),
         EffectType::Particle { .. } => particles::particle_to_tile(ecs, tile_idx, &effect),
-        EffectType::TeleportTo{..} => movement::apply_teleport(ecs, effect, tile_idx),
+        EffectType::TeleportTo { .. } => movement::apply_teleport(ecs, effect, tile_idx),
         _ => {}
     }
 }

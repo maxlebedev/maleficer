@@ -1,5 +1,5 @@
 use super::save_load;
-use crate::{EntityStats, GameLog, Name, Player, effects::*};
+use crate::{effects::*, EntityStats, GameLog, Name, Player};
 use rltk::console;
 use specs::prelude::*;
 

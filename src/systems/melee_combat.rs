@@ -15,13 +15,7 @@ impl<'a> System<'a> for MeleeCombat {
     //TODO: what's the diff btw WriteStorage and WriteExpect
 
     fn run(&mut self, data: Self::SystemData) {
-        let (
-            entities,
-            mut log,
-            mut wants_melee,
-            names,
-            entity_stats,
-        ) = data;
+        let (entities, mut log, mut wants_melee, names, entity_stats) = data;
 
         for (entity, wants_melee, name, stats) in
             (&entities, &wants_melee, &names, &entity_stats).join()

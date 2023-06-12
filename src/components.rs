@@ -81,7 +81,7 @@ impl EntityStats {
 
     pub fn restore(&mut self, key: &str, value: i32) {
         let mut pool = self.pools.get_mut(key).unwrap();
-        pool.current = std::cmp::min(pool.current+value, pool.max);
+        pool.current = std::cmp::min(pool.current + value, pool.max);
     }
 }
 
@@ -202,8 +202,8 @@ pub struct Hidden {}
 
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
 pub struct ApplyTeleport {
-    pub dest_x : i32,
-    pub dest_y : i32,
+    pub dest_x: i32,
+    pub dest_y: i32,
 }
 
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
@@ -214,14 +214,14 @@ pub struct TeleportTo {
 
 #[derive(Component, Serialize, Deserialize, Clone)]
 pub struct SpawnParticleLine {
-    pub glyph : rltk::FontCharType,
-    pub color : RGB,
-    pub lifetime_ms : f32
+    pub glyph: rltk::FontCharType,
+    pub color: RGB,
+    pub lifetime_ms: f32,
 }
 
 #[derive(Component, Serialize, Deserialize, Clone)]
 pub struct SpawnParticleBurst {
-    pub glyph : rltk::FontCharType,
-    pub color : RGB,
-    pub lifetime_ms : f32
+    pub glyph: rltk::FontCharType,
+    pub color: RGB,
+    pub lifetime_ms: f32,
 }
