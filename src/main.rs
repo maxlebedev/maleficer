@@ -19,6 +19,7 @@ pub use gamelog::GameLog;
 use systems::item::use_item;
 mod camera;
 mod config;
+pub mod effects;
 pub mod map_builders;
 mod raws;
 mod spawner;
@@ -60,6 +61,7 @@ pub struct Colors {
     pub white: rltk::RGB,
     pub grey: rltk::RGB,
     pub dark_grey: rltk::RGB,
+    pub blood: rltk::RGB,
 }
 
 lazy_static! {
@@ -76,6 +78,7 @@ lazy_static! {
         white: rltk::RGB::named(rltk::WHITE),
         grey: rltk::RGB::named(rltk::GREY),
         dark_grey: rltk::RGB::named(rltk::DARK_GREY),
+        blood: rltk::RGB::from_f32(0.75, 0., 0.),
     };
 }
 
@@ -275,8 +278,6 @@ impl State {
         mapindex.run_now(&self.ecs);
         let mut melee = systems::melee_combat::MeleeCombat {};
         melee.run_now(&self.ecs);
-        let mut damage = systems::damage::Damage {};
-        damage.run_now(&self.ecs);
         let mut pickup = systems::item::ItemCollection {};
         pickup.run_now(&self.ecs);
         let mut items = systems::item::ItemUse {};
@@ -285,6 +286,7 @@ impl State {
         drop_items.run_now(&self.ecs);
         let mut particles = systems::particle::ParticleSpawn {};
         particles.run_now(&self.ecs);
+        effects::run_effects_queue(&mut self.ecs);
 
         self.ecs.maintain();
     }
@@ -416,7 +418,6 @@ fn register_all(gs: &mut State) {
     gs.ecs.register::<BlocksTile>();
     gs.ecs.register::<EntityStats>();
     gs.ecs.register::<WantsToMelee>();
-    gs.ecs.register::<SufferDamage>();
     gs.ecs.register::<Item>();
     gs.ecs.register::<ProvidesHealing>();
     gs.ecs.register::<InBackpack>();
@@ -434,9 +435,15 @@ fn register_all(gs: &mut State) {
     gs.ecs.register::<Spell>();
     gs.ecs.register::<WantsToCastSpell>();
     gs.ecs.register::<ParticleLifetime>();
-    gs.ecs.register::<Antagonistic>();
+    gs.ecs.register::<SpawnParticleLine>();
+    gs.ecs.register::<SpawnParticleBurst>();
     gs.ecs.register::<Hidden>();
+    gs.ecs.register::<Antagonistic>();
+    gs.ecs.register::<SingleActivation>();
+    gs.ecs.register::<TeleportTo>();
+    gs.ecs.register::<ApplyTeleport>();
 
+    // gs.ecs.insert(TeleportTo{x:0,y:0});
     gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());
     gs.ecs.insert(rltk::RandomNumberGenerator::new());
 

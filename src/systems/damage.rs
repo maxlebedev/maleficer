@@ -1,26 +1,7 @@
 use super::save_load;
-use crate::{EntityStats, GameLog, Name, Player, SufferDamage};
+use crate::{effects::*, EntityStats, GameLog, Name, Player};
 use rltk::console;
 use specs::prelude::*;
-
-pub struct Damage {}
-
-impl<'a> System<'a> for Damage {
-    type SystemData = (
-        WriteStorage<'a, EntityStats>,
-        WriteStorage<'a, SufferDamage>,
-    );
-
-    fn run(&mut self, data: Self::SystemData) {
-        let (mut stats, mut damage) = data;
-
-        for (stats, damage) in (&mut stats, &damage).join() {
-            stats.deplete("hit_points", damage.amount.iter().sum::<i32>());
-        }
-
-        damage.clear();
-    }
-}
 
 pub fn delete_the_dead(ecs: &mut World) {
     let mut dead: Vec<Entity> = Vec::new();
@@ -41,7 +22,10 @@ pub fn delete_the_dead(ecs: &mut World) {
                             log.entries
                                 .push(format!("{} is no more", &victim_name.name));
                         }
-                        dead.push(entity)
+                        dead.push(entity);
+                        if let Some(tile_idx) = entity_position(ecs, entity) {
+                            add_effect(None, EffectType::Bloodstain, Targets::Tile { tile_idx });
+                        }
                     }
                     Some(_) => {
                         console::log("You are dead");

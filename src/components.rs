@@ -78,29 +78,16 @@ impl EntityStats {
         let mut pool = self.pools.get_mut(key).unwrap();
         pool.current -= value;
     }
+
+    pub fn restore(&mut self, key: &str, value: i32) {
+        let mut pool = self.pools.get_mut(key).unwrap();
+        pool.current = std::cmp::min(pool.current + value, pool.max);
+    }
 }
 
 #[derive(Component, Debug, ConvertSaveload, Clone)]
 pub struct WantsToMelee {
     pub target: Entity,
-}
-
-#[derive(Component, Debug, ConvertSaveload, Clone)]
-pub struct SufferDamage {
-    pub amount: Vec<i32>,
-}
-
-impl SufferDamage {
-    pub fn new_damage(store: &mut WriteStorage<SufferDamage>, victim: Entity, amount: i32) {
-        if let Some(suffering) = store.get_mut(victim) {
-            suffering.amount.push(amount);
-        } else {
-            let dmg = SufferDamage {
-                amount: vec![amount],
-            };
-            store.insert(victim, dmg).expect("Unable to insert damage");
-        }
-    }
 }
 
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
@@ -111,6 +98,9 @@ pub struct Destructable {}
 
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
 pub struct Consumable {}
+
+#[derive(Component, Debug, Serialize, Deserialize, Clone)]
+pub struct SingleActivation {}
 
 #[derive(Component, Debug, ConvertSaveload, Clone)]
 pub struct Ranged {
@@ -209,3 +199,29 @@ pub struct Antagonistic {}
 
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
 pub struct Hidden {}
+
+#[derive(Component, Debug, Serialize, Deserialize, Clone)]
+pub struct ApplyTeleport {
+    pub dest_x: i32,
+    pub dest_y: i32,
+}
+
+#[derive(Component, Debug, Serialize, Deserialize, Clone)]
+pub struct TeleportTo {
+    pub x: i32,
+    pub y: i32,
+}
+
+#[derive(Component, Serialize, Deserialize, Clone)]
+pub struct SpawnParticleLine {
+    pub glyph: rltk::FontCharType,
+    pub color: RGB,
+    pub lifetime_ms: f32,
+}
+
+#[derive(Component, Serialize, Deserialize, Clone)]
+pub struct SpawnParticleBurst {
+    pub glyph: rltk::FontCharType,
+    pub color: RGB,
+    pub lifetime_ms: f32,
+}

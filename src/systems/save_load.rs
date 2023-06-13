@@ -67,7 +67,6 @@ pub fn save_game(ecs: &mut World) {
             Name,
             BlocksTile,
             EntityStats,
-            SufferDamage,
             WantsToMelee,
             Item,
             Consumable,
@@ -84,6 +83,11 @@ pub fn save_game(ecs: &mut World) {
             SerializationHelper,
             WantsToCastSpell,
             Antagonistic,
+            SingleActivation,
+            ApplyTeleport,
+            TeleportTo,
+            SpawnParticleLine,
+            SpawnParticleBurst,
             Hidden
         );
     }
@@ -136,7 +140,6 @@ pub fn load_game(ecs: &mut World) {
             Name,
             BlocksTile,
             EntityStats,
-            SufferDamage,
             WantsToMelee,
             Item,
             Consumable,
@@ -153,6 +156,11 @@ pub fn load_game(ecs: &mut World) {
             SerializationHelper,
             WantsToCastSpell,
             Antagonistic,
+            SingleActivation,
+            ApplyTeleport,
+            TeleportTo,
+            SpawnParticleLine,
+            SpawnParticleBurst,
             Hidden
         );
     }

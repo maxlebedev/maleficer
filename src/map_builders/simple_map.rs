@@ -77,20 +77,19 @@ impl SimpleMapBuilder {
             }
         }
 
-        for i in 0..self.rooms.len()-1{
-            let (x,y) = self.rooms[i].center();
-            let this_room = Point{x,y};
-            let mut closest_room = Point{x:0,y:0};
+        for i in 0..self.rooms.len() - 1 {
+            let (x, y) = self.rooms[i].center();
+            let this_room = Point { x, y };
+            let mut closest_room = Point { x: 0, y: 0 };
             let mut min_distance = INFINITY;
-            for j in i+1..self.rooms.len(){
-                let (x,y) = self.rooms[j].center();
-                let old_room = Point{x, y};
+            for j in i + 1..self.rooms.len() {
+                let (x, y) = self.rooms[j].center();
+                let old_room = Point { x, y };
                 let distance = rltk::DistanceAlg::Pythagoras.distance2d(this_room, old_room);
                 if distance < min_distance {
                     min_distance = distance;
                     closest_room = old_room;
                 }
-
             }
             if rng.range(0, 2) == 1 {
                 apply_horizontal_tunnel(&mut self.map, closest_room.x, this_room.x, closest_room.y);
@@ -100,7 +99,6 @@ impl SimpleMapBuilder {
                 apply_horizontal_tunnel(&mut self.map, closest_room.x, this_room.x, this_room.y);
             }
         }
-
 
         let stairs_position = self.rooms[self.rooms.len() - 1].center();
         let stairs_idx = self.map.xy_idx(stairs_position.0, stairs_position.1);

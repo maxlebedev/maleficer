@@ -194,12 +194,10 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
                 }
                 RunState::AwaitingInput
             }
-            _ if key == INPUT.exit => {
-                RunState::MainMenu {
-                    game_started: true,
-                    menu_selection: gui::MainMenuSelection::NewGame,
-                }
-            }
+            _ if key == INPUT.exit => RunState::MainMenu {
+                game_started: true,
+                menu_selection: gui::MainMenuSelection::NewGame,
+            },
             _ if key == INPUT.wait => RunState::PlayerTurn,
             _ => RunState::AwaitingInput,
         },

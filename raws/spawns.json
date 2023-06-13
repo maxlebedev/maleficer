@@ -7,7 +7,8 @@
     { "name" : "Fireball Scroll", "weight" : 2, "min_depth" : 0, "max_depth" : 100, "add_map_depth_to_weight" : true },
     { "name" : "Shock Scroll", "weight" : 2, "min_depth" : 0, "max_depth" : 100, "add_map_depth_to_weight" : true },
     { "name" : "Magic Missile Scroll", "weight" : 4, "min_depth" : 0, "max_depth" : 100 },
-    { "name" : "Drain Scroll", "weight" : 2, "min_depth" : 0, "max_depth" : 100 }
+    { "name" : "Drain Scroll", "weight" : 2, "min_depth" : 0, "max_depth" : 100 },
+    { "name" : "Displacement Scroll", "weight" : 2, "min_depth" : 0, "max_depth" : 100 }
 ],
 "items" : [
     {
@@ -36,7 +37,8 @@
         "consumable" : {
             "effects" : { 
                 "ranged" : "6",
-                "damage" : "20"
+                "damage" : "20",
+                "particle_line": "*;#00FFFF;200.0"
             }
         },
         "stats": {
@@ -63,6 +65,24 @@
         }
     },
     {
+        "name" : "Displacement Scroll",
+        "renderable": {
+            "glyph" : ")",
+            "fg" : "#FF4778",
+            "bg" : "#000000",
+            "order" : 2
+        },
+        "consumable" : {
+            "effects" : {
+                "ranged" : "4",
+                "teleportation": "foo"
+            }
+        },
+        "stats": {
+            "hp" : 1
+        }
+    },
+    {
         "name" : "Fireball Scroll",
         "renderable": {
             "glyph" : ")",
@@ -74,7 +94,8 @@
             "effects" : { 
                 "ranged" : "6",
                 "damage" : "20",
-                "aoe": "3"
+                "area_of_effect": "3",
+                "particle" : "*;#FFA500;200.0"
             }
         },
         "stats": {
@@ -93,7 +114,7 @@
             "effects" : { 
                 "ranged" : "8",
                 "damage" : "10",
-                "aoe": "1"
+                "area_of_effect": "1"
             }
         },
         "stats": {

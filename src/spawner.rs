@@ -44,7 +44,7 @@ pub fn spawn_region(ecs: &mut World, area: &[usize], map_depth: i32) {
         let mut rng = ecs.write_resource::<RandomNumberGenerator>();
         let num_spawns = i32::min(
             areas.len() as i32,
-            rng.roll_dice(1, MAX_SPAWNS + 3) + (map_depth - 1) - 3,
+            rng.roll_dice(1, MAX_SPAWNS + 3) + (map_depth - 1) - 1,
         );
         if num_spawns == 0 {
             return;
