@@ -18,7 +18,6 @@ pub fn item_trigger(creator: Option<Entity>, item: Entity, targets: &Targets, ec
 }
 
 fn spawn_line_particles(ecs: &World, start: i32, end: i32, part: &SpawnParticleLine) {
-    // TODO: this is wildly inaccurate
     let map = ecs.fetch::<Map>();
     let start_pt = rltk::Point::new(start % map.width, start / map.width);
     let end_pt = rltk::Point::new(end % map.width, end / map.width);
