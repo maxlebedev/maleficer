@@ -149,8 +149,7 @@ fn get_tile_glyph(idx: usize, map: &Map) -> (rltk::FontCharType, RGB, RGB) {
             fg = COLORS.dark_cyan;
         }
         TileType::Wall => {
-            let x = idx as i32 % map.width;
-            let y = idx as i32 / map.width;
+            let (x,y) = map.idx_xy(idx);
             glyph = wall_glyph(map, x, y);
             fg = COLORS.green;
         }
