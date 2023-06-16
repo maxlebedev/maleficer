@@ -94,7 +94,7 @@ fn draw_resource_bar(ctx: &mut Rltk, stats: &EntityStats, resource_name: &str, x
         bar_left,
         y,
         bar_right,
-        current,
+        current -1,
         max,
         color,
         COLORS.black,
