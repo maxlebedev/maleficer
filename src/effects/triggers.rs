@@ -1,7 +1,7 @@
 use specs::prelude::*;
 
 use crate::{
-    Consumable, GameLog, InflictsDamage, ProvidesHealing, SpawnParticleBurst, SpawnParticleLine,
+    Consumable, InflictsDamage, ProvidesHealing, SpawnParticleBurst, SpawnParticleLine,
     TeleportTo, COLORS, ProvidesMana, CostsMana,
 };
 

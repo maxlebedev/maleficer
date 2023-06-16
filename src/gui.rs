@@ -2,7 +2,7 @@ use std::cmp::min;
 use std::collections::HashMap;
 
 use itertools::Itertools;
-use rltk::{Point, Rltk, RGB};
+use rltk::{Point, Rltk, RGB, to_cp437};
 use specs::prelude::*;
 
 use crate::config::{BOUNDS, INPUT};
@@ -90,15 +90,19 @@ fn draw_resource_bar(ctx: &mut Rltk, stats: &EntityStats, resource_name: &str, x
 
     let bar_left = health.len();
     let bar_right = UI_WIDTH  - 1 - bar_left;
-    ctx.draw_bar_horizontal(
-        bar_left,
-        y,
-        bar_right,
-        current -1,
-        max,
-        color,
-        COLORS.black,
-    );
+
+    // ctx.draw_bar_horizontal isn't empty at 0%, so we make our own
+    let percent = current as f32 / max as f32;
+    let fill_width = (percent * bar_right as f32) as usize;
+    for x in 0..bar_right{
+        let glyph;
+        if x < fill_width {
+             glyph = '▓';
+        } else {
+            glyph = '░';
+        }
+        ctx.set(bar_left + x, y, color, COLORS.black, to_cp437(glyph));
+    }
 }
 
 pub fn draw_char_ui(ecs: &World, ctx: &mut Rltk) {
