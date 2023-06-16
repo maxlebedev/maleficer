@@ -7,7 +7,7 @@ pub fn apply_teleport(ecs: &mut World, destination: &EffectSpawner, tile_idx: i3
     let mut players = ecs.write_storage::<Player>();
     let mut positions = ecs.write_storage::<Position>();
     let mut viewsheds = ecs.write_storage::<Viewshed>();
-    let (x, y) = map.idx_xy(tile_idx as usize);
+    let (x, y) = map.idx_xy(tile_idx);
     if let EffectType::TeleportTo { .. } = &destination.effect_type {
         for (_player, pos, viewshed) in (&mut players, &mut positions, &mut viewsheds).join() {
             pos.x = x;

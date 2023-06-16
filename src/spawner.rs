@@ -67,7 +67,7 @@ pub fn spawn_region(ecs: &mut World, area: &[usize], map_depth: i32) {
         let (x, y);
         {
             let map = ecs.fetch::<Map>();
-            (x, y) = map.idx_xy(*spawn.0);
+            (x, y) = map.idx_xy(*spawn.0 as i32);
         }
 
         spawn_named_entity(

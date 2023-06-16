@@ -37,8 +37,9 @@ impl Map {
     }
 
     /// for DRY reasons. TODO: let it take i32s and actually use the func
-    pub fn idx_xy(&self, idx: usize) -> (i32, i32) {
-        let id = idx as i32;
+
+    pub fn idx_xy(&self, idx: i32) -> (i32, i32) {
+        let id = idx;
         let x = id % self.width;
         let y = id / self.width;
         (x, y)
@@ -111,15 +112,17 @@ impl BaseMap for Map {
 
     fn get_pathing_distance(&self, idx1: usize, idx2: usize) -> f32 {
         let w = self.width as usize;
-        let p1 = Point::new(idx1 % w, idx1 / w);
-        let p2 = Point::new(idx2 % w, idx2 / w);
+        let (x1, y1) = self.idx_xy(idx1 as i32);
+        let (x2, y2) = self.idx_xy(idx2 as i32);
+        let p1 = Point::new(x1, y1);
+        let p2 = Point::new(x2, y2);
         rltk::DistanceAlg::Pythagoras.distance2d(p1, p2)
     }
 
     fn get_available_exits(&self, idx: usize) -> rltk::SmallVec<[(usize, f32); 10]> {
         let mut exits = rltk::SmallVec::new();
-        let x = idx as i32 % self.width;
-        let y = idx as i32 / self.width;
+
+        let (x, y) = self.idx_xy(idx as i32);
         let w = self.width as usize;
 
         // Cardinal directions
