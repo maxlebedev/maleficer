@@ -123,13 +123,12 @@ fn affect_tile(ecs: &mut World, effect: &EffectSpawner, tile_idx: i32) {
 
 fn affect_entity(ecs: &mut World, effect: &EffectSpawner, target: Entity) {
     // we write a lambda here to avoid borrowing ecs as mutable and immutable in the smae scope
-    let get_player_entity = |ecs: &mut World| *ecs.fetch::<Entity>();
-    let player_entity = get_player_entity(ecs);
     match &effect.effect_type {
         EffectType::Damage { .. } => damage::inflict_damage(ecs, effect, target),
-        EffectType::Healing { .. } => damage::heal_damage(ecs, effect, player_entity),
-        EffectType::GainMana { .. } => mana::gain_mana(ecs, effect, player_entity),
-        EffectType::LoseMana { .. } => mana::lose_mana(ecs, effect, player_entity),
+        EffectType::Healing { .. } => damage::heal_damage(ecs, effect, target),
+        // we gain/lose mana based on targets, but it shouldnt' be so
+        EffectType::GainMana { .. } => mana::gain_mana(ecs, effect, target),
+        EffectType::LoseMana { .. } => mana::lose_mana(ecs, effect, target),
         EffectType::Bloodstain { .. } => {
             if let Some(pos) = entity_position(ecs, target) {
                 damage::bloodstain(ecs, pos)
