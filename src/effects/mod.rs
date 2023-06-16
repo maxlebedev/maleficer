@@ -3,6 +3,7 @@ mod movement;
 mod particles;
 mod targeting;
 mod triggers;
+mod mana;
 pub use targeting::*;
 
 use specs::prelude::*;
@@ -35,6 +36,12 @@ pub enum EffectType {
     TeleportTo {
         x: i32,
         y: i32,
+    },
+    GainMana {
+        amount: i32,
+    },
+    LoseMana {
+        amount: i32,
     },
 }
 
@@ -92,6 +99,8 @@ fn tile_effect_hits_entities(effect: &EffectType) -> bool {
     match effect {
         EffectType::Damage { .. } => true,
         EffectType::Healing { .. } => true,
+        EffectType::GainMana { .. } => true,
+        EffectType::LoseMana { .. } => true,
         // EffectType::Particle { .. } => true,
         _ => false,
     }
@@ -113,10 +122,14 @@ fn affect_tile(ecs: &mut World, effect: &EffectSpawner, tile_idx: i32) {
 }
 
 fn affect_entity(ecs: &mut World, effect: &EffectSpawner, target: Entity) {
-    // TODO: Run the effect
+    // we write a lambda here to avoid borrowing ecs as mutable and immutable in the smae scope
+    let get_player_entity = |ecs: &mut World| *ecs.fetch::<Entity>();
+    let player_entity = get_player_entity(ecs);
     match &effect.effect_type {
         EffectType::Damage { .. } => damage::inflict_damage(ecs, effect, target),
-        EffectType::Healing { .. } => damage::heal_damage(ecs, effect, target),
+        EffectType::Healing { .. } => damage::heal_damage(ecs, effect, player_entity),
+        EffectType::GainMana { .. } => mana::gain_mana(ecs, effect, player_entity),
+        EffectType::LoseMana { .. } => mana::lose_mana(ecs, effect, player_entity),
         EffectType::Bloodstain { .. } => {
             if let Some(pos) = entity_position(ecs, target) {
                 damage::bloodstain(ecs, pos)

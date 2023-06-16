@@ -76,6 +76,31 @@ fn count_strings(strings: Vec<&String>) -> Vec<String> {
 
 pub const UI_WIDTH: usize = 40;
 
+fn draw_resource_bar(ctx: &mut Rltk, stats: &EntityStats, resource_name: &str, x: i32, y: i32, color: RGB){
+
+    let (current, max) = stats.get(resource_name);
+    let health = format!("{}:{}/{} ", resource_name, current, max);
+    ctx.print_color(
+        x,
+        y,
+        COLORS.yellow,
+        COLORS.black,
+        &health,
+    );
+
+    let bar_left = health.len();
+    let bar_right = UI_WIDTH  - 1 - bar_left;
+    ctx.draw_bar_horizontal(
+        bar_left,
+        y,
+        bar_right,
+        current,
+        max,
+        color,
+        COLORS.black,
+    );
+}
+
 pub fn draw_char_ui(ecs: &World, ctx: &mut Rltk) {
     // Sidebar with sections
     // Char info
@@ -98,27 +123,8 @@ pub fn draw_char_ui(ecs: &World, ctx: &mut Rltk) {
     let combat_stats = ecs.read_storage::<EntityStats>();
     let players = ecs.read_storage::<Player>();
     for (_player, stats) in (&players, &combat_stats).join() {
-        let (current_hp, max_hp) = stats.get("hit_points");
-        let health = format!("HP:{}/{} ", current_hp, max_hp);
-        ctx.print_color(
-            ui_start_x + 1,
-            ui_start_y + 1,
-            COLORS.yellow,
-            COLORS.black,
-            &health,
-        );
-
-        let hp_bar_left = health.len();
-        let hp_bar_right = ui_width - 10;
-        ctx.draw_bar_horizontal(
-            hp_bar_left,
-            ui_start_y + 1,
-            hp_bar_right,
-            current_hp,
-            max_hp,
-            COLORS.red,
-            COLORS.black,
-        );
+        draw_resource_bar(ctx, stats, "hit_points", ui_start_x+1, ui_start_y+1, COLORS.red);
+        draw_resource_bar(ctx, stats, "mana", ui_start_x+1, ui_start_y+2, COLORS.cyan);
     }
 
     //inventory

@@ -129,6 +129,16 @@ pub struct ProvidesHealing {
     pub heal_amount: i32,
 }
 
+#[derive(Component, Debug, ConvertSaveload, Clone)]
+pub struct ProvidesMana{
+    pub mana_amount: i32,
+}
+
+#[derive(Component, Debug, ConvertSaveload, Clone)]
+pub struct CostsMana{
+    pub mana_amount: i32,
+}
+
 #[derive(Component, Debug, ConvertSaveload)]
 pub struct InBackpack {
     pub owner: Entity,

@@ -2,7 +2,7 @@ use specs::prelude::*;
 
 use crate::{
     Consumable, GameLog, InflictsDamage, ProvidesHealing, SpawnParticleBurst, SpawnParticleLine,
-    TeleportTo, COLORS,
+    TeleportTo, COLORS, ProvidesMana, CostsMana,
 };
 
 use super::*;
@@ -89,6 +89,29 @@ fn event_trigger(
             creator,
             EffectType::Healing {
                 amount: heal.heal_amount,
+            },
+            targets.clone(),
+        );
+        did_something = true;
+    }
+
+    // Gain Mana
+    if let Some(mana) = ecs.read_storage::<ProvidesMana>().get(entity) {
+        add_effect(
+            creator,
+            EffectType::GainMana {
+                amount: mana.mana_amount,
+            },
+            targets.clone(),
+        );
+        did_something = true;
+    }
+    // Lose Mana
+    if let Some(mana) = ecs.read_storage::<CostsMana>().get(entity) {
+        add_effect(
+            creator,
+            EffectType::LoseMana {
+                amount: mana.mana_amount,
             },
             targets.clone(),
         );

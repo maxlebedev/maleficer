@@ -21,12 +21,10 @@ pub fn inflict_damage(ecs: &mut World, damage: &EffectSpawner, target: Entity) {
     }
 }
 
-pub fn heal_damage(ecs: &mut World, damage: &EffectSpawner, _target: Entity) {
+pub fn heal_damage(ecs: &mut World, damage: &EffectSpawner, target: Entity) {
     let mut entity_stats = ecs.write_storage::<EntityStats>();
 
-    // TODO: for now, healing is a thing that only happens to the player
-    let player_entity = ecs.fetch::<Entity>();
-    if let Some(pool) = entity_stats.get_mut(*player_entity) {
+    if let Some(pool) = entity_stats.get_mut(target) {
         if let EffectType::Healing { amount } = damage.effect_type {
             pool.restore("hit_points", amount);
             add_effect(
@@ -37,7 +35,7 @@ pub fn heal_damage(ecs: &mut World, damage: &EffectSpawner, _target: Entity) {
                     bg: COLORS.black,
                     lifespan: 100.0,
                 },
-                Targets::Single { target:*player_entity },
+                Targets::Single { target },
             );
         }
     }

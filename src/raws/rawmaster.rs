@@ -136,6 +136,16 @@ macro_rules! apply_effects {
                 "teleportation" => $eb = $eb.with(TeleportTo { x: 0, y: 0 }),
                 "particle_line" => $eb = $eb.with(parse_particle_line(&effect.1)),
                 "particle" => $eb = $eb.with(parse_particle(&effect.1)),
+                "costs_mana" => {
+                    $eb = $eb.with(CostsMana {
+                        mana_amount: effect.1.parse::<i32>().unwrap(),
+                    })
+                }
+                "provides_mana" => {
+                    $eb = $eb.with(ProvidesMana {
+                        mana_amount: effect.1.parse::<i32>().unwrap(),
+                    })
+                }
                 _ => rltk::console::log(format!(
                     "Warning: consumable effect {} not implemented.",
                     effect_name
