@@ -63,6 +63,7 @@ impl<'a> System<'a> for MonsterAI {
                     map.blocked[idx] = false;
 
                     idx = path.steps[1];
+                    (pos.x, pos.y) = map.idx_xy(idx as i32);
                     map.blocked[idx] = true;
                     viewshed.dirty = true;
                 }

@@ -111,7 +111,6 @@ impl BaseMap for Map {
     }
 
     fn get_pathing_distance(&self, idx1: usize, idx2: usize) -> f32 {
-        let w = self.width as usize;
         let (x1, y1) = self.idx_xy(idx1 as i32);
         let (x2, y2) = self.idx_xy(idx2 as i32);
         let p1 = Point::new(x1, y1);
