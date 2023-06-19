@@ -420,6 +420,8 @@ fn register_all(gs: &mut State) {
     gs.ecs.register::<WantsToMelee>();
     gs.ecs.register::<Item>();
     gs.ecs.register::<ProvidesHealing>();
+    gs.ecs.register::<ProvidesMana>();
+    gs.ecs.register::<CostsMana>();
     gs.ecs.register::<InBackpack>();
     gs.ecs.register::<WantsToPickupItem>();
     gs.ecs.register::<WantsToUseItem>();

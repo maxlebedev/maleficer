@@ -1,8 +1,8 @@
 use specs::prelude::*;
 
 use crate::{
-    Consumable, GameLog, InflictsDamage, ProvidesHealing, SpawnParticleBurst, SpawnParticleLine,
-    TeleportTo, COLORS,
+    Consumable, InflictsDamage, ProvidesHealing, SpawnParticleBurst, SpawnParticleLine,
+    TeleportTo, COLORS, ProvidesMana, CostsMana,
 };
 
 use super::*;
@@ -49,7 +49,7 @@ fn event_trigger(
     ecs: &mut World,
 ) -> bool {
     let mut did_something = false;
-    let mut _gamelog = ecs.fetch_mut::<GameLog>();
+    // let mut _gamelog = ecs.fetch_mut::<GameLog>();
     // Simple particle spawn
     if let Some(part) = ecs.read_storage::<SpawnParticleBurst>().get(entity) {
         add_effect(
@@ -86,6 +86,10 @@ fn event_trigger(
             }
         }
     }
+
+    // we write a lambda here to avoid borrowing ecs as mutable and immutable in the smae scope
+    let get_player_target = |ecs: &mut World| Targets::Single{target:*ecs.fetch::<Entity>()};
+    let player_target = get_player_target(ecs);
     // Healing
     if let Some(heal) = ecs.read_storage::<ProvidesHealing>().get(entity) {
         add_effect(
@@ -93,7 +97,30 @@ fn event_trigger(
             EffectType::Healing {
                 amount: heal.heal_amount,
             },
-            targets.clone(),
+            player_target.clone(),
+        );
+        did_something = true;
+    }
+
+    // Gain Mana
+    if let Some(mana) = ecs.read_storage::<ProvidesMana>().get(entity) {
+        add_effect(
+            creator,
+            EffectType::GainMana {
+                amount: mana.mana_amount,
+            },
+            player_target.clone(),
+        );
+        did_something = true;
+    }
+    // Lose Mana
+    if let Some(mana) = ecs.read_storage::<CostsMana>().get(entity) {
+        add_effect(
+            creator,
+            EffectType::LoseMana {
+                amount: mana.mana_amount,
+            },
+            player_target.clone(),
         );
         did_something = true;
     }
