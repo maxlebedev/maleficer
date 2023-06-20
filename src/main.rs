@@ -465,7 +465,9 @@ fn main() -> rltk::BError {
     let context: Rltk = rb
         .unwrap()
         .with_title("Maleficer")
-        .with_tile_dimensions(8, 8)
+        .with_fitscreen(true)
+        .with_tile_dimensions(16, 16)
+        .with_fullscreen(true)
         .build()?;
 
     let mut gs = State { ecs: World::new() };

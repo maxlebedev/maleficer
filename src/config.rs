@@ -140,12 +140,12 @@ pub struct Bounds {
 }
 
 pub const BOUNDS: Bounds = Bounds {
-    win_width: 240,
-    win_height: 120,
+    win_width: 120, // this is 1920x1080 for now
+    win_height: 62,
     // map_width: 100, // these are better stored in map.width
     // map_height: 100, // and map.height
-    view_width: 240 - gui::UI_WIDTH - gui::UI_WIDTH,
-    view_height: 120,
+    view_width: 120 - gui::UI_WIDTH - gui::UI_WIDTH,
+    view_height: 62,
 };
 
 fn get_config() -> Config {
