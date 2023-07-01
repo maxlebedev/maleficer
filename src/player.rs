@@ -134,7 +134,7 @@ fn get_item(ecs: &mut World) -> RunState {
 }
 
 fn use_hotkey(ecs: &mut World, key: VirtualKeyCode) -> RunState {
-    let hotkeys = vec![INPUT.hk1, INPUT.hk2, INPUT.hk3, INPUT.hk4];
+    let hotkeys = vec![INPUT.hk1, INPUT.hk2, INPUT.hk3, INPUT.hk4, INPUT.hk5, INPUT.hk6, INPUT.hk7, INPUT.hk8, INPUT.hk9, INPUT.hk10];
 
     let index = hotkeys.iter().position(|obj| *obj == key).unwrap();
 
@@ -171,7 +171,7 @@ fn use_hotkey(ecs: &mut World, key: VirtualKeyCode) -> RunState {
 
 // TODO: protect from overflow on char/item select window
 pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
-    let hotkeys = vec![INPUT.hk1, INPUT.hk2, INPUT.hk3, INPUT.hk4];
+    let hotkeys = vec![INPUT.hk1, INPUT.hk2, INPUT.hk3, INPUT.hk4, INPUT.hk5, INPUT.hk6, INPUT.hk7, INPUT.hk8, INPUT.hk9, INPUT.hk10];
 
     match ctx.key {
         None => RunState::AwaitingInput, // Nothing happened
@@ -183,7 +183,6 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
             _ if key == INPUT.right => try_move_player(1, 0, &mut gs.ecs),
 
             _ if key == INPUT.pick_up => get_item(&mut gs.ecs),
-            _ if key == INPUT.inventory => RunState::ShowInventory { selection: 0 },
 
             _ if hotkeys.contains(&key) => use_hotkey(&mut gs.ecs, key),
             // cast_spell(&mut gs.ecs),

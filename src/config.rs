@@ -81,8 +81,6 @@ pub struct Config {
     pub up: String,
     pub right: String,
     pub pick_up: String,
-    pub inventory: String,
-    pub drop: String,
     pub exit: String,
     pub select: String,
     pub wait: String,
@@ -90,6 +88,12 @@ pub struct Config {
     pub hk2: String,
     pub hk3: String,
     pub hk4: String,
+    pub hk5: String,
+    pub hk6: String,
+    pub hk7: String,
+    pub hk8: String,
+    pub hk9: String,
+    pub hk10: String,
 }
 
 pub struct Input {
@@ -98,8 +102,6 @@ pub struct Input {
     pub up: VirtualKeyCode,
     pub right: VirtualKeyCode,
     pub pick_up: VirtualKeyCode,
-    pub inventory: VirtualKeyCode,
-    pub drop: VirtualKeyCode,
     pub exit: VirtualKeyCode,
     pub select: VirtualKeyCode,
     pub wait: VirtualKeyCode,
@@ -107,6 +109,12 @@ pub struct Input {
     pub hk2: VirtualKeyCode,
     pub hk3: VirtualKeyCode,
     pub hk4: VirtualKeyCode,
+    pub hk5: VirtualKeyCode,
+    pub hk6: VirtualKeyCode,
+    pub hk7: VirtualKeyCode,
+    pub hk8: VirtualKeyCode,
+    pub hk9: VirtualKeyCode,
+    pub hk10: VirtualKeyCode,
 }
 
 lazy_static! {
@@ -117,8 +125,6 @@ lazy_static! {
         up: VirtualKeyCode::from_str(CONFIG.up.as_str()),
         right: VirtualKeyCode::from_str(CONFIG.right.as_str()),
         pick_up: VirtualKeyCode::from_str(CONFIG.pick_up.as_str()),
-        inventory: VirtualKeyCode::from_str(CONFIG.inventory.as_str()),
-        drop: VirtualKeyCode::from_str(CONFIG.drop.as_str()),
         exit: VirtualKeyCode::from_str(CONFIG.exit.as_str()),
         select: VirtualKeyCode::from_str(CONFIG.select.as_str()),
         wait: VirtualKeyCode::from_str(CONFIG.wait.as_str()),
@@ -126,6 +132,12 @@ lazy_static! {
         hk2: VirtualKeyCode::from_str(CONFIG.hk2.as_str()),
         hk3: VirtualKeyCode::from_str(CONFIG.hk3.as_str()),
         hk4: VirtualKeyCode::from_str(CONFIG.hk4.as_str()),
+        hk5: VirtualKeyCode::from_str(CONFIG.hk5.as_str()),
+        hk6: VirtualKeyCode::from_str(CONFIG.hk6.as_str()),
+        hk7: VirtualKeyCode::from_str(CONFIG.hk7.as_str()),
+        hk8: VirtualKeyCode::from_str(CONFIG.hk8.as_str()),
+        hk9: VirtualKeyCode::from_str(CONFIG.hk9.as_str()),
+        hk10: VirtualKeyCode::from_str(CONFIG.hk10.as_str()),
     };
 }
 

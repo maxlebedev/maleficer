@@ -13,9 +13,9 @@ pub use components::*;
 
 // TODO: this shouldn't live here
 pub const SCHOOLS: [&str; 3] = [
-    "unimplemented spells school 1",
-    "unimplemented spells school 2",
-    "unimplemented spells school 3",
+    "unimplemented magical discipline 1",
+    "unimplemented magical discipline 2",
+    "unimplemented magical discipline 3",
 ];
 
 #[derive(PartialEq, Copy, Clone)]
@@ -38,7 +38,6 @@ pub enum MenuAction {
     Up,
     Down,
     Selected,
-    Drop,
 }
 
 pub fn draw_horizontal_line(
@@ -214,77 +213,6 @@ fn wrap_text(text: &str, max_width: usize) -> Vec<String> {
         .collect::<Vec<String>>()
 }
 
-// TODO: this is maybe deprecated
-pub fn show_inventory(
-    gs: &mut State,
-    ctx: &mut Rltk,
-    selection: usize,
-) -> (MenuAction, Option<Entity>) {
-    let fgcolor = COLORS.white;
-    let bgcolor = COLORS.black;
-    let hlcolor = COLORS.magenta;
-
-    let player_entity = gs.ecs.fetch::<Entity>();
-    let names = gs.ecs.read_storage::<Name>();
-    let backpack = gs.ecs.read_storage::<InBackpack>();
-    let entities = gs.ecs.entities();
-
-    let height = BOUNDS.view_height;
-
-    // TODO: sort inventory, and group similar items
-    let inventory = (&backpack, &names, &entities)
-        .join()
-        .sorted_by(|a, b| Ord::cmp(&a.1.name, &b.1.name))
-        .filter(|item| item.0.owner == *player_entity);
-
-    let halfwidth = BOUNDS.view_width / 2;
-    ctx.draw_box(UI_WIDTH, 0, halfwidth - 1, height, fgcolor, bgcolor);
-    ctx.draw_box(
-        halfwidth + UI_WIDTH,
-        0,
-        halfwidth - 1,
-        height,
-        fgcolor,
-        bgcolor,
-    );
-    ctx.print_color_centered(0, COLORS.yellow, bgcolor, "Inventory");
-    ctx.print_color_centered(height, COLORS.yellow, bgcolor, "ESCAPE to cancel");
-
-    let x_offset = UI_WIDTH + 2;
-    let y_offset = 2;
-    let mut equippable: Vec<Entity> = Vec::new();
-
-    for (y, item) in inventory.enumerate() {
-        let mut color = fgcolor;
-        if y == selection {
-            color = hlcolor;
-        }
-        ctx.print_color(
-            x_offset,
-            y + y_offset,
-            color,
-            bgcolor,
-            &item.1.name.to_string(),
-        );
-        equippable.push(item.2);
-    }
-
-    match ctx.key {
-        None => (MenuAction::NoResponse, None),
-        Some(key) => match key {
-            _ if key == INPUT.exit => (MenuAction::Cancel, None),
-            _ if key == INPUT.inventory => (MenuAction::Cancel, None),
-            _ if key == INPUT.up && selection > 0 => (MenuAction::Up, None),
-            _ if key == INPUT.down && selection < equippable.len() - 1 => (MenuAction::Down, None),
-            _ if key == INPUT.drop => (MenuAction::Drop, Some(equippable[selection])),
-            _ if key == INPUT.select && selection < equippable.len() => {
-                (MenuAction::Selected, Some(equippable[selection]))
-            }
-            _ => (MenuAction::NoResponse, None),
-        },
-    }
-}
-
 pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32, radius: i32) -> MenuAction {
     let player_entity = ecs.fetch::<Entity>();
     let player_pos = ecs.fetch::<Point>();
@@ -373,7 +301,7 @@ pub fn chargen_menu(
     let halfwidth = width / 2;
     ctx.draw_box(0, 0, halfwidth, height, fgcolor, bgcolor);
     ctx.draw_box(halfwidth + 1, 0, halfwidth - 1, height, fgcolor, bgcolor);
-    ctx.print_color_centered(0, COLORS.yellow, COLORS.black, "Choose a spell school");
+    ctx.print_color_centered(0, COLORS.yellow, COLORS.black, "Choose a magical discipline");
 
     let inv_offset = 2;
     for (y, school) in SCHOOLS.iter().enumerate() {

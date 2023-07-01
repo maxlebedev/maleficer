@@ -1,5 +1,5 @@
 use super::*;
-use crate::{Player, Position, Viewshed};
+use crate::{Player, Position, Viewshed, systems};
 use specs::prelude::*;
 
 pub fn apply_teleport(ecs: &mut World, destination: &EffectSpawner, tile_idx: i32) {

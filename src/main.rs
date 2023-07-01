@@ -16,7 +16,6 @@ mod gui;
 mod rect;
 mod systems;
 pub use gamelog::GameLog;
-use systems::item::use_item;
 mod camera;
 mod config;
 pub mod effects;
@@ -33,9 +32,6 @@ pub enum RunState {
     },
     PlayerTurn,
     MonsterTurn,
-    ShowInventory {
-        selection: usize,
-    },
     ShowTargeting {
         range: i32,
         item: Entity,
@@ -173,7 +169,6 @@ impl GameState for State {
                         println!("selected {}", gui::SCHOOLS[ch_selection.unwrap()]);
                         newrunstate = RunState::PreRun {};
                     }
-                    _ => {}
                 }
             }
             RunState::PreRun => {
@@ -200,39 +195,6 @@ impl GameState for State {
                 self.goto_next_level();
                 self.run_systems();
                 newrunstate = RunState::AwaitingInput;
-            }
-
-            RunState::ShowInventory { selection } => {
-                let result = gui::show_inventory(self, ctx, selection);
-                match result.0 {
-                    gui::MenuAction::Cancel => newrunstate = RunState::AwaitingInput,
-                    gui::MenuAction::NoResponse => {}
-                    gui::MenuAction::Up => {
-                        newrunstate = RunState::ShowInventory {
-                            selection: selection - 1,
-                        }
-                    }
-                    gui::MenuAction::Down => {
-                        newrunstate = RunState::ShowInventory {
-                            selection: selection + 1,
-                        }
-                    }
-                    gui::MenuAction::Selected => {
-                        let item_entity = result.1.unwrap();
-                        newrunstate = use_item(&mut self.ecs, item_entity);
-                    }
-                    gui::MenuAction::Drop => {
-                        let item_entity = result.1.unwrap();
-                        let mut intent = self.ecs.write_storage::<WantsToDropItem>();
-                        intent
-                            .insert(
-                                *self.ecs.fetch::<Entity>(),
-                                WantsToDropItem { item: item_entity },
-                            )
-                            .expect("Unable to insert intent");
-                        newrunstate = RunState::PlayerTurn;
-                    }
-                }
             }
             RunState::ShowTargeting {
                 range,
@@ -282,8 +244,6 @@ impl State {
         pickup.run_now(&self.ecs);
         let mut items = systems::item::ItemUse {};
         items.run_now(&self.ecs);
-        let mut drop_items = systems::item::ItemDrop {};
-        drop_items.run_now(&self.ecs);
         let mut particles = systems::particle::ParticleSpawn {};
         particles.run_now(&self.ecs);
         effects::run_effects_queue(&mut self.ecs);
@@ -424,8 +384,8 @@ fn register_all(gs: &mut State) {
     gs.ecs.register::<CostsMana>();
     gs.ecs.register::<InBackpack>();
     gs.ecs.register::<WantsToPickupItem>();
-    gs.ecs.register::<WantsToUseItem>();
     gs.ecs.register::<WantsToDropItem>();
+    gs.ecs.register::<WantsToUseItem>();
     gs.ecs.register::<Consumable>();
     gs.ecs.register::<Ranged>();
     gs.ecs.register::<InflictsDamage>();
