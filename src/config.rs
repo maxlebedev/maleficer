@@ -3,8 +3,6 @@ pub use rltk::VirtualKeyCode;
 use serde::Deserialize;
 use std::collections::HashMap;
 
-use crate::gui;
-
 trait FromStr {
     fn from_str(chr: &str) -> Self;
 }
@@ -139,12 +137,14 @@ pub struct Bounds {
     pub view_height: usize,
 }
 
+pub const UI_WIDTH: usize = 40;
+
 pub const BOUNDS: Bounds = Bounds {
     win_width: 120, // this is 1920x1080 for now
     win_height: 62,
     // map_width: 100, // these are better stored in map.width
     // map_height: 100, // and map.height
-    view_width: 120 - gui::UI_WIDTH - gui::UI_WIDTH,
+    view_width: 120 - UI_WIDTH - UI_WIDTH,
     view_height: 62,
 };
 

@@ -88,6 +88,8 @@ pub fn save_game(ecs: &mut World) {
             TeleportTo,
             SpawnParticleLine,
             SpawnParticleBurst,
+            ProvidesMana,
+            CostsMana,
             Hidden
         );
     }
@@ -161,6 +163,8 @@ pub fn load_game(ecs: &mut World) {
             TeleportTo,
             SpawnParticleLine,
             SpawnParticleBurst,
+            ProvidesMana,
+            CostsMana,
             Hidden
         );
     }

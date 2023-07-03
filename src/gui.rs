@@ -3,13 +3,18 @@ use std::collections::HashMap;
 
 use itertools::Itertools;
 use rltk::{Point, Rltk, RGB, to_cp437};
-use specs::prelude::*;
-
+use crate::events::AttackEvent;
+use crate::gamelog::GameLog;
+use crate::{camera, RunState, to_rgb};
 use crate::config::{BOUNDS, INPUT};
-use crate::{camera, Map, COLORS};
 
-use super::{components, GameLog, Player, RunState, State};
-pub use components::*;
+// use specs::prelude::*;
+// use crate::{camera, Map, COLORS};
+// use super::{componenrs, GameLog, Player, RunState, State};
+
+pub use crate::components::*;
+
+use bevy::prelude::*;
 
 // TODO: this shouldn't live here
 pub const SCHOOLS: [&str; 3] = [
@@ -39,6 +44,26 @@ pub enum MenuAction {
     Down,
     Selected,
     Drop,
+}
+
+pub struct UiPlugin;
+
+impl Plugin for UiPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_system(handle_attacks)
+        .init_resource::<GameLog>()
+        //.add_system(handle_print)
+        ;
+    }
+}
+
+fn handle_attacks(
+    mut game_log: ResMut<GameLog>,
+    mut event_attacked: EventReader<AttackEvent>,
+) {
+    for ev in event_attacked.iter() {
+        game_log.entries.push(format!("{} attacked {}", ev.attacker_name, ev.defender_name));
+    }
 }
 
 pub fn draw_horizontal_line(
@@ -83,8 +108,8 @@ fn draw_resource_bar(ctx: &mut Rltk, stats: &EntityStats, resource_name: &str, x
     ctx.print_color(
         x,
         y,
-        COLORS.yellow,
-        COLORS.black,
+        Color::YELLOW.as_rgba_f32(),
+        Color::BLACK.as_rgba_f32(),
         &health,
     );
 
@@ -101,11 +126,16 @@ fn draw_resource_bar(ctx: &mut Rltk, stats: &EntityStats, resource_name: &str, x
         } else {
             glyph = '░';
         }
-        ctx.set(bar_left + x, y, color, COLORS.black, to_cp437(glyph));
+        ctx.set(bar_left + x, y, color, to_rgb(Color::BLACK), to_cp437(glyph));
     }
 }
 
-pub fn draw_char_ui(ecs: &World, ctx: &mut Rltk) {
+// pub fn draw_char_ui(ecs: &World, ctx: &mut Rltk) {
+pub fn draw_char_ui(
+    player_stats: Query<&EntityStats, With <Player>>,
+    player_inventory: Query<(&InBackpack, &Name)>,
+    ctx: &mut Rltk
+) {
     // Sidebar with sections
     // Char info
     // Hotkeys
@@ -120,54 +150,42 @@ pub fn draw_char_ui(ecs: &World, ctx: &mut Rltk) {
         ui_start_y,
         ui_width,
         ui_height,
-        COLORS.white,
-        COLORS.black,
+        to_rgb(Color::WHITE),
+        to_rgb(Color::BLACK),
     );
-
-    let combat_stats = ecs.read_storage::<EntityStats>();
-    let players = ecs.read_storage::<Player>();
-    for (_player, stats) in (&players, &combat_stats).join() {
-        draw_resource_bar(ctx, stats, "hit_points", ui_start_x+1, ui_start_y+1, COLORS.red);
-        draw_resource_bar(ctx, stats, "mana", ui_start_x+1, ui_start_y+2, COLORS.cyan);
-    }
+    draw_resource_bar(ctx, player_stats.single(), "hit_points", ui_start_x+1, ui_start_y+1, to_rgb(Color::RED));
+    draw_resource_bar(ctx, player_stats.single(), "mana", ui_start_x+1, ui_start_y+2, to_rgb(Color::CYAN));
 
     //inventory
-    let player_entity = ecs.fetch::<Entity>();
-    let names = ecs.read_storage::<Name>();
-    let backpack = ecs.read_storage::<InBackpack>();
-    let entities = ecs.entities();
-    let inventory = (&backpack, &names, &entities)
-        .join()
-        .sorted_by(|a, b| Ord::cmp(&a.1.name, &b.1.name))
-        .filter(|item| item.0.owner == *player_entity);
+    let inventory = player_inventory.iter().sorted_by(|a, b| Ord::cmp(&a.1, &b.1));
 
     draw_horizontal_line(
         ctx,
         ui_start_x,
         19,
         ui_width as i32,
-        COLORS.white,
-        COLORS.black,
+        to_rgb(Color::WHITE),
+        to_rgb(Color::BLACK),
         true,
     );
 
     let inventory_start = 20;
 
-    let just_names: Vec<&String> = inventory.into_iter().map(|el| &el.1.name).collect();
+    let just_names: Vec<&String> = inventory.into_iter().map(|el| &el.1).collect();
     let distinct_counts = count_strings(just_names);
 
     for (y, item) in distinct_counts.iter().enumerate() {
         ctx.print_color(
             ui_start_x + 1,
             y + inventory_start,
-            COLORS.white,
-            COLORS.black,
+            to_rgb(Color::WHITE),
+            to_rgb(Color::BLACK),
             &item.to_string(),
         );
     }
 }
 
-pub fn draw_world_ui(ecs: &World, ctx: &mut Rltk) {
+pub fn draw_world_ui(log: ResMut<GameLog>, ctx: &mut Rltk) {
     // Sidebar with sections
     // Depth
     // cursor tile description
@@ -181,15 +199,16 @@ pub fn draw_world_ui(ecs: &World, ctx: &mut Rltk) {
         ui_start_y,
         ui_width,
         ui_height,
-        COLORS.white,
-        COLORS.black,
+        to_rgb(Color::WHITE),
+        to_rgb(Color::BLACK),
     );
-    let map = ecs.fetch::<Map>();
-    let depth = format!("Depth: {}", map.depth);
-    ctx.print_color(ui_start_x + 1, 1, COLORS.yellow, COLORS.black, &depth);
+    // TODO: re-enable once map is back
+    // let map = ecs.fetch::<Map>();
+    // let depth = format!("Depth: {}", map.depth);
+    let depth = format!("Depth: {}", 0);
+    ctx.print_color(ui_start_x + 1, 1, to_rgb(Color::YELLOW), to_rgb(Color::BLACK), &depth);
 
     let history = 20;
-    let log = ecs.fetch::<GameLog>();
     let log_start = ui_height - min(history, log.entries.len()) - 1;
 
     let to_print = log
@@ -214,95 +233,27 @@ fn wrap_text(text: &str, max_width: usize) -> Vec<String> {
         .collect::<Vec<String>>()
 }
 
-// TODO: this is maybe deprecated
-pub fn show_inventory(
-    gs: &mut State,
-    ctx: &mut Rltk,
-    selection: usize,
-) -> (MenuAction, Option<Entity>) {
-    let fgcolor = COLORS.white;
-    let bgcolor = COLORS.black;
-    let hlcolor = COLORS.magenta;
-
-    let player_entity = gs.ecs.fetch::<Entity>();
-    let names = gs.ecs.read_storage::<Name>();
-    let backpack = gs.ecs.read_storage::<InBackpack>();
-    let entities = gs.ecs.entities();
-
-    let height = BOUNDS.view_height;
-
-    // TODO: sort inventory, and group similar items
-    let inventory = (&backpack, &names, &entities)
-        .join()
-        .sorted_by(|a, b| Ord::cmp(&a.1.name, &b.1.name))
-        .filter(|item| item.0.owner == *player_entity);
-
-    let halfwidth = BOUNDS.view_width / 2;
-    ctx.draw_box(UI_WIDTH, 0, halfwidth - 1, height, fgcolor, bgcolor);
-    ctx.draw_box(
-        halfwidth + UI_WIDTH,
-        0,
-        halfwidth - 1,
-        height,
-        fgcolor,
-        bgcolor,
-    );
-    ctx.print_color_centered(0, COLORS.yellow, bgcolor, "Inventory");
-    ctx.print_color_centered(height, COLORS.yellow, bgcolor, "ESCAPE to cancel");
-
-    let x_offset = UI_WIDTH + 2;
-    let y_offset = 2;
-    let mut equippable: Vec<Entity> = Vec::new();
-
-    for (y, item) in inventory.enumerate() {
-        let mut color = fgcolor;
-        if y == selection {
-            color = hlcolor;
-        }
-        ctx.print_color(
-            x_offset,
-            y + y_offset,
-            color,
-            bgcolor,
-            &item.1.name.to_string(),
-        );
-        equippable.push(item.2);
-    }
-
-    match ctx.key {
-        None => (MenuAction::NoResponse, None),
-        Some(key) => match key {
-            _ if key == INPUT.exit => (MenuAction::Cancel, None),
-            _ if key == INPUT.inventory => (MenuAction::Cancel, None),
-            _ if key == INPUT.up && selection > 0 => (MenuAction::Up, None),
-            _ if key == INPUT.down && selection < equippable.len() - 1 => (MenuAction::Down, None),
-            _ if key == INPUT.drop => (MenuAction::Drop, Some(equippable[selection])),
-            _ if key == INPUT.select && selection < equippable.len() => {
-                (MenuAction::Selected, Some(equippable[selection]))
-            }
-            _ => (MenuAction::NoResponse, None),
-        },
-    }
-}
-
-pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32, radius: i32) -> MenuAction {
-    let player_entity = ecs.fetch::<Entity>();
+pub fn ranged_target(
+    ecs: &mut World,
+    player_entity: Query<&Player>,
+    ctx: &mut Rltk, range: i32, radius: i32
+) -> MenuAction {
     let player_pos = ecs.fetch::<Point>();
     let viewsheds = ecs.read_storage::<Viewshed>();
     let mut cursor = ecs.fetch_mut::<Cursor>();
 
-    ctx.print_color(5, 0, COLORS.yellow, COLORS.black, "Select Target:");
+    ctx.print_color(5, 0, to_rgb(Color::YELLOW), to_rgb(Color::BLACK), "Select Target:");
 
     // Highlight available target cells
     let mut available_cells = Vec::new();
-    let visible = viewsheds.get(*player_entity);
+    let visible = viewsheds.get(*player_entity.single());
     if let Some(visible) = visible {
         // We have a viewshed
         for idx in visible.visible_tiles.iter() {
             let distance = rltk::DistanceAlg::Pythagoras.distance2d(*player_pos, *idx);
-            if distance <= range as f32 && camera::in_screen_bounds(ecs, idx.x, idx.y) {
-                let screen_pt = camera::tile_to_screen(ecs, *idx);
-                camera::set_bg_view(ctx, screen_pt.x, screen_pt.y, COLORS.blue);
+            if distance <= range as f32 && camera::in_screen_bounds(player_pos, idx.x, idx.y) {
+                let screen_pt = camera::tile_to_screen(player_pos, *idx);
+                camera::set_bg_view(ctx, screen_pt.x, screen_pt.y, to_rgb(Color::BLUE));
                 available_cells.push(*idx);
             }
         }
@@ -312,14 +263,14 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32, radius: i32) -
 
     let mut valid_target = false;
     for idx in available_cells.iter() {
-        let scr_pt = camera::tile_to_screen(ecs, *idx);
+        let scr_pt = camera::tile_to_screen(player_pos, *idx);
         if scr_pt.x == cursor.point.x && scr_pt.y == cursor.point.y {
             valid_target = true;
         }
     }
-    let mut curs_color = COLORS.red;
+    let mut curs_color = to_rgb(Color::RED);
     if valid_target {
-        curs_color = COLORS.cyan;
+        curs_color = to_rgb(Color::CYAN);
     }
     camera::set_bg_view(ctx, cursor.point.x, cursor.point.y, curs_color);
     let blast_tiles = camera::blast_tiles(ecs, cursor.point, radius);
@@ -327,7 +278,7 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32, radius: i32) -
         if *tile == cursor.point {
             continue;
         }
-        camera::set_bg_view(ctx, tile.x, tile.y, COLORS.dark_grey);
+        camera::set_bg_view(ctx, tile.x, tile.y,    to_rgb(Color::DARK_GRAY));
     }
 
     match ctx.key {
@@ -357,15 +308,13 @@ pub fn ranged_target(ecs: &mut World, ctx: &mut Rltk, range: i32, radius: i32) -
     }
 }
 
-// TODO: this is really close to the inventory one, might be able to dry it up
 pub fn chargen_menu(
-    _gs: &mut State,
     ctx: &mut Rltk,
     selection: usize,
 ) -> (MenuAction, Option<usize>) {
-    let fgcolor = COLORS.white;
-    let bgcolor = COLORS.black;
-    let hlcolor = COLORS.magenta;
+    let fgcolor = to_rgb(Color::WHITE);
+    let bgcolor = to_rgb(Color::BLACK);
+    let hlcolor = to_rgb(Color::PURPLE);
 
     let height = BOUNDS.win_height;
     let width = BOUNDS.win_width;
@@ -373,7 +322,7 @@ pub fn chargen_menu(
     let halfwidth = width / 2;
     ctx.draw_box(0, 0, halfwidth, height, fgcolor, bgcolor);
     ctx.draw_box(halfwidth + 1, 0, halfwidth - 1, height, fgcolor, bgcolor);
-    ctx.print_color_centered(0, COLORS.yellow, COLORS.black, "Choose a spell school");
+    ctx.print_color_centered(0, to_rgb(Color::YELLOW), to_rgb(Color::BLACK), "Choose a spell school");
 
     let inv_offset = 2;
     for (y, school) in SCHOOLS.iter().enumerate() {
@@ -402,10 +351,8 @@ pub fn chargen_menu(
     }
 }
 
-pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
-    let runstate = gs.ecs.fetch::<RunState>();
-
-    ctx.print_color_centered(15, COLORS.yellow, COLORS.black, "Maleficer");
+pub fn main_menu(runstate: Res<State<RunState>>, ctx: &mut Rltk, selection: MainMenuSelection) -> MainMenuResult {
+    ctx.print_color_centered(15, to_rgb(Color::YELLOW), to_rgb(Color::BLACK), "Maleficer");
 
     let states = [
         MainMenuSelection::NewGame,
@@ -416,32 +363,28 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
     let idx: usize;
     let state_num = states.len();
 
-    if let RunState::MainMenu {
-        game_started: _,
-        menu_selection: selection,
-    } = *runstate
     {
-        let mut ngcolor = COLORS.white;
-        let mut lgcolor = COLORS.white;
-        let mut qcolor = COLORS.white;
+        let mut ngcolor = to_rgb(Color::WHITE);
+        let mut lgcolor = to_rgb(Color::WHITE);
+        let mut qcolor = to_rgb(Color::WHITE);
         match selection {
             MainMenuSelection::NewGame => {
-                ngcolor = COLORS.magenta;
+                ngcolor = to_rgb(Color::PURPLE);
                 idx = 0;
             }
             MainMenuSelection::Continue => {
-                lgcolor = COLORS.magenta;
+                lgcolor = to_rgb(Color::PURPLE);
                 idx = 1;
             }
             MainMenuSelection::Quit => {
-                qcolor = COLORS.magenta;
+                qcolor = to_rgb(Color::PURPLE);
                 idx = 2;
             }
         }
 
-        ctx.print_color_centered(24, ngcolor, COLORS.black, "Begin New Game");
-        ctx.print_color_centered(25, lgcolor, COLORS.black, "Continue");
-        ctx.print_color_centered(26, qcolor, COLORS.black, "Quit");
+        ctx.print_color_centered(24, ngcolor, to_rgb(Color::BLACK), "Begin New Game");
+        ctx.print_color_centered(25, lgcolor, to_rgb(Color::BLACK), "Continue");
+        ctx.print_color_centered(26, qcolor, to_rgb(Color::BLACK), "Quit");
 
         match ctx.key {
             None => {
@@ -477,9 +420,5 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
                 }
             },
         }
-    }
-
-    MainMenuResult::NoSelection {
-        selected: MainMenuSelection::NewGame,
     }
 }

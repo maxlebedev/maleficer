@@ -1,8 +1,11 @@
-use crate::{config::BOUNDS, gui::UI_WIDTH, COLORS};
+use crate::{config::BOUNDS, gui::UI_WIDTH};
 use specs::prelude::*;
 
 use super::{Hidden, Map, Position, Renderable, TileType};
 use rltk::{Point, Rltk, RGB};
+use crate::to_rgb;
+
+use bevy::prelude::{Color, Query, Without};
 
 const SHOW_BOUNDARIES: bool = true;
 
@@ -21,9 +24,7 @@ pub fn get_screen_bounds(ecs: &World) -> (i32, i32, i32, i32) {
     (min_x, max_x, min_y, max_y)
 }
 
-pub fn tile_to_screen(ecs: &World, tile: Point) -> Point {
-    let player_pos = ecs.fetch::<Point>();
-
+pub fn tile_to_screen(player_pos: Point, tile: Point) -> Point {
     let center_x = (BOUNDS.view_width / 2) as i32;
     let center_y = (BOUNDS.view_height / 2) as i32;
 
@@ -36,9 +37,7 @@ pub fn tile_to_screen(ecs: &World, tile: Point) -> Point {
     rltk::Point { x, y }
 }
 
-pub fn screen_to_tile(ecs: &World, point: Point) -> Point {
-    let player_pos = ecs.fetch::<Point>();
-
+pub fn screen_to_tile(player_pos: Point, point: Point) -> Point {
     let center_x = (BOUNDS.view_width / 2) as i32;
     let center_y = (BOUNDS.view_height / 2) as i32;
 
@@ -50,9 +49,9 @@ pub fn screen_to_tile(ecs: &World, point: Point) -> Point {
     rltk::Point { x, y }
 }
 
-pub fn in_screen_bounds(ecs: &World, x: i32, y: i32) -> bool {
+pub fn in_screen_bounds(player_pos: Point, x: i32, y: i32) -> bool {
     let tile = Point { x, y };
-    let screen_pt = tile_to_screen(ecs, tile);
+    let screen_pt = tile_to_screen(player_pos, tile);
 
     if screen_pt.x > 1
         && screen_pt.x < BOUNDS.view_width as i32 - 1
@@ -65,13 +64,14 @@ pub fn in_screen_bounds(ecs: &World, x: i32, y: i32) -> bool {
 }
 
 pub fn blast_tiles(ecs: &World, screen_pt: Point, radius: i32) -> Vec<Point> {
-    let curs_tile = screen_to_tile(ecs, screen_pt);
+    let player_pos = ecs.fetch::<Point>();
+    let curs_tile = screen_to_tile(*player_pos, screen_pt);
     let map = ecs.fetch::<Map>();
     let blast_tiles = rltk::field_of_view(curs_tile, radius, &*map);
     // let mut ret = Vec::<Point>::new();
     blast_tiles
         .iter()
-        .map(|x| tile_to_screen(ecs, *x))
+        .map(|x| tile_to_screen(*player_pos, *x))
         .collect()
 }
 
@@ -85,7 +85,9 @@ pub fn set_bg_view(ctx: &mut Rltk, x: i32, y: i32, bg: RGB) {
     ctx.set_bg(x + ui_width, y, bg);
 }
 
-pub fn render_camera(ecs: &World, ctx: &mut Rltk) {
+pub fn render_camera(ecs: &World,
+    renderables: Query<(&Position, &Renderable, Without<Hidden>)>,
+    ctx: &mut Rltk) {
     let map = ecs.fetch::<Map>();
     let (min_x, max_x, min_y, max_y) = get_screen_bounds(ecs);
 
@@ -105,8 +107,8 @@ pub fn render_camera(ecs: &World, ctx: &mut Rltk) {
                     ctx,
                     x as i32,
                     y as i32,
-                    COLORS.grey,
-                    COLORS.black,
+                    to_rgb(Color::GRAY),
+                    to_rgb(Color::BLACK),
                     rltk::to_cp437('+'),
                 );
             }
@@ -118,9 +120,8 @@ pub fn render_camera(ecs: &World, ctx: &mut Rltk) {
     let hidden = ecs.read_storage::<Hidden>();
     let map = ecs.fetch::<Map>();
 
-    let mut data = (&positions, &renderables, !&hidden)
-        .join()
-        .collect::<Vec<_>>();
+    let mut data = renderables.iter_mut();
+    //(&positions, &renderables, !&hidden) .join() .collect::<Vec<_>>();
     data.sort_by(|&a, &b| b.1.render_order.cmp(&a.1.render_order));
     for (pos, render, _hidden) in data.iter() {
         let idx = map.xy_idx(pos.x, pos.y);
@@ -141,21 +142,21 @@ pub fn render_camera(ecs: &World, ctx: &mut Rltk) {
 fn get_tile_glyph(idx: usize, map: &Map) -> (rltk::FontCharType, RGB, RGB) {
     let glyph;
     let mut fg;
-    let mut bg = COLORS.black;
+    let mut bg = to_rgb(Color::BLACK);
 
     match map.tiles[idx] {
         TileType::Floor => {
             glyph = rltk::to_cp437('.');
-            fg = COLORS.dark_cyan;
+            fg = to_rgb(Color::MIDNIGHT_BLUE);
         }
         TileType::Wall => {
             let (x,y) = map.idx_xy(idx as i32);
             glyph = wall_glyph(map, x, y);
-            fg = COLORS.green;
+            fg = to_rgb(Color::GREEN);
         }
         TileType::DownStairs => {
             glyph = rltk::to_cp437('▼');
-            fg = COLORS.dark_cyan;
+            fg = to_rgb(Color::MIDNIGHT_BLUE);
         }
     }
     if !map.visible_tiles[idx] {
@@ -163,7 +164,7 @@ fn get_tile_glyph(idx: usize, map: &Map) -> (rltk::FontCharType, RGB, RGB) {
     }
 
     if map.bloodstains.contains(&idx) {
-        bg = COLORS.blood;
+        bg = to_rgb(Color::CRIMSON);
         // maybe change floor tiles to this? '▓'
     }
 
@@ -239,24 +240,5 @@ fn wall_glyph(map: &Map, x: i32, y: i32) -> rltk::FontCharType {
         },
         15 => rltk::to_cp437('╬'),
         _ => rltk::to_cp437('#'), // # We missed one?
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::{camera::*, State};
-
-    #[test]
-    fn test_get_screen_bounds() {
-        let (player_x, player_y) = (20, 15);
-        let mut state = State { ecs: World::new() };
-        state.ecs.insert(Point::new(player_x, player_y));
-        let (min_x, max_x, min_y, max_y) = get_screen_bounds(&state.ecs);
-        // these are relative to BOUNDS.height/width
-        assert_eq!(min_x, -70);
-        assert_eq!(max_x, 110);
-
-        assert_eq!(min_y, -45);
-        assert_eq!(max_y, 75);
     }
 }
