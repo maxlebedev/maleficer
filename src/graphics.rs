@@ -98,12 +98,33 @@ fn get_world_position(
     )
 }
 
+const PIECE_SPEED: f32 = 10.;
+const POSITION_TOLERANCE : f32 = 0.1;
+
+pub fn update_piece_position(
+    mut query: Query<(&Position, &mut Transform), With<Piece>>,
+        time: Res<Time>,
+) {
+    for (position, mut transform) in query.iter_mut() {
+        let target = get_world_position(&position, PIECE_Z);
+        let d = (target - transform.translation).length();
+        if d > POSITION_TOLERANCE {
+            transform.translation = transform.translation.lerp(
+                target,
+                PIECE_SPEED * time.delta_seconds()
+            );
+        } else {
+            transform.translation = target;
+        }
+    }
+}
+
 pub struct GraphicsPlugin;
 
 impl Plugin for GraphicsPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, load_assets)
-        .add_systems(Update, (spawn_tile_renderer, spawn_piece_renderer).run_if(in_state(AppState::Game)))
+        .add_systems(Update, (spawn_tile_renderer, spawn_piece_renderer, update_piece_position).run_if(in_state(AppState::Game)))
         ;
 
     }
