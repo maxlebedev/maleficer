@@ -1,38 +1,22 @@
-built off of https://github.com/amethyst/rustrogueliketutorial
+A classic (berlin definition) roguelike video game written with Bevy and inspired by modern ttrpg games.
 
-Maleficer is intended to be a ttpg-inspired roguelike written in rust.
+Maleficer looks to balance procedural generation with buildcrafting, provide mechanical clarity (rules work like a tabletop game), and innovate the turn-by-turn gameplay loop.
 
-It takes heavy inspiration from games like Trespassor, bringing modern ttrpg dungeon crawling mechanics to the roguelike genre
+Inspiration:
+  Tresspasser
+  Magic the Gathering (spells, resource system)
+  Pillars of Eternity (stats)
 
-# Ideas
-characters are all some variant of wizard, and start with two schools.
-The options are something like:
-	* one per element
-	* battle magic
-	* teleportation/forced movement
-	* defense
-	* illusion/stealth
-	* info gathering
-Leveling up grants spells from the chosen schools, but more can be learned.
+Players take on the role of an ambitious magic school drop-out looking to [steal the amulet of yendor, or w.e].
+At character creation, the player can select 1-2 magical disciplines, more are available via loot.
 
-Might use a mana sytem at first, but maybe something more involved going forward? Like a stat for magic reserves, magnitude, duration, etc
+Example Magical Disciplines:
+  * pyromancy
+  * battle magic (gish)
+  * illusion
+  * teleportation
+  * info gathering
 
-Going with spells because I don't want the combat loop to be about repeatedly making default attacks
-
-
-# TODO:
-
-## Core gameplay
-* Tests
-* Spells, rather than items/scrolls
-* Hotbar/Easy way to cast spells
-* Chapter 66 has spell content, so work up to that first
-
-## UX
-* Descriptions next to inventory items
-
-## Design
-* Why explore the level, (vs doing down asap)
-* What is the progression system?
-
-## Bugs
+## Design Questions
+* If no hunger meter, how to prod the player to take risks?
+* What is the progression system? (learning spells, stat system)
