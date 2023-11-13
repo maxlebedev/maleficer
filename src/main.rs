@@ -34,7 +34,7 @@ fn setup(mut commands: Commands) {
         camera.transform.translation.z
     );
     commands.spawn(camera);
-
+    info!("Enter to start");
 }
 
 fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>, mut texture_atlases: ResMut<Assets<TextureAtlas>>){
