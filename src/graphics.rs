@@ -1,8 +1,11 @@
 use bevy::prelude::*;
+use super::AppState;
 
 use crate::board::components::{Position, Tile};
 
 pub const TILE_SIZE: f32 = 32.;
+pub const TILE_Z: f32 = 0.;
+pub const PIECE_Z: f32 = 1.;
 
 #[derive(Resource)]
 pub struct GraphicsAssets {
@@ -41,11 +44,7 @@ pub fn spawn_tile_renderer(
         let mut sprite = TextureAtlasSprite::new(177);
         sprite.custom_size = Some(Vec2::splat(TILE_SIZE));
         sprite.color = Color::OLIVE;
-        let v = Vec3::new(
-            TILE_SIZE * position.c.x as f32,
-            TILE_SIZE * position.c.y as f32,
-            0.
-        );
+        let v = get_world_position(position, TILE_Z);
         commands.entity(entity)
             .insert(
                 SpriteSheetBundle {
@@ -58,13 +57,54 @@ pub fn spawn_tile_renderer(
     }
 }
 
+use super::Piece;
+
+pub fn spawn_piece_renderer(
+    mut commands: Commands,
+    query: Query<(Entity, &Position, &Piece), Added<Piece>>,
+    assets: Res<GraphicsAssets>
+) {
+    for (entity, position, piece) in query.iter() {
+        dbg!(&piece.kind);
+        let sprite_idx = match piece.kind.as_str() {
+            "Player" => 1,
+            _ => 63
+        };
+        let mut sprite = TextureAtlasSprite::new(sprite_idx);
+        sprite.custom_size = Some(Vec2::splat(TILE_SIZE));
+        sprite.color = Color::WHITE;
+        let v = get_world_position(&position, PIECE_Z);
+        commands.entity(entity)
+            .insert(
+                SpriteSheetBundle {
+                    sprite,
+                    texture_atlas: assets.sprite_texture.clone(),
+                    transform: Transform::from_translation(v),
+                    ..Default::default()
+                }
+            );
+    }
+}
+
+
+fn get_world_position(
+    position: &Position,
+    z: f32
+) -> Vec3 {
+    Vec3::new(
+        TILE_SIZE * position.c.x as f32,
+        TILE_SIZE * position.c.y as f32,
+        z
+    )
+}
+
 pub struct GraphicsPlugin;
 
 impl Plugin for GraphicsPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, load_assets)
-            //post startup because it depends on load_assets
-        .add_systems(PostStartup, spawn_tile_renderer);
+        .add_systems(Update, (spawn_tile_renderer, spawn_piece_renderer).run_if(in_state(AppState::Game)))
+        ;
 
     }
 }
