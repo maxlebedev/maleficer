@@ -69,15 +69,6 @@ fn enter_to_start(
     }
 }
 
-fn player_movement(mut player: Query<(&mut Player, &mut Transform)>){
-    // TODO: this should recieve directional controls
-    // TODO: the sprite thing has a postion that is different from our coords
-    for (_, mut transform) in &mut player{
-        transform.translation.y += 10.0;
-    }
-
-}
-
 #[derive(Clone, Debug, Default, Hash, Eq, States, PartialEq)]
 pub enum AppState {
     #[default]
