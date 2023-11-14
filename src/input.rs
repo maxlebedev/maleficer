@@ -3,20 +3,7 @@ use bevy::prelude::*;
 use bevy::input::keyboard::KeyboardInput;
 use crate::Coord;
 use bevy::input::keyboard::KeyCode;
-use crate::board::components::Position;
-
-/*
-fn player_position(
-    keys: Res<Input<KeyCode>>,
-    mut player_query: Query<&mut Position, With<super::Player>>,
-) {
-    let Ok(mut position) = player_query.get_single_mut() else { return };
-    let key  = keys.get_just_pressed();
-    match key {
-        KeyCode::Left => position.c += Coord::LEFT,
-        _ => (),
-    }
-}*/
+use crate::board::Position;
 
 // TODO: should this be more generic and take an entity to move?
 #[derive(Event)]

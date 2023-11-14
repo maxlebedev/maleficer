@@ -1,10 +1,16 @@
 use bevy::prelude::*;
 use std::collections::HashMap;
-
 use crate::coord::Coord;
+use super::AppState;
 
-use super::CurrentBoard;
-use super::components::{Position, Tile};
+#[derive(Component)]
+pub struct Position {
+    pub c: Coord
+}
+
+#[derive(Component)]
+pub struct Tile;
+
 
 pub fn spawn_map(
     mut commands: Commands,
@@ -22,4 +28,18 @@ pub fn spawn_map(
             current.tiles.insert(c, tile);
         }
     }
+}
+
+pub struct BoardPlugin;
+
+impl Plugin for BoardPlugin {
+    fn build(&self, app: &mut App) {
+        app.init_resource::<CurrentBoard>()
+            .add_systems(OnEnter(AppState::Game), spawn_map);
+    }
+}
+
+#[derive(Default, Resource)]
+pub struct CurrentBoard {
+    pub tiles: HashMap<Coord, Entity>
 }

@@ -26,14 +26,17 @@ fn main() {
         .run();
 }
 
+#[derive(Component)]
+struct GameCamera;
+
 fn setup(mut commands: Commands) {
     let mut camera = Camera2dBundle::default();
     camera.transform.translation = Vec3::new(
-        4. * graphics::TILE_SIZE,
+        4. * graphics::TILE_SIZE, // TODO: why 4?
         4. * graphics::TILE_SIZE,
         camera.transform.translation.z
     );
-    commands.spawn(camera);
+    commands.spawn((camera,GameCamera));
     info!("Enter to start");
 }
 
@@ -52,7 +55,7 @@ fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>, mut text
     commands.spawn((
         Player,
         Piece { kind: "Player".to_string() },
-        board::components::Position { c: Coord::new(0, 0) },
+        board::Position { c: Coord::new(0, 0) },
         //ssb
     ));
 }

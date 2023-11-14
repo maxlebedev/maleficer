@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use super::AppState;
 
-use crate::board::components::{Position, Tile};
+use crate::board::{Position, Tile};
 
 pub const TILE_SIZE: f32 = 32.;
 pub const TILE_Z: f32 = 0.;
