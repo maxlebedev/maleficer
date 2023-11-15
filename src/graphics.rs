@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use super::AppState;
+use super::{AppState, GameState};
 
 use crate::board::{Position, Tile};
 
@@ -124,7 +124,8 @@ pub struct GraphicsPlugin;
 impl Plugin for GraphicsPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, load_assets)
-        .add_systems(Update, (spawn_tile_renderer, spawn_piece_renderer, update_piece_position).run_if(in_state(AppState::Game)))
+        .add_systems(Update, (spawn_tile_renderer, spawn_piece_renderer, update_piece_position).run_if(in_state(AppState::InGame)))
+        .add_systems(Update, (update_piece_position).run_if(in_state(GameState::TurnResolution)))
         ;
 
     }

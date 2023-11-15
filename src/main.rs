@@ -5,6 +5,7 @@ mod board;
 mod coord;
 mod graphics;
 mod input;
+//mod actions;
 
 #[derive(Component)]
 struct Player;
@@ -13,6 +14,9 @@ struct Player;
 pub struct Piece {
     pub kind: String
 }
+
+// #[derive(Component, Default)]
+// pub struct Actor(pub Option<Box<dyn actions::Action>>);
 
 fn main() {
     App::new()
@@ -66,7 +70,7 @@ fn enter_to_start(
 ) {
     // TODO: this eventually becomes a menu system
     if keys.just_pressed(KeyCode::Return) {
-        next_state.set(AppState::Game);
+        next_state.set(AppState::InGame);
         dbg!("entering game");
         keys.reset(KeyCode::Return);
     }
@@ -76,7 +80,15 @@ fn enter_to_start(
 pub enum AppState {
     #[default]
     Menu,
-    Game,
+    InGame,
+}
+
+#[derive(Clone, Debug, Default, Hash, Eq, States, PartialEq)]
+pub enum GameState {
+    #[default]
+    PlayerInput,
+    TurnResolution,
+    AITurn,
 }
 
 pub struct MaleficerPlugin;
@@ -86,10 +98,11 @@ impl Plugin for MaleficerPlugin{
         app.add_systems(Startup, setup)
             .add_systems(Update, enter_to_start.run_if(in_state(AppState::Menu)))
             .add_state::<AppState>()
+            .add_state::<GameState>()
             .add_plugins(board::BoardPlugin)
             .add_plugins(graphics::GraphicsPlugin)
             .add_plugins(input::InputPlugin)
-            .add_systems(OnEnter(AppState::Game), spawn_player)
+            .add_systems(OnEnter(AppState::InGame), spawn_player)
         ;
     }
 }
