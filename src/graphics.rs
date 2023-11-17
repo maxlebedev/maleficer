@@ -1,7 +1,10 @@
-use super::{AppState, GameState};
+use super::state::{AppState, GameState};
 use bevy::prelude::*;
 
-use crate::board::{Position, Tile};
+use crate::{
+    board::{Position, Tile},
+    state::ChangeStateEvent,
+};
 
 pub const TILE_SIZE: f32 = 32.;
 pub const TILE_Z: f32 = 0.;
@@ -81,13 +84,15 @@ fn get_world_position(position: &Position, z: f32) -> Vec3 {
     )
 }
 
-const PIECE_SPEED: f32 = 10.;
+const PIECE_SPEED: f32 = 15.;
 const POSITION_TOLERANCE: f32 = 0.1;
 
 pub fn update_piece_position(
     mut query: Query<(&Position, &mut Transform), With<Piece>>,
+    mut ev_state: EventWriter<ChangeStateEvent>,
     time: Res<Time>,
 ) {
+    let mut animating = false;
     for (position, mut transform) in query.iter_mut() {
         let target = get_world_position(&position, PIECE_Z);
         let d = (target - transform.translation).length();
@@ -95,9 +100,14 @@ pub fn update_piece_position(
             transform.translation = transform
                 .translation
                 .lerp(target, PIECE_SPEED * time.delta_seconds());
+            animating = true;
         } else {
             transform.translation = target;
         }
+    }
+    if !animating {
+        info!("to->PlayerInput");
+        ev_state.send(ChangeStateEvent(GameState::PlayerInput));
     }
 }
 
@@ -105,19 +115,14 @@ pub struct GraphicsPlugin;
 
 impl Plugin for GraphicsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, load_assets)
-            .add_systems(
-                Update,
-                (
-                    spawn_tile_renderer,
-                    spawn_piece_renderer,
-                    update_piece_position,
-                )
-                    .run_if(in_state(AppState::InGame)),
+        app.add_systems(Startup, load_assets).add_systems(
+            Update,
+            (
+                spawn_tile_renderer,
+                spawn_piece_renderer,
+                update_piece_position.run_if(in_state(GameState::TurnResolution)),
             )
-            .add_systems(
-                Update,
-                (update_piece_position).run_if(in_state(GameState::TurnResolution)),
-            );
+                .run_if(in_state(AppState::InGame)),
+        );
     }
 }

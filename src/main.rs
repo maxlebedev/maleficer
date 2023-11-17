@@ -1,10 +1,12 @@
 use bevy::prelude::*;
 use coord::Coord;
+use crate::state::AppState;
 
 mod board;
 mod coord;
 mod graphics;
 mod input;
+mod state;
 //mod actions;
 
 #[derive(Component)]
@@ -82,20 +84,6 @@ fn enter_to_start(mut keys: ResMut<Input<KeyCode>>, mut next_state: ResMut<NextS
     }
 }
 
-#[derive(Clone, Debug, Default, Hash, Eq, States, PartialEq)]
-pub enum AppState {
-    #[default]
-    Menu,
-    InGame,
-}
-
-#[derive(Clone, Debug, Default, Hash, Eq, States, PartialEq)]
-pub enum GameState {
-    #[default]
-    PlayerInput,
-    TurnResolution,
-    AITurn,
-}
 
 pub struct MaleficerPlugin;
 
@@ -103,11 +91,10 @@ impl Plugin for MaleficerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup)
             .add_systems(Update, enter_to_start.run_if(in_state(AppState::Menu)))
-            .add_state::<AppState>()
-            .add_state::<GameState>()
             .add_plugins(board::BoardPlugin)
             .add_plugins(graphics::GraphicsPlugin)
             .add_plugins(input::InputPlugin)
+            .add_plugins(state::StatePlugin)
             .add_systems(OnEnter(AppState::InGame), spawn_player);
     }
 }
