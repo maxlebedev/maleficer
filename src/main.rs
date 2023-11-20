@@ -1,24 +1,30 @@
 use bevy::prelude::*;
+use board::Position;
 use coord::Coord;
-use crate::state::AppState;
+use state::NextStateEvent;
+use crate::state::{AppState, GameState};
 
 mod board;
 mod coord;
 mod graphics;
 mod input;
 mod state;
-//mod actions;
+mod actions;
+use rand;
 
 #[derive(Component)]
-struct Player;
+pub struct Player;
+
+#[derive(Component)]
+struct Mob;
 
 #[derive(Component)]
 pub struct Piece {
     pub kind: String,
 }
 
-// #[derive(Component, Default)]
-// pub struct Actor(pub Option<Box<dyn actions::Action>>);
+#[derive(Component, Default)]
+pub struct Actor(pub Option<Box<dyn actions::Action>>);
 
 fn main() {
     App::new()
@@ -56,7 +62,6 @@ fn spawn_player(
         TextureAtlas::from_grid(texture_handle, Vec2::new(16.0, 16.0), 8, 9, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
-    dbg!("spawning player");
     let _ssb = SpriteSheetBundle {
         texture_atlas: texture_atlas_handle,
         sprite: TextureAtlasSprite::new(8),
@@ -65,17 +70,56 @@ fn spawn_player(
     };
     commands.spawn((
         Player,
+        Actor::default(),
         Piece {
             kind: "Player".to_string(),
         },
         board::Position {
             c: Coord::new(0, 0),
         },
-        //ssb
     ));
 }
 
-fn enter_to_start(mut keys: ResMut<Input<KeyCode>>, mut next_state: ResMut<NextState<AppState>>) {
+fn spawn_mobs(mut commands: Commands) {
+    commands.spawn((
+        Mob,
+        Actor::default(),
+        Piece {
+            kind: "Mob".to_string(),
+        },
+        board::Position {
+            c: Coord::new(4, 4),
+        },
+    ));
+    commands.spawn((
+        Mob,
+        Piece {
+            kind: "Mob".to_string(),
+        },
+        board::Position {
+            c: Coord::new(2, 4),
+        },
+    ));
+}
+
+fn mob_ai(mut mobs: Query<&mut Position, With<Mob>>,
+    mut ev_state: EventWriter<NextStateEvent>,
+) {
+    for mut position in mobs.iter_mut() {
+        if rand::random(){
+            position.c += Coord::UP;
+        }
+        else {
+            position.c += Coord::DOWN;
+        }
+    }
+    ev_state.send(NextStateEvent);
+}
+
+fn enter_to_start(
+    mut keys: ResMut<Input<KeyCode>>,
+    mut next_state: ResMut<NextState<AppState>>,
+) {
     // TODO: this eventually becomes a menu system
     if keys.just_pressed(KeyCode::Return) {
         next_state.set(AppState::InGame);
@@ -91,10 +135,13 @@ impl Plugin for MaleficerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup)
             .add_systems(Update, enter_to_start.run_if(in_state(AppState::Menu)))
+            .add_systems(Update, mob_ai.run_if(in_state(GameState::AITurn)))
             .add_plugins(board::BoardPlugin)
             .add_plugins(graphics::GraphicsPlugin)
             .add_plugins(input::InputPlugin)
             .add_plugins(state::StatePlugin)
-            .add_systems(OnEnter(AppState::InGame), spawn_player);
+            .add_plugins(state::ManagerPlugin)
+            .add_plugins(actions::ActionsPlugin)
+            .add_systems(OnEnter(AppState::InGame), (spawn_player, spawn_mobs));
     }
 }

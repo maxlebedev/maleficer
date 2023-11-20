@@ -1,10 +1,7 @@
 use super::state::{AppState, GameState};
 use bevy::prelude::*;
 
-use crate::{
-    board::{Position, Tile},
-    state::ChangeStateEvent,
-};
+use crate::board::{Position, Tile};
 
 pub const TILE_SIZE: f32 = 32.;
 pub const TILE_Z: f32 = 0.;
@@ -58,9 +55,9 @@ pub fn spawn_piece_renderer(
     assets: Res<GraphicsAssets>,
 ) {
     for (entity, position, piece) in query.iter() {
-        dbg!(&piece.kind);
         let sprite_idx = match piece.kind.as_str() {
             "Player" => 1,
+            "Mob" => 16,
             _ => 63,
         };
         let mut sprite = TextureAtlasSprite::new(sprite_idx);
@@ -87,10 +84,13 @@ fn get_world_position(position: &Position, z: f32) -> Vec3 {
 const PIECE_SPEED: f32 = 15.;
 const POSITION_TOLERANCE: f32 = 0.1;
 
+#[derive(Event)]
+pub struct GraphicsWaitEvent;
+
 pub fn update_piece_position(
     mut query: Query<(&Position, &mut Transform), With<Piece>>,
-    mut ev_state: EventWriter<ChangeStateEvent>,
     time: Res<Time>,
+    mut ev_wait: EventWriter<GraphicsWaitEvent>
 ) {
     let mut animating = false;
     for (position, mut transform) in query.iter_mut() {
@@ -121,8 +121,10 @@ impl Plugin for GraphicsPlugin {
                 spawn_tile_renderer,
                 spawn_piece_renderer,
                 update_piece_position.run_if(in_state(GameState::TurnResolution)),
+                update_piece_position.run_if(in_state(GameState::AITurnResolution)),
             )
                 .run_if(in_state(AppState::InGame)),
-        );
+        )
+        .add_event::<GraphicsWaitEvent>();
     }
 }
