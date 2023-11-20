@@ -1,17 +1,17 @@
 use std::collections::VecDeque;
 
+use crate::state::{AppState, GameState};
 use actions::{ActorQueue, MoveAction};
 use bevy::prelude::*;
 use board::Position;
 use coord::Coord;
-use crate::state::{AppState, GameState};
 
+mod actions;
 mod board;
 mod coord;
 mod graphics;
 mod input;
 mod state;
-mod actions;
 use rand;
 
 #[derive(Component)]
@@ -104,15 +104,15 @@ fn spawn_mobs(mut commands: Commands) {
     ));
 }
 
-fn mob_ai(mut mobs: Query<(Entity, &mut Position, &mut Actor), With<Mob>>,
+fn mob_ai(
+    mut mobs: Query<(Entity, &mut Position, &mut Actor), With<Mob>>,
     mut actor_queue: ResMut<ActorQueue>,
 ) {
     for (entity, position, mut actor) in mobs.iter_mut() {
         let dir;
-        if rand::random(){
+        if rand::random() {
             dir = Coord::UP;
-        }
-        else {
+        } else {
             dir = Coord::DOWN;
         }
 
@@ -123,10 +123,7 @@ fn mob_ai(mut mobs: Query<(Entity, &mut Position, &mut Actor), With<Mob>>,
     //ev_state.send(NextStateEvent);
 }
 
-fn enter_to_start(
-    mut keys: ResMut<Input<KeyCode>>,
-    mut next_state: ResMut<NextState<AppState>>,
-) {
+fn enter_to_start(mut keys: ResMut<Input<KeyCode>>, mut next_state: ResMut<NextState<AppState>>) {
     // TODO: this eventually becomes a menu system
     if keys.just_pressed(KeyCode::Return) {
         next_state.set(AppState::InGame);
@@ -134,7 +131,6 @@ fn enter_to_start(
         keys.reset(KeyCode::Return);
     }
 }
-
 
 pub struct MaleficerPlugin;
 

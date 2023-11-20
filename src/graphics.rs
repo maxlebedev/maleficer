@@ -90,7 +90,7 @@ pub struct GraphicsWaitEvent;
 pub fn update_piece_position(
     mut query: Query<(&Position, &mut Transform), With<Piece>>,
     time: Res<Time>,
-    mut ev_wait: EventWriter<GraphicsWaitEvent>
+    mut ev_wait: EventWriter<GraphicsWaitEvent>,
 ) {
     let mut animating = false;
     for (position, mut transform) in query.iter_mut() {
@@ -116,16 +116,17 @@ pub struct GraphicsPlugin;
 
 impl Plugin for GraphicsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, load_assets).add_systems(
-            Update,
-            (
-                spawn_tile_renderer,
-                spawn_piece_renderer,
-                update_piece_position.run_if(in_state(GameState::TurnResolution)),
-                update_piece_position.run_if(in_state(GameState::AITurnResolution)),
+        app.add_systems(Startup, load_assets)
+            .add_systems(
+                Update,
+                (
+                    spawn_tile_renderer,
+                    spawn_piece_renderer,
+                    update_piece_position.run_if(in_state(GameState::TurnResolution)),
+                    update_piece_position.run_if(in_state(GameState::AITurnResolution)),
+                )
+                    .run_if(in_state(AppState::InGame)),
             )
-                .run_if(in_state(AppState::InGame)),
-        )
-        .add_event::<GraphicsWaitEvent>();
+            .add_event::<GraphicsWaitEvent>();
     }
 }

@@ -16,10 +16,16 @@ pub struct MoveAction(pub Entity, pub Coord);
 impl Action for MoveAction {
     fn execute(&self, world: &mut World) -> bool {
         info!("executing MoveAction");
-        let Some(board) = world.get_resource::<CurrentBoard>() else { return false };
-        if !board.tiles.contains_key(&self.1) { return false };
+        let Some(board) = world.get_resource::<CurrentBoard>() else {
+            return false;
+        };
+        if !board.tiles.contains_key(&self.1) {
+            return false;
+        };
 
-        let Some(mut position) = world.get_mut::<Position>(self.0) else { return false };
+        let Some(mut position) = world.get_mut::<Position>(self.0) else {
+            return false;
+        };
         position.c = self.1;
         true
     }
@@ -34,14 +40,17 @@ pub struct ActionsCompleteEvent;
 #[derive(Event)]
 pub struct NextActorEvent;
 
-
 pub fn process_action_queue(world: &mut World) {
-    let Some(mut queue) = world.get_resource_mut::<ActorQueue>() else { return };
+    let Some(mut queue) = world.get_resource_mut::<ActorQueue>() else {
+        return;
+    };
     let Some(entity) = queue.0.pop_front() else {
         world.send_event(ActionsCompleteEvent);
         return;
     };
-    let Some(mut actor) = world.get_mut::<Actor>(entity) else { return };
+    let Some(mut actor) = world.get_mut::<Actor>(entity) else {
+        return;
+    };
     let Some(action) = actor.0.take() else { return };
 
     if !action.execute(world) && world.get::<Player>(entity).is_some() {
@@ -60,8 +69,6 @@ impl Plugin for ActionsPlugin {
             .add_event::<NextActorEvent>()
             .add_event::<ActionsCompleteEvent>()
             .add_event::<InvalidPlayerActionEvent>()
-            .add_systems(Update,
-                process_action_queue.run_if(on_event::<TickEvent>())
-            );
+            .add_systems(Update, process_action_queue.run_if(on_event::<TickEvent>()));
     }
 }
