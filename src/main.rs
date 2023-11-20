@@ -1,7 +1,9 @@
+use std::collections::VecDeque;
+
+use actions::{ActorQueue, MoveAction};
 use bevy::prelude::*;
 use board::Position;
 use coord::Coord;
-use state::NextStateEvent;
 use crate::state::{AppState, GameState};
 
 mod board;
@@ -44,7 +46,7 @@ struct GameCamera;
 fn setup(mut commands: Commands) {
     let mut camera = Camera2dBundle::default();
     camera.transform.translation = Vec3::new(
-        4. * graphics::TILE_SIZE, // TODO: why 4?
+        4. * graphics::TILE_SIZE,
         4. * graphics::TILE_SIZE,
         camera.transform.translation.z,
     );
@@ -102,18 +104,23 @@ fn spawn_mobs(mut commands: Commands) {
     ));
 }
 
-fn mob_ai(mut mobs: Query<&mut Position, With<Mob>>,
-    mut ev_state: EventWriter<NextStateEvent>,
+fn mob_ai(mut mobs: Query<(Entity, &mut Position, &mut Actor), With<Mob>>,
+    mut actor_queue: ResMut<ActorQueue>,
 ) {
-    for mut position in mobs.iter_mut() {
+    for (entity, position, mut actor) in mobs.iter_mut() {
+        let dir;
         if rand::random(){
-            position.c += Coord::UP;
+            dir = Coord::UP;
         }
         else {
-            position.c += Coord::DOWN;
+            dir = Coord::DOWN;
         }
+
+        let action = MoveAction(entity, position.c + dir);
+        actor.0 = Some(Box::new(action));
+        actor_queue.0 = VecDeque::from([entity]);
     }
-    ev_state.send(NextStateEvent);
+    //ev_state.send(NextStateEvent);
 }
 
 fn enter_to_start(

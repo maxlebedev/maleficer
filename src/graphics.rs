@@ -104,10 +104,11 @@ pub fn update_piece_position(
         } else {
             transform.translation = target;
         }
+        // animations occasionally get "stuck". I think animating doesn't get set to true on some
+        // loop
     }
-    if !animating {
-        info!("to->PlayerInput");
-        ev_state.send(ChangeStateEvent(GameState::PlayerInput));
+    if animating {
+        ev_wait.send(GraphicsWaitEvent);
     }
 }
 
