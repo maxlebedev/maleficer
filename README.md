@@ -4,8 +4,8 @@ The combat of many rogulikes boils down to walking into enemies until they die, 
 I also take inspiration from modern TTRPGs like Trespassor, especially in terms of mechanical clarity.
 
 # Dependancies
-libsdl2-dev
-export LIBGL_ALWAYS_SOFTWARE=1
+	- libsdl2-dev
+	- export LIBGL_ALWAYS_SOFTWARE=1
 
 # Plot
 The player is an ambitous and foolhardy wizard school dropout. He starts with some default spells, but learns many more via exploration.
@@ -16,7 +16,7 @@ The player is an ambitous and foolhardy wizard school dropout. He starts with so
 ## Mechanical Ideas
 	- teleportation/forced movement
 	- info gathering (bigger sight radius, heartbeat counter)
-	- terrain generation (creat new hallways)
+	- terrain generation (create new hallways)
 	- resouce exchange (health for mana etc)
 
 ## Resource Ideas
