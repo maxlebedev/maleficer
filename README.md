@@ -18,6 +18,8 @@ The player is an ambitous and foolhardy wizard school dropout. He starts with so
 	- info gathering (bigger sight radius, heartbeat counter)
 	- terrain generation (create new hallways)
 	- resouce exchange (health for mana etc)
+	- grant status `Foo X` where x ticks down every turn (Bleed 3, Slow 2, etc)
+
 
 ## Resource Ideas
 	- Like MTG: 5 different kinds of mana, with some mechanical niche protection
