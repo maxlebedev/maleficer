@@ -9,8 +9,9 @@ class Action(Enum):
     MOVE_LEFT = 3
     MOVE_RIGHT = 4
 
+
 def load_keymap(keymap_json_path):
-    with open(keymap_json_path, 'r') as file:
+    with open(keymap_json_path, "r") as file:
         keymap_data = yaml.safe_load(file)
 
     key_action_mapping = {}

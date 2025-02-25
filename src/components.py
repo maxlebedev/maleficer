@@ -1,3 +1,4 @@
+from typing import Tuple
 from dataclasses import dataclass as component
 
 
@@ -5,14 +6,20 @@ from dataclasses import dataclass as component
 class Player:
     pass
 
+
 @component
 class Position:
-    def __init__(self, x=0, y=0):
-        self.x = x
-        self.y = y
+    x: int
+    y: int
+
 
 @component
 class Movement:
-    def __init__(self, x=0, y=0):
-        self.x = x
-        self.y = y
+    x: int
+    y: int
+
+
+@component
+class Visible:
+    glyph: str
+    color: Tuple[int, int, int]
