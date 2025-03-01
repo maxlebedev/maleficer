@@ -15,6 +15,7 @@ class Position:
 
 @component
 class Movement:
+    # TODO: name could probably be better
     x: int
     y: int
 
