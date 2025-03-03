@@ -1,5 +1,3 @@
-from typing import Optional
-
 import esper
 import tcod
 
@@ -18,7 +16,7 @@ class EventHandler(tcod.event.EventDispatch[actions.Action]):
     def ev_quit(self, event: tcod.event.Quit):
         raise SystemExit()
 
-    def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[actions.Action]:
+    def ev_keydown(self, event: tcod.event.KeyDown) -> actions.Action | None:
         player = esper.get_component(cmp.Player)[0][0]
         action = None
         if self.keymap and not esper.has_component(player, cmp.Movement):

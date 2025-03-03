@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Dict
 
 import tcod
 import yaml
@@ -23,7 +22,7 @@ class Input(Enum):
     MOVE_RIGHT = 4
 
 
-KeyMap = Dict[tcod.event.KeySym, Input]
+KeyMap = dict[tcod.event.KeySym, Input]
 
 
 def load_keymap(keymap_json_path):

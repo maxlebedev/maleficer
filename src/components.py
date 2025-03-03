@@ -1,5 +1,5 @@
 from dataclasses import dataclass as component
-from typing import Tuple
+import display
 
 
 @component
@@ -23,14 +23,16 @@ class Movement:
 @component
 class Visible:
     glyph: str
-    color: Tuple[int, int, int]
+    color: display.RGB
 
 
 @component
 class Blocking:
     """Can't be moved through"""
+
     pass
 
+
 @component
-class Tile: #floor, wall, door, etc
+class Tile:  # floor, wall, door, etc
     pass

@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import esper
 import tcod
 from tcod import libtcodpy
@@ -11,8 +9,6 @@ import processors
 from board import Board
 
 FLAGS = tcod.context.SDL_WINDOW_RESIZABLE | tcod.context.SDL_WINDOW_FULLSCREEN
-
-RGB = Tuple[int, int, int]
 
 
 def get_player_pos():
@@ -55,7 +51,7 @@ def main() -> None:
         board = Board()
         render_proc = processors.RenderProcessor(console, context, board)
         esper.add_processor(render_proc)
-        board.set_tile(2,4, glyph="0")
+        board.set_tile(2, 4, glyph="0")
 
         while True:
             esper.process()

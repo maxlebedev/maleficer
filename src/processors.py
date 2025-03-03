@@ -15,9 +15,9 @@ class MovementProcessor(esper.Processor):
             pos.y += move.y
             esper.remove_component(ent, cmp.Movement)
 
+
 # TODO: redundant with event handler?
 class EventProcessor(esper.Processor):
-
     def __init__(self, event_handler):
         self.event_handler = event_handler
 
@@ -30,7 +30,6 @@ class EventProcessor(esper.Processor):
 
 
 class RenderProcessor(esper.Processor):
-
     def __init__(self, console, context, board):
         self.console = console
         self.context = context
@@ -52,11 +51,11 @@ class RenderProcessor(esper.Processor):
         startx, endx = (display.PANEL_WIDTH, display.BOARD_END_COORD)
         starty, endy = (0, display.BOARD_HEIGHT)
         tile_rgbs = [list(map(self.board.tile_to_rgb, row)) for row in self.board.tiles]
-        # tile_rgbs = [self.board.tile_to_rgb(t) for t in self.board.tiles]
         self.console.rgb[startx:endx, starty:endy] = tile_rgbs
-        # (ord("."), display.WHITE, display.BLACK)
 
         player_components = esper.get_components(cmp.Player, cmp.Position, cmp.Visible)
         for _, (_, pos, vis) in player_components:
-            self.console.print(pos.x + display.PANEL_WIDTH, pos.y, vis.glyph, fg=vis.color)
+            self.console.print(
+                pos.x + display.PANEL_WIDTH, pos.y, vis.glyph, fg=vis.color
+            )
         self.context.present(self.console)  # , integer_scaling=True
