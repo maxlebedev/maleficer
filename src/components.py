@@ -15,7 +15,7 @@ class Position:
 
 @component
 class Movement:
-    # TODO: name could probably be better
+    # TODO: name could probably be better, like as an adjective?
     x: int
     y: int
 
@@ -24,3 +24,13 @@ class Movement:
 class Visible:
     glyph: str
     color: Tuple[int, int, int]
+
+
+@component
+class Blocking:
+    """Can't be moved through"""
+    pass
+
+@component
+class Tile: #floor, wall, door, etc
+    pass

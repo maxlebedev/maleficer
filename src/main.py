@@ -9,10 +9,11 @@ import components as cmp
 import processors
 import engine
 import display
+from board import Board
+
 
 FLAGS = tcod.context.SDL_WINDOW_RESIZABLE | tcod.context.SDL_WINDOW_FULLSCREEN
 
-# TODO: actually a square board leaving space for panes on the left and right would be better
 RGB = Tuple[int, int, int]
 
 
@@ -22,7 +23,7 @@ def get_player_pos():
     return (0, 0)
 
 
-def as_color(text, fg: RGB = (255, 255, 255), bg: RGB = (0, 0, 0)) -> str:
+def as_color(text, fg: RGB = display.WHITE, bg: RGB = display.BLACK) -> str:
     """Return the control codes to change the foreground and background colors."""
     fore_rgb = libtcodpy.COLCTRL_FORE_RGB
     back_rgb = libtcodpy.COLCTRL_BACK_RGB
@@ -32,16 +33,15 @@ def as_color(text, fg: RGB = (255, 255, 255), bg: RGB = (0, 0, 0)) -> str:
 
 
 def main() -> None:
-
     tile_atlas = "assets/dejavu10x10_gs_tc.png"
     tileset = tcod.tileset.load_tilesheet(tile_atlas, 32, 8, tcod.tileset.CHARMAP_TCOD)
 
-    visible_cmp = cmp.Visible(glyph="@", color=(0, 255, 0))
-    player = esper.create_entity(
-        cmp.Player(), cmp.Position(x=1, y=1), visible_cmp
-    )
+    visible_cmp = cmp.Visible(glyph="@", color=display.GREEN)
+    position_cmp = cmp.Position(x=1, y=1)
+    player = esper.create_entity(cmp.Player(), position_cmp, visible_cmp)
     esper.add_processor(processors.MovementProcessor())
     event_handler = engine.EventHandler()
+    esper.add_processor(processors.EventProcessor(event_handler))
 
     context_params = {
         "width": display.CONSOLE_WIDTH,
@@ -53,29 +53,12 @@ def main() -> None:
     }
 
     with tcod.context.new(**context_params) as context:
-        root_console = context.new_console(order="F")
-        # this is a lot to draw every loop. if the map does any "scrolling" we'll have to redraw it all
-        # TODO: see if there is a bulk print or something
-        for w in range(display.BOARD_WIDTH):
-            for h in range(display.BOARD_HEIGHT):
-                root_console.print(x=w + display.PANEL_WIDTH, y=h, string=".")
-        root_console.print(x=71, y=47, string="?")
+        console = context.new_console(order="F")
         myengine = engine.Engine(event_handler=event_handler)
+        esper.add_processor(processors.RenderProcessor(myengine, console, context))
+
         while True:
-            # root_console.clear()
-
-            myengine.render(console=root_console, context=context)
-
-            context.present(root_console)  # , integer_scaling=True
-            for event in tcod.event.wait():
-                action = event_handler.dispatch(event)
-                if action and isinstance(action, actions.MovementAction):
-                    x, y = get_player_pos()
-                    # dumb hack to not have to re-render the whole screen. gotta replace
-                    chr = as_color(".")
-                    root_console.print(x=x + display.PANEL_WIDTH, y=y, string=chr)
-                    esper.add_component(player, cmp.Movement(x=action.dx, y=action.dy))
-
+            # myengine.render(console=console, context=context)
             esper.process()
 
 

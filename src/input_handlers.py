@@ -23,7 +23,8 @@ class Input(Enum):
     MOVE_RIGHT = 4
 
 
-KeyMap = Dict[tcod.event.KeySym,Input]
+KeyMap = Dict[tcod.event.KeySym, Input]
+
 
 def load_keymap(keymap_json_path):
     with open(keymap_json_path, "r") as file:
