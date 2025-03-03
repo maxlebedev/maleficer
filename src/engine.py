@@ -1,16 +1,13 @@
-import esper
-import tcod
-import display
-
-import input_handlers
-from input_handlers import Input
-import components as cmp
-import actions
 from typing import Optional
 
-from tcod.context import Context
-from tcod.console import Console
-from functools import partial
+import esper
+import tcod
+
+import actions
+import components as cmp
+import display
+import input_handlers
+from input_handlers import Input
 
 
 # TODO: I'm not sure if EventHandler wants to be here or in input

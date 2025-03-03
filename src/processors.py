@@ -1,9 +1,12 @@
-import esper
-import components as cmp
-import actions
-import tcod
 from functools import partial
+
+import esper
+import tcod
+
+import actions
+import components as cmp
 import display
+
 
 # TODO: more things need to be here
 class MovementProcessor(esper.Processor):

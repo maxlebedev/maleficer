@@ -1,5 +1,5 @@
-from typing import Tuple
 from dataclasses import dataclass as component
+from typing import Tuple
 
 
 @component

@@ -1,8 +1,10 @@
 # do we store info about the board size here?
-import components as cmp
-import esper
-import display
 from functools import partial
+
+import esper
+
+import components as cmp
+import display
 
 
 class Board:
