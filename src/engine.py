@@ -37,32 +37,3 @@ class EventHandler(tcod.event.EventDispatch[actions.Action]):
             elif event.sym == tcod.event.KeySym.ESCAPE:
                 raise SystemExit()
         return action
-
-
-# TODO: this is at odds with the Processors
-# engine runs the game loop
-class Engine:
-    def __init__(self, event_handler: EventHandler):
-        self.event_handler = event_handler
-
-    def render(self, console: Console, context: Context) -> None:
-        console.clear()
-
-        side_panel = partial(console.draw_frame, decoration="╔═╗║ ║╚═╝")
-
-        w = display.PANEL_WIDTH
-        h = display.PANEL_HEIGHT
-        # left panel
-        side_panel(x=0, y=0, width=w, height=h)
-
-        # right panel
-        side_panel(x=display.BOARD_END_COORD, y=0, width=w, height=h)
-
-        startx, endx = (display.PANEL_WIDTH, display.BOARD_END_COORD)
-        starty, endy = (0, display.BOARD_HEIGHT)
-        console.rgb[startx:endx, starty:endy] = (ord("."), display.WHITE, display.BLACK)
-
-        player_components = esper.get_components(cmp.Player, cmp.Position, cmp.Visible)
-        for _, (_, pos, vis) in player_components:
-            console.print(pos.x + display.PANEL_WIDTH, pos.y, vis.glyph, fg=vis.color)
-        context.present(console)  # , integer_scaling=True

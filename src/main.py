@@ -38,7 +38,7 @@ def main() -> None:
 
     visible_cmp = cmp.Visible(glyph="@", color=display.GREEN)
     position_cmp = cmp.Position(x=1, y=1)
-    player = esper.create_entity(cmp.Player(), position_cmp, visible_cmp)
+    esper.create_entity(cmp.Player(), position_cmp, visible_cmp)
     esper.add_processor(processors.MovementProcessor())
     event_handler = engine.EventHandler()
     esper.add_processor(processors.EventProcessor(event_handler))
@@ -54,11 +54,16 @@ def main() -> None:
 
     with tcod.context.new(**context_params) as context:
         console = context.new_console(order="F")
-        myengine = engine.Engine(event_handler=event_handler)
-        esper.add_processor(processors.RenderProcessor(myengine, console, context))
+        esper.add_processor(processors.RenderProcessor(event_handler, console, context))
+
+        board = Board()
+        # this is a test, delete
+        example_tile = board.get_tile(0,4)
+        board.flip_tile(console, 0,4)
+        pos = esper.component_for_entity(example_tile, cmp.Position)
+        print(pos) # Position(x=0, y=4)
 
         while True:
-            # myengine.render(console=console, context=context)
             esper.process()
 
 
