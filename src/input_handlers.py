@@ -20,6 +20,7 @@ class Input(Enum):
     MOVE_DOWN = 2
     MOVE_LEFT = 3
     MOVE_RIGHT = 4
+    ESC = 5
 
 
 KeyMap = dict[tcod.event.KeySym, Input]

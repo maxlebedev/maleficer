@@ -1,5 +1,4 @@
 import esper
-
 import tcod
 
 import components as cmp
@@ -37,7 +36,9 @@ def main() -> None:
         esper.add_processor(render_proc)
         esper.add_processor(processors.MovementProcessor(board))
         board.set_cell(2, 4, glyph="0")
-        esper.add_component(board.get_cell(2, 4), cmp.Blocking())
+        cell = board.get_cell(2, 4)
+        if cell:
+            esper.add_component(cell, cmp.Blocking())
 
         while True:
             esper.process()

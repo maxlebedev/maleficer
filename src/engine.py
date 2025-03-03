@@ -17,6 +17,7 @@ class EventHandler(tcod.event.EventDispatch[actions.Action]):
             self.keymap[Input.MOVE_LEFT]: (actions.MovementAction, (-1, 0)),
             self.keymap[Input.MOVE_UP]: (actions.MovementAction, (0, -1)),
             self.keymap[Input.MOVE_RIGHT]: (actions.MovementAction, (1, 0)),
+            self.keymap[Input.ESC]: (self.ev_quit, (tcod.event.Quit,)),
         }
 
     def ev_quit(self, event: tcod.event.Quit):
@@ -25,9 +26,8 @@ class EventHandler(tcod.event.EventDispatch[actions.Action]):
     def ev_keydown(self, event: tcod.event.KeyDown) -> actions.Action | None:
         player = esper.get_component(cmp.Player)[0][0]
         action = None
+        tcod.event.Quit()
         if self.keymap and not esper.has_component(player, cmp.Moving):
-            if event.sym == tcod.event.KeySym.ESCAPE:
-                raise SystemExit()
             func, args = self.action_map[event.sym]
             action = func(*args)
 

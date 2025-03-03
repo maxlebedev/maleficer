@@ -35,13 +35,14 @@ class Board:
         vis = esper.component_for_entity(cell, cmp.Visible)
         return (ord(vis.glyph), vis.color, display.BLACK)
 
-    def get_cell(self, x: int, y: int) -> int:
+    def get_cell(self, x: int, y: int) -> int | None:
+        # bounds checking
+        if any([x < 0, y < 0, x > display.BOARD_WIDTH-1, y > display.BOARD_HEIGHT-1]):
+            return None
         return self.cells[x][y]
 
-    def set_cell(
-        self, x: int, y: int, glyph: str | None = None, color: display.RGB | None = None
-    ):
-        vis = esper.component_for_entity(self.cells[x][y], cmp.Visible)
+    def set_cell(self, cell: int, glyph: str | None = None, color: display.RGB | None = None):
+        vis = esper.component_for_entity(cell, cmp.Visible)
         if glyph:
             vis.glyph = glyph
         if color:

@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from functools import partial
 
 import esper
@@ -7,11 +8,8 @@ import actions
 import board
 import components as cmp
 import display
-import tcod
-
-from dataclasses import dataclass
-
 import engine
+
 
 @dataclass
 class MovementProcessor(esper.Processor):
@@ -22,7 +20,9 @@ class MovementProcessor(esper.Processor):
             new_x = pos.x + move.x
             new_y = pos.y + move.y
             # move only if the target tile is not blocking
-            if not esper.has_component(self.board.cells[new_x][new_y], cmp.Blocking):
+            target_cell = self.board.get_cell(new_x,new_y)
+            # Note: as written, when we have a turn system, walking into a wall consumes a turn
+            if target_cell and not esper.has_component(target_cell, cmp.Blocking):
                 pos.x = new_x
                 pos.y = new_y
             esper.remove_component(ent, cmp.Moving)
