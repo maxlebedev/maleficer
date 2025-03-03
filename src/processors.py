@@ -31,9 +31,10 @@ class EventProcessor(esper.Processor):
 
 class RenderProcessor(esper.Processor):
 
-    def __init__(self, console, context):
+    def __init__(self, console, context, board):
         self.console = console
         self.context = context
+        self.board = board
 
     def process(self):
         self.console.clear()
@@ -50,7 +51,10 @@ class RenderProcessor(esper.Processor):
 
         startx, endx = (display.PANEL_WIDTH, display.BOARD_END_COORD)
         starty, endy = (0, display.BOARD_HEIGHT)
-        self.console.rgb[startx:endx, starty:endy] = (ord("."), display.WHITE, display.BLACK)
+        tile_rgbs = [list(map(self.board.tile_to_rgb, row)) for row in self.board.tiles]
+        # tile_rgbs = [self.board.tile_to_rgb(t) for t in self.board.tiles]
+        self.console.rgb[startx:endx, starty:endy] = tile_rgbs
+        # (ord("."), display.WHITE, display.BLACK)
 
         player_components = esper.get_components(cmp.Player, cmp.Position, cmp.Visible)
         for _, (_, pos, vis) in player_components:

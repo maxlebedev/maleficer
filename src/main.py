@@ -52,14 +52,10 @@ def main() -> None:
 
     with tcod.context.new(**context_params) as context:
         console = context.new_console(order="F")
-        esper.add_processor(processors.RenderProcessor(console, context))
-
         board = Board()
-        # this is a test, delete
-        example_tile = board.get_tile(0,4)
-        board.flip_tile(console, 0,4)
-        pos = esper.component_for_entity(example_tile, cmp.Position)
-        print(pos) # Position(x=0, y=4)
+        render_proc = processors.RenderProcessor(console, context, board)
+        esper.add_processor(render_proc)
+        board.set_tile(2,4, glyph="0")
 
         while True:
             esper.process()

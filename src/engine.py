@@ -5,7 +5,6 @@ import tcod
 
 import actions
 import components as cmp
-import display
 import input_handlers
 from input_handlers import Input
 
