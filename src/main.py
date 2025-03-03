@@ -52,7 +52,7 @@ def main() -> None:
 
     with tcod.context.new(**context_params) as context:
         console = context.new_console(order="F")
-        esper.add_processor(processors.RenderProcessor(event_handler, console, context))
+        esper.add_processor(processors.RenderProcessor(console, context))
 
         board = Board()
         # this is a test, delete

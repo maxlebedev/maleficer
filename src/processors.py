@@ -8,7 +8,6 @@ import components as cmp
 import display
 
 
-# TODO: more things need to be here
 class MovementProcessor(esper.Processor):
     def process(self):
         for ent, (move, pos) in esper.get_components(cmp.Movement, cmp.Position):
@@ -32,8 +31,7 @@ class EventProcessor(esper.Processor):
 
 class RenderProcessor(esper.Processor):
 
-    def __init__(self, event_handler, console, context):
-        self.event_handler = event_handler
+    def __init__(self, console, context):
         self.console = console
         self.context = context
 
