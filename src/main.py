@@ -11,21 +11,6 @@ from board import Board
 FLAGS = tcod.context.SDL_WINDOW_RESIZABLE | tcod.context.SDL_WINDOW_FULLSCREEN
 
 
-def get_player_pos():
-    for _, (_, pos) in esper.get_components(cmp.Player, cmp.Position):
-        return (pos.x, pos.y)
-    return (0, 0)
-
-
-def as_color(text, fg: RGB = display.WHITE, bg: RGB = display.BLACK) -> str:
-    """Return the control codes to change the foreground and background colors."""
-    fore_rgb = libtcodpy.COLCTRL_FORE_RGB
-    back_rgb = libtcodpy.COLCTRL_BACK_RGB
-
-    pre = "%c%c%c%c%c%c%c%c" % (fore_rgb, *fg, back_rgb, *bg)
-    return f"{pre}{text}{libtcodpy.COLCTRL_STOP:c}"
-
-
 def main() -> None:
     tile_atlas = "assets/dejavu10x10_gs_tc.png"
     tileset = tcod.tileset.load_tilesheet(tile_atlas, 32, 8, tcod.tileset.CHARMAP_TCOD)
@@ -51,7 +36,7 @@ def main() -> None:
         board = Board()
         render_proc = processors.RenderProcessor(console, context, board)
         esper.add_processor(render_proc)
-        board.set_tile(2, 4, glyph="0")
+        board.set_cell(2, 4, glyph="0")
 
         while True:
             esper.process()

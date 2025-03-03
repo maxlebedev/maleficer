@@ -1,4 +1,5 @@
 from dataclasses import dataclass as component
+
 import display
 
 
@@ -14,8 +15,7 @@ class Position:
 
 
 @component
-class Movement:
-    # TODO: name could probably be better, like as an adjective?
+class Moving:
     x: int
     y: int
 
@@ -24,15 +24,16 @@ class Movement:
 class Visible:
     glyph: str
     color: display.RGB
+    # TODO: not tacking bg color yet.
+    # I don't intend bg color to be a property of the glyph
 
 
 @component
 class Blocking:
     """Can't be moved through"""
-
     pass
 
 
 @component
-class Tile:  # floor, wall, door, etc
+class Cell:  # floor, wall, door, etc
     pass
