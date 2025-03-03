@@ -1,6 +1,6 @@
 import esper
+
 import tcod
-from tcod import libtcodpy
 
 import components as cmp
 import display
@@ -18,7 +18,6 @@ def main() -> None:
     visible_cmp = cmp.Visible(glyph="@", color=display.GREEN)
     position_cmp = cmp.Position(x=1, y=1)
     esper.create_entity(cmp.Player(), position_cmp, visible_cmp)
-    esper.add_processor(processors.MovementProcessor())
     event_handler = engine.EventHandler()
     esper.add_processor(processors.EventProcessor(event_handler))
 
@@ -36,7 +35,9 @@ def main() -> None:
         board = Board()
         render_proc = processors.RenderProcessor(console, context, board)
         esper.add_processor(render_proc)
+        esper.add_processor(processors.MovementProcessor(board))
         board.set_cell(2, 4, glyph="0")
+        esper.add_component(board.get_cell(2, 4), cmp.Blocking())
 
         while True:
             esper.process()

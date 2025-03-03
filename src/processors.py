@@ -4,22 +4,34 @@ import esper
 import tcod
 
 import actions
+import board
 import components as cmp
 import display
+import tcod
 
+from dataclasses import dataclass
 
+import engine
+
+@dataclass
 class MovementProcessor(esper.Processor):
+    board: board.Board
+
     def process(self):
         for ent, (move, pos) in esper.get_components(cmp.Moving, cmp.Position):
-            pos.x += move.x
-            pos.y += move.y
+            new_x = pos.x + move.x
+            new_y = pos.y + move.y
+            # move only if the target tile is not blocking
+            if not esper.has_component(self.board.cells[new_x][new_y], cmp.Blocking):
+                pos.x = new_x
+                pos.y = new_y
             esper.remove_component(ent, cmp.Moving)
 
 
 # TODO: unclear delineation w EventHandler
+@ dataclass
 class EventProcessor(esper.Processor):
-    def __init__(self, event_handler):
-        self.event_handler = event_handler
+    event_handler: engine.EventHandler
 
     def process(self):
         player, _ = esper.get_component(cmp.Player)[0]
@@ -29,11 +41,11 @@ class EventProcessor(esper.Processor):
                 esper.add_component(player, cmp.Moving(x=action.dx, y=action.dy))
 
 
+@ dataclass
 class RenderProcessor(esper.Processor):
-    def __init__(self, console, context, board):
-        self.console = console
-        self.context = context
-        self.board = board
+    console: tcod.console.Console
+    context: tcod.context.Context
+    board: board.Board
 
     def process(self):
         self.console.clear()
@@ -55,7 +67,6 @@ class RenderProcessor(esper.Processor):
 
         player_components = esper.get_components(cmp.Player, cmp.Position, cmp.Visible)
         for _, (_, pos, vis) in player_components:
-            self.console.print(
-                pos.x + display.PANEL_WIDTH, pos.y, vis.glyph, fg=vis.color
-            )
+            x = pos.x + display.PANEL_WIDTH
+            self.console.print(x , pos.y, vis.glyph, fg=vis.color)
         self.context.present(self.console)  # , integer_scaling=True
