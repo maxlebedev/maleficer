@@ -20,7 +20,7 @@ class MovementProcessor(esper.Processor):
             new_x = pos.x + move.x
             new_y = pos.y + move.y
             # move only if the target tile is not blocking
-            target_cell = self.board.get_cell(new_x,new_y)
+            target_cell = self.board.get_cell(new_x, new_y)
             # Note: as written, when we have a turn system, walking into a wall consumes a turn
             if target_cell and not esper.has_component(target_cell, cmp.Blocking):
                 pos.x = new_x
@@ -30,7 +30,7 @@ class MovementProcessor(esper.Processor):
 
 # TODO: unclear delineation w EventHandler
 # currently EventHandler -> Action -> EventProcessor. Can almost certainly be simplified
-@ dataclass
+@dataclass
 class EventProcessor(esper.Processor):
     event_handler: engine.EventHandler
 
@@ -55,14 +55,13 @@ class RenderProcessor(esper.Processor):
             "y": 0,
             "width": display.PANEL_WIDTH,
             "height": display.PANEL_HEIGHT,
-            "decoration": "╔═╗║ ║╚═╝"
+            "decoration": "╔═╗║ ║╚═╝",
         }
 
         # left panel
         self.console.draw_frame(x=0, **panel_params)
         # right panel
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
-
 
         startx, endx = (display.PANEL_WIDTH, display.R_PANEL_START)
         starty, endy = (0, display.BOARD_HEIGHT)
@@ -72,5 +71,5 @@ class RenderProcessor(esper.Processor):
         player_components = esper.get_components(cmp.Player, cmp.Position, cmp.Visible)
         for _, (_, pos, vis) in player_components:
             x = pos.x + display.PANEL_WIDTH
-            self.console.print(x , pos.y, vis.glyph, fg=vis.color)
+            self.console.print(x, pos.y, vis.glyph, fg=vis.color)
         self.context.present(self.console)  # , integer_scaling=True

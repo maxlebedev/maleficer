@@ -31,6 +31,7 @@ class Visible:
 @component
 class Blocking:
     """Can't be moved through"""
+
     pass
 
 

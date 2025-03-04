@@ -1,11 +1,11 @@
 import esper
 import tcod
 
+import board
 import components as cmp
 import display
 import engine
 import processors
-import board
 
 FLAGS = tcod.context.SDL_WINDOW_RESIZABLE | tcod.context.SDL_WINDOW_FULLSCREEN
 
