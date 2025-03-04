@@ -61,10 +61,10 @@ class RenderProcessor(esper.Processor):
         # left panel
         self.console.draw_frame(x=0, **panel_params)
         # right panel
-        self.console.draw_frame(x=display.BOARD_END_COORD, **panel_params)
+        self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
 
 
-        startx, endx = (display.PANEL_WIDTH, display.BOARD_END_COORD)
+        startx, endx = (display.PANEL_WIDTH, display.R_PANEL_START)
         starty, endy = (0, display.BOARD_HEIGHT)
         cell_rgbs = [list(map(self.board.cell_to_rgb, row)) for row in self.board.cells]
         self.console.rgb[startx:endx, starty:endy] = cell_rgbs

@@ -5,7 +5,7 @@ import components as cmp
 import display
 import engine
 import processors
-from board import Board
+import board
 
 FLAGS = tcod.context.SDL_WINDOW_RESIZABLE | tcod.context.SDL_WINDOW_FULLSCREEN
 
@@ -31,14 +31,11 @@ def main() -> None:
 
     with tcod.context.new(**context_params) as context:
         console = context.new_console(order="F")
-        board = Board()
-        render_proc = processors.RenderProcessor(console, context, board)
+        game_board = board.Board()
+        render_proc = processors.RenderProcessor(console, context, game_board)
         esper.add_processor(render_proc)
-        esper.add_processor(processors.MovementProcessor(board))
-        cell = board.get_cell(2, 4)
-        if cell:
-            board.set_cell(cell, glyph="0")
-            esper.add_component(cell, cmp.Blocking())
+        esper.add_processor(processors.MovementProcessor(game_board))
+        board.generate_dungeon(game_board)
 
         while True:
             esper.process()
