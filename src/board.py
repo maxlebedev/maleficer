@@ -79,12 +79,24 @@ class RectangularRoom:
         self.y2 = y + height
 
     @property
+    def center(self) -> POSITION:
+        center_x = (self.x1 + self.x2) // 2
+        center_y = (self.y1 + self.y2) // 2
+
+        return center_x, center_y
+
+    @property
     def inner(self) -> tuple[slice, slice]:
         """Return the inner area of this room as a 2D array index."""
         return slice(self.x1 + 1, self.x2), slice(self.y1 + 1, self.y2)
 
+    @property
+    def outer(self) -> tuple[slice, slice]:
+        """Return the inner area of this room as a 2D array index."""
+        return slice(self.x1, self.x2 + 1), slice(self.y1, self.y2 + 1)
 
-def tunnel_between(start: POSITION, end: POSITION) -> Generator[POSITION, None, None]:
+
+def tunnel_between(board, start: POSITION, end: POSITION):
     """Return an L-shaped tunnel between these two points."""
     x1, y1 = start
     x2, y2 = end
@@ -97,28 +109,44 @@ def tunnel_between(start: POSITION, end: POSITION) -> Generator[POSITION, None, 
 
     # Generate the coordinates for this tunnel.
     for x, y in tcod.los.bresenham((x1, y1), (corner_x, corner_y)).tolist():
-        yield x, y
+        cell = board.get_cell(x, y)
+        board.to_floor(cell)
     for x, y in tcod.los.bresenham((corner_x, corner_y), (x2, y2)).tolist():
-        yield x, y
+        cell = board.get_cell(x, y)
+        board.to_floor(cell)
 
-def interects(board: Board, src: RectangularRoom, target: RectangularRoom) -> bool:
-    src_cells = board.yield_range(*src.inner)
-    target_cells = board.yield_range(*target.inner)
+def intersects(board: Board, src: RectangularRoom, target: RectangularRoom) -> bool:
+    # Checking corner overlap is cheaper, but that doesn't work for non-rect rooms
+    src_cells = board.yield_range(*src.outer)
+    target_cells = board.yield_range(*target.outer)
     return set(src_cells) == set(target_cells)
 
 
-def generate_dungeon(board):
-    room1 = RectangularRoom(x=20, y=15, width=10, height=15)
-    room2 = RectangularRoom(x=35, y=15, width=10, height=15)
-    room3 = RectangularRoom(x=0, y=0, width=15, height=10)
-    rooms = [room1, room2, room3]
-    for room in rooms:
-        for cell in board.yield_range(*room.inner):
+def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
+    rooms: list[RectangularRoom] = []
+    for _ in range(max_rooms):
+        room_width = random.randint(min_rm_siz, max_rm_siz)
+        room_height = random.randint(min_rm_siz, max_rm_siz)
+
+        x = random.randint(0, display.BOARD_WIDTH - room_width - 1)
+        y = random.randint(0, display.BOARD_HEIGHT - room_height - 1)
+
+        new_room = RectangularRoom(x, y, room_width, room_height)
+        # Run through the other rooms and see if they intersect with this one.
+        if any(intersects(board, new_room, other_room) for other_room in rooms):
+            continue  # This room intersects, so go to the next attempt.
+
+        for cell in board.yield_range(*new_room.inner):
             board.to_floor(cell)
 
-    tunnel1 = tunnel_between((30, 20), (40, 20))
-    tunnel2 = tunnel_between((5, 5), (40, 23))
-    for tunnel in [tunnel1, tunnel2]:
-        for x, y in tunnel:
-            cell = board.get_cell(x, y)
-            board.to_floor(cell)
+        if len(rooms) == 0:
+            # The first room, where the player starts.
+
+            _, (_, pos) = esper.get_components(cmp.Player, cmp.Position)[0]
+            pos.x, pos.y = new_room.center
+        else:  # All rooms after the first.
+            # Dig out a tunnel between this room and the previous one.
+            tunnel_between(board, rooms[-1].center, new_room.center)
+
+        # Finally, append the new room to the list.
+        rooms.append(new_room)
