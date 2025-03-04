@@ -1,7 +1,7 @@
 # do we store info about the board size here, or still display?
 
 import random
-from collections.abc import Generator
+from dataclasses import dataclass
 
 import esper
 import tcod
@@ -70,13 +70,20 @@ class Board:
             for cell in col[y_slice]:
                 yield cell
 
-
+@dataclass
 class RectangularRoom:
-    def __init__(self, x: int, y: int, width: int, height: int):
-        self.x1 = x
-        self.y1 = y
-        self.x2 = x + width
-        self.y2 = y + height
+    x1: int
+    y1: int
+    width: int
+    height: int
+
+    @property
+    def x2(self):
+        return self.x1 + self.width
+
+    @property
+    def y2(self):
+        return self.y1 + self.height
 
     @property
     def center(self) -> POSITION:
@@ -119,11 +126,31 @@ def intersects(board: Board, src: RectangularRoom, target: RectangularRoom) -> b
     # Checking corner overlap is cheaper, but that doesn't work for non-rect rooms
     src_cells = board.yield_range(*src.outer)
     target_cells = board.yield_range(*target.outer)
-    return set(src_cells) == set(target_cells)
+    return bool(set(src_cells) & (set(target_cells)))
+
+
+def closest_coordinate(origin: POSITION, coordinates: list[POSITION]) -> POSITION:
+    # Function to calculate the Euclidean distance
+    def euclidean_distance(x1, y1, x2, y2):
+        return pow(pow(x2-x1,2)+pow(y2-y1,2), 0.5)
+
+    # Initialize the closest distance as a large number
+    closest_dist = float('inf')
+    closest_coord = None
+
+    # Iterate through the list of coordinates and find the closest one
+    for (x2, y2) in coordinates:
+        distance = euclidean_distance(origin[0], origin[1], x2, y2)
+        if distance < closest_dist:
+            closest_dist = distance
+            closest_coord = (x2, y2)
+
+    return closest_coord or origin
 
 
 def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
     rooms: list[RectangularRoom] = []
+    centers: list[POSITION] = []
     for _ in range(max_rooms):
         room_width = random.randint(min_rm_siz, max_rm_siz)
         room_height = random.randint(min_rm_siz, max_rm_siz)
@@ -136,17 +163,17 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
         if any(intersects(board, new_room, other_room) for other_room in rooms):
             continue  # This room intersects, so go to the next attempt.
 
+        centers.append(new_room.center)
         for cell in board.yield_range(*new_room.inner):
             board.to_floor(cell)
 
-        if len(rooms) == 0:
-            # The first room, where the player starts.
-
+        if len(rooms) == 0: # The first room, where the player starts.
             _, (_, pos) = esper.get_components(cmp.Player, cmp.Position)[0]
             pos.x, pos.y = new_room.center
         else:  # All rooms after the first.
             # Dig out a tunnel between this room and the previous one.
-            tunnel_between(board, rooms[-1].center, new_room.center)
+            endpt = closest_coordinate(new_room.center, centers[:-1])
+            tunnel_between(board, new_room.center, endpt)
 
         # Finally, append the new room to the list.
         rooms.append(new_room)
