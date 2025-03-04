@@ -35,9 +35,9 @@ def main() -> None:
         render_proc = processors.RenderProcessor(console, context, board)
         esper.add_processor(render_proc)
         esper.add_processor(processors.MovementProcessor(board))
-        board.set_cell(2, 4, glyph="0")
         cell = board.get_cell(2, 4)
         if cell:
+            board.set_cell(cell, glyph="0")
             esper.add_component(cell, cmp.Blocking())
 
         while True:

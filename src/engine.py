@@ -24,11 +24,8 @@ class EventHandler(tcod.event.EventDispatch[actions.Action]):
         raise SystemExit()
 
     def ev_keydown(self, event: tcod.event.KeyDown) -> actions.Action | None:
-        player = esper.get_component(cmp.Player)[0][0]
         action = None
-        tcod.event.Quit()
-        if self.keymap and not esper.has_component(player, cmp.Moving):
+        if self.keymap and event.sym in self.action_map:
             func, args = self.action_map[event.sym]
             action = func(*args)
-
         return action

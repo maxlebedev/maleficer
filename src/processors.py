@@ -29,6 +29,7 @@ class MovementProcessor(esper.Processor):
 
 
 # TODO: unclear delineation w EventHandler
+# currently EventHandler -> Action -> EventProcessor. Can almost certainly be simplified
 @ dataclass
 class EventProcessor(esper.Processor):
     event_handler: engine.EventHandler
@@ -41,7 +42,7 @@ class EventProcessor(esper.Processor):
                 esper.add_component(player, cmp.Moving(x=action.dx, y=action.dy))
 
 
-@ dataclass
+@dataclass
 class RenderProcessor(esper.Processor):
     console: tcod.console.Console
     context: tcod.context.Context
@@ -50,15 +51,18 @@ class RenderProcessor(esper.Processor):
     def process(self):
         self.console.clear()
 
-        side_panel = partial(self.console.draw_frame, decoration="╔═╗║ ║╚═╝")
+        panel_params = {
+            "y": 0,
+            "width": display.PANEL_WIDTH,
+            "height": display.PANEL_HEIGHT,
+            "decoration": "╔═╗║ ║╚═╝"
+        }
 
-        w = display.PANEL_WIDTH
-        h = display.PANEL_HEIGHT
         # left panel
-        side_panel(x=0, y=0, width=w, height=h)
-
+        self.console.draw_frame(x=0, **panel_params)
         # right panel
-        side_panel(x=display.BOARD_END_COORD, y=0, width=w, height=h)
+        self.console.draw_frame(x=display.BOARD_END_COORD, **panel_params)
+
 
         startx, endx = (display.PANEL_WIDTH, display.BOARD_END_COORD)
         starty, endy = (0, display.BOARD_HEIGHT)
