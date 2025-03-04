@@ -8,7 +8,7 @@ import actions
 import board
 import components as cmp
 import display
-import engine
+import input
 
 
 @dataclass
@@ -32,7 +32,7 @@ class MovementProcessor(esper.Processor):
 # currently EventHandler -> Action -> EventProcessor. Can almost certainly be simplified
 @dataclass
 class EventProcessor(esper.Processor):
-    event_handler: engine.EventHandler
+    event_handler: input.EventHandler
 
     def process(self):
         player, _ = esper.get_component(cmp.Player)[0]

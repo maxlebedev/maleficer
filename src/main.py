@@ -4,7 +4,7 @@ import tcod
 import board
 import components as cmp
 import display
-import engine
+import input
 import processors
 
 FLAGS = tcod.context.SDL_WINDOW_RESIZABLE | tcod.context.SDL_WINDOW_FULLSCREEN
@@ -17,7 +17,7 @@ def main() -> None:
     visible_cmp = cmp.Visible(glyph="@", color=display.GREEN)
     position_cmp = cmp.Position(x=1, y=1)
     esper.create_entity(cmp.Player(), position_cmp, visible_cmp)
-    event_handler = engine.EventHandler()
+    event_handler = input.EventHandler()
     esper.add_processor(processors.EventProcessor(event_handler))
 
     context_params = {
