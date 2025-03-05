@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from functools import partial
+from tcod.map import compute_fov
 
 import esper
 import tcod
@@ -65,11 +65,32 @@ class RenderProcessor(esper.Processor):
 
         startx, endx = (display.PANEL_WIDTH, display.R_PANEL_START)
         starty, endy = (0, display.BOARD_HEIGHT)
-        cell_rgbs = [list(map(self.board.cell_to_rgb, row)) for row in self.board.cells]
+        # TODO: check if explored first
+        cell_rgbs = [list(map(self.board.as_rgb, row)) for row in self.board.cells]
+
+        transparency = self.board.as_transparency()
+        _, (_, pos) = esper.get_components(cmp.Player, cmp.Position)[0]
+        in_fov = compute_fov(transparency, (pos.x, pos.y), radius=8)
+
+        for x, col in enumerate(cell_rgbs):
+            for y, cell in enumerate(col):
+                # 3 cases.
+                # in fov, display unedited
+                # explored, display black
+                # else display nothing
+                if in_fov[x][y]:
+                    self.board.explored.add(self.board.cells[x][y])
+                elif self.board.cells[x][y] in self.board.explored:
+                    cell_rgbs[x][y] = (cell[0], cell[1], display.BLACK)
+                elif not in_fov[x][y]:
+                    cell_rgbs[x][y] = (cell[0], display.BLACK, display.BLACK)
+
+
         self.console.rgb[startx:endx, starty:endy] = cell_rgbs
 
         player_components = esper.get_components(cmp.Player, cmp.Position, cmp.Visible)
         for _, (_, pos, vis) in player_components:
             x = pos.x + display.PANEL_WIDTH
             self.console.print(x, pos.y, vis.glyph, fg=vis.color)
+
         self.context.present(self.console)  # , integer_scaling=True
