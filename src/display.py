@@ -1,6 +1,6 @@
 CONSOLE_WIDTH = 1920
 CONSOLE_HEIGHT = 1080
-TILE_SIZE = 10
+TILE_SIZE = 16
 
 
 PANEL_WIDTH = 42
@@ -19,4 +19,17 @@ BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
-GREY = (50, 50, 50)
+LGREY = (100, 100, 100)
+DGREY = (50, 50, 50)
+YELLOW = (55, 55, 37)
+
+
+class Glyph:
+    NONE = 0
+    FLOOR = 3
+    WALL = 637
+    PLAYER = 73
+
+def darker(rgb: RGB):
+    scale = 50
+    return (rgb[0]-scale, rgb[1]-scale,rgb[2]-scale)

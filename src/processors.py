@@ -53,7 +53,8 @@ class RenderProcessor(esper.Processor):
             "y": 0,
             "width": display.PANEL_WIDTH,
             "height": display.PANEL_HEIGHT,
-            "decoration": "╔═╗║ ║╚═╝",
+            # "decoration": "╔═╗║ ║╚═╝",
+            "decoration": (1,2,3,4,5,6,7,8,9),
         }
 
         # left panel
@@ -75,9 +76,12 @@ class RenderProcessor(esper.Processor):
                 cell = self.board.get_cell(x, y)
                 if in_fov[x][y] and cell:
                     self.board.explored.add(cell)
-                    cell_rgbs[x][y] = (rgb_cell[0], rgb_cell[1], display.GREY)
-                elif not in_fov[x][y] and not cell in self.board.explored:
-                    cell_rgbs[x][y] = (rgb_cell[0], display.BLACK, display.BLACK)
+                    cell_rgbs[x][y] = (rgb_cell[0], rgb_cell[1], display.DGREY)
+                elif not in_fov[x][y]:
+                    if cell in self.board.explored:
+                        cell_rgbs[x][y] = (rgb_cell[0], display.darker(rgb_cell[1]), display.BLACK)
+                    else:
+                        cell_rgbs[x][y] = (rgb_cell[0], display.BLACK, display.BLACK)
         return cell_rgbs
 
     def process(self):
@@ -95,6 +99,7 @@ class RenderProcessor(esper.Processor):
         player_components = esper.get_components(cmp.Player, cmp.Position, cmp.Visible)
         for _, (_, pos, vis) in player_components:
             x = pos.x + display.PANEL_WIDTH
-            self.console.print(x, pos.y, vis.glyph, fg=vis.color)
+            self.console.rgb[x, pos.y] = (vis.glyph, vis.color, vis.bg_color)
+            # self.console.print(x, pos.y, vis.glyph, fg=vis.color)
 
         self.context.present(self.console)  # , integer_scaling=True

@@ -16,7 +16,6 @@ We map Keybinds to Inputs via keymap
 """
 
 
-# TODO: change this name
 class Input(Enum):
     MOVE_UP = 1
     MOVE_DOWN = 2

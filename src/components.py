@@ -22,7 +22,7 @@ class Moving:
 
 @component
 class Visible:
-    glyph: str
+    glyph: int
     color: display.RGB = display.WHITE
     bg_color: display.RGB = display.BLACK
     # bg_color mostly represents explored state. Grey by default, black when in view

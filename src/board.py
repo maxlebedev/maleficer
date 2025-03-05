@@ -20,8 +20,8 @@ class Board:
     pos = esper.component_for_entity(cell, cmp.Position)
     """
 
-    floor_glyph: str = "."
-    wall_glyph: str = "#"
+    floor_glyph: int = display.Glyph.FLOOR
+    wall_glyph: int = display.Glyph.WALL
     cells: list[list[CELL]] = []
     explored: set[CELL] = set()
 
@@ -47,7 +47,7 @@ class Board:
     @classmethod
     def as_rgb(cls, cell: CELL):
         vis = esper.component_for_entity(cell, cmp.Visible)
-        return (ord(vis.glyph), vis.color, vis.bg_color)
+        return (vis.glyph, vis.color, vis.bg_color)
 
     def as_transparency(self):
         transparency = []
@@ -81,7 +81,7 @@ class Board:
             raise IndexError()
         self.cells[x][y] = cell
 
-    def set_glyph(self, cell: CELL, glyph: str):
+    def set_glyph(self, cell: CELL, glyph: int):
         vis = esper.component_for_entity(cell, cmp.Visible)
         vis.glyph = glyph
 
