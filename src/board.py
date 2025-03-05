@@ -192,8 +192,5 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
         else:  # All rooms after the first.
             endpt = closest_coordinate(new_room.center, centers[:-1])
             tunnel_between(board, new_room.center, endpt)
-            for cell in board.as_sequence(*new_room.inner):
-                vis = esper.component_for_entity(cell, cmp.Visible)
-                vis.bg_color = display.GREY
 
         rooms.append(new_room)

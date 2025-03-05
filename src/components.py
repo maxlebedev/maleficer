@@ -24,7 +24,7 @@ class Moving:
 class Visible:
     glyph: str
     color: display.RGB = display.WHITE
-    bg_color: display.RGB = display.GREY
+    bg_color: display.RGB = display.BLACK
     # bg_color mostly represents explored state. Grey by default, black when in view
     # or maybe grey as my light source
 
