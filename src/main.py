@@ -29,6 +29,8 @@ def main() -> None:
         "vsync": True,
     }
 
+    # TODO: would it be better to make the side panels their own consoles?
+    # at the very least, they'd be redrawn on their own schedule
     with tcod.context.new(**context_params) as context:
         console = context.new_console(order="F")
         game_board = board.Board()

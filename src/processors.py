@@ -48,9 +48,7 @@ class RenderProcessor(esper.Processor):
     context: tcod.context.Context
     board: board.Board
 
-    def process(self):
-        self.console.clear()
-
+    def _draw_panels(self):
         panel_params = {
             "y": 0,
             "width": display.PANEL_WIDTH,
@@ -63,11 +61,7 @@ class RenderProcessor(esper.Processor):
         # right panel
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
 
-        startx, endx = (display.PANEL_WIDTH, display.R_PANEL_START)
-        starty, endy = (0, display.BOARD_HEIGHT)
-        # TODO: check if explored first
-        cell_rgbs = [list(map(self.board.as_rgb, row)) for row in self.board.cells]
-
+    def _apply_lighting(self, cell_rgbs) -> list[list[tuple[int, display.RGB, display.RGB]]]:
         transparency = self.board.as_transparency()
         _, (_, pos) = esper.get_components(cmp.Player, cmp.Position)[0]
         in_fov = compute_fov(transparency, (pos.x, pos.y), radius=8)
@@ -84,7 +78,18 @@ class RenderProcessor(esper.Processor):
                     cell_rgbs[x][y] = (rgb_cell[0], rgb_cell[1], display.GREY)
                 elif not in_fov[x][y] and not cell in self.board.explored:
                     cell_rgbs[x][y] = (rgb_cell[0], display.BLACK, display.BLACK)
+        return cell_rgbs
 
+    def process(self):
+        self.console.clear()
+        self._draw_panels()
+
+
+        cell_rgbs = [list(map(self.board.as_rgb, row)) for row in self.board.cells]
+        cell_rgbs = self._apply_lighting(cell_rgbs)
+
+        startx, endx = (display.PANEL_WIDTH, display.R_PANEL_START)
+        starty, endy = (0, display.BOARD_HEIGHT)
         self.console.rgb[startx:endx, starty:endy] = cell_rgbs
 
         player_components = esper.get_components(cmp.Player, cmp.Position, cmp.Visible)

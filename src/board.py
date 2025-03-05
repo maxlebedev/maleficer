@@ -186,10 +186,10 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
             pos = esper.component_for_entity(cell, cmp.Position)
             board.set_cell(pos.x, pos.y, board.make_floor(pos.x, pos.y))
 
-        if len(rooms) == 0:  # The first room, where the player starts.
+        if len(rooms) == 0:  # start player in first room
             _, (_, pos) = esper.get_components(cmp.Player, cmp.Position)[0]
             pos.x, pos.y = new_room.center
-        else:  # All rooms after the first.
+        else:  # All rooms after the first get one tunnel
             endpt = closest_coordinate(new_room.center, centers[:-1])
             tunnel_between(board, new_room.center, endpt)
 
