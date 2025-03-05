@@ -34,7 +34,9 @@ class Board:
 
     def make_floor(self, x: int, y: int) -> int:
         vis = cmp.Visible(glyph=self.floor_glyph, color=display.WHITE)
-        cell = esper.create_entity(cmp.Cell(), cmp.Position(x, y), vis, cmp.Transparent())
+        cell = esper.create_entity(
+            cmp.Cell(), cmp.Position(x, y), vis, cmp.Transparent()
+        )
         return cell
 
     def make_wall(self, x: int, y: int) -> int:
@@ -61,22 +63,33 @@ class Board:
                     transparency[x][y] = 0
         return transparency
 
-    def get_cell(self, x: int, y: int) -> CELL | None:
-        # bounds checking
+    def _in_bounds(self, x: int, y: int) -> bool:
         if x < 0 or y < 0:
-            return None
+            return False
         if x > display.BOARD_WIDTH - 1 or y > display.BOARD_HEIGHT - 1:
-            return None
-        return self.cells[x][y]
+            return False
+        return True
+
+
+    def get_cell(self, x: int, y: int) -> CELL | None:
+        if self._in_bounds(x,y):
+            return self.cells[x][y]
+        return None
+
+    def set_cell(self, x: int, y: int, cell: CELL):
+        if not self._in_bounds(x,y):
+            raise IndexError()
+        self.cells[x][y] = cell
 
     def set_glyph(self, cell: CELL, glyph: str):
         vis = esper.component_for_entity(cell, cmp.Visible)
         vis.glyph = glyph
 
-    def yield_range(self, x_slice: slice, y_slice: slice):
+    def as_sequence(self, x_slice: slice = slice(None), y_slice: slice = slice(None)):
         for col in self.cells[x_slice]:
             for cell in col[y_slice]:
                 yield cell
+
 
 @dataclass
 class RectangularRoom:
@@ -124,27 +137,28 @@ def tunnel_between(board, start: POSITION, end: POSITION):
 
     # Generate the coordinates for this tunnel.
     for x, y in tcod.los.bresenham((x1, y1), (corner_x, corner_y)).tolist():
-        board.cells[x][y] = board.make_floor(x, y)
+        board.set_cell(x, y, board.make_floor(x, y))
     for x, y in tcod.los.bresenham((corner_x, corner_y), (x2, y2)).tolist():
-        board.cells[x][y] = board.make_floor(x, y)
+        board.set_cell(x, y, board.make_floor(x, y))
+
 
 def intersects(board: Board, src: RectangularRoom, target: RectangularRoom) -> bool:
     # Checking corner overlap is cheaper, but that doesn't work for non-rect rooms
-    src_cells = board.yield_range(*src.outer)
-    target_cells = board.yield_range(*target.outer)
+    src_cells = board.as_sequence(*src.outer)
+    target_cells = board.as_sequence(*target.outer)
     return bool(set(src_cells) & (set(target_cells)))
 
 
 def closest_coordinate(origin: POSITION, coordinates: list[POSITION]) -> POSITION:
     def euclidean_distance(x1, y1, x2, y2):
-        return pow(pow(x2-x1,2)+pow(y2-y1,2), 0.5)
+        return pow(pow(x2 - x1, 2) + pow(y2 - y1, 2), 0.5)
 
     # Initialize the closest distance as a large number
-    closest_dist = float('inf')
+    closest_dist = float("inf")
     closest_coord = None
 
     # Iterate through the list of coordinates and find the closest one
-    for (x2, y2) in coordinates:
+    for x2, y2 in coordinates:
         distance = euclidean_distance(origin[0], origin[1], x2, y2)
         if distance < closest_dist:
             closest_dist = distance
@@ -168,17 +182,17 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
             continue  # This room intersects, so go to the next attempt.
 
         centers.append(new_room.center)
-        for cell in board.yield_range(*new_room.inner):
+        for cell in board.as_sequence(*new_room.inner):
             pos = esper.component_for_entity(cell, cmp.Position)
-            board.cells[pos.x][pos.y] = board.make_floor(pos.x, pos.y)
+            board.set_cell(pos.x, pos.y, board.make_floor(pos.x, pos.y))
 
-        if len(rooms) == 0: # The first room, where the player starts.
+        if len(rooms) == 0:  # The first room, where the player starts.
             _, (_, pos) = esper.get_components(cmp.Player, cmp.Position)[0]
             pos.x, pos.y = new_room.center
         else:  # All rooms after the first.
             endpt = closest_coordinate(new_room.center, centers[:-1])
             tunnel_between(board, new_room.center, endpt)
-            for cell in board.yield_range(*new_room.inner):
+            for cell in board.as_sequence(*new_room.inner):
                 vis = esper.component_for_entity(cell, cmp.Visible)
                 vis.bg_color = display.GREY
 

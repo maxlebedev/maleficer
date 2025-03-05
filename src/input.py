@@ -51,6 +51,7 @@ def load_keymap(keymap_json_path):
 
     return key_map
 
+
 class EventHandler(tcod.event.EventDispatch[actions.Action]):
     def __init__(self):
         keymap_path = "keymap.yaml"

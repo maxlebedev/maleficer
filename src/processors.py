@@ -73,18 +73,18 @@ class RenderProcessor(esper.Processor):
         in_fov = compute_fov(transparency, (pos.x, pos.y), radius=8)
 
         for x, col in enumerate(cell_rgbs):
-            for y, cell in enumerate(col):
+            for y, rgb_cell in enumerate(col):
                 # 3 cases.
                 # in fov, display unedited
                 # explored, display black
                 # else display nothing
-                if in_fov[x][y]:
-                    self.board.explored.add(self.board.cells[x][y])
-                elif self.board.cells[x][y] in self.board.explored:
-                    cell_rgbs[x][y] = (cell[0], cell[1], display.BLACK)
+                cell = self.board.get_cell(x, y)
+                if in_fov[x][y] and cell:
+                    self.board.explored.add(cell)
+                elif self.board.get_cell(x, y) in self.board.explored:
+                    cell_rgbs[x][y] = (rgb_cell[0], rgb_cell[1], display.BLACK)
                 elif not in_fov[x][y]:
-                    cell_rgbs[x][y] = (cell[0], display.BLACK, display.BLACK)
-
+                    cell_rgbs[x][y] = (rgb_cell[0], display.BLACK, display.BLACK)
 
         self.console.rgb[startx:endx, starty:endy] = cell_rgbs
 
