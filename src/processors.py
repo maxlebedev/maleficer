@@ -76,10 +76,10 @@ class RenderProcessor(esper.Processor):
                 cell = self.board.get_cell(x, y)
                 if in_fov[x][y] and cell:
                     self.board.explored.add(cell)
-                    cell_rgbs[x][y] = (rgb_cell[0], rgb_cell[1], display.DGREY)
+                    cell_rgbs[x][y] = (rgb_cell[0], display.brighter(rgb_cell[1]), display.DGREY)
                 elif not in_fov[x][y]:
                     if cell in self.board.explored:
-                        cell_rgbs[x][y] = (rgb_cell[0], display.darker(rgb_cell[1]), display.BLACK)
+                        cell_rgbs[x][y] = (rgb_cell[0], rgb_cell[1], display.BLACK)
                     else:
                         cell_rgbs[x][y] = (rgb_cell[0], display.BLACK, display.BLACK)
         return cell_rgbs

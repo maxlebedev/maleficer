@@ -33,14 +33,14 @@ class Board:
             self.cells.append(col)
 
     def make_floor(self, x: int, y: int) -> int:
-        vis = cmp.Visible(glyph=self.floor_glyph, color=display.WHITE)
+        vis = cmp.Visible(glyph=self.floor_glyph, color=display.LGREY)
         cell = esper.create_entity(
             cmp.Cell(), cmp.Position(x, y), vis, cmp.Transparent()
         )
         return cell
 
     def make_wall(self, x: int, y: int) -> int:
-        vis = cmp.Visible(glyph=self.wall_glyph, color=display.WHITE)
+        vis = cmp.Visible(glyph=self.wall_glyph, color=display.LGREY)
         cell = esper.create_entity(cmp.Cell(), cmp.Position(x, y), vis, cmp.Blocking())
         return cell
 

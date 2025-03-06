@@ -7,7 +7,7 @@ import display
 import input
 import processors
 
-FLAGS = tcod.context.SDL_WINDOW_RESIZABLE # | tcod.context.SDL_WINDOW_FULLSCREEN
+FLAGS = tcod.context.SDL_WINDOW_RESIZABLE | tcod.context.SDL_WINDOW_FULLSCREEN
 
 
 def load_custom_tileset(atlas_path: str, x: int, y: int) -> tcod.tileset.Tileset:

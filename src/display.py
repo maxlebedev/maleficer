@@ -30,6 +30,10 @@ class Glyph:
     WALL = 637
     PLAYER = 73
 
-def darker(rgb: RGB):
-    scale = 50
-    return (rgb[0]-scale, rgb[1]-scale,rgb[2]-scale)
+
+def brighter(rgb: RGB):
+    scale = 100
+    red = min(255, rgb[0]+scale)
+    blue = min(255, rgb[1]+scale)
+    green = min(255, rgb[2]+scale)
+    return (red, blue, green)
