@@ -54,7 +54,17 @@ class RenderProcessor(esper.Processor):
             "width": display.PANEL_WIDTH,
             "height": display.PANEL_HEIGHT,
             # "decoration": "╔═╗║ ║╚═╝",
-            "decoration": (1,2,3,4,5,6,7,8,9),
+            "decoration": (
+                display.Glyph.FRAME1,
+                display.Glyph.FRAME2,
+                display.Glyph.FRAME3,
+                display.Glyph.FRAME4,
+                display.Glyph.NONE,
+                display.Glyph.FRAME6,
+                display.Glyph.FRAME7,
+                display.Glyph.FRAME8,
+                display.Glyph.FRAME9,
+            ),
         }
 
         # left panel
@@ -76,7 +86,9 @@ class RenderProcessor(esper.Processor):
                 cell = self.board.get_cell(x, y)
                 if in_fov[x][y] and cell:
                     self.board.explored.add(cell)
-                    cell_rgbs[x][y] = (rgb_cell[0], display.brighter(rgb_cell[1]), display.DGREY)
+                    brighter = display.brighter(rgb_cell[1], scale=100)
+                    cell_rgbs[x][y] = (rgb_cell[0], brighter, display.DGREY)
+
                 elif not in_fov[x][y]:
                     if cell in self.board.explored:
                         cell_rgbs[x][y] = (rgb_cell[0], rgb_cell[1], display.BLACK)

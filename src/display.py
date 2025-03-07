@@ -29,10 +29,23 @@ class Glyph:
     FLOOR = 3
     WALL = 637
     PLAYER = 73
+    FRAME1 = 947
+    FRAME2 = 948
+    FRAME3 = 949
+    FRAME4 = 996
+    FRAME5 = 997
+    FRAME6 = 998
+    FRAME7 = 1045
+    FRAME8 = 1046
+    FRAME9 = 1047
 
+def darker(rgb: RGB, scale):
+    red = max(0, rgb[0]+scale)
+    blue = max(0, rgb[1]+scale)
+    green = max(0, rgb[2]+scale)
+    return (red, blue, green)
 
-def brighter(rgb: RGB):
-    scale = 100
+def brighter(rgb: RGB, scale: int):
     red = min(255, rgb[0]+scale)
     blue = min(255, rgb[1]+scale)
     green = min(255, rgb[2]+scale)
