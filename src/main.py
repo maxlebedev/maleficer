@@ -28,9 +28,10 @@ def main() -> None:
 
     visible_cmp = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.GREEN, bg_color=display.DGREY)
     position_cmp = cmp.Position(x=1, y=1)
-    esper.create_entity(cmp.Player(), position_cmp, visible_cmp)
+    esper.create_entity(cmp.Player(), position_cmp, visible_cmp, cmp.Blocking())
     event_handler = input.EventHandler()
-    esper.add_processor(processors.EventProcessor(event_handler))
+    esper.add_processor(processors.EventProcessor(event_handler), priority=5)
+    esper.add_processor(processors.NPCProcessor(), priority=4)
 
     context_params = {
         "width": display.CONSOLE_WIDTH,
@@ -47,7 +48,7 @@ def main() -> None:
         console = context.new_console(order="F")
         game_board = board.Board()
         render_proc = processors.RenderProcessor(console, context, game_board)
-        esper.add_processor(render_proc)
+        esper.add_processor(render_proc, priority=6)
         esper.add_processor(processors.MovementProcessor(game_board))
         board.generate_dungeon(game_board)
 

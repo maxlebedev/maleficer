@@ -23,14 +23,17 @@ class Board:
     floor_glyph: int = display.Glyph.FLOOR
     wall_glyph: int = display.Glyph.WALL
     cells: list[list[CELL]] = []
+    entities: list[list[set[int]]] = []
     explored: set[CELL] = set()
 
     def __init__(self):
+        self.entities = [[set() for _ in range(display.BOARD_HEIGHT)] for _ in range(display.BOARD_WIDTH)]
         self.cells = []
         self.board_size = display.BOARD_WIDTH * display.BOARD_HEIGHT
         for x in range(display.BOARD_WIDTH):
             col = [self.make_wall(x, y) for y in range(display.BOARD_HEIGHT)]
             self.cells.append(col)
+
 
     def make_floor(self, x: int, y: int) -> int:
         vis = cmp.Visible(glyph=self.floor_glyph, color=display.LGREY)
@@ -43,6 +46,12 @@ class Board:
         vis = cmp.Visible(glyph=self.wall_glyph, color=display.LGREY)
         cell = esper.create_entity(cmp.Cell(), cmp.Position(x, y), vis, cmp.Blocking())
         return cell
+
+    def make_bat(self, x: int, y: int) -> int:
+        position_cmp = cmp.Position(x, y)
+        visible_cmp = cmp.Visible(glyph=display.Glyph.BAT, color=display.RED, bg_color=display.DGREY)
+        bat = esper.create_entity(cmp.Player(), position_cmp, visible_cmp, cmp.Blocking(),cmp.NPC())
+        return bat
 
     @classmethod
     def as_rgb(cls, cell: CELL):
@@ -70,15 +79,18 @@ class Board:
             return False
         return True
 
-
     def get_cell(self, x: int, y: int) -> CELL | None:
         if self._in_bounds(x,y):
             return self.cells[x][y]
         return None
 
+    def remove_cell(self, x: int, y: int):
+        esper.delete_entity(self.cells[x][y])
+
     def set_cell(self, x: int, y: int, cell: CELL):
         if not self._in_bounds(x,y):
             raise IndexError()
+        self.remove_cell(x, y)
         self.cells[x][y] = cell
 
     def set_glyph(self, cell: CELL, glyph: int):
@@ -89,6 +101,14 @@ class Board:
         for col in self.cells[x_slice]:
             for cell in col[y_slice]:
                 yield cell
+
+    def build_entity_cache(self):
+        for x in range(display.BOARD_WIDTH):
+            for y in range(display.BOARD_HEIGHT):
+                self.entities[x][y] = set()
+        for entity, pos in esper.get_component(cmp.Position):
+            self.entities[pos.x][pos.y].add(entity)
+
 
 
 @dataclass
@@ -190,7 +210,9 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
             _, (_, pos) = esper.get_components(cmp.Player, cmp.Position)[0]
             pos.x, pos.y = new_room.center
         else:  # All rooms after the first get one tunnel
+            # TODO: sometimes bats spawn in first room (can't reproduce)
             endpt = closest_coordinate(new_room.center, centers[:-1])
             tunnel_between(board, new_room.center, endpt)
+            board.make_bat(*new_room.center)
 
         rooms.append(new_room)

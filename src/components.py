@@ -44,3 +44,8 @@ class Blocking:
 @component
 class Cell:  # floor, wall, door, etc
     pass
+
+
+@component
+class NPC:
+    pass
