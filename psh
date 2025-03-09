@@ -12,3 +12,8 @@ rsync . $tmp_path -r --exclude-from=.gitignore
 cd $tmp_path
 
 powershell.exe -Command "$@"
+
+
+# TODO: add -i cmd which install as well
+# powershell.exe -Command "pip install ."
+# add -x cmd which makes and exe
