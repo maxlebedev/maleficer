@@ -55,10 +55,8 @@ class NPCProcessor(esper.Processor):
 
     def process(self):
         for entity, _ in esper.get_component(cmp.NPC):
-            dir = random.choice([(0,1), (0,-1), (1,0), (-1,0)])
+            dir = random.choice([(0,1), (0,-1), (1,0), (-1,0), (0,0)])
             esper.add_component(entity, cmp.Moving(x=dir[0], y=dir[1]))
-
-
 
 
 @dataclass

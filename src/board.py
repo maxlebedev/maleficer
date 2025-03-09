@@ -210,7 +210,6 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
             _, (_, pos) = esper.get_components(cmp.Player, cmp.Position)[0]
             pos.x, pos.y = new_room.center
         else:  # All rooms after the first get one tunnel
-            # TODO: sometimes bats spawn in first room (can't reproduce)
             endpt = closest_coordinate(new_room.center, centers[:-1])
             tunnel_between(board, new_room.center, endpt)
             board.make_bat(*new_room.center)
