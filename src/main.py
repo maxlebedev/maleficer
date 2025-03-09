@@ -7,17 +7,18 @@ import display
 import input
 import processors
 
-FLAGS = tcod.context.SDL_WINDOW_RESIZABLE | tcod.context.SDL_WINDOW_FULLSCREEN
+FLAGS = tcod.context.SDL_WINDOW_RESIZABLE  # | tcod.context.SDL_WINDOW_FULLSCREEN
 
 
 def load_custom_tileset(atlas_path: str, x: int, y: int) -> tcod.tileset.Tileset:
     tileset = tcod.tileset.load_tilesheet(atlas_path, x, y, None)
     codepath = 0
-    for yy in range(0,y):
-        for xx in range(0,x):
+    for yy in range(0, y):
+        for xx in range(0, x):
             tileset.remap(codepath, xx, yy)
             codepath += 1
     return tileset
+
 
 def main() -> None:
     # tile_atlas = "assets/dejavu10x10_gs_tc.png"
@@ -26,7 +27,9 @@ def main() -> None:
     tile_atlas = "assets/monochrome-transparent_packed.png"
     tileset = load_custom_tileset(tile_atlas, 49, 22)
 
-    visible_cmp = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.GREEN, bg_color=display.DGREY)
+    visible_cmp = cmp.Visible(
+        glyph=display.Glyph.PLAYER, color=display.GREEN, bg_color=display.DGREY
+    )
     position_cmp = cmp.Position(x=1, y=1)
     esper.create_entity(cmp.Player(), position_cmp, visible_cmp, cmp.Blocking())
     event_handler = input.EventHandler()

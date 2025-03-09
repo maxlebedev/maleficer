@@ -27,13 +27,15 @@ class Board:
     explored: set[CELL] = set()
 
     def __init__(self):
-        self.entities = [[set() for _ in range(display.BOARD_HEIGHT)] for _ in range(display.BOARD_WIDTH)]
+        self.entities = [
+            [set() for _ in range(display.BOARD_HEIGHT)]
+            for _ in range(display.BOARD_WIDTH)
+        ]
         self.cells = []
         self.board_size = display.BOARD_WIDTH * display.BOARD_HEIGHT
         for x in range(display.BOARD_WIDTH):
             col = [self.make_wall(x, y) for y in range(display.BOARD_HEIGHT)]
             self.cells.append(col)
-
 
     def make_floor(self, x: int, y: int) -> int:
         vis = cmp.Visible(glyph=self.floor_glyph, color=display.LGREY)
@@ -48,9 +50,11 @@ class Board:
         return cell
 
     def make_bat(self, x: int, y: int) -> int:
-        position_cmp = cmp.Position(x, y)
-        visible_cmp = cmp.Visible(glyph=display.Glyph.BAT, color=display.RED, bg_color=display.DGREY)
-        bat = esper.create_entity(cmp.NPC(), position_cmp, visible_cmp, cmp.Blocking(),cmp.NPC())
+        pos = cmp.Position(x, y)
+        vis = cmp.Visible(
+            glyph=display.Glyph.BAT, color=display.RED, bg_color=display.DGREY
+        )
+        bat = esper.create_entity(cmp.NPC(), pos, vis, cmp.Blocking(), cmp.NPC())
         return bat
 
     @classmethod
@@ -80,7 +84,7 @@ class Board:
         return True
 
     def get_cell(self, x: int, y: int) -> CELL | None:
-        if self._in_bounds(x,y):
+        if self._in_bounds(x, y):
             return self.cells[x][y]
         return None
 
@@ -88,7 +92,7 @@ class Board:
         esper.delete_entity(self.cells[x][y])
 
     def set_cell(self, x: int, y: int, cell: CELL):
-        if not self._in_bounds(x,y):
+        if not self._in_bounds(x, y):
             raise IndexError()
         self.remove_cell(x, y)
         self.cells[x][y] = cell
@@ -108,7 +112,6 @@ class Board:
                 self.entities[x][y] = set()
         for entity, pos in esper.get_component(cmp.Position):
             self.entities[pos.x][pos.y].add(entity)
-
 
 
 @dataclass

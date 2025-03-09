@@ -50,8 +50,8 @@ class Cell:  # floor, wall, door, etc
 class NPC:
     pass
 
+
 @component
-class Killable: # Destroyable
+class Killable:  # Destroyable
     hp: int
     armor: int = 0
-

@@ -22,7 +22,7 @@ class MovementProcessor(esper.Processor):
             new_y = pos.y + move.y
             # Note: as written, walking into a wall consumes a turn
             move = True
-            self.board.build_entity_cache() # expensive, but okay
+            self.board.build_entity_cache()  # expensive, but okay
             for target in self.board.entities[new_x][new_y]:
                 if esper.has_component(target, cmp.Blocking):
                     move = False
@@ -50,12 +50,12 @@ class EventProcessor(esper.Processor):
                     esper.add_component(player, cmp.Moving(x=action.dx, y=action.dy))
                     player_turn = False
 
+
 @dataclass
 class NPCProcessor(esper.Processor):
-
     def process(self):
         for entity, _ in esper.get_component(cmp.NPC):
-            dir = random.choice([(0,1), (0,-1), (1,0), (-1,0), (0,0)])
+            dir = random.choice([(0, 1), (0, -1), (1, 0), (-1, 0), (0, 0)])
             esper.add_component(entity, cmp.Moving(x=dir[0], y=dir[1]))
 
 
@@ -88,11 +88,8 @@ class RenderProcessor(esper.Processor):
         # right panel
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
 
-    # -> tuple[list[list[tuple[int, display.RGB, display.RGB]]], tuple]
-    def _apply_lighting(self, cell_rgbs):
-        transparency = self.board.as_transparency()
-        _, (_, pos) = esper.get_components(cmp.Player, cmp.Position)[0]
-        in_fov = compute_fov(transparency, (pos.x, pos.y), radius=8)
+    def _apply_lighting(self, cell_rgbs, in_fov) -> list[list[display.CELL_RGB]]:
+        # TODO: lighting currently only works on cells. should work on anything being drawn
 
         for x, col in enumerate(cell_rgbs):
             for y, rgb_cell in enumerate(col):
@@ -110,26 +107,27 @@ class RenderProcessor(esper.Processor):
                         cell_rgbs[x][y] = (rgb_cell[0], rgb_cell[1], display.BLACK)
                     else:
                         cell_rgbs[x][y] = (rgb_cell[0], display.BLACK, display.BLACK)
-        return cell_rgbs, in_fov
+        return cell_rgbs
 
     def process(self):
         self.console.clear()
         self._draw_panels()
 
-
         cell_rgbs = [list(map(self.board.as_rgb, row)) for row in self.board.cells]
-        cell_rgbs, in_fov = self._apply_lighting(cell_rgbs)
+        transparency = self.board.as_transparency()
+        _, (_, pos) = esper.get_components(cmp.Player, cmp.Position)[0]
+        in_fov = compute_fov(transparency, (pos.x, pos.y), radius=8)
+        cell_rgbs = self._apply_lighting(cell_rgbs, in_fov)
 
         startx, endx = (display.PANEL_WIDTH, display.R_PANEL_START)
         starty, endy = (0, display.BOARD_HEIGHT)
         self.console.rgb[startx:endx, starty:endy] = cell_rgbs
 
         drawable_entities = esper.get_components(cmp.Position, cmp.Visible)
-        for entity,(pos, vis)  in drawable_entities:
+        for entity, (pos, vis) in drawable_entities:
             if esper.has_component(entity, cmp.Cell) or not in_fov[pos.x][pos.y]:
                 continue
             x = pos.x + display.PANEL_WIDTH
             self.console.rgb[x, pos.y] = (vis.glyph, vis.color, vis.bg_color)
-            # self.console.print(x, pos.y, vis.glyph, fg=vis.color)
 
         self.context.present(self.console)  # , integer_scaling=True
