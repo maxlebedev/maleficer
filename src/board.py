@@ -50,7 +50,7 @@ class Board:
     def make_bat(self, x: int, y: int) -> int:
         position_cmp = cmp.Position(x, y)
         visible_cmp = cmp.Visible(glyph=display.Glyph.BAT, color=display.RED, bg_color=display.DGREY)
-        bat = esper.create_entity(cmp.Player(), position_cmp, visible_cmp, cmp.Blocking(),cmp.NPC())
+        bat = esper.create_entity(cmp.NPC(), position_cmp, visible_cmp, cmp.Blocking(),cmp.NPC())
         return bat
 
     @classmethod
