@@ -36,20 +36,20 @@ class Board:
             self.cells.append(col)
 
     def make_floor(self, x: int, y: int) -> int:
-        vis = cmp.Visible(glyph=display.Glyph.FLOOR, color=display.LGREY)
+        vis = cmp.Visible(glyph=display.Glyph.FLOOR, color=display.Color.LGREY)
         cell = esper.create_entity(
             cmp.Cell(), cmp.Position(x, y), vis, cmp.Transparent()
         )
         return cell
 
     def make_wall(self, x: int, y: int) -> int:
-        vis = cmp.Visible(glyph=display.Glyph.WALL, color=display.LGREY)
+        vis = cmp.Visible(glyph=display.Glyph.WALL, color=display.Color.LGREY)
         cell = esper.create_entity(cmp.Cell(), cmp.Position(x, y), vis, cmp.Blocking())
         return cell
 
     def make_bat(self, x: int, y: int) -> int:
         pos = cmp.Position(x, y)
-        vis = cmp.Visible(glyph=display.Glyph.BAT, color=display.RED)
+        vis = cmp.Visible(glyph=display.Glyph.BAT, color=display.Color.RED)
         bat = esper.create_entity(cmp.NPC(), pos, vis, cmp.Blocking(), cmp.NPC())
         return bat
 

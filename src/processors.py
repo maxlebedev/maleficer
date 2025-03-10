@@ -1,16 +1,16 @@
+import random
 from dataclasses import dataclass
-from tcod.map import compute_fov
-from tcod import libtcodpy
 
 import esper
 import tcod
+from tcod import libtcodpy
+from tcod.map import compute_fov
 
 import actions
 import board
 import components as cmp
 import display
 import input
-import random
 
 
 @dataclass
@@ -102,11 +102,11 @@ class RenderProcessor(esper.Processor):
                 if in_fov[x][y]:
                     self.board.explored.add(cell)
                     brighter = display.brighter(fgcolor, scale=100)
-                    cell_rgbs[x][y] = (glyph, brighter, display.CANDLE)
+                    cell_rgbs[x][y] = (glyph, brighter, display.Color.CANDLE)
                 elif cell in self.board.explored:
-                    cell_rgbs[x][y] = (glyph, fgcolor, display.BLACK)
+                    cell_rgbs[x][y] = (glyph, fgcolor, display.Color.BLACK)
                 else:
-                    cell_rgbs[x][y] = (glyph, display.BLACK, display.BLACK)
+                    cell_rgbs[x][y] = (glyph, display.Color.BLACK, display.Color.BLACK)
         return cell_rgbs
 
     def process(self):

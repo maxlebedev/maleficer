@@ -19,15 +19,16 @@ R_PANEL_START = PANEL_WIDTH + BOARD_WIDTH
 RGB = tuple[int, int, int]
 CELL_RGB = tuple[int, RGB, RGB]
 
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-GREEN = (0, 255, 0)
-RED = (255, 0, 0)
-BLUE = (0, 0, 255)
-LGREY = (100, 100, 100)
-DGREY = (50, 50, 50)
-YELLOW = (55, 55, 37)
-CANDLE = (97, 85, 52)
+class Color:
+    WHITE = (255, 255, 255)
+    BLACK = (0, 0, 0)
+    GREEN = (0, 255, 0)
+    RED = (255, 0, 0)
+    BLUE = (0, 0, 255)
+    LGREY = (100, 100, 100)
+    DGREY = (50, 50, 50)
+    YELLOW = (55, 55, 37)
+    CANDLE = (97, 85, 52)
 
 
 class Glyph(IntEnum):
@@ -87,24 +88,6 @@ letter_map = {
     "X": 976,
     "Y": 977,
     "Z": 978,
-}
-
-
-other = {
-    "NONE": 0,
-    "FLOOR": 3,
-    "WALL": 637,
-    "PLAYER": 73,
-    "FRAME1": 947,
-    "FRAME2": 948,
-    "FRAME3": 949,
-    "FRAME4": 996,
-    "FRAME5": 997,
-    "FRAME6": 998,
-    "FRAME7": 1045,
-    "FRAME8": 1046,
-    "FRAME9": 1047,
-    "BAT": 418,
 }
 
 

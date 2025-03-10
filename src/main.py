@@ -1,3 +1,5 @@
+from enum import IntEnum
+
 import esper
 import tcod
 
@@ -6,7 +8,6 @@ import components as cmp
 import display
 import input
 import processors
-from enum import IntEnum
 
 FLAGS = tcod.context.SDL_WINDOW_RESIZABLE  # | tcod.context.SDL_WINDOW_FULLSCREEN
 
@@ -35,7 +36,7 @@ def main() -> None:
     tile_atlas = "assets/monochrome-transparent_packed.png"
     tileset = load_custom_tileset(tile_atlas, 49, 22)
 
-    visible_cmp = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.GREEN)
+    visible_cmp = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN)
     position_cmp = cmp.Position(x=1, y=1)
     esper.create_entity(cmp.Player(), position_cmp, visible_cmp, cmp.Blocking())
     event_handler = input.EventHandler()
