@@ -31,6 +31,7 @@ CANDLE = (97,85,52)
 
 
 class Glyph(IntEnum):
+    # ints are all overwritten at asset load time
     NONE = 0
     FLOOR = 3
     WALL = 637
@@ -45,8 +46,66 @@ class Glyph(IntEnum):
     FRAME8 = 1046
     FRAME9 = 1047
     BAT = 418
-    A = 917
-    B = 918
+
+
+letter_map = {
+    "0": 868,
+    "1": 869,
+    "2": 870,
+    "3": 871,
+    "4": 872,
+    "5": 873,
+    "6": 874,
+    "7": 875,
+    "8": 876,
+    "9": 877,
+    ":": 878,
+    ".": 879,
+    "A": 917,
+    "B": 918,
+    "C": 919,
+    "D": 920,
+    "E": 921,
+    "F": 922,
+    "G": 923,
+    "H": 924,
+    "I": 925,
+    "J": 926,
+    "K": 927,
+    "L": 928,
+    "M": 929,
+    "N": 966,
+    "O": 967,
+    "P": 968,
+    "Q": 969,
+    "R": 970,
+    "S": 971,
+    "T": 972,
+    "U": 973,
+    "V": 974,
+    "W": 975,
+    "X": 976,
+    "Y": 977,
+    "Z": 978,
+}
+
+
+other = {
+    "NONE": 0,
+    "FLOOR": 3,
+    "WALL": 637,
+    "PLAYER": 73,
+    "FRAME1": 947,
+    "FRAME2": 948,
+    "FRAME3": 949,
+    "FRAME4": 996,
+    "FRAME5": 997,
+    "FRAME6": 998,
+    "FRAME7": 1045,
+    "FRAME8": 1046,
+    "FRAME9": 1047,
+    "BAT": 418,
+    }
 
 
 def darker(rgb: RGB, scale):

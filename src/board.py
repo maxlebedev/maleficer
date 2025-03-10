@@ -20,8 +20,6 @@ class Board:
     pos = esper.component_for_entity(cell, cmp.Position)
     """
 
-    floor_glyph: int = display.Glyph.FLOOR
-    wall_glyph: int = display.Glyph.WALL
     cells: list[list[CELL]] = []
     entities: list[list[set[int]]] = []
     explored: set[CELL] = set()
@@ -38,14 +36,14 @@ class Board:
             self.cells.append(col)
 
     def make_floor(self, x: int, y: int) -> int:
-        vis = cmp.Visible(glyph=self.floor_glyph, color=display.LGREY)
+        vis = cmp.Visible(glyph=display.Glyph.FLOOR, color=display.LGREY)
         cell = esper.create_entity(
             cmp.Cell(), cmp.Position(x, y), vis, cmp.Transparent()
         )
         return cell
 
     def make_wall(self, x: int, y: int) -> int:
-        vis = cmp.Visible(glyph=self.wall_glyph, color=display.LGREY)
+        vis = cmp.Visible(glyph=display.Glyph.WALL, color=display.LGREY)
         cell = esper.create_entity(cmp.Cell(), cmp.Position(x, y), vis, cmp.Blocking())
         return cell
 

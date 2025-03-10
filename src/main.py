@@ -6,24 +6,30 @@ import components as cmp
 import display
 import input
 import processors
+from enum import IntEnum
 
 FLAGS = tcod.context.SDL_WINDOW_RESIZABLE  # | tcod.context.SDL_WINDOW_FULLSCREEN
 
-
 def load_custom_tileset(atlas_path: str, x: int, y: int) -> tcod.tileset.Tileset:
     tileset = tcod.tileset.load_tilesheet(atlas_path, x, y, None)
-    codepath = 0
-    for yy in range(0, y):
-        for xx in range(0, x):
-            tileset.remap(codepath, xx, yy)
-            codepath += 1
+    for letter, val in display.letter_map.items():
+        yy = val // x
+        xx = val % x
+        tileset.remap(ord(letter), xx, yy)
+    codepath = 91
+    glyph_map = {}
+    for glyph in display.Glyph:
+        yy = glyph.value // x
+        xx = glyph.value % x
+        tileset.remap(codepath, xx, yy)
+        glyph_map[glyph.name] = codepath
+        codepath += 1
+    display.Glyph = IntEnum('Glyph', [(key, value) for key, value in glyph_map.items()])
     return tileset
 
 
+
 def main() -> None:
-    # tile_atlas = "assets/dejavu10x10_gs_tc.png"
-    # tileset = tcod.tileset.load_tilesheet(tile_atlas, 32, 8, tcod.tileset.CHARMAP_TCOD)
-    # display.TILE_SIZE = 16
     tile_atlas = "assets/monochrome-transparent_packed.png"
     tileset = load_custom_tileset(tile_atlas, 49, 22)
 

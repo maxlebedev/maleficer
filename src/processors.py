@@ -86,7 +86,9 @@ class RenderProcessor(esper.Processor):
 
         # left panel
         self.console.draw_frame(x=0, **panel_params)
-        display.console_print(self.console, 2, 3, "ABBA")
+        self.console.print(2, 2, "ABCDEFGHIJKLM")
+        self.console.print(2, 3, "NOPQUSTUVWXYZ")
+        self.console.print(2, 4, "0123456789.")
         # right panel
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
 
