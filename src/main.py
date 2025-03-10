@@ -27,9 +27,7 @@ def main() -> None:
     tile_atlas = "assets/monochrome-transparent_packed.png"
     tileset = load_custom_tileset(tile_atlas, 49, 22)
 
-    visible_cmp = cmp.Visible(
-        glyph=display.Glyph.PLAYER, color=display.GREEN, bg_color=display.DGREY
-    )
+    visible_cmp = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.GREEN)
     position_cmp = cmp.Position(x=1, y=1)
     esper.create_entity(cmp.Player(), position_cmp, visible_cmp, cmp.Blocking())
     event_handler = input.EventHandler()

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from tcod.map import compute_fov
+from tcod import libtcodpy
 
 import esper
 import tcod
@@ -89,24 +90,20 @@ class RenderProcessor(esper.Processor):
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
 
     def _apply_lighting(self, cell_rgbs, in_fov) -> list[list[display.CELL_RGB]]:
-        # TODO: lighting currently only works on cells. should work on anything being drawn
-
+        """display cells in fov with lighting, explored without, and hide the rest"""
         for x, col in enumerate(cell_rgbs):
-            for y, rgb_cell in enumerate(col):
-                # 3 cases.
-                # in fov, display with lighting
-                # explored, display black
-                # else display nothing
+            for y, (glyph, fgcolor, _) in enumerate(col):
                 cell = self.board.get_cell(x, y)
-                if in_fov[x][y] and cell:
+                if not cell:
+                    continue
+                if in_fov[x][y]:
                     self.board.explored.add(cell)
-                    brighter = display.brighter(rgb_cell[1], scale=100)
-                    cell_rgbs[x][y] = (rgb_cell[0], brighter, display.DGREY)
-                elif not in_fov[x][y]:
-                    if cell in self.board.explored:
-                        cell_rgbs[x][y] = (rgb_cell[0], rgb_cell[1], display.BLACK)
-                    else:
-                        cell_rgbs[x][y] = (rgb_cell[0], display.BLACK, display.BLACK)
+                    brighter = display.brighter(fgcolor, scale=100)
+                    cell_rgbs[x][y] = (glyph, brighter, display.CANDLE)
+                elif cell in self.board.explored:
+                    cell_rgbs[x][y] = (glyph, fgcolor, display.BLACK)
+                else:
+                    cell_rgbs[x][y] = (glyph, display.BLACK, display.BLACK)
         return cell_rgbs
 
     def process(self):
@@ -114,20 +111,22 @@ class RenderProcessor(esper.Processor):
         self._draw_panels()
 
         cell_rgbs = [list(map(self.board.as_rgb, row)) for row in self.board.cells]
+
         transparency = self.board.as_transparency()
         _, (_, pos) = esper.get_components(cmp.Player, cmp.Position)[0]
-        in_fov = compute_fov(transparency, (pos.x, pos.y), radius=8)
-        cell_rgbs = self._apply_lighting(cell_rgbs, in_fov)
-
-        startx, endx = (display.PANEL_WIDTH, display.R_PANEL_START)
-        starty, endy = (0, display.BOARD_HEIGHT)
-        self.console.rgb[startx:endx, starty:endy] = cell_rgbs
+        algo = libtcodpy.FOV_SHADOW
+        in_fov = compute_fov(transparency, (pos.x, pos.y), radius=4, algorithm=algo)
 
         drawable_entities = esper.get_components(cmp.Position, cmp.Visible)
         for entity, (pos, vis) in drawable_entities:
             if esper.has_component(entity, cmp.Cell) or not in_fov[pos.x][pos.y]:
                 continue
-            x = pos.x + display.PANEL_WIDTH
-            self.console.rgb[x, pos.y] = (vis.glyph, vis.color, vis.bg_color)
+            cell_rgbs[pos.x][pos.y] = (vis.glyph, vis.color, vis.bg_color)
+
+        cell_rgbs = self._apply_lighting(cell_rgbs, in_fov)
+
+        startx, endx = (display.PANEL_WIDTH, display.R_PANEL_START)
+        starty, endy = (0, display.BOARD_HEIGHT)
+        self.console.rgb[startx:endx, starty:endy] = cell_rgbs
 
         self.context.present(self.console)  # , integer_scaling=True

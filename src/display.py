@@ -25,6 +25,7 @@ BLUE = (0, 0, 255)
 LGREY = (100, 100, 100)
 DGREY = (50, 50, 50)
 YELLOW = (55, 55, 37)
+CANDLE = (97,85,52)
 
 
 class Glyph:
