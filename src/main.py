@@ -10,23 +10,25 @@ from enum import IntEnum
 
 FLAGS = tcod.context.SDL_WINDOW_RESIZABLE  # | tcod.context.SDL_WINDOW_FULLSCREEN
 
-def load_custom_tileset(atlas_path: str, x: int, y: int) -> tcod.tileset.Tileset:
-    tileset = tcod.tileset.load_tilesheet(atlas_path, x, y, None)
+Tileset = tcod.tileset.Tileset
+
+
+def load_custom_tileset(atlas_path: str, width: int, height: int) -> Tileset:
+    tileset = tcod.tileset.load_tilesheet(atlas_path, width, height, None)
     for letter, val in display.letter_map.items():
-        yy = val // x
-        xx = val % x
+        yy = val // width
+        xx = val % width
         tileset.remap(ord(letter), xx, yy)
     codepath = 91
     glyph_map = {}
     for glyph in display.Glyph:
-        yy = glyph.value // x
-        xx = glyph.value % x
+        yy = glyph.value // width
+        xx = glyph.value % width
         tileset.remap(codepath, xx, yy)
         glyph_map[glyph.name] = codepath
         codepath += 1
-    display.Glyph = IntEnum('Glyph', [(key, value) for key, value in glyph_map.items()])
+    display.Glyph = IntEnum("Glyph", [(key, value) for key, value in glyph_map.items()])
     return tileset
-
 
 
 def main() -> None:
