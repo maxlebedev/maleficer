@@ -1,3 +1,5 @@
+from enum import IntEnum
+
 CONSOLE_WIDTH = 1920
 CONSOLE_HEIGHT = 1080
 TILE_SIZE = 16
@@ -28,7 +30,7 @@ YELLOW = (55, 55, 37)
 CANDLE = (97,85,52)
 
 
-class Glyph:
+class Glyph(IntEnum):
     NONE = 0
     FLOOR = 3
     WALL = 637
@@ -43,6 +45,8 @@ class Glyph:
     FRAME8 = 1046
     FRAME9 = 1047
     BAT = 418
+    A = 917
+    B = 918
 
 
 def darker(rgb: RGB, scale):
@@ -57,3 +61,11 @@ def brighter(rgb: RGB, scale: int):
     blue = min(255, rgb[1] + scale)
     green = min(255, rgb[2] + scale)
     return (red, blue, green)
+
+def console_print(console, x, y, text: str):
+    # convert text into codepoints
+    for i, char in enumerate(text.upper()):
+        codepoint = Glyph[char]
+        console.rgb[x+i, y] = (codepoint, WHITE, BLACK)
+    pass
+
