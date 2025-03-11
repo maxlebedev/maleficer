@@ -13,6 +13,8 @@ import display
 import input
 
 
+# Currently we process movement by attaching and removing components
+# Alternatively, we could have an event queue
 @dataclass
 class MovementProcessor(esper.Processor):
     board: board.Board
@@ -35,18 +37,34 @@ class MovementProcessor(esper.Processor):
             esper.remove_component(ent, cmp.Moving)
 
 
-# TODO: unclear delineation w EventHandler
-# currently EventHandler -> Action -> EventProcessor. Can almost certainly be simplified
 @dataclass
-class EventProcessor(esper.Processor):
-    event_handler: input.EventHandler
+class InputEventProcessor(esper.Processor):
+    def __init__(self):
+        keymap_path = "keymap.yaml"
+        self.keymap = input.load_keymap(keymap_path)
+        self.action_map = {
+            self.keymap[input.Input.MOVE_DOWN]: (actions.MovementAction, (0, 1)),
+            self.keymap[input.Input.MOVE_LEFT]: (actions.MovementAction, (-1, 0)),
+            self.keymap[input.Input.MOVE_UP]: (actions.MovementAction, (0, -1)),
+            self.keymap[input.Input.MOVE_RIGHT]: (actions.MovementAction, (1, 0)),
+            self.keymap[input.Input.ESC]: (self.exit, tuple()),
+        }
+
+    def exit(self):
+        raise SystemExit()
 
     def process(self):
         player, _ = esper.get_component(cmp.Player)[0]
         player_turn = True
         while player_turn:
             for event in tcod.event.wait():
-                action = self.event_handler.dispatch(event)
+                # if we ever have other events we care abt, we can dispatch by type
+                if not isinstance(event, tcod.event.KeyDown):
+                    continue
+                action = None
+                if self.keymap and event.sym in self.action_map:
+                    func, args = self.action_map[event.sym]
+                    action = func(*args)
                 if action and isinstance(action, actions.MovementAction):
                     esper.add_component(player, cmp.Moving(x=action.dx, y=action.dy))
                     player_turn = False
@@ -89,6 +107,8 @@ class RenderProcessor(esper.Processor):
         self.console.print(2, 2, "ABCDEFGHIJKLM")
         self.console.print(2, 3, "NOPQUSTUVWXYZ")
         self.console.print(2, 4, "0123456789.")
+        _, (_, vitals) = esper.get_components(cmp.Player, cmp.Killable)[0]
+        self.console.print(2, 5, f"HP: {vitals.hp}")
         # right panel
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
 

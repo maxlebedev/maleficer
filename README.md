@@ -28,3 +28,7 @@ The player is an ambitous and foolhardy wizard school dropout. He starts with so
 # Design Questions
 	- Why explore the level, (vs doing down asap)
 	- What is the progression system?
+
+# Future work
+Could work on damage system next
+Could make menus

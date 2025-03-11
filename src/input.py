@@ -13,6 +13,8 @@ Input: the input option
 Actions: a player has chosen an in-game option
 
 We map Keybinds to Inputs via keymap
+
+# TODO: what about non-player events, are those actions?
 """
 
 
@@ -49,26 +51,3 @@ def load_keymap(keymap_json_path):
             print(f"Error: {ve}")
 
     return key_map
-
-
-class EventHandler(tcod.event.EventDispatch[actions.Action]):
-    def __init__(self):
-        keymap_path = "keymap.yaml"
-        self.keymap = load_keymap(keymap_path)
-        self.action_map = {
-            self.keymap[Input.MOVE_DOWN]: (actions.MovementAction, (0, 1)),
-            self.keymap[Input.MOVE_LEFT]: (actions.MovementAction, (-1, 0)),
-            self.keymap[Input.MOVE_UP]: (actions.MovementAction, (0, -1)),
-            self.keymap[Input.MOVE_RIGHT]: (actions.MovementAction, (1, 0)),
-            self.keymap[Input.ESC]: (self.ev_quit, (tcod.event.Quit,)),
-        }
-
-    def ev_quit(self, event: tcod.event.Quit):
-        raise SystemExit()
-
-    def ev_keydown(self, event: tcod.event.KeyDown) -> actions.Action | None:
-        action = None
-        if self.keymap and event.sym in self.action_map:
-            func, args = self.action_map[event.sym]
-            action = func(*args)
-        return action

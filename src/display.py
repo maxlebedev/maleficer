@@ -19,6 +19,7 @@ R_PANEL_START = PANEL_WIDTH + BOARD_WIDTH
 RGB = tuple[int, int, int]
 CELL_RGB = tuple[int, RGB, RGB]
 
+
 class Color:
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)

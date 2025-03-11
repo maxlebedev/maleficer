@@ -25,8 +25,7 @@ class Visible:
     glyph: int
     color: display.RGB = display.Color.WHITE
     bg_color: display.RGB = display.Color.BLACK
-    # bg_color mostly represents explored state. Grey by default, black when in view
-    # or maybe grey as my light source
+    # bg_color mostly represents explored state, rather than a property of the entity
 
 
 @component

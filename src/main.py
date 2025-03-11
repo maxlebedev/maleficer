@@ -16,15 +16,14 @@ Tileset = tcod.tileset.Tileset
 
 def load_custom_tileset(atlas_path: str, width: int, height: int) -> Tileset:
     tileset = tcod.tileset.load_tilesheet(atlas_path, width, height, None)
+    idx_to_point = lambda x, y: (x % y, x // y)
     for letter, val in display.letter_map.items():
-        yy = val // width
-        xx = val % width
+        xx, yy = idx_to_point(val, width)
         tileset.remap(ord(letter), xx, yy)
     codepath = 91
     glyph_map = {}
     for glyph in display.Glyph:
-        yy = glyph.value // width
-        xx = glyph.value % width
+        xx, yy = idx_to_point(glyph.value, width)
         tileset.remap(codepath, xx, yy)
         glyph_map[glyph.name] = codepath
         codepath += 1
@@ -38,9 +37,8 @@ def main() -> None:
 
     visible_cmp = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN)
     position_cmp = cmp.Position(x=1, y=1)
-    esper.create_entity(cmp.Player(), position_cmp, visible_cmp, cmp.Blocking())
-    event_handler = input.EventHandler()
-    esper.add_processor(processors.EventProcessor(event_handler), priority=5)
+    esper.create_entity(cmp.Player(), position_cmp, visible_cmp, cmp.Blocking(), cmp.Killable(hp=10))
+    esper.add_processor(processors.InputEventProcessor(), priority=5)
     esper.add_processor(processors.NPCProcessor(), priority=4)
 
     context_params = {
