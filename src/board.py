@@ -8,9 +8,7 @@ import tcod
 
 import components as cmp
 import display
-
-POSITION = tuple[int, int]
-CELL = int
+import typ
 
 
 class Board:
@@ -20,9 +18,9 @@ class Board:
     pos = esper.component_for_entity(cell, cmp.Position)
     """
 
-    cells: list[list[CELL]] = []
+    cells: list[list[typ.CELL]] = []
     entities: list[list[set[int]]] = []
-    explored: set[CELL] = set()
+    explored: set[typ.CELL] = set()
 
     def __init__(self):
         self.entities = [
@@ -54,11 +52,11 @@ class Board:
         return bat
 
     @classmethod
-    def as_rgb(cls, cell: CELL):
+    def as_rgb(cls, cell: typ.CELL) -> typ.CELL_RGB:
         vis = esper.component_for_entity(cell, cmp.Visible)
         return (vis.glyph, vis.color, vis.bg_color)
 
-    def as_transparency(self):
+    def as_transparency(self) -> list[list[bool]]:
         transparency = []
         for _ in range(display.BOARD_WIDTH):
             col = [None for _ in range(display.BOARD_HEIGHT)]
@@ -79,7 +77,7 @@ class Board:
             return False
         return True
 
-    def get_cell(self, x: int, y: int) -> CELL | None:
+    def get_cell(self, x: int, y: int) -> typ.CELL | None:
         if self._in_bounds(x, y):
             return self.cells[x][y]
         return None
@@ -87,13 +85,13 @@ class Board:
     def remove_cell(self, x: int, y: int):
         esper.delete_entity(self.cells[x][y])
 
-    def set_cell(self, x: int, y: int, cell: CELL):
+    def set_cell(self, x: int, y: int, cell: typ.CELL):
         if not self._in_bounds(x, y):
             raise IndexError()
         self.remove_cell(x, y)
         self.cells[x][y] = cell
 
-    def set_glyph(self, cell: CELL, glyph: int):
+    def set_glyph(self, cell: typ.CELL, glyph: int):
         vis = esper.component_for_entity(cell, cmp.Visible)
         vis.glyph = glyph
 
@@ -126,7 +124,7 @@ class RectangularRoom:
         return self.y1 + self.height
 
     @property
-    def center(self) -> POSITION:
+    def center(self) -> typ.POSITION:
         center_x = (self.x1 + self.x2) // 2
         center_y = (self.y1 + self.y2) // 2
 
@@ -143,7 +141,7 @@ class RectangularRoom:
         return slice(self.x1, self.x2 + 1), slice(self.y1, self.y2 + 1)
 
 
-def tunnel_between(board, start: POSITION, end: POSITION):
+def tunnel_between(board, start: typ.POSITION, end: typ.POSITION):
     """Return an L-shaped tunnel between these two points."""
     x1, y1 = start
     x2, y2 = end
@@ -168,7 +166,9 @@ def intersects(board: Board, src: RectangularRoom, target: RectangularRoom) -> b
     return bool(set(src_cells) & (set(target_cells)))
 
 
-def closest_coordinate(origin: POSITION, coordinates: list[POSITION]) -> POSITION:
+def closest_coordinate(
+    origin: typ.POSITION, coordinates: list[typ.POSITION]
+) -> typ.POSITION:
     def euclidean_distance(x1, y1, x2, y2):
         return pow(pow(x2 - x1, 2) + pow(y2 - y1, 2), 0.5)
 
@@ -188,7 +188,7 @@ def closest_coordinate(origin: POSITION, coordinates: list[POSITION]) -> POSITIO
 
 def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
     rooms: list[RectangularRoom] = []
-    centers: list[POSITION] = []
+    centers: list[typ.POSITION] = []
     for _ in range(max_rooms):
         room_width = random.randint(min_rm_siz, max_rm_siz)
         room_height = random.randint(min_rm_siz, max_rm_siz)
@@ -208,7 +208,7 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
         if len(rooms) == 0:  # start player in first room
             _, (_, pos) = esper.get_components(cmp.Player, cmp.Position)[0]
             pos.x, pos.y = new_room.center
-        else:  # All rooms after the first get one tunnel
+        else:  # All rooms after the first get one tunnel and bat
             endpt = closest_coordinate(new_room.center, centers[:-1])
             tunnel_between(board, new_room.center, endpt)
             board.make_bat(*new_room.center)

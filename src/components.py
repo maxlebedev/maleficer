@@ -1,6 +1,7 @@
 from dataclasses import dataclass as component
 
 import display
+import typ
 
 
 @component
@@ -23,8 +24,8 @@ class Moving:
 @component
 class Visible:
     glyph: int
-    color: display.RGB = display.Color.WHITE
-    bg_color: display.RGB = display.Color.BLACK
+    color: typ.RGB = display.Color.WHITE
+    bg_color: typ.RGB = display.Color.BLACK
     # bg_color mostly represents explored state, rather than a property of the entity
 
 

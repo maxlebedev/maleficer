@@ -1,5 +1,7 @@
 from enum import IntEnum
 
+import typ
+
 CONSOLE_WIDTH = 1920
 CONSOLE_HEIGHT = 1080
 TILE_SIZE = 16
@@ -16,8 +18,6 @@ BOARD_WIDTH = (CONSOLE_WIDTH // TILE_SIZE) - PANEL_WIDTH - PANEL_WIDTH
 R_PANEL_START = PANEL_WIDTH + BOARD_WIDTH
 
 # colors
-RGB = tuple[int, int, int]
-CELL_RGB = tuple[int, RGB, RGB]
 
 
 class Color:
@@ -92,14 +92,14 @@ letter_map = {
 }
 
 
-def darker(rgb: RGB, scale):
+def darker(rgb: typ.RGB, scale: int):
     red = max(0, rgb[0] + scale)
     blue = max(0, rgb[1] + scale)
     green = max(0, rgb[2] + scale)
     return (red, blue, green)
 
 
-def brighter(rgb: RGB, scale: int):
+def brighter(rgb: typ.RGB, scale: int):
     red = min(255, rgb[0] + scale)
     blue = min(255, rgb[1] + scale)
     green = min(255, rgb[2] + scale)

@@ -11,6 +11,7 @@ import board
 import components as cmp
 import display
 import input
+import typ
 
 
 # Currently we process movement by attaching and removing components
@@ -112,7 +113,7 @@ class RenderProcessor(esper.Processor):
         # right panel
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
 
-    def _apply_lighting(self, cell_rgbs, in_fov) -> list[list[display.CELL_RGB]]:
+    def _apply_lighting(self, cell_rgbs, in_fov) -> list[list[typ.CELL_RGB]]:
         """display cells in fov with lighting, explored without, and hide the rest"""
         for x, col in enumerate(cell_rgbs):
             for y, (glyph, fgcolor, _) in enumerate(col):
