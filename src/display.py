@@ -17,9 +17,6 @@ BOARD_WIDTH = (CONSOLE_WIDTH // TILE_SIZE) - PANEL_WIDTH - PANEL_WIDTH
 
 R_PANEL_START = PANEL_WIDTH + BOARD_WIDTH
 
-# colors
-
-
 class Color:
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
@@ -92,14 +89,14 @@ letter_map = {
 }
 
 
-def darker(rgb: typ.RGB, scale: int):
+def darker(rgb: typ.RGB, scale: int) -> typ.RGB:
     red = max(0, rgb[0] + scale)
     blue = max(0, rgb[1] + scale)
     green = max(0, rgb[2] + scale)
     return (red, blue, green)
 
 
-def brighter(rgb: typ.RGB, scale: int):
+def brighter(rgb: typ.RGB, scale: int) -> typ.RGB:
     red = min(255, rgb[0] + scale)
     blue = min(255, rgb[1] + scale)
     green = min(255, rgb[2] + scale)

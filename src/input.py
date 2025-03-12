@@ -13,8 +13,6 @@ Input: the input option
 Actions: a player has chosen an in-game option
 
 We map Keybinds to Inputs via keymap
-
-# TODO: what about non-player events, are those actions?
 """
 
 

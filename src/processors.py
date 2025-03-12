@@ -6,24 +6,29 @@ import tcod
 from tcod import libtcodpy
 from tcod.map import compute_fov
 
-import actions
 import board
 import components as cmp
 import display
 import input
 import typ
 
+import event
 
-# Currently we process movement by attaching and removing components
-# Alternatively, we could have an event queue
+
 @dataclass
 class MovementProcessor(esper.Processor):
     board: board.Board
 
     def process(self):
-        for ent, (move, pos) in esper.get_components(cmp.Moving, cmp.Position):
-            new_x = pos.x + move.x
-            new_y = pos.y + move.y
+        while event.Queues.movement:
+            movement = event.Queues.movement.pop()
+            ent = movement.source
+            move_x = movement.x
+            move_y = movement.y
+
+            pos = esper.component_for_entity(ent, cmp.Position)
+            new_x = pos.x + move_x
+            new_y = pos.y + move_y
             # Note: as written, walking into a wall consumes a turn
             move = True
             self.board.build_entity_cache()  # expensive, but okay
@@ -35,7 +40,14 @@ class MovementProcessor(esper.Processor):
                 pos.x = new_x
                 pos.y = new_y
                 self.board.entities[new_x][new_y].add(ent)
-            esper.remove_component(ent, cmp.Moving)
+
+@dataclass
+class DamageProcessor(esper.Processor):
+    def process(self):
+        while event.Queues.damage:
+            damage = event.Queues.damage.pop()
+            vit = esper.component_for_entity(damage.target, cmp.Vitals)
+            vit.hp -= damage.amount
 
 
 @dataclass
@@ -43,11 +55,13 @@ class InputEventProcessor(esper.Processor):
     def __init__(self):
         keymap_path = "keymap.yaml"
         self.keymap = input.load_keymap(keymap_path)
+
+        player, _ = esper.get_component(cmp.Player)[0]
         self.action_map = {
-            self.keymap[input.Input.MOVE_DOWN]: (actions.MovementAction, (0, 1)),
-            self.keymap[input.Input.MOVE_LEFT]: (actions.MovementAction, (-1, 0)),
-            self.keymap[input.Input.MOVE_UP]: (actions.MovementAction, (0, -1)),
-            self.keymap[input.Input.MOVE_RIGHT]: (actions.MovementAction, (1, 0)),
+            self.keymap[input.Input.MOVE_DOWN]: (event.Movement, (player, 0, 1)),
+            self.keymap[input.Input.MOVE_LEFT]: (event.Movement, (player, -1, 0)),
+            self.keymap[input.Input.MOVE_UP]: (event.Movement, (player, 0, -1)),
+            self.keymap[input.Input.MOVE_RIGHT]: (event.Movement, (player, 1, 0)),
             self.keymap[input.Input.ESC]: (self.exit, tuple()),
         }
 
@@ -55,20 +69,17 @@ class InputEventProcessor(esper.Processor):
         raise SystemExit()
 
     def process(self):
-        player, _ = esper.get_component(cmp.Player)[0]
-        player_turn = True
-        while player_turn:
-            for event in tcod.event.wait():
+        action = None
+        while not action:
+            for input_event in tcod.event.wait():
                 # if we ever have other events we care abt, we can dispatch by type
-                if not isinstance(event, tcod.event.KeyDown):
+                if not isinstance(input_event, tcod.event.KeyDown):
                     continue
-                action = None
-                if self.keymap and event.sym in self.action_map:
-                    func, args = self.action_map[event.sym]
+                if self.keymap and input_event.sym in self.action_map:
+                    func, args = self.action_map[input_event.sym]
                     action = func(*args)
-                if action and isinstance(action, actions.MovementAction):
-                    esper.add_component(player, cmp.Moving(x=action.dx, y=action.dy))
-                    player_turn = False
+        if isinstance(action , event.Movement):
+            event.Queues.movement.append(action)
 
 
 @dataclass
@@ -76,7 +87,8 @@ class NPCProcessor(esper.Processor):
     def process(self):
         for entity, _ in esper.get_component(cmp.NPC):
             dir = random.choice([(0, 1), (0, -1), (1, 0), (-1, 0), (0, 0)])
-            esper.add_component(entity, cmp.Moving(x=dir[0], y=dir[1]))
+            move = event.Movement(entity, *dir)
+            event.Queues.movement.append(move)
 
 
 @dataclass
@@ -108,7 +120,7 @@ class RenderProcessor(esper.Processor):
         self.console.print(2, 2, "ABCDEFGHIJKLM")
         self.console.print(2, 3, "NOPQUSTUVWXYZ")
         self.console.print(2, 4, "0123456789.")
-        _, (_, vitals) = esper.get_components(cmp.Player, cmp.Killable)[0]
+        _, (_, vitals) = esper.get_components(cmp.Player, cmp.Vitals)[0]
         self.console.print(2, 5, f"HP: {vitals.hp}")
         # right panel
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)

@@ -52,6 +52,6 @@ class NPC:
 
 
 @component
-class Killable:  # Destroyable
+class Vitals:  # Destroyable
     hp: int
     armor: int = 0
