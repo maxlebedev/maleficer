@@ -104,6 +104,9 @@ class NPCProcessor(esper.Processor):
                 continue
             move = event.Movement(entity, *dir)
             event.Queues.movement.append(move)
+            # consider the move processor potentially sending a Bump event,
+            # and then reading that event (this means this proc runs twice?)
+            # this lets each NPC decide what behavior to have on a bump
 
 
 @dataclass
