@@ -35,6 +35,10 @@ class MovementProcessor(esper.Processor):
             for target in self.board.entities[new_x][new_y]:
                 if esper.has_component(target, cmp.Blocking):
                     move = False
+                    src_is_enemy = esper.has_component(ent, cmp.NPC)
+                    target_is_harmable = esper.has_component(target, cmp.Vitals)
+                    if src_is_enemy and target_is_harmable:
+                        event.Queues.damage.append(event.Damage(ent, target, 1))
 
             if move:
                 pos.x = new_x
@@ -48,6 +52,15 @@ class DamageProcessor(esper.Processor):
             damage = event.Queues.damage.pop()
             vit = esper.component_for_entity(damage.target, cmp.Vitals)
             vit.hp -= damage.amount
+
+            src_vit = esper.component_for_entity(damage.source, cmp.Vitals)
+            print(f"{src_vit.name} deals {damage.amount} to {vit.name}")
+            if vit.hp <= 0:
+                print(f"{vit.name} dies")
+                esper.delete_entity(damage.target)
+                # crashes if player gets deleted
+        # this probably not where we process death
+        # death can potentially happen without damage
 
 
 @dataclass
@@ -87,6 +100,8 @@ class NPCProcessor(esper.Processor):
     def process(self):
         for entity, _ in esper.get_component(cmp.NPC):
             dir = random.choice([(0, 1), (0, -1), (1, 0), (-1, 0), (0, 0)])
+            if dir == (0,0):
+                continue
             move = event.Movement(entity, *dir)
             event.Queues.movement.append(move)
 

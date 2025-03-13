@@ -53,5 +53,6 @@ class NPC:
 
 @component
 class Vitals:  # Destroyable
+    name: str
     hp: int
     armor: int = 0
