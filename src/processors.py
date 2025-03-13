@@ -56,7 +56,7 @@ class DamageProcessor(esper.Processor):
             src_actor = esper.component_for_entity(damage.source, cmp.Actor)
             message = f"{src_actor.name} deals {damage.amount} to {actor.name}"
             print(message)
-            display.Log.append(message)
+            event.Log.append(message)
 
             if actor.hp <= 0:
                 print(f"{actor.name} dies")
@@ -145,7 +145,7 @@ class RenderProcessor(esper.Processor):
         self.console.print(2, 5, f"HP: {actor.hp}")
         # right panel
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
-        for i, message in enumerate(display.Log.messages):
+        for i, message in enumerate(event.Log.messages):
             self.console.print(1+display.R_PANEL_START, 1+i, message)
 
 
