@@ -36,8 +36,8 @@ def main() -> None:
 
     visible_cmp = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN)
     position_cmp = cmp.Position(x=1, y=1)
-    vitals = cmp.Vitals(hp=10, name="player")
-    esper.create_entity(cmp.Player(), position_cmp, visible_cmp, cmp.Blocking(), vitals)
+    actor = cmp.Actor(hp=10, name="player")
+    esper.create_entity(cmp.Player(), position_cmp, visible_cmp, cmp.Blocking(), actor)
     esper.add_processor(processors.InputEventProcessor(), priority=5)
     esper.add_processor(processors.NPCProcessor(), priority=4)
     esper.add_processor(processors.DamageProcessor(), priority=3)

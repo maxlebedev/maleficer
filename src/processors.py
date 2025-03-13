@@ -35,8 +35,8 @@ class MovementProcessor(esper.Processor):
             for target in self.board.entities[new_x][new_y]:
                 if esper.has_component(target, cmp.Blocking):
                     move = False
-                    src_is_enemy = esper.has_component(ent, cmp.NPC)
-                    target_is_harmable = esper.has_component(target, cmp.Vitals)
+                    src_is_enemy = esper.has_component(ent, cmp.Enemy)
+                    target_is_harmable = esper.has_component(target, cmp.Actor)
                     if src_is_enemy and target_is_harmable:
                         event.Queues.damage.append(event.Damage(ent, target, 1))
 
@@ -50,13 +50,16 @@ class DamageProcessor(esper.Processor):
     def process(self):
         while event.Queues.damage:
             damage = event.Queues.damage.pop()
-            vit = esper.component_for_entity(damage.target, cmp.Vitals)
-            vit.hp -= damage.amount
+            actor = esper.component_for_entity(damage.target, cmp.Actor)
+            actor.hp -= damage.amount
 
-            src_vit = esper.component_for_entity(damage.source, cmp.Vitals)
-            print(f"{src_vit.name} deals {damage.amount} to {vit.name}")
-            if vit.hp <= 0:
-                print(f"{vit.name} dies")
+            src_actor = esper.component_for_entity(damage.source, cmp.Actor)
+            message = f"{src_actor.name} deals {damage.amount} to {actor.name}"
+            print(message)
+            display.Log.append(message)
+
+            if actor.hp <= 0:
+                print(f"{actor.name} dies")
                 esper.delete_entity(damage.target)
                 # crashes if player gets deleted
         # this probably not where we process death
@@ -98,7 +101,7 @@ class InputEventProcessor(esper.Processor):
 @dataclass
 class NPCProcessor(esper.Processor):
     def process(self):
-        for entity, _ in esper.get_component(cmp.NPC):
+        for entity, _ in esper.get_component(cmp.Enemy):
             dir = random.choice([(0, 1), (0, -1), (1, 0), (-1, 0), (0, 0)])
             if dir == (0,0):
                 continue
@@ -138,10 +141,13 @@ class RenderProcessor(esper.Processor):
         self.console.print(2, 2, "ABCDEFGHIJKLM")
         self.console.print(2, 3, "NOPQUSTUVWXYZ")
         self.console.print(2, 4, "0123456789.")
-        _, (_, vitals) = esper.get_components(cmp.Player, cmp.Vitals)[0]
-        self.console.print(2, 5, f"HP: {vitals.hp}")
+        _, (_, actor) = esper.get_components(cmp.Player, cmp.Actor)[0]
+        self.console.print(2, 5, f"HP: {actor.hp}")
         # right panel
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
+        for i, message in enumerate(display.Log.messages):
+            self.console.print(1+display.R_PANEL_START, 1+i, message)
+
 
     def _apply_lighting(self, cell_rgbs, in_fov) -> list[list[typ.CELL_RGB]]:
         """display cells in fov with lighting, explored without, and hide the rest"""

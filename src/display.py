@@ -101,3 +101,14 @@ def brighter(rgb: typ.RGB, scale: int) -> typ.RGB:
     blue = min(255, rgb[1] + scale)
     green = min(255, rgb[2] + scale)
     return (red, blue, green)
+
+
+class Log: # action log? where does this live?
+    messages: list = []
+
+    @classmethod
+    def append(cls, text: str):
+        trimmed_text = text[:PANEL_WIDTH-2].upper()
+        # TODO: break into two lines instead maybe
+        cls.messages.append(trimmed_text)
+        cls.messages = cls.messages[-PANEL_HEIGHT-2:]

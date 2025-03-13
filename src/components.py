@@ -47,12 +47,12 @@ class Cell:  # floor, wall, door, etc
 
 
 @component
-class NPC:
+class Enemy:
     pass
 
 
 @component
-class Vitals:  # Destroyable
+class Actor:  # Destroyable
     name: str
     hp: int
     armor: int = 0
