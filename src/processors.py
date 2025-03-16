@@ -50,6 +50,10 @@ class DamageProcessor(esper.Processor):
     def process(self):
         while event.Queues.damage:
             damage = event.Queues.damage.pop()
+            if not all(map(esper.entity_exists, [damage.target, damage.source])):
+                # if either entity doesn't exist anymore, damage fizzles
+                continue
+
             actor = esper.component_for_entity(damage.target, cmp.Actor)
             actor.hp -= damage.amount
 
@@ -59,7 +63,9 @@ class DamageProcessor(esper.Processor):
             event.Log.append(message)
 
             if actor.hp <= 0:
-                print(f"{actor.name} dies")
+                message = f"{actor.name} dies"
+                print(message)
+                event.Log.append(message)
                 esper.delete_entity(damage.target)
                 # crashes if player gets deleted
         # this probably not where we process death
@@ -118,6 +124,19 @@ class RenderProcessor(esper.Processor):
     context: tcod.context.Context
     board: board.Board
 
+
+    def render_bar(self, x: int, y: int, curr: int, maximum: int, total_width: int):
+        bar_width = int(curr / maximum * total_width)
+        bg = display.Color.BAR_EMPTY
+        self.console.draw_rect(x=x, y=y, width=total_width, height=1, ch=1, bg=bg)
+
+        if bar_width > 0:
+            bg = display.Color.BAR_FILLED
+            self.console.draw_rect(x=x, y=y, width=bar_width, height=1, ch=1, bg=bg)
+
+        text = f"HP: {curr}/{maximum}"
+        self.console.print(x=x, y=y, string=text, fg=display.Color.DGREY)
+
     def _draw_panels(self):
         panel_params = {
             "y": 0,
@@ -142,7 +161,7 @@ class RenderProcessor(esper.Processor):
         self.console.print(2, 3, "NOPQUSTUVWXYZ")
         self.console.print(2, 4, "0123456789.")
         _, (_, actor) = esper.get_components(cmp.Player, cmp.Actor)[0]
-        self.console.print(2, 5, f"HP: {actor.hp}")
+        self.render_bar(1, 5, actor.hp, 10, display.PANEL_WIDTH-2)
         # right panel
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
         for i, message in enumerate(event.Log.messages):

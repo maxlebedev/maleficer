@@ -26,7 +26,10 @@ class Color:
     LGREY = (100, 100, 100)
     DGREY = (50, 50, 50)
     YELLOW = (55, 55, 37)
+
     CANDLE = (97, 85, 52)
+    BAR_FILLED = GREEN
+    BAR_EMPTY = RED
 
 
 class Glyph(IntEnum):
