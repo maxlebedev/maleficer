@@ -92,15 +92,6 @@ letter_map = {
 }
 
 
-def darker(rgb: typ.RGB, scale: int) -> typ.RGB:
-    red = max(0, rgb[0] + scale)
-    blue = max(0, rgb[1] + scale)
-    green = max(0, rgb[2] + scale)
-    return (red, blue, green)
-
-
 def brighter(rgb: typ.RGB, scale: int) -> typ.RGB:
-    red = min(255, rgb[0] + scale)
-    blue = min(255, rgb[1] + scale)
-    green = min(255, rgb[2] + scale)
-    return (red, blue, green)
+    scale_up = lambda x: min(255, x + scale)
+    return tuple(map(scale_up, rgb)) # type: ignore

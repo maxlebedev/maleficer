@@ -1,4 +1,4 @@
-from enum import IntEnum
+from enum import IntEnum, StrEnum
 
 import esper
 import tcod
@@ -7,6 +7,7 @@ import board
 import components as cmp
 import display
 import processors
+import input
 
 FLAGS = tcod.context.SDL_WINDOW_RESIZABLE  # | tcod.context.SDL_WINDOW_FULLSCREEN
 
@@ -41,6 +42,8 @@ def main() -> None:
     esper.add_processor(processors.InputEventProcessor(), priority=5)
     esper.add_processor(processors.NPCProcessor(), priority=4)
     esper.add_processor(processors.DamageProcessor(), priority=3)
+
+    esper.set_handler("target", input.Target.perform)
 
     context_params = {
         "width": display.CONSOLE_WIDTH,

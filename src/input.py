@@ -3,8 +3,6 @@ from enum import Enum
 import tcod
 import yaml
 
-import actions
-
 """
 Clarifying related terms
 
@@ -22,6 +20,7 @@ class Input(Enum):
     MOVE_LEFT = 3
     MOVE_RIGHT = 4
     ESC = 5
+    ONE = 6
 
 
 KeyMap = dict[tcod.event.KeySym, Input]
@@ -49,3 +48,11 @@ def load_keymap(keymap_json_path):
             print(f"Error: {ve}")
 
     return key_map
+
+
+class Target:
+
+    @classmethod
+    def perform(cls):
+        print("I am targeting")
+

@@ -80,11 +80,12 @@ class InputEventProcessor(esper.Processor):
 
         player, _ = esper.get_component(cmp.Player)[0]
         self.action_map = {
-            self.keymap[input.Input.MOVE_DOWN]: (event.Movement, (player, 0, 1)),
-            self.keymap[input.Input.MOVE_LEFT]: (event.Movement, (player, -1, 0)),
-            self.keymap[input.Input.MOVE_UP]: (event.Movement, (player, 0, -1)),
-            self.keymap[input.Input.MOVE_RIGHT]: (event.Movement, (player, 1, 0)),
-            self.keymap[input.Input.ESC]: (self.exit, tuple()),
+            self.keymap[input.Input.MOVE_DOWN]: (event.Movement, [player, 0, 1]),
+            self.keymap[input.Input.MOVE_LEFT]: (event.Movement, [player, -1, 0]),
+            self.keymap[input.Input.MOVE_UP]: (event.Movement, [player, 0, -1]),
+            self.keymap[input.Input.MOVE_RIGHT]: (event.Movement, [player, 1, 0]),
+            self.keymap[input.Input.ESC]: (self.exit, []),
+            self.keymap[input.Input.ONE]: (esper.dispatch_event, ["target"]),
         }
 
     def exit(self):
