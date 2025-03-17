@@ -1,5 +1,7 @@
 from enum import IntEnum
 
+import tcod 
+
 import typ
 
 CONSOLE_WIDTH = 1920
@@ -96,3 +98,22 @@ letter_map = {
 def brighter(rgb: typ.RGB, scale: int) -> typ.RGB:
     scale_up = lambda x: min(255, x + scale)
     return tuple(map(scale_up, rgb))  # type: ignore
+
+def load_tileset(atlas_path: str, width: int, height: int) -> tcod.tileset.Tileset:
+    global Glyph
+    tileset = tcod.tileset.load_tilesheet(atlas_path, width, height, None)
+    idx_to_point = lambda x, y: (x % y, x // y)
+    for letter, val in letter_map.items():
+        xx, yy = idx_to_point(val, width)
+        tileset.remap(ord(letter), xx, yy)
+
+    codepath = 91
+    glyph_map = {}
+    for glyph in Glyph:
+        xx, yy = idx_to_point(glyph.value, width)
+        tileset.remap(codepath, xx, yy)
+        glyph_map[glyph.name] = codepath
+        codepath += 1
+
+    Glyph = IntEnum("Glyph", glyph_map) # type: ignore
+    return tileset
