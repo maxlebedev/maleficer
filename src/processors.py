@@ -86,7 +86,7 @@ class InputEventProcessor(esper.Processor):
             KEYMAP[input.Input.MOVE_UP]: (event.Movement, [player, 0, -1]),
             KEYMAP[input.Input.MOVE_RIGHT]: (event.Movement, [player, 1, 0]),
             KEYMAP[input.Input.ESC]: (self.exit, []),
-            KEYMAP[input.Input.ONE]: (esper.dispatch_event, ["target"]),
+            # KEYMAP[input.Input.ONE]: (esper.dispatch_event, ["target"]),
         }
 
     def exit(self):

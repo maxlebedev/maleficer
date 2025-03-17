@@ -7,6 +7,10 @@ import display
 import components as cmp
 # taken from https://github.com/toptea/roguelike_tutorial/blob/master/src/main.py#L180
 
+class State(StrEnum):
+    GAME = "game"
+    MENU = "menu"
+
 
 class Scene:
     manager = None
@@ -28,11 +32,6 @@ class Game(Scene):
         esper.add_processor(processors.InputEventProcessor(), priority=5)
         esper.add_processor(processors.NPCProcessor(), priority=4)
         esper.add_processor(processors.DamageProcessor(), priority=3)
-
-
-class State(StrEnum):
-    GAME = "game"
-    MENU = "menu"
 
 @dataclass
 class Manager:

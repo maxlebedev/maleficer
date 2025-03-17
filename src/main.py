@@ -40,7 +40,7 @@ def main() -> None:
 
     manager.current_scene.setup()
 
-    esper.set_handler("target", input.Target.perform)
+    # esper.set_handler("target", input.Target.perform)
 
     context_params = {
         "width": display.CONSOLE_WIDTH,
