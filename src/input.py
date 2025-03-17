@@ -23,9 +23,6 @@ class Input(Enum):
     ONE = 6
 
 
-KeyMap = dict[tcod.event.KeySym, Input]
-
-
 def load_keymap(keymap_json_path):
     with open(keymap_json_path, "r") as file:
         keymap_data = yaml.safe_load(file)
@@ -48,11 +45,4 @@ def load_keymap(keymap_json_path):
             print(f"Error: {ve}")
 
     return key_map
-
-
-class Target:
-
-    @classmethod
-    def perform(cls):
-        print("I am targeting")
 

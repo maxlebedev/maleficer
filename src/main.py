@@ -4,17 +4,15 @@ import esper
 import tcod
 
 import board
-import components as cmp
 import display
 import processors
 import input
+import scene
 
 FLAGS = tcod.context.SDL_WINDOW_RESIZABLE  # | tcod.context.SDL_WINDOW_FULLSCREEN
 
-Tileset = tcod.tileset.Tileset
 
-
-def load_custom_tileset(atlas_path: str, width: int, height: int) -> Tileset:
+def load_tileset(atlas_path: str, width: int, height: int) -> tcod.tileset.Tileset:
     tileset = tcod.tileset.load_tilesheet(atlas_path, width, height, None)
     idx_to_point = lambda x, y: (x % y, x // y)
     for letter, val in display.letter_map.items():
@@ -33,15 +31,14 @@ def load_custom_tileset(atlas_path: str, width: int, height: int) -> Tileset:
 
 def main() -> None:
     tile_atlas = "assets/monochrome-transparent_packed.png"
-    tileset = load_custom_tileset(tile_atlas, 49, 22)
+    tileset = load_tileset(tile_atlas, 49, 22)
 
-    visible_cmp = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN)
-    position_cmp = cmp.Position(x=1, y=1)
-    actor = cmp.Actor(hp=10, name="player")
-    esper.create_entity(cmp.Player(), position_cmp, visible_cmp, cmp.Blocking(), actor)
-    esper.add_processor(processors.InputEventProcessor(), priority=5)
-    esper.add_processor(processors.NPCProcessor(), priority=4)
-    esper.add_processor(processors.DamageProcessor(), priority=3)
+    manager = scene.Manager()
+
+    manager.change_scene(scene.State.GAME)
+    esper.delete_world("default")
+
+    manager.current_scene.setup()
 
     esper.set_handler("target", input.Target.perform)
 

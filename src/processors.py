@@ -5,6 +5,7 @@ import esper
 import tcod
 from tcod import libtcodpy
 from tcod.map import compute_fov
+import input
 
 import board
 import components as cmp
@@ -14,6 +15,8 @@ import typ
 
 import event
 
+
+KEYMAP = input.load_keymap("keymap.yaml")
 
 @dataclass
 class MovementProcessor(esper.Processor):
@@ -75,17 +78,15 @@ class DamageProcessor(esper.Processor):
 @dataclass
 class InputEventProcessor(esper.Processor):
     def __init__(self):
-        keymap_path = "keymap.yaml"
-        self.keymap = input.load_keymap(keymap_path)
 
         player, _ = esper.get_component(cmp.Player)[0]
         self.action_map = {
-            self.keymap[input.Input.MOVE_DOWN]: (event.Movement, [player, 0, 1]),
-            self.keymap[input.Input.MOVE_LEFT]: (event.Movement, [player, -1, 0]),
-            self.keymap[input.Input.MOVE_UP]: (event.Movement, [player, 0, -1]),
-            self.keymap[input.Input.MOVE_RIGHT]: (event.Movement, [player, 1, 0]),
-            self.keymap[input.Input.ESC]: (self.exit, []),
-            self.keymap[input.Input.ONE]: (esper.dispatch_event, ["target"]),
+            KEYMAP[input.Input.MOVE_DOWN]: (event.Movement, [player, 0, 1]),
+            KEYMAP[input.Input.MOVE_LEFT]: (event.Movement, [player, -1, 0]),
+            KEYMAP[input.Input.MOVE_UP]: (event.Movement, [player, 0, -1]),
+            KEYMAP[input.Input.MOVE_RIGHT]: (event.Movement, [player, 1, 0]),
+            KEYMAP[input.Input.ESC]: (self.exit, []),
+            KEYMAP[input.Input.ONE]: (esper.dispatch_event, ["target"]),
         }
 
     def exit(self):
@@ -98,7 +99,7 @@ class InputEventProcessor(esper.Processor):
                 # if we ever have other events we care abt, we can dispatch by type
                 if not isinstance(input_event, tcod.event.KeyDown):
                     continue
-                if self.keymap and input_event.sym in self.action_map:
+                if input_event.sym in self.action_map:
                     func, args = self.action_map[input_event.sym]
                     action = func(*args)
         if isinstance(action , event.Movement):
