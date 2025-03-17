@@ -17,6 +17,7 @@ BOARD_WIDTH = (CONSOLE_WIDTH // TILE_SIZE) - PANEL_WIDTH - PANEL_WIDTH
 
 R_PANEL_START = PANEL_WIDTH + BOARD_WIDTH
 
+
 class Color:
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
@@ -94,4 +95,4 @@ letter_map = {
 
 def brighter(rgb: typ.RGB, scale: int) -> typ.RGB:
     scale_up = lambda x: min(255, x + scale)
-    return tuple(map(scale_up, rgb)) # type: ignore
+    return tuple(map(scale_up, rgb))  # type: ignore

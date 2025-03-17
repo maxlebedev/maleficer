@@ -54,5 +54,5 @@ class Enemy:
 @component
 class Actor:  # Destroyable
     name: str
-    hp: int # and a max hp?
+    hp: int  # and a max hp?
     armor: int = 0

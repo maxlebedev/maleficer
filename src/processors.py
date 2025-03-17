@@ -5,18 +5,16 @@ import esper
 import tcod
 from tcod import libtcodpy
 from tcod.map import compute_fov
-import input
 
 import board
 import components as cmp
 import display
+import event
 import input
 import typ
 
-import event
-
-
 KEYMAP = input.load_keymap("keymap.yaml")
+
 
 @dataclass
 class MovementProcessor(esper.Processor):
@@ -48,6 +46,7 @@ class MovementProcessor(esper.Processor):
                 pos.y = new_y
                 self.board.entities[new_x][new_y].add(ent)
 
+
 @dataclass
 class DamageProcessor(esper.Processor):
     def process(self):
@@ -78,7 +77,6 @@ class DamageProcessor(esper.Processor):
 @dataclass
 class InputEventProcessor(esper.Processor):
     def __init__(self):
-
         player, _ = esper.get_component(cmp.Player)[0]
         self.action_map = {
             KEYMAP[input.Input.MOVE_DOWN]: (event.Movement, [player, 0, 1]),
@@ -102,7 +100,7 @@ class InputEventProcessor(esper.Processor):
                 if input_event.sym in self.action_map:
                     func, args = self.action_map[input_event.sym]
                     action = func(*args)
-        if isinstance(action , event.Movement):
+        if isinstance(action, event.Movement):
             event.Queues.movement.append(action)
 
 
@@ -111,7 +109,7 @@ class NPCProcessor(esper.Processor):
     def process(self):
         for entity, _ in esper.get_component(cmp.Enemy):
             dir = random.choice([(0, 1), (0, -1), (1, 0), (-1, 0), (0, 0)])
-            if dir == (0,0):
+            if dir == (0, 0):
                 continue
             move = event.Movement(entity, *dir)
             event.Queues.movement.append(move)
@@ -125,7 +123,6 @@ class RenderProcessor(esper.Processor):
     console: tcod.console.Console
     context: tcod.context.Context
     board: board.Board
-
 
     def render_bar(self, x: int, y: int, curr: int, maximum: int, total_width: int):
         bar_width = int(curr / maximum * total_width)
@@ -163,12 +160,11 @@ class RenderProcessor(esper.Processor):
         self.console.print(2, 3, "NOPQUSTUVWXYZ")
         self.console.print(2, 4, "0123456789.")
         _, (_, actor) = esper.get_components(cmp.Player, cmp.Actor)[0]
-        self.render_bar(1, 5, actor.hp, 10, display.PANEL_WIDTH-2)
+        self.render_bar(1, 5, actor.hp, 10, display.PANEL_WIDTH - 2)
         # right panel
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
         for i, message in enumerate(event.Log.messages):
-            self.console.print(1+display.R_PANEL_START, 1+i, message)
-
+            self.console.print(1 + display.R_PANEL_START, 1 + i, message)
 
     def _apply_lighting(self, cell_rgbs, in_fov) -> list[list[typ.CELL_RGB]]:
         """display cells in fov with lighting, explored without, and hide the rest"""

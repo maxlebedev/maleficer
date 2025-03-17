@@ -45,4 +45,3 @@ def load_keymap(keymap_json_path):
             print(f"Error: {ve}")
 
     return key_map
-
