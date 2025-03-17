@@ -13,8 +13,6 @@ import board
 # scene idea taken from
 # https://github.com/toptea/roguelike_tutorial/blob/master/src/main.py#L180
 
-FLAGS = tcod.context.SDL_WINDOW_RESIZABLE  # | tcod.context.SDL_WINDOW_FULLSCREEN
-
 
 class State(StrEnum):
     GAME = "game"
@@ -24,20 +22,19 @@ class State(StrEnum):
 class Scene:
     manager = None
 
-    def update(self):
-        raise NotImplementedError
-
 
 class MainMenu(Scene):
-    def setup(self):
-        pass
+    def setup(self, context, console):
+
+        render_proc = processors.MenuRenderProcessor(console, context)
+        esper.add_processor(render_proc, priority=6)
+
+        input_proc = processors.MenuInputEventProcessor()
+        esper.add_processor(input_proc, priority=5)
 
 
 class Game(Scene):
-    def setup(self):
-        tile_atlas = "assets/monochrome-transparent_packed.png"
-        tileset = display.load_tileset(tile_atlas, 49, 22)
-
+    def setup(self, context, console):
         visible_cmp = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN)
         position_cmp = cmp.Position(x=1, y=1)
         actor = cmp.Actor(hp=10, name="player")
@@ -48,17 +45,6 @@ class Game(Scene):
         esper.add_processor(processors.NPCProcessor(), priority=4)
         esper.add_processor(processors.DamageProcessor(), priority=3)
 
-        context_params = {
-            "width": display.CONSOLE_WIDTH,
-            "height": display.CONSOLE_HEIGHT,
-            "tileset": tileset,
-            "sdl_window_flags": FLAGS,
-            "title": "Maleficer",
-            "vsync": True,
-        }
-
-        context = tcod.context.new(**context_params)
-        console = context.new_console(order="F")
         game_board = board.Board()
         render_proc = processors.RenderProcessor(console, context, game_board)
         esper.add_processor(render_proc, priority=6)
@@ -76,7 +62,8 @@ class Manager:
     }
     current_scene = scene[State.MENU]
 
-    def change_scene(self, state: State):
+    @classmethod
+    def change_scene(cls, state: State):
         # TODO: state machine, error handling
-        self.current_scene = self.scene[state]
+        cls.current_scene = cls.scene[state]
         esper.switch_world(state)

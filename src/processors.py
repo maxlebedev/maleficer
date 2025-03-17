@@ -12,6 +12,7 @@ import display
 import event
 import input
 import typ
+import scene
 
 KEYMAP = input.load_keymap("keymap.yaml")
 
@@ -78,13 +79,14 @@ class DamageProcessor(esper.Processor):
 class InputEventProcessor(esper.Processor):
     def __init__(self):
         player, _ = esper.get_component(cmp.Player)[0]
+        to_menu_scene = (esper.dispatch_event, ["change_scene", scene.State.MENU])
         self.action_map = {
             KEYMAP[input.Input.MOVE_DOWN]: (event.Movement, [player, 0, 1]),
             KEYMAP[input.Input.MOVE_LEFT]: (event.Movement, [player, -1, 0]),
             KEYMAP[input.Input.MOVE_UP]: (event.Movement, [player, 0, -1]),
             KEYMAP[input.Input.MOVE_RIGHT]: (event.Movement, [player, 1, 0]),
             KEYMAP[input.Input.ESC]: (self.exit, []),
-            # KEYMAP[input.Input.ONE]: (esper.dispatch_event, ["target"]),
+            KEYMAP[input.Input.ONE]: to_menu_scene,
         }
 
     def exit(self):
@@ -100,6 +102,8 @@ class InputEventProcessor(esper.Processor):
                 if input_event.sym in self.action_map:
                     func, args = self.action_map[input_event.sym]
                     action = func(*args)
+                    if func == esper.dispatch_event:
+                        action = True
         if isinstance(action, event.Movement):
             event.Queues.movement.append(action)
 
@@ -207,3 +211,37 @@ class RenderProcessor(esper.Processor):
         self.console.rgb[startx:endx, starty:endy] = cell_rgbs
 
         self.context.present(self.console)  # , integer_scaling=True
+
+@dataclass
+class MenuRenderProcessor(esper.Processor):
+    console: tcod.console.Console
+    context: tcod.context.Context
+
+    def process(self):
+        self.console.clear()
+        self.console.print(4, 8, "THIS IS THE MENU")
+        self.context.present(self.console)  # , integer_scaling=True
+
+
+@dataclass
+class MenuInputEventProcessor(esper.Processor):
+    def __init__(self):
+        to_game_scene = (esper.dispatch_event, ["change_scene", scene.State.GAME])
+        self.action_map = {
+            KEYMAP[input.Input.ESC]: to_game_scene,
+        }
+
+    def exit(self):
+        raise SystemExit()
+
+    def process(self):
+        action = None
+        while not action:
+            for input_event in tcod.event.wait():
+                if not isinstance(input_event, tcod.event.KeyDown):
+                    continue
+                if input_event.sym in self.action_map:
+                    func, args = self.action_map[input_event.sym]
+                    action = func(*args)
+                    if func == esper.dispatch_event:
+                        action = True
