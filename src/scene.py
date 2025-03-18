@@ -41,7 +41,7 @@ class Game(Scene):
         esper.create_entity(
             cmp.Player(), position_cmp, visible_cmp, cmp.Blocking(), actor
         )
-        esper.add_processor(processors.InputEventProcessor(), priority=5)
+        esper.add_processor(processors.GameInputEventProcessor(), priority=5)
         esper.add_processor(processors.NPCProcessor(), priority=4)
         esper.add_processor(processors.DamageProcessor(), priority=3)
 
