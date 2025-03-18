@@ -85,8 +85,8 @@ class InputEventProcessor(esper.Processor):
             KEYMAP[input.Input.MOVE_LEFT]: (event.Movement, [player, -1, 0]),
             KEYMAP[input.Input.MOVE_UP]: (event.Movement, [player, 0, -1]),
             KEYMAP[input.Input.MOVE_RIGHT]: (event.Movement, [player, 1, 0]),
-            KEYMAP[input.Input.ESC]: (self.exit, []),
-            KEYMAP[input.Input.ONE]: to_menu_scene,
+            KEYMAP[input.Input.ESC]: to_menu_scene,
+            # KEYMAP[input.Input.ONE]: to_menu_scene,
         }
 
     def exit(self):
@@ -219,7 +219,9 @@ class MenuRenderProcessor(esper.Processor):
 
     def process(self):
         self.console.clear()
-        self.console.print(4, 8, "THIS IS THE MENU")
+        x = display.PANEL_WIDTH + (display.BOARD_WIDTH // 2)
+        y = display.BOARD_HEIGHT // 2
+        self.console.print(x, y, "WELCOME TO MALEFICER", alignment=libtcodpy.CENTER)
         self.context.present(self.console)  # , integer_scaling=True
 
 
@@ -228,7 +230,8 @@ class MenuInputEventProcessor(esper.Processor):
     def __init__(self):
         to_game_scene = (esper.dispatch_event, ["change_scene", scene.State.GAME])
         self.action_map = {
-            KEYMAP[input.Input.ESC]: to_game_scene,
+            KEYMAP[input.Input.ESC]: (self.exit, []),
+            KEYMAP[input.Input.SELECT]: to_game_scene,
         }
 
     def exit(self):

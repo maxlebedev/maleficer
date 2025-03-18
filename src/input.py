@@ -21,6 +21,7 @@ class Input(Enum):
     MOVE_RIGHT = 4
     ESC = 5
     ONE = 6
+    SELECT = 7
 
 
 def load_keymap(keymap_json_path):
