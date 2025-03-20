@@ -2,12 +2,12 @@ from dataclasses import dataclass
 from enum import StrEnum
 
 import esper
-import tcod
 
 import components as cmp
 import display
 import processors
 import board
+import input
 
 
 # scene idea taken from
@@ -26,7 +26,7 @@ class Scene:
 class MainMenu(Scene):
     def setup(self, context, console):
 
-        render_proc = processors.MenuRenderProcessor(console, context)
+        render_proc = processors.MenuRenderProcessor(context, console)
         esper.add_processor(render_proc, priority=6)
 
         input_proc = processors.MenuInputEventProcessor()
@@ -50,6 +50,10 @@ class Game(Scene):
         esper.add_processor(render_proc, priority=6)
         esper.add_processor(processors.MovementProcessor(game_board))
         board.generate_dungeon(game_board)
+
+        esper.set_handler("target", input.target) # this errors on exit
+        esper.remove_handler("target", input.target) # this doesn't actually remove
+
 
 
 @dataclass

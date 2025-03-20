@@ -1,4 +1,5 @@
 from enum import IntEnum
+import itertools
 
 import tcod 
 
@@ -7,6 +8,8 @@ import typ
 CONSOLE_WIDTH = 1920
 CONSOLE_HEIGHT = 1080
 TILE_SIZE = 16
+TS_WIDTH = 49
+TS_HEIGHT = 22
 
 
 PANEL_WIDTH = 27  # 42
@@ -94,26 +97,30 @@ letter_map = {
     "Z": 978,
 }
 
+def _idx_to_point(x, y):
+    return (x % y, x // y)
+
 
 def brighter(rgb: typ.RGB, scale: int) -> typ.RGB:
     scale_up = lambda x: min(255, x + scale)
     return tuple(map(scale_up, rgb))  # type: ignore
 
+
 def load_tileset(atlas_path: str, width: int, height: int) -> tcod.tileset.Tileset:
-    global Glyph
     tileset = tcod.tileset.load_tilesheet(atlas_path, width, height, None)
-    idx_to_point = lambda x, y: (x % y, x // y)
     for letter, val in letter_map.items():
-        xx, yy = idx_to_point(val, width)
+        xx, yy = _idx_to_point(val, width)
         tileset.remap(ord(letter), xx, yy)
 
-    codepath = 91
-    glyph_map = {}
+    codepath = itertools.count(91)
     for glyph in Glyph:
-        xx, yy = idx_to_point(glyph.value, width)
-        tileset.remap(codepath, xx, yy)
-        glyph_map[glyph.name] = codepath
-        codepath += 1
+        xx, yy = _idx_to_point(glyph.value, width)
+        tileset.remap(next(codepath), xx, yy)
 
-    Glyph = IntEnum("Glyph", glyph_map) # type: ignore
     return tileset
+
+def remap_glyphs():
+    codepath = itertools.count(91)
+    glyph_map = {glyph.name:next(codepath) for glyph in Glyph}
+
+    return IntEnum("Glyph", glyph_map)

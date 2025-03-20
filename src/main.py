@@ -1,5 +1,4 @@
-from enum import IntEnum, StrEnum
-
+from enum import IntEnum
 import esper
 import tcod
 
@@ -11,11 +10,12 @@ FLAGS = tcod.context.SDL_WINDOW_RESIZABLE  # | tcod.context.SDL_WINDOW_FULLSCREE
 
 
 def main() -> None:
-    scene.Manager.change_scene(scene.State.MENU)
+    scene.Manager.change_scene(scene.State.GAME)
     esper.delete_world("default")
 
     tile_atlas = "assets/monochrome-transparent_packed.png"
-    tileset = display.load_tileset(tile_atlas, 49, 22)
+    tileset = display.load_tileset(tile_atlas, display.TS_WIDTH, display.TS_HEIGHT)
+    display.Glyph = display.remap_glyphs()
 
     context_params = {
         "width": display.CONSOLE_WIDTH,
@@ -32,6 +32,7 @@ def main() -> None:
         scene.Manager.change_scene(state)
         scene.Manager.current_scene.setup(context, console)
         esper.set_handler("change_scene", scene.Manager.change_scene)
+    scene.Manager.change_scene(scene.State.MENU)
 
     while True:
         esper.process()
