@@ -8,6 +8,7 @@ import display
 import processors
 import board
 import input
+import event
 
 
 # scene idea taken from
@@ -51,10 +52,6 @@ class Game(Scene):
         esper.add_processor(processors.MovementProcessor(game_board))
         board.generate_dungeon(game_board)
 
-        esper.set_handler("target", input.target) # this errors on exit
-        esper.remove_handler("target", input.target) # this doesn't actually remove
-
-
 
 @dataclass
 class Manager:
@@ -71,3 +68,10 @@ class Manager:
         # TODO: state machine, error handling
         cls.current_scene = cls.scene[state]
         esper.switch_world(state)
+        if state == State.MENU:
+            event.GameState.set_current(event.GameState.Group.menu)
+        if state == State.GAME:
+            event.GameState.set_current(event.GameState.Group.player)
+
+# TODO: replace most of this with the gamestate thing
+# then move it from event to scene

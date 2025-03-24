@@ -13,13 +13,24 @@ import event
 import input
 import typ
 import scene
+from functools import wraps
 
+
+def phase_aware(func):
+    @wraps(func)
+    def should_run(self):
+        if event.GameState.proc_in_turn(self):
+            func(self)
+        else:
+            print(f"{self} not running")
+    return should_run
 
 
 @dataclass
 class MovementProcessor(esper.Processor):
     board: board.Board
 
+    @phase_aware
     def process(self):
         while event.Queues.movement:
             movement = event.Queues.movement.pop()
@@ -45,6 +56,7 @@ class MovementProcessor(esper.Processor):
                 pos.x = new_x
                 pos.y = new_y
                 self.board.entities[new_x][new_y].add(ent)
+                event.GameState.to_enemy()
 
 
 @dataclass
@@ -101,19 +113,21 @@ class GameInputEventProcessor(InputEventProcessor):
     def __init__(self):
         player, _ = esper.get_component(cmp.Player)[0]
         to_menu_scene = (esper.dispatch_event, ["change_scene", scene.State.MENU])
-        to_target = (esper.dispatch_event, ["target"])
+        # to_target = (esper.dispatch_event, ["target"])
         self.action_map = {
             input.KEYMAP[input.Input.MOVE_DOWN]: (event.Movement, [player, 0, 1]),
             input.KEYMAP[input.Input.MOVE_LEFT]: (event.Movement, [player, -1, 0]),
             input.KEYMAP[input.Input.MOVE_UP]: (event.Movement, [player, 0, -1]),
             input.KEYMAP[input.Input.MOVE_RIGHT]: (event.Movement, [player, 1, 0]),
             input.KEYMAP[input.Input.ESC]: to_menu_scene,
-            input.KEYMAP[input.Input.ONE]: to_target,
+            # input.KEYMAP[input.Input.ONE]: to_target,
         }
 
 
 @dataclass
 class NPCProcessor(esper.Processor):
+
+    @phase_aware
     def process(self):
         for entity, _ in esper.get_component(cmp.Enemy):
             dir = random.choice([(0, 1), (0, -1), (1, 0), (-1, 0), (0, 0)])
@@ -124,6 +138,8 @@ class NPCProcessor(esper.Processor):
             # consider the move processor potentially sending a Bump event,
             # and then reading that event (this means this proc runs twice?)
             # this lets each NPC decide what behavior to have on a bump
+
+        event.GameState.to_player()
 
 
 @dataclass
@@ -231,6 +247,15 @@ class MenuRenderProcessor(esper.Processor):
 
 @dataclass
 class MenuInputEventProcessor(InputEventProcessor):
+    def __init__(self):
+        to_game_scene = (esper.dispatch_event, ["change_scene", scene.State.GAME])
+        self.action_map = {
+            input.KEYMAP[input.Input.ESC]: (self.exit, []),
+            input.KEYMAP[input.Input.SELECT]: to_game_scene,
+        }
+
+@dataclass
+class TargetInputEventProcessor(InputEventProcessor):
     def __init__(self):
         to_game_scene = (esper.dispatch_event, ["change_scene", scene.State.GAME])
         self.action_map = {
