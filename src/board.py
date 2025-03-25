@@ -1,4 +1,4 @@
-# do we store info about the board size here, or still display?
+# TODO: do we store info about the board size here, or still display?
 
 import random
 from dataclasses import dataclass
@@ -14,8 +14,6 @@ import typ
 class Board:
     """
     Note: the cell matrix is stored as columns, so [x][y] is the right acces pattern
-    component access
-    pos = esper.component_for_entity(cell, cmp.Position)
     """
 
     cells: list[list[typ.CELL]] = []
@@ -167,9 +165,7 @@ def intersects(board: Board, src: RectangularRoom, target: RectangularRoom) -> b
     return bool(set(src_cells) & (set(target_cells)))
 
 
-def closest_coordinate(
-    origin: typ.POSITION, coordinates: list[typ.POSITION]
-) -> typ.POSITION:
+def closest_position(start: typ.POSITION, position: list[typ.POSITION]) -> typ.POSITION:
     def euclidean_distance(x1, y1, x2, y2):
         return pow(pow(x2 - x1, 2) + pow(y2 - y1, 2), 0.5)
 
@@ -178,13 +174,13 @@ def closest_coordinate(
     closest_coord = None
 
     # Iterate through the list of coordinates and find the closest one
-    for x2, y2 in coordinates:
-        distance = euclidean_distance(origin[0], origin[1], x2, y2)
+    for x2, y2 in position:
+        distance = euclidean_distance(start[0], start[1], x2, y2)
         if distance < closest_dist:
             closest_dist = distance
             closest_coord = (x2, y2)
 
-    return closest_coord or origin
+    return closest_coord or start
 
 
 def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
@@ -210,7 +206,7 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
             _, (_, pos) = esper.get_components(cmp.Player, cmp.Position)[0]
             pos.x, pos.y = new_room.center
         else:  # All rooms after the first get one tunnel and bat
-            endpt = closest_coordinate(new_room.center, centers[:-1])
+            endpt = closest_position(new_room.center, centers[:-1])
             tunnel_between(board, new_room.center, endpt)
             board.make_bat(*new_room.center)
 

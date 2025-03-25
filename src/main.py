@@ -2,7 +2,6 @@ import esper
 import tcod
 
 import display
-import event
 import scene
 
 FLAGS = tcod.context.SDL_WINDOW_RESIZABLE  # | tcod.context.SDL_WINDOW_FULLSCREEN
