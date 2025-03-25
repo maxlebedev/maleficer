@@ -52,23 +52,3 @@ def load_keymap(keymap_json_path):
 
 
 KEYMAP = load_keymap("keymap.yaml")
-
-
-def target(): # TODO: takes a board?
-    print("in target")
-    _, (_, pos) = esper.get_components(cmp.Player, cmp.Position)[0]
-    fov_source = (pos.x, pos.y)
-    done = False
-    while not done:
-        for input_event in tcod.event.wait():
-            # if we ever have other events we care abt, we can dispatch by type
-            if not isinstance(input_event, tcod.event.KeyDown):
-                continue
-            if input_event.sym == KEYMAP[Input.MOVE_DOWN]:
-                fov_source = (fov_source[0],fov_source[1]+1)
-                print("Down")
-            elif input_event.sym == KEYMAP[Input.MOVE_UP]:
-                fov_source = (fov_source[0],fov_source[1]-1)
-                print("UP")
-            elif input_event.sym == KEYMAP[Input.ESC]:
-                done = True

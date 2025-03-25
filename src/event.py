@@ -12,6 +12,7 @@ import display
 
 class Log:
     """Messages to be displayed in in-game log"""
+
     messages: list = []
 
     @classmethod
@@ -24,6 +25,7 @@ class Log:
 
 class Queues:
     """global queues that help one processor delegate an action to another"""
+
     movement = collections.deque()
     damage = collections.deque()
 

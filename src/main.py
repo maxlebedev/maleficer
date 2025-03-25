@@ -9,7 +9,6 @@ FLAGS = tcod.context.SDL_WINDOW_RESIZABLE  # | tcod.context.SDL_WINDOW_FULLSCREE
 
 
 def main() -> None:
-
     tile_atlas = "assets/monochrome-transparent_packed.png"
     tileset = display.load_tileset(tile_atlas, display.TS_WIDTH, display.TS_HEIGHT)
     display.Glyph = display.remap_glyphs()
@@ -28,7 +27,6 @@ def main() -> None:
     scene.main_menu_setup(context, console)
     scene.board_setup(context, console)
     scene.to_phase(scene.Phase.menu)
-
 
     while True:
         esper.process()

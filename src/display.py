@@ -97,6 +97,7 @@ letter_map = {
     "Z": 978,
 }
 
+
 def _idx_to_point(x, y):
     return (x % y, x // y)
 
@@ -119,8 +120,9 @@ def load_tileset(atlas_path: str, width: int, height: int) -> tcod.tileset.Tiles
 
     return tileset
 
+
 def remap_glyphs():
     codepath = itertools.count(91)
-    glyph_map = {glyph.name:next(codepath) for glyph in Glyph}
+    glyph_map = {glyph.name: next(codepath) for glyph in Glyph}
 
     return IntEnum("Glyph", glyph_map)

@@ -27,9 +27,7 @@ def board_setup(context, console):
     visible_cmp = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN)
     position_cmp = cmp.Position(x=1, y=1)
     actor = cmp.Actor(hp=10, name="player")
-    esper.create_entity(
-        cmp.Player(), position_cmp, visible_cmp, cmp.Blocking(), actor
-    )
+    esper.create_entity(cmp.Player(), position_cmp, visible_cmp, cmp.Blocking(), actor)
     input_proc = processors.GameInputEventProcessor()
     npc_proc = processors.NPCProcessor()
     damage_proc = processors.DamageProcessor()
@@ -48,4 +46,4 @@ def to_phase(phase: Phase):
     esper._processors = []
     for i, proc in enumerate(PHASES[phase]):
         esper.add_processor(proc, priority=i)
-    return True # returning True for InputEventProcessor reasons
+    return True  # returning True for InputEventProcessor reasons

@@ -25,7 +25,7 @@ class MovementProcessor(esper.Processor):
             ent = movement.source
             move_x = movement.x
             move_y = movement.y
-            if not esper.entity_exists(ent): # entity intends to move, but dies first
+            if not esper.entity_exists(ent):  # entity intends to move, but dies first
                 continue
 
             pos = esper.component_for_entity(ent, cmp.Position)
@@ -74,6 +74,7 @@ class DamageProcessor(esper.Processor):
         # this probably not where we process death
         # death can potentially happen without damage
 
+
 @dataclass
 class InputEventProcessor(esper.Processor):
     action_map = {}
@@ -113,7 +114,6 @@ class GameInputEventProcessor(InputEventProcessor):
 
 @dataclass
 class NPCProcessor(esper.Processor):
-
     def process(self):
         for entity, _ in esper.get_component(cmp.Enemy):
             dir = random.choice([(0, 1), (0, -1), (1, 0), (-1, 0), (0, 0)])
@@ -216,6 +216,7 @@ class BoardRenderProcessor(esper.Processor):
 
         self.context.present(self.console)  # , integer_scaling=True
 
+
 @dataclass
 class MenuRenderProcessor(esper.Processor):
     context: tcod.context.Context
@@ -236,6 +237,7 @@ class MenuInputEventProcessor(InputEventProcessor):
             input.KEYMAP[input.Input.ESC]: (self.exit, []),
             input.KEYMAP[input.Input.SELECT]: (scene.to_phase, [scene.Phase.board]),
         }
+
 
 @dataclass
 class TargetInputEventProcessor(InputEventProcessor):
