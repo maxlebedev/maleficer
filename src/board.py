@@ -147,11 +147,10 @@ def tunnel_between(board, start: typ.POSITION, end: typ.POSITION):
     """Return an L-shaped tunnel between these two points."""
     x1, y1 = start
     x2, y2 = end
-    if random.random() < 0.5:
-        # Move horizontally, then vertically.
+    horizontal_then_vertical = random.random() < 0.5
+    if horizontal_then_vertical:
         corner_x, corner_y = x2, y1
     else:
-        # Move vertically, then horizontally.
         corner_x, corner_y = x1, y2
 
     # Generate the coordinates for this tunnel.

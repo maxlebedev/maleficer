@@ -1,7 +1,7 @@
-from enum import IntEnum
 import itertools
+from enum import IntEnum
 
-import tcod 
+import tcod
 
 import typ
 

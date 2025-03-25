@@ -1,11 +1,8 @@
 import collections
 import textwrap
 from dataclasses import dataclass
-import enum
-import esper
 
 import display
-import processors as procs
 
 # an event is somethig that happens
 # an action is somthing someone did
@@ -14,6 +11,7 @@ import processors as procs
 
 
 class Log:
+    """Messages to be displayed in in-game log"""
     messages: list = []
 
     @classmethod
@@ -24,8 +22,8 @@ class Log:
         cls.messages = cls.messages[-display.PANEL_HEIGHT - 2 :]
 
 
-# global queues that help one processor delegate an action to another
 class Queues:
+    """global queues that help one processor delegate an action to another"""
     movement = collections.deque()
     damage = collections.deque()
 
@@ -42,62 +40,3 @@ class Movement:
     source: int
     x: int
     y: int
-
-
-"""
-consider this turn model:
-    we have a gamestate enum
-    there are functions that form a state machine over the enum
-    the processors are assigned to specific gamestates, and don't run outside of those
-    the proc consults GameState.proc_in_turn, and exits early if not
-
-This also means we don't need a target event
-
-"""
-
-class GameState:
-    # Note these GameState are unrelated to scenes
-    class Group(enum.Enum):
-        player = enum.auto()
-        render = enum.auto()
-        enemy = enum.auto()
-        target = enum.auto()
-        menu = enum.auto()
-
-    turn_procs: dict
-    current: Group
-
-    @classmethod
-    def set_current(cls, group: Group):
-        # TODO: sate machine checks
-        cls.current = group
-
-    @classmethod
-    def to_player(cls):
-        cls.set_current(cls.Group.player)
-
-    @classmethod
-    def to_menu(cls):
-        cls.set_current(cls.Group.menu)
-
-    @classmethod
-    def to_enemy(cls):
-        cls.set_current(cls.Group.enemy)
-
-    @classmethod
-    def setup(cls):
-        cls.turn_procs = {
-            cls.Group.player: {procs.GameInputEventProcessor,
-                               procs.RenderProcessor,
-                               procs.MovementProcessor,
-                               },
-            cls.Group.enemy: {procs.NPCProcessor},
-            # TODO: actually render happens elsewhere
-            cls.Group.menu: {procs.MenuInputEventProcessor, procs.MenuRenderProcessor},
-        }
-        cls.current = cls.Group.player
-
-    @classmethod
-    def proc_in_turn(cls, proc: esper.Processor) -> bool:
-        return type(proc) in cls.turn_procs[cls.current]
-

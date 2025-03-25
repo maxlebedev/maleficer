@@ -1,8 +1,9 @@
 from enum import Enum
 
+import esper
 import tcod
 import yaml
-import esper
+
 import components as cmp
 
 """
