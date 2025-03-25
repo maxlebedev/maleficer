@@ -108,7 +108,7 @@ class GameInputEventProcessor(InputEventProcessor):
             input.KEYMAP[input.Input.MOVE_UP]: (event.Movement, [player, 0, -1]),
             input.KEYMAP[input.Input.MOVE_RIGHT]: (event.Movement, [player, 1, 0]),
             input.KEYMAP[input.Input.ESC]: (scene.to_phase, [scene.Phase.menu]),
-            # input.KEYMAP[input.Input.ONE]: to_target,
+            input.KEYMAP[input.Input.ONE]: (scene.to_phase, [scene.Phase.target]),
         }
 
 
@@ -235,15 +235,26 @@ class MenuInputEventProcessor(InputEventProcessor):
     def __init__(self):
         self.action_map = {
             input.KEYMAP[input.Input.ESC]: (self.exit, []),
-            input.KEYMAP[input.Input.SELECT]: (scene.to_phase, [scene.Phase.board]),
+            input.KEYMAP[input.Input.SELECT]: (scene.to_phase, [scene.Phase.level]),
         }
 
 
 @dataclass
 class TargetInputEventProcessor(InputEventProcessor):
     def __init__(self):
-        to_game_scene = (esper.dispatch_event, ["change_scene", scene.State.GAME])
+        crosshair, _ = esper.get_component(cmp.Crosshair)[0]
         self.action_map = {
-            input.KEYMAP[input.Input.ESC]: (self.exit, []),
-            input.KEYMAP[input.Input.SELECT]: to_game_scene,
+            input.KEYMAP[input.Input.MOVE_DOWN]: (event.Movement, [crosshair, 0, 1]),
+            input.KEYMAP[input.Input.MOVE_LEFT]: (event.Movement, [crosshair, -1, 0]),
+            input.KEYMAP[input.Input.MOVE_UP]: (event.Movement, [crosshair, 0, -1]),
+            input.KEYMAP[input.Input.MOVE_RIGHT]: (event.Movement, [crosshair, 1, 0]),
+            # input.KEYMAP[input.Input.ESC]: (self.exit, []),
+            input.KEYMAP[input.Input.ESC]: (scene.to_phase, [scene.Phase.level]),
         }
+
+
+@dataclass
+class TargetRenderProcessor(InputEventProcessor):
+    # the crosshair as a glyph gets blocked, and covers other glyphs.
+    # better as a set of bg colors?
+    pass

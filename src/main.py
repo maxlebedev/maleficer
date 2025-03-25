@@ -3,6 +3,7 @@ import tcod
 
 import display
 import scene
+import board
 
 FLAGS = tcod.context.SDL_WINDOW_RESIZABLE  # | tcod.context.SDL_WINDOW_FULLSCREEN
 
@@ -23,8 +24,11 @@ def main() -> None:
     context = tcod.context.new(**context_params)
     console = context.new_console(order="F")
 
+    game_board = board.Board()
+
     scene.main_menu_setup(context, console)
-    scene.board_setup(context, console)
+    scene.level_setup(context, console, game_board)
+    scene.targeting_setup(context, console, game_board)
     scene.to_phase(scene.Phase.menu)
 
     while True:

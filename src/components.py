@@ -56,3 +56,7 @@ class Actor:  # Destroyable
     name: str
     hp: int  # and a max hp?
     armor: int = 0
+
+@component
+class Crosshair:
+    pass

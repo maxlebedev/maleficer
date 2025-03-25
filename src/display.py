@@ -39,7 +39,7 @@ class Color:
 
 
 class Glyph(IntEnum):
-    # ints are all overwritten at asset load time
+    # ints are all overwritten at asset load time, so import-time uses are discouraged
     NONE = 0
     FLOOR = 3
     WALL = 637
@@ -54,6 +54,7 @@ class Glyph(IntEnum):
     FRAME8 = 1046
     FRAME9 = 1047
     BAT = 418
+    CROSSHAIR = 711
 
 
 letter_map = {
