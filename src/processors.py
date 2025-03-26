@@ -6,7 +6,7 @@ import tcod
 from tcod import libtcodpy
 from tcod.map import compute_fov
 
-import board
+import location
 import components as cmp
 import display
 import event
@@ -17,7 +17,7 @@ import typ
 
 @dataclass
 class MovementProcessor(esper.Processor):
-    board: board.Board
+    board: location.Board
 
     def process(self):
         while event.Queues.movement:
@@ -125,13 +125,10 @@ class NPCProcessor(esper.Processor):
             # and then reading that event (this means this proc runs twice?)
             # this lets each NPC decide what behavior to have on a bump
 
-
 @dataclass
-class BoardRenderProcessor(esper.Processor):
+class RenderProcessor(esper.Processor):
     console: tcod.console.Console
     context: tcod.context.Context
-    board: board.Board
-
     def render_bar(self, x: int, y: int, curr: int, maximum: int, total_width: int):
         bar_width = int(curr / maximum * total_width)
         bg = display.Color.BAR_EMPTY
@@ -174,22 +171,30 @@ class BoardRenderProcessor(esper.Processor):
         for i, message in enumerate(event.Log.messages):
             self.console.print(1 + display.R_PANEL_START, 1 + i, message)
 
-    def _apply_lighting(self, cell_rgbs, in_fov) -> list[list[typ.CELL_RGB]]:
+    def _apply_lighting(self, gameboard, cell_rgbs, in_fov) -> list[list[typ.CELL_RGB]]:
         """display cells in fov with lighting, explored without, and hide the rest"""
         for x, col in enumerate(cell_rgbs):
             for y, (glyph, fgcolor, _) in enumerate(col):
-                cell = self.board.get_cell(x, y)
+                cell = gameboard.get_cell(x, y)
                 if not cell:
                     continue
                 if in_fov[x][y]:
-                    self.board.explored.add(cell)
+                    gameboard.explored.add(cell)
                     brighter = display.brighter(fgcolor, scale=100)
                     cell_rgbs[x][y] = (glyph, brighter, display.Color.CANDLE)
-                elif cell in self.board.explored:
+                elif cell in gameboard.explored:
                     cell_rgbs[x][y] = (glyph, fgcolor, display.Color.BLACK)
                 else:
                     cell_rgbs[x][y] = (glyph, display.Color.BLACK, display.Color.BLACK)
         return cell_rgbs
+
+
+
+@dataclass
+class BoardRenderProcessor(RenderProcessor):
+    console: tcod.console.Console
+    context: tcod.context.Context
+    board: location.Board
 
     def process(self):
         self.console.clear()
@@ -198,7 +203,7 @@ class BoardRenderProcessor(esper.Processor):
         cell_rgbs = [list(map(self.board.as_rgb, row)) for row in self.board.cells]
 
         transparency = self.board.as_transparency()
-        _, (_, pos) = esper.get_components(cmp.Player, cmp.Position)[0]
+        pos = location.player_position()
         algo = libtcodpy.FOV_SHADOW
         in_fov = compute_fov(transparency, (pos.x, pos.y), radius=4, algorithm=algo)
 
@@ -208,14 +213,13 @@ class BoardRenderProcessor(esper.Processor):
                 continue
             cell_rgbs[pos.x][pos.y] = (vis.glyph, vis.color, vis.bg_color)
 
-        cell_rgbs = self._apply_lighting(cell_rgbs, in_fov)
+        cell_rgbs = self._apply_lighting(self.board, cell_rgbs, in_fov)
 
         startx, endx = (display.PANEL_WIDTH, display.R_PANEL_START)
         starty, endy = (0, display.BOARD_HEIGHT)
         self.console.rgb[startx:endx, starty:endy] = cell_rgbs
 
         self.context.present(self.console)  # , integer_scaling=True
-
 
 @dataclass
 class MenuRenderProcessor(esper.Processor):
@@ -254,7 +258,36 @@ class TargetInputEventProcessor(InputEventProcessor):
 
 
 @dataclass
-class TargetRenderProcessor(InputEventProcessor):
-    # the crosshair as a glyph gets blocked, and covers other glyphs.
-    # better as a set of bg colors?
-    pass
+class TargetRenderProcessor(RenderProcessor):
+    console: tcod.console.Console
+    context: tcod.context.Context
+    board: location.Board
+
+    def process(self) -> None:
+        # TODO: DRY this up
+        self.console.clear()
+        self._draw_panels()
+
+        cell_rgbs = [list(map(self.board.as_rgb, row)) for row in self.board.cells]
+
+        transparency = self.board.as_transparency()
+        pos = location.player_position()
+        algo = libtcodpy.FOV_SHADOW
+        in_fov = compute_fov(transparency, (pos.x, pos.y), radius=4, algorithm=algo)
+
+        drawable_entities = esper.get_components(cmp.Position, cmp.Visible)
+        for entity, (pos, vis) in drawable_entities:
+            if esper.has_component(entity, cmp.Cell) or not in_fov[pos.x][pos.y]:
+                continue
+            cell_rgbs[pos.x][pos.y] = (vis.glyph, vis.color, vis.bg_color)
+
+        cell_rgbs = self._apply_lighting(self.board, cell_rgbs, in_fov)
+
+        drawable_areas = esper.get_components(cmp.Position, cmp.EffectArea)
+        for _, (pos, aoe) in drawable_areas:
+            cell = cell_rgbs[pos.x][pos.y]
+            cell_rgbs[pos.x][pos.y] = cell[0], cell[1], aoe.color
+        startx, endx = (display.PANEL_WIDTH, display.R_PANEL_START)
+        starty, endy = (0, display.BOARD_HEIGHT)
+        self.console.rgb[startx:endx, starty:endy] = cell_rgbs
+        self.context.present(self.console)  # , integer_scaling=True

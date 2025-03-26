@@ -31,6 +31,7 @@ class Visible:
 
 @component
 class Transparent:
+    """does not block light"""
     pass
 
 
@@ -60,3 +61,8 @@ class Actor:  # Destroyable
 @component
 class Crosshair:
     pass
+
+@component
+class EffectArea:
+    color: typ.RGB
+    # radius/cell set/aoe formula?

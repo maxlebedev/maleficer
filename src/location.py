@@ -10,6 +10,10 @@ import components as cmp
 import display
 import typ
 
+def player_position():
+    # TODO: fine to crash if player missing?
+    _, (_, pos) = esper.get_components(cmp.Player, cmp.Position)[0]
+    return pos
 
 class Board:
     """
@@ -203,7 +207,7 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
             board.set_cell(pos.x, pos.y, board.make_floor(pos.x, pos.y))
 
         if len(rooms) == 0:  # start player in first room
-            _, (_, pos) = esper.get_components(cmp.Player, cmp.Position)[0]
+            pos = player_position()
             pos.x, pos.y = new_room.center
         else:  # All rooms after the first get one tunnel and bat
             endpt = closest_position(new_room.center, centers[:-1])

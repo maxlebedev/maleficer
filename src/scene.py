@@ -2,7 +2,7 @@ import enum
 
 import esper
 
-import board
+import location
 import components as cmp
 import display
 import processors
@@ -34,22 +34,22 @@ def level_setup(context, console, game_board):
 
     render_proc = processors.BoardRenderProcessor(console, context, game_board)
     movement_proc = processors.MovementProcessor(game_board)
-    board.generate_dungeon(game_board)
+    location.generate_dungeon(game_board)
 
     level_procs = [input_proc, npc_proc, damage_proc, render_proc, movement_proc]
     PHASES[Phase.level] = level_procs
 
 def targeting_setup(context, console, game_board):
-    _, (_, pos) = esper.get_components(cmp.Player, cmp.Position)[0]
+    pos = location.player_position()
 
-    visible_cmp = cmp.Visible(glyph=display.Glyph.CROSSHAIR, color=display.Color.RED)
+    aoe_cmp = cmp.EffectArea(color=display.Color.RED)
     position_cmp = cmp.Position(x=pos.x, y=pos.y)
-    esper.create_entity(cmp.Crosshair(), position_cmp, visible_cmp)
+    esper.create_entity(cmp.Crosshair(), position_cmp, aoe_cmp)
 
     input_proc = processors.TargetInputEventProcessor()
-    render_proc = processors.BoardRenderProcessor(console, context, game_board)
+    target_render_proc = processors.TargetRenderProcessor(console, context, game_board)
     movement_proc = processors.MovementProcessor(game_board)
-    target_procs = [input_proc, render_proc, movement_proc]
+    target_procs = [input_proc, target_render_proc, movement_proc]
     PHASES[Phase.target] = target_procs
 
 def to_phase(phase: Phase):
