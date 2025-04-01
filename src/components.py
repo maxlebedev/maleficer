@@ -55,8 +55,11 @@ class Enemy:
 @component
 class Actor:  # Destroyable
     name: str
-    hp: int  # and a max hp?
+    max_hp: int
     armor: int = 0
+
+    def __post_init__(self):
+        self.hp = self.max_hp
 
 @component
 class Crosshair:

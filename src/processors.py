@@ -161,11 +161,8 @@ class RenderProcessor(esper.Processor):
 
         # left panel
         self.console.draw_frame(x=0, **panel_params)
-        self.console.print(2, 2, "ABCDEFGHIJKLM")
-        self.console.print(2, 3, "NOPQUSTUVWXYZ")
-        self.console.print(2, 4, "0123456789.")
         _, (_, actor) = esper.get_components(cmp.Player, cmp.Actor)[0]
-        self.render_bar(1, 5, actor.hp, 10, display.PANEL_WIDTH - 2)
+        self.render_bar(1, 1, actor.hp, actor.max_hp, display.PANEL_WIDTH - 2)
         # right panel
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
         for i, message in enumerate(event.Log.messages):
@@ -272,6 +269,7 @@ class TargetInputEventProcessor(InputEventProcessor):
         scene.oneshot(DamageProcessor)
         scene.oneshot(BoardRenderProcessor)
         # I'd perfer not needing these oneshot procs, but it is what it is
+        # TODO: we go back to target for some reason here
 
 
 @dataclass

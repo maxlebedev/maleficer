@@ -96,6 +96,33 @@ letter_map = {
     "X": 976,
     "Y": 977,
     "Z": 978,
+    "a": 917,
+    "b": 918,
+    "c": 919,
+    "d": 920,
+    "e": 921,
+    "f": 922,
+    "g": 923,
+    "h": 924,
+    "i": 925,
+    "j": 926,
+    "k": 927,
+    "l": 928,
+    "m": 929,
+    "n": 966,
+    "o": 967,
+    "p": 968,
+    "q": 969,
+    "r": 970,
+    "s": 971,
+    "t": 972,
+    "u": 973,
+    "v": 974,
+    "w": 975,
+    "x": 976,
+    "y": 977,
+    "z": 978,
+    "/": 1013,
 }
 
 
@@ -114,7 +141,7 @@ def load_tileset(atlas_path: str, width: int, height: int) -> tcod.tileset.Tiles
         xx, yy = _idx_to_point(val, width)
         tileset.remap(ord(letter), xx, yy)
 
-    codepath = itertools.count(91)
+    codepath = itertools.count(ord("z"))
     for glyph in Glyph:
         xx, yy = _idx_to_point(glyph.value, width)
         tileset.remap(next(codepath), xx, yy)
@@ -123,7 +150,7 @@ def load_tileset(atlas_path: str, width: int, height: int) -> tcod.tileset.Tiles
 
 
 def remap_glyphs():
-    codepath = itertools.count(91)
+    codepath = itertools.count(ord("z"))
     glyph_map = {glyph.name: next(codepath) for glyph in Glyph}
 
     return IntEnum("Glyph", glyph_map)
