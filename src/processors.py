@@ -36,7 +36,7 @@ class MovementProcessor(esper.Processor):
             self.board.build_entity_cache()  # expensive, but okay
             for target in self.board.entities[new_x][new_y]:
                 ent_is_actor = esper.has_component(ent, cmp.Actor)
-                if ent_is_actor and  esper.has_component(target, cmp.Blocking):
+                if ent_is_actor and esper.has_component(target, cmp.Blocking):
                     move = False
                     src_is_enemy = esper.has_component(ent, cmp.Enemy)
                     target_is_harmable = esper.has_component(target, cmp.Actor)
@@ -245,16 +245,33 @@ class MenuInputEventProcessor(InputEventProcessor):
 
 @dataclass
 class TargetInputEventProcessor(InputEventProcessor):
-    def __init__(self):
+    board: location.Board
+
+    def __init__(self, board):
+        self.board = board
         crosshair, _ = esper.get_component(cmp.Crosshair)[0]
+
         self.action_map = {
             input.KEYMAP[input.Input.MOVE_DOWN]: (event.Movement, [crosshair, 0, 1]),
             input.KEYMAP[input.Input.MOVE_LEFT]: (event.Movement, [crosshair, -1, 0]),
             input.KEYMAP[input.Input.MOVE_UP]: (event.Movement, [crosshair, 0, -1]),
             input.KEYMAP[input.Input.MOVE_RIGHT]: (event.Movement, [crosshair, 1, 0]),
-            # input.KEYMAP[input.Input.ESC]: (self.exit, []),
             input.KEYMAP[input.Input.ESC]: (scene.to_phase, [scene.Phase.level]),
+            input.KEYMAP[input.Input.SELECT]: (self.deal_damage,[crosshair])
         }
+    # TODO: how am I having the crosshair follow the player?
+
+    def deal_damage(self, ent_w_pos: int):
+        player, _ = esper.get_component(cmp.Player)[0]
+        pos = esper.component_for_entity(ent_w_pos, cmp.Position)
+        self.board.build_entity_cache()  # expensive, but okay
+        for target in self.board.entities[pos.x][pos.y]:
+            if esper.has_component(target, cmp.Actor):
+                event.Queues.damage.append(event.Damage(player, target, 1))
+        scene.to_phase(scene.Phase.level) # , DamageProcessor
+        scene.oneshot(DamageProcessor)
+        scene.oneshot(BoardRenderProcessor)
+        # I'd perfer not needing these oneshot procs, but it is what it is
 
 
 @dataclass
