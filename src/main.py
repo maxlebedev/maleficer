@@ -1,9 +1,10 @@
 import esper
 import tcod
 
+import components as cmp
 import display
-import scene
 import location
+import scene
 
 FLAGS = tcod.context.SDL_WINDOW_RESIZABLE  # | tcod.context.SDL_WINDOW_FULLSCREEN
 
@@ -23,6 +24,11 @@ def main() -> None:
     }
     context = tcod.context.new(**context_params)
     console = context.new_console(order="F")
+
+    visible_cmp = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN)
+    position_cmp = cmp.Position(x=1, y=1)
+    actor = cmp.Actor(hp=10, name="player")
+    esper.create_entity(cmp.Player(), position_cmp, visible_cmp, cmp.Blocking(), actor)
 
     game_board = location.Board()
 

@@ -2,9 +2,9 @@ import enum
 
 import esper
 
-import location
 import components as cmp
 import display
+import location
 import processors
 
 PHASES = dict()
@@ -24,10 +24,6 @@ def main_menu_setup(context, console):
 
 
 def level_setup(context, console, game_board):
-    visible_cmp = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN)
-    position_cmp = cmp.Position(x=1, y=1)
-    actor = cmp.Actor(hp=10, name="player")
-    esper.create_entity(cmp.Player(), position_cmp, visible_cmp, cmp.Blocking(), actor)
     input_proc = processors.GameInputEventProcessor()
     npc_proc = processors.NPCProcessor()
     damage_proc = processors.DamageProcessor()

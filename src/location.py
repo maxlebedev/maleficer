@@ -10,6 +10,7 @@ import components as cmp
 import display
 import typ
 
+
 def player_position():
     # TODO: fine to crash if player missing?
     _, (_, pos) = esper.get_components(cmp.Player, cmp.Position)[0]
@@ -68,10 +69,7 @@ class Board:
 
         for x, col in enumerate(self.cells):
             for y, cell in enumerate(col):
-                if esper.has_component(cell, cmp.Transparent):
-                    transparency[x][y] = 1
-                else:
-                    transparency[x][y] = 0
+                transparency[x][y] = int(esper.has_component(cell, cmp.Transparent))
         return transparency
 
     def _in_bounds(self, x: int, y: int) -> bool:

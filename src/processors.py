@@ -6,11 +6,11 @@ import tcod
 from tcod import libtcodpy
 from tcod.map import compute_fov
 
-import location
 import components as cmp
 import display
 import event
 import input
+import location
 import scene
 import typ
 
@@ -35,7 +35,8 @@ class MovementProcessor(esper.Processor):
             move = True
             self.board.build_entity_cache()  # expensive, but okay
             for target in self.board.entities[new_x][new_y]:
-                if esper.has_component(target, cmp.Blocking):
+                ent_is_actor = esper.has_component(ent, cmp.Actor)
+                if ent_is_actor and  esper.has_component(target, cmp.Blocking):
                     move = False
                     src_is_enemy = esper.has_component(ent, cmp.Enemy)
                     target_is_harmable = esper.has_component(target, cmp.Actor)
@@ -69,7 +70,7 @@ class DamageProcessor(esper.Processor):
                 message = f"{actor.name} dies"
                 print(message)
                 event.Log.append(message)
-                esper.delete_entity(damage.target)
+                esper.delete_entity(damage.target, immediate=True)
                 # crashes if player gets deleted
         # this probably not where we process death
         # death can potentially happen without damage
@@ -101,7 +102,6 @@ class InputEventProcessor(esper.Processor):
 class GameInputEventProcessor(InputEventProcessor):
     def __init__(self):
         player, _ = esper.get_component(cmp.Player)[0]
-        # to_target = (esper.dispatch_event, ["target"])
         self.action_map = {
             input.KEYMAP[input.Input.MOVE_DOWN]: (event.Movement, [player, 0, 1]),
             input.KEYMAP[input.Input.MOVE_LEFT]: (event.Movement, [player, -1, 0]),
