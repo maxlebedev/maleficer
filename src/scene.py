@@ -20,7 +20,7 @@ def main_menu_setup(context, console):
     render_proc = processors.MenuRenderProcessor(context, console)
     input_proc = processors.MenuInputEventProcessor()
 
-    PHASES[Phase.menu] = [input_proc, render_proc]
+    PHASES[Phase.menu] = [render_proc, input_proc]
 
 
 def level_setup(context, console, game_board):
@@ -33,7 +33,7 @@ def level_setup(context, console, game_board):
     location.generate_dungeon(game_board)
 
     level_procs = [render_proc, input_proc, npc_proc, movement_proc, damage_proc]
-    PHASES[Phase.level] = list(reversed(level_procs))
+    PHASES[Phase.level] = level_procs
 
 def targeting_setup(context, console, game_board):
     pos = location.player_position()
@@ -45,7 +45,7 @@ def targeting_setup(context, console, game_board):
     input_proc = processors.TargetInputEventProcessor(game_board)
     target_render_proc = processors.TargetRenderProcessor(console, context, game_board)
     movement_proc = processors.MovementProcessor(game_board)
-    target_procs = [movement_proc, input_proc, target_render_proc]
+    target_procs = [target_render_proc, input_proc, movement_proc]
     PHASES[Phase.target] = target_procs
 
 def to_phase(phase: Phase, start_proc: type[esper.Processor]| None = None):
@@ -59,7 +59,7 @@ def to_phase(phase: Phase, start_proc: type[esper.Processor]| None = None):
         idx = next((i for i, x in enumerate(proc_list) if isinstance(x, start_proc)))
         idx += 1
         proc_list = proc_list[idx:]+proc_list[:idx]
-    for i, proc in enumerate(proc_list):
+    for i, proc in enumerate(reversed(proc_list)):
         esper.add_processor(proc, priority=i)
     return True  # returning True for InputEventProcessor reasons
 
