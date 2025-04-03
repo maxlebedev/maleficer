@@ -85,15 +85,13 @@ class InputEventProcessor(esper.Processor):
 
     def process(self):
         action = None
-        while not action:
-            for input_event in tcod.event.wait():
-                # if we ever have other events we care abt, we can dispatch by type
-                if not isinstance(input_event, tcod.event.KeyDown):
-                    continue
-                if input_event.sym in self.action_map:
-                    func, args = self.action_map[input_event.sym]
-                    action = func(*args)
-        # TODO: this is a code smell. "action" holds both the release for this loop, and the signal for us to queue a movement event. The queueing should perhaps happen in func
+        for input_event in tcod.event.wait():
+            # if we ever have other events we care abt, we can dispatch by type
+            if not isinstance(input_event, tcod.event.KeyDown):
+                continue
+            if input_event.sym in self.action_map:
+                func, args = self.action_map[input_event.sym]
+                action = func(*args)
         if isinstance(action, event.Movement):
             event.Queues.movement.append(action)
 
@@ -269,7 +267,6 @@ class TargetInputEventProcessor(InputEventProcessor):
         scene.oneshot(DamageProcessor)
         scene.oneshot(BoardRenderProcessor)
         # I'd perfer not needing these oneshot procs, but it is what it is
-        # TODO: we go back to target for some reason here
 
 
 @dataclass

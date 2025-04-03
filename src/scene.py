@@ -16,6 +16,12 @@ class Phase(enum.Enum):
     target = enum.auto()
 
 
+def player_setup():
+    visible_cmp = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN)
+    position_cmp = cmp.Position(x=1, y=1)
+    actor = cmp.Actor(max_hp=10, name="player")
+    esper.create_entity(cmp.Player(), position_cmp, visible_cmp, cmp.Blocking(), actor)
+
 def main_menu_setup(context, console):
     render_proc = processors.MenuRenderProcessor(context, console)
     input_proc = processors.MenuInputEventProcessor()
@@ -61,7 +67,6 @@ def to_phase(phase: Phase, start_proc: type[esper.Processor]| None = None):
         proc_list = proc_list[idx:]+proc_list[:idx]
     for i, proc in enumerate(reversed(proc_list)):
         esper.add_processor(proc, priority=i)
-    return True  # returning True for InputEventProcessor reasons
 
 
 def oneshot(proctype: type[esper.Processor]):

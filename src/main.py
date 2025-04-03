@@ -25,10 +25,7 @@ def main() -> None:
     context = tcod.context.new(**context_params)
     console = context.new_console(order="F")
 
-    visible_cmp = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN)
-    position_cmp = cmp.Position(x=1, y=1)
-    actor = cmp.Actor(max_hp=10, name="player")
-    esper.create_entity(cmp.Player(), position_cmp, visible_cmp, cmp.Blocking(), actor)
+    scene.player_setup()
 
     game_board = location.Board()
 
