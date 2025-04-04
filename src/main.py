@@ -1,7 +1,6 @@
 import esper
 import tcod
 
-import components as cmp
 import display
 import location
 import scene

@@ -22,6 +22,7 @@ def player_setup():
     actor = cmp.Actor(max_hp=10, name="player")
     esper.create_entity(cmp.Player(), position_cmp, visible_cmp, cmp.Blocking(), actor)
 
+
 def main_menu_setup(context, console):
     render_proc = processors.MenuRenderProcessor(context, console)
     input_proc = processors.MenuInputEventProcessor()
@@ -41,6 +42,7 @@ def level_setup(context, console, game_board):
     level_procs = [render_proc, input_proc, npc_proc, movement_proc, damage_proc]
     PHASES[Phase.level] = level_procs
 
+
 def targeting_setup(context, console, game_board):
     pos = location.player_position()
 
@@ -54,18 +56,20 @@ def targeting_setup(context, console, game_board):
     target_procs = [target_render_proc, input_proc, movement_proc]
     PHASES[Phase.target] = target_procs
 
-def to_phase(phase: Phase, start_proc: type[esper.Processor]| None = None):
-    """We dynamically add and remove processors when moving between phases. Each phase has its own proc loop."""
+
+def to_phase(phase: Phase, start_proc: type[esper.Processor] | None = None):
+    """We dynamically add and remove processors when moving between phases. Each phase has it s own proc loop."""
     for proc in esper._processors:
-       esper.remove_processor(type(proc))
+        esper.remove_processor(type(proc))
     esper._processors = []
 
     proc_list = PHASES[phase]
     if start_proc:
-        idx = next((i for i, x in enumerate(proc_list) if isinstance(x, start_proc)))
-        idx += 1
-        proc_list = proc_list[idx:]+proc_list[:idx]
-    for i, proc in enumerate(reversed(proc_list)):
+        while start_proc and not isinstance(proc_list[0], start_proc):
+            proc_list.append(proc_list.pop(0))
+
+    proc_list = list(reversed(proc_list))
+    for i, proc in enumerate(proc_list):
         esper.add_processor(proc, priority=i)
 
 

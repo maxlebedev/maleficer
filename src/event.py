@@ -36,9 +36,15 @@ class Damage:
     target: int
     amount: int
 
+    def __post_init__(self):
+        Queues.damage.append(self)
+
 
 @dataclass
 class Movement:
     source: int
     x: int
     y: int
+
+    def __post_init__(self):
+        Queues.movement.append(self)

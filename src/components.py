@@ -32,6 +32,7 @@ class Visible:
 @component
 class Transparent:
     """does not block light"""
+
     pass
 
 
@@ -61,9 +62,11 @@ class Actor:  # Destroyable
     def __post_init__(self):
         self.hp = self.max_hp
 
+
 @component
 class Crosshair:
     pass
+
 
 @component
 class EffectArea:

@@ -41,7 +41,7 @@ class MovementProcessor(esper.Processor):
                     src_is_enemy = esper.has_component(ent, cmp.Enemy)
                     target_is_harmable = esper.has_component(target, cmp.Actor)
                     if src_is_enemy and target_is_harmable:
-                        event.Queues.damage.append(event.Damage(ent, target, 1))
+                        event.Damage(ent, target, 1)
 
             if move:
                 pos.x = new_x
@@ -84,16 +84,16 @@ class InputEventProcessor(esper.Processor):
         raise SystemExit()
 
     def process(self):
-        action = None
-        for input_event in tcod.event.wait():
-            # if we ever have other events we care abt, we can dispatch by type
-            if not isinstance(input_event, tcod.event.KeyDown):
-                continue
-            if input_event.sym in self.action_map:
-                func, args = self.action_map[input_event.sym]
-                action = func(*args)
-        if isinstance(action, event.Movement):
-            event.Queues.movement.append(action)
+        listen = True
+        while listen:
+            for input_event in tcod.event.wait():
+                # if we ever have other events we care abt, we can dispatch by type
+                if not isinstance(input_event, tcod.event.KeyDown):
+                    continue
+                if input_event.sym in self.action_map:
+                    func, args = self.action_map[input_event.sym]
+                    func(*args)
+                    listen = False
 
 
 @dataclass
@@ -117,16 +117,17 @@ class NPCProcessor(esper.Processor):
             dir = random.choice([(0, 1), (0, -1), (1, 0), (-1, 0), (0, 0)])
             if dir == (0, 0):
                 continue
-            move = event.Movement(entity, *dir)
-            event.Queues.movement.append(move)
+            event.Movement(entity, *dir)
             # consider the move processor potentially sending a Bump event,
             # and then reading that event (this means this proc runs twice?)
             # this lets each NPC decide what behavior to have on a bump
+
 
 @dataclass
 class RenderProcessor(esper.Processor):
     console: tcod.console.Console
     context: tcod.context.Context
+
     def render_bar(self, x: int, y: int, curr: int, maximum: int, total_width: int):
         bar_width = int(curr / maximum * total_width)
         bg = display.Color.BAR_EMPTY
@@ -184,7 +185,6 @@ class RenderProcessor(esper.Processor):
         return cell_rgbs
 
 
-
 @dataclass
 class BoardRenderProcessor(RenderProcessor):
     console: tcod.console.Console
@@ -216,6 +216,7 @@ class BoardRenderProcessor(RenderProcessor):
 
         self.context.present(self.console)  # , integer_scaling=True
 
+
 @dataclass
 class MenuRenderProcessor(esper.Processor):
     context: tcod.context.Context
@@ -245,28 +246,27 @@ class TargetInputEventProcessor(InputEventProcessor):
     def __init__(self, board):
         self.board = board
         crosshair, _ = esper.get_component(cmp.Crosshair)[0]
+        to_level = (scene.to_phase, [scene.Phase.level])
 
         self.action_map = {
             input.KEYMAP[input.Input.MOVE_DOWN]: (event.Movement, [crosshair, 0, 1]),
             input.KEYMAP[input.Input.MOVE_LEFT]: (event.Movement, [crosshair, -1, 0]),
             input.KEYMAP[input.Input.MOVE_UP]: (event.Movement, [crosshair, 0, -1]),
             input.KEYMAP[input.Input.MOVE_RIGHT]: (event.Movement, [crosshair, 1, 0]),
-            input.KEYMAP[input.Input.ESC]: (scene.to_phase, [scene.Phase.level]),
-            input.KEYMAP[input.Input.SELECT]: (self.deal_damage,[crosshair])
+            input.KEYMAP[input.Input.ESC]: to_level,
+            input.KEYMAP[input.Input.SELECT]: (self.deal_damage, [crosshair]),
         }
+
     # TODO: how am I having the crosshair follow the player?
 
-    def deal_damage(self, ent_w_pos: int):
+    def deal_damage(self, positioned_entity: int):
         player, _ = esper.get_component(cmp.Player)[0]
-        pos = esper.component_for_entity(ent_w_pos, cmp.Position)
+        pos = esper.component_for_entity(positioned_entity, cmp.Position)
         self.board.build_entity_cache()  # expensive, but okay
         for target in self.board.entities[pos.x][pos.y]:
             if esper.has_component(target, cmp.Actor):
-                event.Queues.damage.append(event.Damage(player, target, 1))
-        scene.to_phase(scene.Phase.level) # , DamageProcessor
-        scene.oneshot(DamageProcessor)
-        scene.oneshot(BoardRenderProcessor)
-        # I'd perfer not needing these oneshot procs, but it is what it is
+                event.Damage(player, target, 1)
+        scene.to_phase(scene.Phase.level, DamageProcessor)
 
 
 @dataclass

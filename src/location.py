@@ -16,6 +16,7 @@ def player_position():
     _, (_, pos) = esper.get_components(cmp.Player, cmp.Position)[0]
     return pos
 
+
 class Board:
     """
     Note: the cell matrix is stored as columns, so [x][y] is the right acces pattern
