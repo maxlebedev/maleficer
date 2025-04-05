@@ -54,6 +54,7 @@ class Glyph(IntEnum):
     FRAME8 = 1046
     FRAME9 = 1047
     BAT = 418
+    SKELETON = 323
     CROSSHAIR = 711
 
 

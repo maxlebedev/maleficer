@@ -53,9 +53,17 @@ class Board:
         pos = cmp.Position(x, y)
         vis = cmp.Visible(glyph=display.Glyph.BAT, color=display.Color.RED)
         actor = cmp.Actor(max_hp=1, name="bat")
-        components = [cmp.Enemy(), pos, vis, cmp.Blocking(), cmp.Enemy(), actor]
+        components = [cmp.Enemy(), pos, vis, cmp.Blocking(), cmp.Enemy(), actor, cmp.Wander()]
         bat = esper.create_entity(*components)
         return bat
+
+    def make_skeleton(self, x: int, y: int) -> int:
+        pos = cmp.Position(x, y)
+        vis = cmp.Visible(glyph=display.Glyph.SKELETON, color=display.Color.RED)
+        actor = cmp.Actor(max_hp=3, name="skeleton")
+        components = [cmp.Enemy(), pos, vis, cmp.Blocking(), cmp.Enemy(), actor, cmp.Melee(radius=5)]
+        skeleton = esper.create_entity(*components)
+        return skeleton
 
     @classmethod
     def as_rgb(cls, cell: typ.CELL) -> typ.CELL_RGB:
@@ -167,11 +175,10 @@ def intersects(board: Board, src: RectangularRoom, target: RectangularRoom) -> b
     target_cells = board.as_sequence(*target.outer)
     return bool(set(src_cells) & (set(target_cells)))
 
+def euclidean_distance(x1, y1, x2, y2):
+    return pow(pow(x2 - x1, 2) + pow(y2 - y1, 2), 0.5)
 
 def closest_position(start: typ.POSITION, position: list[typ.POSITION]) -> typ.POSITION:
-    def euclidean_distance(x1, y1, x2, y2):
-        return pow(pow(x2 - x1, 2) + pow(y2 - y1, 2), 0.5)
-
     # Initialize the closest distance as a large number
     closest_dist = float("inf")
     closest_coord = None
@@ -211,6 +218,9 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
         else:  # All rooms after the first get one tunnel and bat
             endpt = closest_position(new_room.center, centers[:-1])
             tunnel_between(board, new_room.center, endpt)
-            board.make_bat(*new_room.center)
+            if random.randint(0, 1):
+                board.make_bat(*new_room.center)
+            else:
+                board.make_skeleton(*new_room.center)
 
         rooms.append(new_room)

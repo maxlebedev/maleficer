@@ -110,7 +110,7 @@ class GameInputEventProcessor(InputEventProcessor):
         }
 
     def to_target(self):
-        _, (_, player_pos) = esper.get_components(cmp.Player, cmp.Position)[0]
+        player_pos = location.player_position()
         _, (_, xhair_pos) = esper.get_components(cmp.Crosshair, cmp.Position)[0]
         xhair_pos.x, xhair_pos.y = player_pos.x, player_pos.y
         scene.to_phase(scene.Phase.target)
@@ -120,14 +120,28 @@ class GameInputEventProcessor(InputEventProcessor):
 @dataclass
 class NPCProcessor(esper.Processor):
     def process(self):
-        for entity, _ in esper.get_component(cmp.Enemy):
+        for entity, _ in esper.get_component(cmp.Wander):
             dir = random.choice([(0, 1), (0, -1), (1, 0), (-1, 0), (0, 0)])
             if dir == (0, 0):
                 continue
             event.Movement(entity, *dir)
-            # consider the move processor potentially sending a Bump event,
-            # and then reading that event (this means this proc runs twice?)
-            # this lets each NPC decide what behavior to have on a bump
+
+        player_pos = location.player_position()
+        for entity, _ in esper.get_component(cmp.Melee):
+            epos = esper.component_for_entity(entity, cmp.Position)
+            melee = esper.component_for_entity(entity, cmp.Melee)
+            dist_to_player = location.euclidean_distance(player_pos.x, player_pos.y, epos.x, epos.y)
+            if dist_to_player > melee.radius:
+                continue
+            # Naive pathfinding. Does not deal with corners well
+            if player_pos.x > epos.x:
+                event.Movement(entity, x=1, y=0)
+            elif player_pos.y > epos.y:
+                event.Movement(entity, x=0, y=1)
+            elif player_pos.x < epos.x:
+                event.Movement(entity, x=-1, y=0)
+            elif player_pos.y < epos.y:
+                event.Movement(entity, x=0, y=-1)
 
 
 @dataclass

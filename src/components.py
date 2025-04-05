@@ -54,6 +54,18 @@ class Enemy:
 
 
 @component
+class Wander:
+    """Walks around randomly"""
+    pass
+
+
+@component
+class Melee:
+    """Walks towards player"""
+    radius: int
+    pass
+
+@component
 class Actor:  # Destroyable
     name: str
     max_hp: int
