@@ -264,8 +264,6 @@ class TargetInputEventProcessor(InputEventProcessor):
             input.KEYMAP[input.Input.SELECT]: (self.deal_damage, [crosshair]),
         }
 
-    # TODO: how am I having the crosshair follow the player?
-
     def deal_damage(self, positioned_entity: int):
         player, _ = esper.get_component(cmp.Player)[0]
         pos = esper.component_for_entity(positioned_entity, cmp.Position)
