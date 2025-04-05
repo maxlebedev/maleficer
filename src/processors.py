@@ -106,8 +106,15 @@ class GameInputEventProcessor(InputEventProcessor):
             input.KEYMAP[input.Input.MOVE_UP]: (event.Movement, [player, 0, -1]),
             input.KEYMAP[input.Input.MOVE_RIGHT]: (event.Movement, [player, 1, 0]),
             input.KEYMAP[input.Input.ESC]: (scene.to_phase, [scene.Phase.menu]),
-            input.KEYMAP[input.Input.ONE]: (scene.to_phase, [scene.Phase.target]),
+            input.KEYMAP[input.Input.ONE]: (self.to_target, []),
         }
+
+    def to_target(self):
+        _, (_, player_pos) = esper.get_components(cmp.Player, cmp.Position)[0]
+        _, (_, xhair_pos) = esper.get_components(cmp.Crosshair, cmp.Position)[0]
+        xhair_pos.x, xhair_pos.y = player_pos.x, player_pos.y
+        scene.to_phase(scene.Phase.target)
+
 
 
 @dataclass

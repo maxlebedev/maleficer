@@ -5,7 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "esper>=3.3",
+    "esper>=3.4",
     "pyyaml>=6.0.2",
     "ruff>=0.9.7",
     "tcod>=16.2.3",
