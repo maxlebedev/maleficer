@@ -204,6 +204,20 @@ class RenderProcessor(esper.Processor):
                     cell_rgbs[x][y] = (glyph, display.Color.BLACK, display.Color.BLACK)
         return cell_rgbs
 
+    def _get_fov(self, board: location.Board):
+        transparency = board.as_transparency()
+        pos = location.player_position()
+        algo = libtcodpy.FOV_SHADOW
+        fov = compute_fov(transparency, (pos.x, pos.y), radius=4, algorithm=algo)
+        return fov
+
+    def present(self, cell_rgbs):
+        startx, endx = (display.PANEL_WIDTH, display.R_PANEL_START)
+        starty, endy = (0, display.BOARD_HEIGHT)
+        self.console.rgb[startx:endx, starty:endy] = cell_rgbs
+        self.context.present(self.console)  # , integer_scaling=True
+
+
 
 @dataclass
 class BoardRenderProcessor(RenderProcessor):
@@ -217,10 +231,7 @@ class BoardRenderProcessor(RenderProcessor):
 
         cell_rgbs = [list(map(self.board.as_rgb, row)) for row in self.board.cells]
 
-        transparency = self.board.as_transparency()
-        pos = location.player_position()
-        algo = libtcodpy.FOV_SHADOW
-        in_fov = compute_fov(transparency, (pos.x, pos.y), radius=4, algorithm=algo)
+        in_fov = self._get_fov(self.board)
 
         drawable_entities = esper.get_components(cmp.Position, cmp.Visible)
         for entity, (pos, vis) in drawable_entities:
@@ -229,12 +240,8 @@ class BoardRenderProcessor(RenderProcessor):
             cell_rgbs[pos.x][pos.y] = (vis.glyph, vis.color, vis.bg_color)
 
         cell_rgbs = self._apply_lighting(self.board, cell_rgbs, in_fov)
+        self.present(cell_rgbs)
 
-        startx, endx = (display.PANEL_WIDTH, display.R_PANEL_START)
-        starty, endy = (0, display.BOARD_HEIGHT)
-        self.console.rgb[startx:endx, starty:endy] = cell_rgbs
-
-        self.context.present(self.console)  # , integer_scaling=True
 
 
 @dataclass
@@ -294,16 +301,12 @@ class TargetRenderProcessor(RenderProcessor):
     board: location.Board
 
     def process(self) -> None:
-        # TODO: DRY this up
         self.console.clear()
         self._draw_panels()
 
         cell_rgbs = [list(map(self.board.as_rgb, row)) for row in self.board.cells]
 
-        transparency = self.board.as_transparency()
-        pos = location.player_position()
-        algo = libtcodpy.FOV_SHADOW
-        in_fov = compute_fov(transparency, (pos.x, pos.y), radius=4, algorithm=algo)
+        in_fov = self._get_fov(self.board)
 
         drawable_entities = esper.get_components(cmp.Position, cmp.Visible)
         for entity, (pos, vis) in drawable_entities:
@@ -317,7 +320,5 @@ class TargetRenderProcessor(RenderProcessor):
         for _, (pos, aoe) in drawable_areas:
             cell = cell_rgbs[pos.x][pos.y]
             cell_rgbs[pos.x][pos.y] = cell[0], cell[1], aoe.color
-        startx, endx = (display.PANEL_WIDTH, display.R_PANEL_START)
-        starty, endy = (0, display.BOARD_HEIGHT)
-        self.console.rgb[startx:endx, starty:endy] = cell_rgbs
-        self.context.present(self.console)  # , integer_scaling=True
+
+        self.present(cell_rgbs)
