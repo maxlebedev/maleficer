@@ -40,6 +40,7 @@ def level_setup(context, console, game_board):
     location.generate_dungeon(game_board)
 
     level_procs = [render_proc, input_proc, npc_proc, movement_proc, damage_proc]
+    # do we want one damage phase or two?
     PHASES[Phase.level] = level_procs
 
 

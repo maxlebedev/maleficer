@@ -285,7 +285,7 @@ class TargetInputEventProcessor(InputEventProcessor):
         for target in self.board.entities[pos.x][pos.y]:
             if esper.has_component(target, cmp.Actor):
                 event.Damage(player, target, 1)
-        scene.to_phase(scene.Phase.level, DamageProcessor)
+        scene.to_phase(scene.Phase.level, NPCProcessor)
 
 
 @dataclass
