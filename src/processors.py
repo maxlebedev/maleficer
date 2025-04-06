@@ -13,6 +13,7 @@ import input
 import location
 import scene
 import typ
+import ecs
 
 
 @dataclass
@@ -233,9 +234,10 @@ class BoardRenderProcessor(RenderProcessor):
 
         in_fov = self._get_fov(self.board)
 
-        drawable_entities = esper.get_components(cmp.Position, cmp.Visible)
-        for entity, (pos, vis) in drawable_entities:
-            if esper.has_component(entity, cmp.Cell) or not in_fov[pos.x][pos.y]:
+        drawable_entities = ecs.Query().filter(cmp.Position, cmp.Visible)
+        nonwall_drawables = drawable_entities.exclude(cmp.Cell).get()
+        for _, (pos, vis) in nonwall_drawables:
+            if not in_fov[pos.x][pos.y]:
                 continue
             cell_rgbs[pos.x][pos.y] = (vis.glyph, vis.color, vis.bg_color)
 
@@ -308,15 +310,16 @@ class TargetRenderProcessor(RenderProcessor):
 
         in_fov = self._get_fov(self.board)
 
-        drawable_entities = esper.get_components(cmp.Position, cmp.Visible)
-        for entity, (pos, vis) in drawable_entities:
-            if esper.has_component(entity, cmp.Cell) or not in_fov[pos.x][pos.y]:
+        drawable_entities = ecs.Query().filter(cmp.Position, cmp.Visible)
+        nonwall_drawables = drawable_entities.exclude(cmp.Cell).get()
+        for _, (pos, vis) in nonwall_drawables:
+            if not in_fov[pos.x][pos.y]:
                 continue
             cell_rgbs[pos.x][pos.y] = (vis.glyph, vis.color, vis.bg_color)
 
         cell_rgbs = self._apply_lighting(self.board, cell_rgbs, in_fov)
 
-        drawable_areas = esper.get_components(cmp.Position, cmp.EffectArea)
+        drawable_areas = ecs.Query().filter(cmp.Position, cmp.EffectArea).get()
         for _, (pos, aoe) in drawable_areas:
             cell = cell_rgbs[pos.x][pos.y]
             cell_rgbs[pos.x][pos.y] = cell[0], cell[1], aoe.color
