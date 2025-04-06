@@ -130,7 +130,7 @@ class NPCProcessor(esper.Processor):
         for entity, _ in esper.get_component(cmp.Melee):
             epos = esper.component_for_entity(entity, cmp.Position)
             melee = esper.component_for_entity(entity, cmp.Melee)
-            dist_to_player = location.euclidean_distance(player_pos.x, player_pos.y, epos.x, epos.y)
+            dist_to_player = location.euclidean_distance(player_pos, epos)
             if dist_to_player > melee.radius:
                 continue
             # Naive pathfinding. Does not deal with corners well

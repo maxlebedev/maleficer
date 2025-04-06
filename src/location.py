@@ -49,19 +49,18 @@ class Board:
         cell = esper.create_entity(cmp.Cell(), cmp.Position(x, y), vis, cmp.Blocking())
         return cell
 
-    def make_bat(self, x: int, y: int) -> int:
-        pos = cmp.Position(x, y)
+    def make_bat(self, pos: cmp.Position) -> int:
         vis = cmp.Visible(glyph=display.Glyph.BAT, color=display.Color.RED)
         actor = cmp.Actor(max_hp=1, name="bat")
-        components = [cmp.Enemy(), pos, vis, cmp.Blocking(), cmp.Enemy(), actor, cmp.Wander()]
+        components = [cmp.Enemy(), pos, vis, cmp.Blocking(), actor, cmp.Wander()]
         bat = esper.create_entity(*components)
         return bat
 
-    def make_skeleton(self, x: int, y: int) -> int:
-        pos = cmp.Position(x, y)
+    def make_skeleton(self, pos: cmp.Position) -> int:
         vis = cmp.Visible(glyph=display.Glyph.SKELETON, color=display.Color.RED)
         actor = cmp.Actor(max_hp=3, name="skeleton")
-        components = [cmp.Enemy(), pos, vis, cmp.Blocking(), cmp.Enemy(), actor, cmp.Melee(radius=5)]
+        melee = cmp.Melee(radius=5)
+        components = [cmp.Enemy(), pos, vis, cmp.Blocking(), actor, melee]
         skeleton = esper.create_entity(*components)
         return skeleton
 
@@ -135,11 +134,11 @@ class RectangularRoom:
         return self.y1 + self.height
 
     @property
-    def center(self) -> typ.POSITION:
+    def center(self) -> cmp.Position:
         center_x = (self.x1 + self.x2) // 2
         center_y = (self.y1 + self.y2) // 2
 
-        return center_x, center_y
+        return cmp.Position(x=center_x, y=center_y)
 
     @property
     def inner(self) -> tuple[slice, slice]:
@@ -152,20 +151,18 @@ class RectangularRoom:
         return slice(self.x1, self.x2 + 1), slice(self.y1, self.y2 + 1)
 
 
-def tunnel_between(board, start: typ.POSITION, end: typ.POSITION):
+def tunnel_between(board, start: cmp.Position, end: cmp.Position):
     """Return an L-shaped tunnel between these two points."""
-    x1, y1 = start
-    x2, y2 = end
     horizontal_then_vertical = random.random() < 0.5
     if horizontal_then_vertical:
-        corner_x, corner_y = x2, y1
+        corner_x, corner_y = end.x, start.y
     else:
-        corner_x, corner_y = x1, y2
+        corner_x, corner_y = start.x, end.y
 
     # Generate the coordinates for this tunnel.
-    for x, y in tcod.los.bresenham((x1, y1), (corner_x, corner_y)).tolist():
+    for x, y in tcod.los.bresenham((start.x, start.y), (corner_x, corner_y)).tolist():
         board.set_cell(x, y, board.make_floor(x, y))
-    for x, y in tcod.los.bresenham((corner_x, corner_y), (x2, y2)).tolist():
+    for x, y in tcod.los.bresenham((corner_x, corner_y), (end.x, end.y)).tolist():
         board.set_cell(x, y, board.make_floor(x, y))
 
 
@@ -175,35 +172,35 @@ def intersects(board: Board, src: RectangularRoom, target: RectangularRoom) -> b
     target_cells = board.as_sequence(*target.outer)
     return bool(set(src_cells) & (set(target_cells)))
 
-def euclidean_distance(x1, y1, x2, y2):
-    return pow(pow(x2 - x1, 2) + pow(y2 - y1, 2), 0.5)
+def euclidean_distance(start: cmp.Position, end: cmp.Position):
+   return pow(pow(end.x - start.x, 2) + pow(end.y - start.y, 2), 0.5)
 
-def closest_position(start: typ.POSITION, position: list[typ.POSITION]) -> typ.POSITION:
+def closest_position(start: cmp.Position, positions: list[cmp.Position]) -> cmp.Position:
     # Initialize the closest distance as a large number
     closest_dist = float("inf")
     closest_coord = None
 
     # Iterate through the list of coordinates and find the closest one
-    for x2, y2 in position:
-        distance = euclidean_distance(start[0], start[1], x2, y2)
+    for position in positions:
+        distance = euclidean_distance(start, position)
         if distance < closest_dist:
             closest_dist = distance
-            closest_coord = (x2, y2)
+            closest_coord = position
 
     return closest_coord or start
 
 
 def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
     rooms: list[RectangularRoom] = []
-    centers: list[typ.POSITION] = []
+    centers: list[cmp.Position] = []
     for _ in range(max_rooms):
         room_width = random.randint(min_rm_siz, max_rm_siz)
         room_height = random.randint(min_rm_siz, max_rm_siz)
 
-        x = random.randint(0, display.BOARD_WIDTH - room_width - 1)
-        y = random.randint(0, display.BOARD_HEIGHT - room_height - 1)
+        room_x = random.randint(0, display.BOARD_WIDTH - room_width - 1)
+        room_y = random.randint(0, display.BOARD_HEIGHT - room_height - 1)
 
-        new_room = RectangularRoom(x, y, room_width, room_height)
+        new_room = RectangularRoom(room_x, room_y, room_width, room_height)
         if any(intersects(board, new_room, other_room) for other_room in rooms):
             continue  # This room intersects, so go to the next attempt.
 
@@ -214,13 +211,13 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
 
         if len(rooms) == 0:  # start player in first room
             pos = player_position()
-            pos.x, pos.y = new_room.center
+            pos.x, pos.y = new_room.center.x, new_room.center.y
         else:  # All rooms after the first get one tunnel and bat
             endpt = closest_position(new_room.center, centers[:-1])
             tunnel_between(board, new_room.center, endpt)
             if random.randint(0, 1):
-                board.make_bat(*new_room.center)
+                board.make_bat(new_room.center)
             else:
-                board.make_skeleton(*new_room.center)
+                board.make_skeleton(new_room.center)
 
         rooms.append(new_room)
