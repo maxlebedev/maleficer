@@ -172,16 +172,16 @@ def intersects(board: Board, src: RectangularRoom, target: RectangularRoom) -> b
     target_cells = board.as_sequence(*target.outer)
     return bool(set(src_cells) & (set(target_cells)))
 
-def euclidean_distance(start: cmp.Position, end: cmp.Position):
-   return pow(pow(end.x - start.x, 2) + pow(end.y - start.y, 2), 0.5)
 
-def closest_position(start: cmp.Position, positions: list[cmp.Position]) -> cmp.Position:
-    # Initialize the closest distance as a large number
+def euclidean_distance(start: cmp.Position, end: cmp.Position):
+    return pow(pow(end.x - start.x, 2) + pow(end.y - start.y, 2), 0.5)
+
+
+def closest_position(start: cmp.Position, options: list[cmp.Position]) -> cmp.Position:
     closest_dist = float("inf")
     closest_coord = None
 
-    # Iterate through the list of coordinates and find the closest one
-    for position in positions:
+    for position in options:
         distance = euclidean_distance(start, position)
         if distance < closest_dist:
             closest_dist = distance
@@ -212,7 +212,7 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
         if len(rooms) == 0:  # start player in first room
             pos = player_position()
             pos.x, pos.y = new_room.center.x, new_room.center.y
-        else:  # All rooms after the first get one tunnel and bat
+        else:  # All rooms after the first get one tunnel and enemy
             endpt = closest_position(new_room.center, centers[:-1])
             tunnel_between(board, new_room.center, endpt)
             if random.randint(0, 1):

@@ -116,7 +116,6 @@ class GameInputEventProcessor(InputEventProcessor):
         scene.to_phase(scene.Phase.target)
 
 
-
 @dataclass
 class NPCProcessor(esper.Processor):
     def process(self):
