@@ -56,6 +56,7 @@ class Glyph(IntEnum):
     BAT = 418
     SKELETON = 323
     CROSSHAIR = 711
+    POTION = 581
 
 
 letter_map = {

@@ -43,6 +43,14 @@ class MovementProcessor(esper.Processor):
                     target_is_harmable = esper.has_component(target, cmp.Actor)
                     if src_is_enemy and target_is_harmable:
                         event.Damage(ent, target, 1)
+                ent_is_player = esper.has_component(ent, cmp.Player)
+                target_is_collectable = esper.has_component(target, cmp.Collectable)
+                if ent_is_player and target_is_collectable:
+                    esper.remove_component(target, cmp.Position)
+                    esper.add_component(target, cmp.InInventory)
+                    print(f"player picked up an item")
+                    # TODO: now print that on a side pane
+                    # oneshot call some collectable processor?
 
             if move:
                 pos.x = new_x

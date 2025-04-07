@@ -87,3 +87,17 @@ class Crosshair:
 class EffectArea:
     color: typ.RGB
     # radius/cell set/aoe formula?
+
+@component
+class Collectable:
+    """can be added to inventory"""
+
+    pass
+
+@component
+class InInventory:
+    pass
+
+@component
+class Spell:
+    pass

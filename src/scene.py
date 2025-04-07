@@ -17,10 +17,10 @@ class Phase(enum.Enum):
 
 
 def player_setup():
-    visible_cmp = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN)
-    position_cmp = cmp.Position(x=1, y=1)
+    vis = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN)
+    pos = cmp.Position(x=1, y=1)
     actor = cmp.Actor(max_hp=10, name="player")
-    esper.create_entity(cmp.Player(), position_cmp, visible_cmp, cmp.Blocking(), actor)
+    esper.create_entity(cmp.Player(), pos, vis, cmp.Blocking(), actor)
 
 
 def main_menu_setup(context, console):

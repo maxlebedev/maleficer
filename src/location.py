@@ -64,6 +64,13 @@ class Board:
         skeleton = esper.create_entity(*components)
         return skeleton
 
+    def make_potion(self, pos: cmp.Position) -> int:
+        vis = cmp.Visible(glyph=display.Glyph.POTION, color=display.Color.GREEN)
+        col = cmp.Collectable
+        components = [pos, vis, cmp.Collectable()]
+        potion = esper.create_entity(*components)
+        return potion
+
     @classmethod
     def as_rgb(cls, cell: typ.CELL) -> typ.CELL_RGB:
         vis = esper.component_for_entity(cell, cmp.Visible)
@@ -219,5 +226,7 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
                 board.make_bat(new_room.center)
             else:
                 board.make_skeleton(new_room.center)
+                board.make_potion(new_room.center)
+
 
         rooms.append(new_room)
