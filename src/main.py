@@ -33,6 +33,8 @@ def main() -> None:
     scene.targeting_setup(context, console, game_board)
     scene.to_phase(scene.Phase.menu)
 
+    scene.inventory_setup()
+
     while True:
         esper.process()
 

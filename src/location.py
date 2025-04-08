@@ -66,8 +66,9 @@ class Board:
 
     def make_potion(self, pos: cmp.Position) -> int:
         vis = cmp.Visible(glyph=display.Glyph.POTION, color=display.Color.GREEN)
-        col = cmp.Collectable
-        components = [pos, vis, cmp.Collectable()]
+        col = cmp.Collectable()
+        actor = cmp.Actor(max_hp=1, name="potion")
+        components = [pos, vis, col, actor]
         potion = esper.create_entity(*components)
         return potion
 

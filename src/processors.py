@@ -47,9 +47,8 @@ class MovementProcessor(esper.Processor):
                 target_is_collectable = esper.has_component(target, cmp.Collectable)
                 if ent_is_player and target_is_collectable:
                     esper.remove_component(target, cmp.Position)
-                    esper.add_component(target, cmp.InInventory)
+                    esper.add_component(target, cmp.InInventory())
                     print(f"player picked up an item")
-                    # TODO: now print that on a side pane
                     # oneshot call some collectable processor?
 
             if move:
@@ -191,6 +190,12 @@ class RenderProcessor(esper.Processor):
         self.console.draw_frame(x=0, **panel_params)
         _, (_, actor) = esper.get_components(cmp.Player, cmp.Actor)[0]
         self.render_bar(1, 1, actor.hp, actor.max_hp, display.PANEL_WIDTH - 2)
+        # inventory
+        inventory = esper.get_components(cmp.InInventory, cmp.Actor)
+        for i, (_, (_, named)) in enumerate(inventory):
+            # TODO: consolidate items of like type
+            self.console.print(1, 3 + i, named.name)
+
         # right panel
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
         for i, message in enumerate(event.Log.messages):

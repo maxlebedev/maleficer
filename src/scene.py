@@ -16,11 +16,17 @@ class Phase(enum.Enum):
     target = enum.auto()
 
 
+# do I want this to be a setup.py or something?
 def player_setup():
     vis = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN)
     pos = cmp.Position(x=1, y=1)
     actor = cmp.Actor(max_hp=10, name="player")
     esper.create_entity(cmp.Player(), pos, vis, cmp.Blocking(), actor)
+
+
+def inventory_setup():
+    esper.create_entity(cmp.InInventory(), cmp.Actor(name="bottle of water", max_hp=1))
+    esper.create_entity(cmp.InInventory(), cmp.Actor(name="lighter", max_hp=1))
 
 
 def main_menu_setup(context, console):

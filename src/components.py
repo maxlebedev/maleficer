@@ -70,7 +70,7 @@ class Melee:
 
 @component
 class Actor:  # Destroyable
-    name: str
+    name: str # consider a Named/Onymous component?
     max_hp: int
     armor: int = 0
 
