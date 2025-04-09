@@ -25,16 +25,16 @@ def main() -> None:
     context = tcod.context.new(**context_params)
     console = context.new_console(order="F")
 
-    create.player()
+    scene.player_setup()
 
     game_board = location.Board()
 
-    create.main_menu(context, console)
-    create.level(context, console, game_board)
-    create.targeting(context, console, game_board)
+    scene.main_menu_setup(context, console)
+    scene.level_setup(context, console, game_board)
+    scene.targeting_setup(context, console, game_board)
     scene.to_phase(scene.Phase.menu)
 
-    create.inventory()
+    scene.inventory_setup()
 
     while True:
         esper.process()

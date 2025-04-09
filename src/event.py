@@ -31,21 +31,23 @@ class Queues:
     damage = collections.deque()
 
 
+class Event:
+    _queue: collections.deque
+
+    def __post_init__(self):
+        self._queue.append(self)
+
 @dataclass
-class Damage:
+class Damage(Event):
+    _queue = Queues.damage
     source: int
     target: int
     amount: int
 
-    def __post_init__(self):
-        Queues.damage.append(self)
-
 
 @dataclass
-class Movement:
+class Movement(Event):
+    _queue = Queues.movement
     source: int
     x: int
     y: int
-
-    def __post_init__(self):
-        Queues.movement.append(self)
