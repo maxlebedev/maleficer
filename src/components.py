@@ -101,3 +101,7 @@ class InInventory:
 @component
 class Spell:
     pass
+
+@component
+class MenuSelection:
+    pass

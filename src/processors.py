@@ -1,3 +1,4 @@
+from collections import defaultdict
 import random
 from dataclasses import dataclass
 
@@ -14,6 +15,8 @@ import location
 import scene
 import typ
 import ecs
+
+# TODO: I'm namespacing the processors, but I should probably break them down by phase?
 
 
 @dataclass
@@ -167,6 +170,13 @@ class RenderProcessor(esper.Processor):
         text = f"HP: {curr}/{maximum}"
         self.console.print(x=x, y=y, string=text, fg=display.Color.DGREY)
 
+    def _generate_inventory_map(self) -> list:
+        inventory = esper.get_components(cmp.InInventory, cmp.Actor)
+        inventory_map = defaultdict(set)
+        for (entity, (_, actor)) in inventory:
+            inventory_map[actor.name].add(entity)
+        return sorted(inventory_map.items())
+
     def _draw_panels(self):
         panel_params = {
             "y": 0,
@@ -189,11 +199,11 @@ class RenderProcessor(esper.Processor):
         self.console.draw_frame(x=0, **panel_params)
         _, (_, actor) = esper.get_components(cmp.Player, cmp.Actor)[0]
         self.render_bar(1, 1, actor.hp, actor.max_hp, display.PANEL_WIDTH - 2)
+
         # inventory
-        inventory = esper.get_components(cmp.InInventory, cmp.Actor)
-        for i, (_, (_, named)) in enumerate(inventory):
-            # TODO: consolidate items of like type
-            self.console.print(1, 3 + i, named.name)
+        inv_map = self._generate_inventory_map()
+        for i, (name, entities) in enumerate(inv_map):
+            self.console.print(1, 3 + i, f"{len(entities)}x {name}")
 
         # right panel
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
@@ -238,13 +248,10 @@ class BoardRenderProcessor(RenderProcessor):
     context: tcod.context.Context
     board: location.Board
 
-    def process(self):
-        self.console.clear()
-        self._draw_panels()
+    def _board_to_cell_rgbs(self, board: location.Board):
+        cell_rgbs = [list(map(board.as_rgb, row)) for row in board.cells]
 
-        cell_rgbs = [list(map(self.board.as_rgb, row)) for row in self.board.cells]
-
-        in_fov = self._get_fov(self.board)
+        in_fov = self._get_fov(board)
 
         drawable_entities = ecs.Query().filter(cmp.Position, cmp.Visible)
         nonwall_drawables = drawable_entities.exclude(cmp.Cell).get()
@@ -253,7 +260,14 @@ class BoardRenderProcessor(RenderProcessor):
                 continue
             cell_rgbs[pos.x][pos.y] = (vis.glyph, vis.color, vis.bg_color)
 
-        cell_rgbs = self._apply_lighting(self.board, cell_rgbs, in_fov)
+        cell_rgbs = self._apply_lighting(board, cell_rgbs, in_fov)
+        return cell_rgbs
+
+
+    def process(self):
+        self.console.clear()
+        self._draw_panels()
+        cell_rgbs = self._board_to_cell_rgbs(self.board)
         self.present(cell_rgbs)
 
 
@@ -309,7 +323,7 @@ class TargetInputEventProcessor(InputEventProcessor):
 
 
 @dataclass
-class TargetRenderProcessor(RenderProcessor):
+class TargetRenderProcessor(BoardRenderProcessor):
     console: tcod.console.Console
     context: tcod.context.Context
     board: location.Board
@@ -318,18 +332,7 @@ class TargetRenderProcessor(RenderProcessor):
         self.console.clear()
         self._draw_panels()
 
-        cell_rgbs = [list(map(self.board.as_rgb, row)) for row in self.board.cells]
-
-        in_fov = self._get_fov(self.board)
-
-        drawable_entities = ecs.Query().filter(cmp.Position, cmp.Visible)
-        nonwall_drawables = drawable_entities.exclude(cmp.Cell).get()
-        for _, (pos, vis) in nonwall_drawables:
-            if not in_fov[pos.x][pos.y]:
-                continue
-            cell_rgbs[pos.x][pos.y] = (vis.glyph, vis.color, vis.bg_color)
-
-        cell_rgbs = self._apply_lighting(self.board, cell_rgbs, in_fov)
+        cell_rgbs = self._board_to_cell_rgbs(self.board)
 
         drawable_areas = ecs.Query().filter(cmp.Position, cmp.EffectArea).get()
         for _, (pos, aoe) in drawable_areas:
@@ -337,3 +340,29 @@ class TargetRenderProcessor(RenderProcessor):
             cell_rgbs[pos.x][pos.y] = cell[0], cell[1], aoe.color
 
         self.present(cell_rgbs)
+
+@dataclass
+class InventoryRenderProcessor(BoardRenderProcessor):
+    console: tcod.console.Console
+    context: tcod.context.Context
+    board: location.Board
+
+
+    def process(self) -> None:
+        self.console.clear()
+        self._draw_panels()
+
+        cell_rgbs = self._board_to_cell_rgbs(self.board)
+
+        # inventory thing
+        inv_map = self._generate_inventory_map()
+        for i, (name, entities) in enumerate(inv_map):
+            self.console.print(1, 3 + i, f"{len(entities)}x {name}")
+
+        self.present(cell_rgbs)
+
+@dataclass
+class InventoryInputEventProcessor(InputEventProcessor):
+    def __init__(self):
+        self.action_map = {
+        }

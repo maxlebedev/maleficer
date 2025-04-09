@@ -14,6 +14,7 @@ class Phase(enum.Enum):
     menu = enum.auto()
     level = enum.auto()
     target = enum.auto()
+    inventory = enum.auto()
 
 
 # do I want this to be in create.py?
@@ -64,8 +65,16 @@ def targeting_setup(context, console, game_board):
     PHASES[Phase.target] = target_procs
 
 
+def inventory_phase(context, console, game_board):
+    input_proc = processors.InventoryInputEventProcessor()
+    render_proc = processors.InventoryRenderProcessor(console, context, game_board)
+
+    inventory_procs = [render_proc, input_proc]
+    PHASES[Phase.inventory] = inventory_procs
+
+
 def to_phase(phase: Phase, start_proc: type[esper.Processor] | None = None):
-    """We dynamically add and remove processors when moving between phases. Each phase has it s own proc loop."""
+    """We dynamically add and remove processors when moving between phases. Each phase has its own proc loop."""
     for proc in esper._processors:
         esper.remove_processor(type(proc))
     esper._processors = []
