@@ -9,6 +9,7 @@ import tcod
 import components as cmp
 import display
 import typ
+import create
 
 
 def player_position():
@@ -34,43 +35,8 @@ class Board:
         self.cells = []
         self.board_size = display.BOARD_WIDTH * display.BOARD_HEIGHT
         for x in range(display.BOARD_WIDTH):
-            col = [self.make_wall(x, y) for y in range(display.BOARD_HEIGHT)]
+            col = [create.wall(x, y) for y in range(display.BOARD_HEIGHT)]
             self.cells.append(col)
-
-    def make_floor(self, x: int, y: int) -> int:
-        vis = cmp.Visible(glyph=display.Glyph.FLOOR, color=display.Color.LGREY)
-        cell = esper.create_entity(
-            cmp.Cell(), cmp.Position(x, y), vis, cmp.Transparent()
-        )
-        return cell
-
-    def make_wall(self, x: int, y: int) -> int:
-        vis = cmp.Visible(glyph=display.Glyph.WALL, color=display.Color.LGREY)
-        cell = esper.create_entity(cmp.Cell(), cmp.Position(x, y), vis, cmp.Blocking())
-        return cell
-
-    def make_bat(self, pos: cmp.Position) -> int:
-        vis = cmp.Visible(glyph=display.Glyph.BAT, color=display.Color.RED)
-        actor = cmp.Actor(max_hp=1, name="bat")
-        components = [cmp.Enemy(), pos, vis, cmp.Blocking(), actor, cmp.Wander()]
-        bat = esper.create_entity(*components)
-        return bat
-
-    def make_skeleton(self, pos: cmp.Position) -> int:
-        vis = cmp.Visible(glyph=display.Glyph.SKELETON, color=display.Color.RED)
-        actor = cmp.Actor(max_hp=3, name="skeleton")
-        melee = cmp.Melee(radius=5)
-        components = [cmp.Enemy(), pos, vis, cmp.Blocking(), actor, melee]
-        skeleton = esper.create_entity(*components)
-        return skeleton
-
-    def make_potion(self, pos: cmp.Position) -> int:
-        vis = cmp.Visible(glyph=display.Glyph.POTION, color=display.Color.GREEN)
-        col = cmp.Collectable()
-        actor = cmp.Actor(max_hp=1, name="potion")
-        components = [pos, vis, col, actor]
-        potion = esper.create_entity(*components)
-        return potion
 
     @classmethod
     def as_rgb(cls, cell: typ.CELL) -> typ.CELL_RGB:
@@ -169,9 +135,9 @@ def tunnel_between(board, start: cmp.Position, end: cmp.Position):
 
     # Generate the coordinates for this tunnel.
     for x, y in tcod.los.bresenham((start.x, start.y), (corner_x, corner_y)).tolist():
-        board.set_cell(x, y, board.make_floor(x, y))
+        board.set_cell(x, y, create.floor(x, y))
     for x, y in tcod.los.bresenham((corner_x, corner_y), (end.x, end.y)).tolist():
-        board.set_cell(x, y, board.make_floor(x, y))
+        board.set_cell(x, y, create.floor(x, y))
 
 
 def intersects(board: Board, src: RectangularRoom, target: RectangularRoom) -> bool:
@@ -215,7 +181,7 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
         centers.append(new_room.center)
         for cell in board.as_sequence(*new_room.inner):
             pos = esper.component_for_entity(cell, cmp.Position)
-            board.set_cell(pos.x, pos.y, board.make_floor(pos.x, pos.y))
+            board.set_cell(pos.x, pos.y, create.floor(pos.x, pos.y))
 
         if len(rooms) == 0:  # start player in first room
             pos = player_position()
@@ -224,10 +190,10 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
             endpt = closest_position(new_room.center, centers[:-1])
             tunnel_between(board, new_room.center, endpt)
             if random.randint(0, 1):
-                board.make_bat(new_room.center)
+                create.bat(new_room.center)
             else:
-                board.make_skeleton(new_room.center)
-                board.make_potion(new_room.center)
+                create.skeleton(new_room.center)
+                create.potion(new_room.center)
 
 
         rooms.append(new_room)

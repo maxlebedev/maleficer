@@ -48,7 +48,8 @@ class MovementProcessor(esper.Processor):
                 if ent_is_player and target_is_collectable:
                     esper.remove_component(target, cmp.Position)
                     esper.add_component(target, cmp.InInventory())
-                    print(f"player picked up an item")
+                    message = "player picked up an item"
+                    event.Log.append(message)
                     # oneshot call some collectable processor?
 
             if move:
@@ -71,12 +72,10 @@ class DamageProcessor(esper.Processor):
 
             src_actor = esper.component_for_entity(damage.source, cmp.Actor)
             message = f"{src_actor.name} deals {damage.amount} to {actor.name}"
-            print(message)
             event.Log.append(message)
 
             if actor.hp <= 0:
                 message = f"{actor.name} dies"
-                print(message)
                 event.Log.append(message)
                 esper.delete_entity(damage.target, immediate=True)
                 # crashes if player gets deleted

@@ -17,6 +17,7 @@ class Log:
 
     @classmethod
     def append(cls, text: str):
+        print(text)
         for line in textwrap.wrap(text, display.PANEL_WIDTH - 2):
             cls.messages.append(line.upper())
 
