@@ -37,6 +37,7 @@ class Event:
     def __post_init__(self):
         self._queue.append(self)
 
+
 @dataclass
 class Damage(Event):
     _queue = Queues.damage

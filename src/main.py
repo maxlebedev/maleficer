@@ -4,7 +4,6 @@ import tcod
 import display
 import location
 import scene
-import create
 
 FLAGS = tcod.context.SDL_WINDOW_RESIZABLE  # | tcod.context.SDL_WINDOW_FULLSCREEN
 
@@ -29,9 +28,10 @@ def main() -> None:
 
     game_board = location.Board()
 
-    scene.main_menu_setup(context, console)
-    scene.level_setup(context, console, game_board)
-    scene.targeting_setup(context, console, game_board)
+    scene.main_menu_phase(context, console)
+    scene.level_phase(context, console, game_board)
+    scene.targeting_phase(context, console, game_board)
+    scene.inventory_phase(context, console, game_board)
     scene.to_phase(scene.Phase.menu)
 
     scene.inventory_setup()

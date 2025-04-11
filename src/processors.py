@@ -117,6 +117,7 @@ class GameInputEventProcessor(InputEventProcessor):
             input.KEYMAP[input.Input.MOVE_RIGHT]: (event.Movement, [player, 1, 0]),
             input.KEYMAP[input.Input.ESC]: (scene.to_phase, [scene.Phase.menu]),
             input.KEYMAP[input.Input.ONE]: (self.to_target, []),
+            input.KEYMAP[input.Input.TWO]: (scene.to_phase, [scene.Phase.inventory]),
         }
 
     def to_target(self):
@@ -173,8 +174,9 @@ class RenderProcessor(esper.Processor):
     def _generate_inventory_map(self) -> list:
         inventory = esper.get_components(cmp.InInventory, cmp.Actor)
         inventory_map = defaultdict(set)
-        for (entity, (_, actor)) in inventory:
+        for entity, (_, actor) in inventory:
             inventory_map[actor.name].add(entity)
+        # TODO: assign these a cmp.MenuItem with their order
         return sorted(inventory_map.items())
 
     def _draw_panels(self):
@@ -241,7 +243,6 @@ class RenderProcessor(esper.Processor):
         self.context.present(self.console)  # , integer_scaling=True
 
 
-
 @dataclass
 class BoardRenderProcessor(RenderProcessor):
     console: tcod.console.Console
@@ -263,13 +264,11 @@ class BoardRenderProcessor(RenderProcessor):
         cell_rgbs = self._apply_lighting(board, cell_rgbs, in_fov)
         return cell_rgbs
 
-
     def process(self):
         self.console.clear()
         self._draw_panels()
         cell_rgbs = self._board_to_cell_rgbs(self.board)
         self.present(cell_rgbs)
-
 
 
 @dataclass
@@ -341,12 +340,12 @@ class TargetRenderProcessor(BoardRenderProcessor):
 
         self.present(cell_rgbs)
 
+
 @dataclass
 class InventoryRenderProcessor(BoardRenderProcessor):
     console: tcod.console.Console
     context: tcod.context.Context
     board: location.Board
-
 
     def process(self) -> None:
         self.console.clear()
@@ -355,14 +354,30 @@ class InventoryRenderProcessor(BoardRenderProcessor):
         cell_rgbs = self._board_to_cell_rgbs(self.board)
 
         # inventory thing
+        _, (menu_selection) = esper.get_component(cmp.MenuSelection)[0]
+
         inv_map = self._generate_inventory_map()
         for i, (name, entities) in enumerate(inv_map):
-            self.console.print(1, 3 + i, f"{len(entities)}x {name}")
+            text = f"{len(entities)}x {name}"
+            fg=display.Color.WHITE
+            bg=display.Color.BLACK
+            if menu_selection.item == i:
+                fg, bg = bg, fg
+            self.console.print(1, 3 + i, string=text, fg=fg, bg=bg)
 
         self.present(cell_rgbs)
+
 
 @dataclass
 class InventoryInputEventProcessor(InputEventProcessor):
     def __init__(self):
+        to_level = (scene.to_phase, [scene.Phase.level])
         self.action_map = {
+            input.KEYMAP[input.Input.MOVE_DOWN]: (self.move_selection, [1]),
+            input.KEYMAP[input.Input.MOVE_UP]: (self.move_selection, [-1]),
+            input.KEYMAP[input.Input.ESC]: to_level,
         }
+
+    def move_selection(self, diff: int):
+        _, (menu_selection) = esper.get_component(cmp.MenuSelection)[0]
+        menu_selection.item += diff

@@ -1,4 +1,4 @@
-from enum import Enum
+import enum
 
 import tcod
 import yaml
@@ -14,14 +14,15 @@ We map Keybinds to Inputs via keymap
 """
 
 
-class Input(Enum):
-    MOVE_UP = 1
-    MOVE_DOWN = 2
-    MOVE_LEFT = 3
-    MOVE_RIGHT = 4
-    ESC = 5
-    ONE = 6
-    SELECT = 7
+class Input(enum.Enum):
+    MOVE_UP = enum.auto()
+    MOVE_DOWN = enum.auto()
+    MOVE_LEFT = enum.auto()
+    MOVE_RIGHT = enum.auto()
+    ESC = enum.auto()
+    SELECT = enum.auto()
+    ONE = enum.auto()
+    TWO = enum.auto()
 
 
 def load_keymap(keymap_json_path):

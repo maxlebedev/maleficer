@@ -1,9 +1,11 @@
 # ECS funcs to extend esper
 import esper
 
+
 class Query:
     entities = None
     include = None
+
     def filter(self, *include):
         comp_db = esper._components
         self.include = include

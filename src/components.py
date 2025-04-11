@@ -70,7 +70,7 @@ class Melee:
 
 @component
 class Actor:  # Destroyable
-    name: str # consider a Named/Onymous component?
+    name: str  # consider a Named/Onymous component?
     max_hp: int
     armor: int = 0
 
@@ -88,20 +88,30 @@ class EffectArea:
     color: typ.RGB
     # radius/cell set/aoe formula?
 
+
 @component
 class Collectable:
     """can be added to inventory"""
 
     pass
 
+
 @component
 class InInventory:
     pass
+
 
 @component
 class Spell:
     pass
 
+
 @component
 class MenuSelection:
+    item: int = 0
     pass
+
+
+@component
+class MenuItem:
+    order: int

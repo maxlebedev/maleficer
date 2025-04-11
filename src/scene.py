@@ -22,7 +22,7 @@ def player_setup():
     vis = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN)
     pos = cmp.Position(x=1, y=1)
     actor = cmp.Actor(max_hp=10, name="player")
-    esper.create_entity(cmp.Player(), pos, vis, cmp.Blocking(), actor )
+    esper.create_entity(cmp.Player(), pos, vis, cmp.Blocking(), actor)
 
 
 def inventory_setup():
@@ -30,14 +30,14 @@ def inventory_setup():
     esper.create_entity(cmp.InInventory(), cmp.Actor(name="lighter", max_hp=1))
 
 
-def main_menu_setup(context, console):
+def main_menu_phase(context, console):
     render_proc = processors.MenuRenderProcessor(context, console)
     input_proc = processors.MenuInputEventProcessor()
 
     PHASES[Phase.menu] = [render_proc, input_proc]
 
 
-def level_setup(context, console, game_board):
+def level_phase(context, console, game_board):
     input_proc = processors.GameInputEventProcessor()
     npc_proc = processors.NPCProcessor()
     damage_proc = processors.DamageProcessor()
@@ -51,7 +51,7 @@ def level_setup(context, console, game_board):
     PHASES[Phase.level] = level_procs
 
 
-def targeting_setup(context, console, game_board):
+def targeting_phase(context, console, game_board):
     pos = location.player_position()
 
     aoe_cmp = cmp.EffectArea(color=display.Color.RED)
@@ -66,6 +66,8 @@ def targeting_setup(context, console, game_board):
 
 
 def inventory_phase(context, console, game_board):
+    esper.create_entity(cmp.MenuSelection())
+
     input_proc = processors.InventoryInputEventProcessor()
     render_proc = processors.InventoryRenderProcessor(console, context, game_board)
 
