@@ -1,5 +1,6 @@
 # factories
 import esper
+import collections 
 
 import components as cmp
 import display
@@ -42,3 +43,14 @@ def potion(pos: cmp.Position) -> int:
     components = [pos, vis, col, actor]
     potion = esper.create_entity(*components)
     return potion
+
+
+def inventory_map() -> list:
+    inventory = esper.get_components(cmp.InInventory, cmp.Actor)
+    inventory_map = collections.defaultdict(set)
+    for entity, (_, actor) in inventory:
+        inventory_map[actor.name].add(entity)
+    # TODO: create a cmp.MenuItem on collection, then set the order in this func
+    # then display is just a matter of lookup
+    sorted_map = sorted(inventory_map.items())
+    return sorted_map

@@ -4,6 +4,7 @@ import tcod
 import display
 import location
 import scene
+import create
 
 FLAGS = tcod.context.SDL_WINDOW_RESIZABLE  # | tcod.context.SDL_WINDOW_FULLSCREEN
 
@@ -35,6 +36,7 @@ def main() -> None:
     scene.to_phase(scene.Phase.menu)
 
     scene.inventory_setup()
+    create.inventory_map()
 
     while True:
         esper.process()

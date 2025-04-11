@@ -6,11 +6,12 @@ import yaml
 """
 Clarifying related terms
 
-Keybind: the physical key (from yaml file)
-Input: the input option
-Actions: a player has chosen an in-game option
+Keybind: the physical key/keysym (from yaml file)
+Input: the labels for input option
+Actions: functions fired from the key presses
 
 We map Keybinds to Inputs via keymap
+And then Inputs to Actions vis action_map
 """
 
 

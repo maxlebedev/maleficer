@@ -15,6 +15,7 @@ import location
 import scene
 import typ
 import ecs
+import create
 
 # TODO: I'm namespacing the processors, but I should probably break them down by phase?
 
@@ -51,6 +52,7 @@ class MovementProcessor(esper.Processor):
                 if ent_is_player and target_is_collectable:
                     esper.remove_component(target, cmp.Position)
                     esper.add_component(target, cmp.InInventory())
+                    create.inventory_map()
                     message = "player picked up an item"
                     event.Log.append(message)
                     # oneshot call some collectable processor?
@@ -171,14 +173,6 @@ class RenderProcessor(esper.Processor):
         text = f"HP: {curr}/{maximum}"
         self.console.print(x=x, y=y, string=text, fg=display.Color.DGREY)
 
-    def _generate_inventory_map(self) -> list:
-        inventory = esper.get_components(cmp.InInventory, cmp.Actor)
-        inventory_map = defaultdict(set)
-        for entity, (_, actor) in inventory:
-            inventory_map[actor.name].add(entity)
-        # TODO: assign these a cmp.MenuItem with their order
-        return sorted(inventory_map.items())
-
     def _draw_panels(self):
         panel_params = {
             "y": 0,
@@ -203,7 +197,7 @@ class RenderProcessor(esper.Processor):
         self.render_bar(1, 1, actor.hp, actor.max_hp, display.PANEL_WIDTH - 2)
 
         # inventory
-        inv_map = self._generate_inventory_map()
+        inv_map = create.inventory_map()
         for i, (name, entities) in enumerate(inv_map):
             self.console.print(1, 3 + i, f"{len(entities)}x {name}")
 
@@ -347,16 +341,10 @@ class InventoryRenderProcessor(BoardRenderProcessor):
     context: tcod.context.Context
     board: location.Board
 
-    def process(self) -> None:
-        self.console.clear()
-        self._draw_panels()
-
-        cell_rgbs = self._board_to_cell_rgbs(self.board)
-
-        # inventory thing
+    def display_inventory(self):
         _, (menu_selection) = esper.get_component(cmp.MenuSelection)[0]
 
-        inv_map = self._generate_inventory_map()
+        inv_map = create.inventory_map()
         for i, (name, entities) in enumerate(inv_map):
             text = f"{len(entities)}x {name}"
             fg=display.Color.WHITE
@@ -365,6 +353,13 @@ class InventoryRenderProcessor(BoardRenderProcessor):
                 fg, bg = bg, fg
             self.console.print(1, 3 + i, string=text, fg=fg, bg=bg)
 
+    def process(self) -> None:
+        self.console.clear()
+        self._draw_panels()
+
+        cell_rgbs = self._board_to_cell_rgbs(self.board)
+
+        self.display_inventory()
         self.present(cell_rgbs)
 
 
@@ -376,8 +371,17 @@ class InventoryInputEventProcessor(InputEventProcessor):
             input.KEYMAP[input.Input.MOVE_DOWN]: (self.move_selection, [1]),
             input.KEYMAP[input.Input.MOVE_UP]: (self.move_selection, [-1]),
             input.KEYMAP[input.Input.ESC]: to_level,
+            input.KEYMAP[input.Input.SELECT]: (self.use_item, []),
         }
 
     def move_selection(self, diff: int):
         _, (menu_selection) = esper.get_component(cmp.MenuSelection)[0]
         menu_selection.item += diff
+
+    def use_item(self):
+        inv_map = create.inventory_map()
+        _, (menu_selection) = esper.get_component(cmp.MenuSelection)[0]
+        selection_set = inv_map[menu_selection.item][1]
+        print(f"using one of {selection_set}")
+
+        scene.to_phase(scene.Phase.level, NPCProcessor)
