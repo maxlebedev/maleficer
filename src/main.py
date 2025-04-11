@@ -37,6 +37,7 @@ def main() -> None:
 
     scene.inventory_setup()
     create.inventory_map()
+    create.starting_spell()
 
     while True:
         esper.process()

@@ -23,3 +23,9 @@ class Query:
         if self.entities and self.include:
             for entity in self.entities:
                 yield entity, [entity_db[entity][cmp] for cmp in self.include]
+
+    def first(self):
+        return next(self.get())
+
+    def first_cmp(self):
+        return next(self.get())[1][0]

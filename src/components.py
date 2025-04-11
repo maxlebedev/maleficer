@@ -103,6 +103,16 @@ class InInventory:
 
 @component
 class Spell:
+    slot: int
+    target_range: int
+    damage: int
+    # mana cost?
+    pass
+
+
+@component
+class CurrentSpell:
+    """the spell we casting right now"""
     pass
 
 

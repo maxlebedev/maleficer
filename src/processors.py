@@ -47,6 +47,7 @@ class MovementProcessor(esper.Processor):
                     target_is_harmable = esper.has_component(target, cmp.Actor)
                     if src_is_enemy and target_is_harmable:
                         event.Damage(ent, target, 1)
+                        # this should come from some property on the source
                 ent_is_player = esper.has_component(ent, cmp.Player)
                 target_is_collectable = esper.has_component(target, cmp.Collectable)
                 if ent_is_player and target_is_collectable:
@@ -118,14 +119,20 @@ class GameInputEventProcessor(InputEventProcessor):
             input.KEYMAP[input.Input.MOVE_UP]: (event.Movement, [player, 0, -1]),
             input.KEYMAP[input.Input.MOVE_RIGHT]: (event.Movement, [player, 1, 0]),
             input.KEYMAP[input.Input.ESC]: (scene.to_phase, [scene.Phase.menu]),
-            input.KEYMAP[input.Input.ONE]: (self.to_target, []),
+            input.KEYMAP[input.Input.ONE]: (self.to_target, [1]),
             input.KEYMAP[input.Input.TWO]: (scene.to_phase, [scene.Phase.inventory]),
         }
 
-    def to_target(self):
+    def to_target(self, slot: int):
+        # TODO: This probably wants to take spell_ent and not slot num
         player_pos = location.player_position()
         _, (_, xhair_pos) = esper.get_components(cmp.Crosshair, cmp.Position)[0]
         xhair_pos.x, xhair_pos.y = player_pos.x, player_pos.y
+
+        for spell_ent, (spell_cmp) in esper.get_component(cmp.Spell):
+            if spell_cmp.slot == slot:
+                esper.add_component(spell_ent, cmp.CurrentSpell())
+
         scene.to_phase(scene.Phase.target)
 
 
@@ -293,7 +300,7 @@ class TargetInputEventProcessor(InputEventProcessor):
 
     def __init__(self, board):
         self.board = board
-        crosshair, _ = esper.get_component(cmp.Crosshair)[0]
+        crosshair, _ = ecs.Query().filter(cmp.Crosshair).first()
         to_level = (scene.to_phase, [scene.Phase.level])
 
         self.action_map = {
@@ -306,12 +313,17 @@ class TargetInputEventProcessor(InputEventProcessor):
         }
 
     def deal_damage(self, positioned_entity: int):
-        player, _ = esper.get_component(cmp.Player)[0]
+        player, _ = ecs.Query().filter(cmp.Player).first()
         pos = esper.component_for_entity(positioned_entity, cmp.Position)
         self.board.build_entity_cache()  # expensive, but okay
+
+        query = ecs.Query().filter(cmp.Spell, cmp.CurrentSpell)
+        spell_ent, (spell_cmp, _) = query.first()
         for target in self.board.entities[pos.x][pos.y]:
             if esper.has_component(target, cmp.Actor):
-                event.Damage(player, target, 1)
+                event.Damage(player, target, spell_cmp.damage)
+
+        esper.remove_component(spell_ent, cmp.CurrentSpell)
         scene.to_phase(scene.Phase.level, NPCProcessor)
 
 
@@ -342,7 +354,7 @@ class InventoryRenderProcessor(BoardRenderProcessor):
     board: location.Board
 
     def display_inventory(self):
-        _, (menu_selection) = esper.get_component(cmp.MenuSelection)[0]
+        menu_selection = ecs.Query().filter(cmp.MenuSelection).first_cmp()
 
         inv_map = create.inventory_map()
         for i, (name, entities) in enumerate(inv_map):
@@ -375,12 +387,12 @@ class InventoryInputEventProcessor(InputEventProcessor):
         }
 
     def move_selection(self, diff: int):
-        _, (menu_selection) = esper.get_component(cmp.MenuSelection)[0]
+        menu_selection = ecs.Query().filter(cmp.MenuSelection).first_cmp()
         menu_selection.item += diff
 
     def use_item(self):
         inv_map = create.inventory_map()
-        _, (menu_selection) = esper.get_component(cmp.MenuSelection)[0]
+        menu_selection = ecs.Query().filter(cmp.MenuSelection).first_cmp()
         selection_set = inv_map[menu_selection.item][1]
         print(f"using one of {selection_set}")
 
