@@ -126,7 +126,7 @@ class GameInputEventProcessor(InputEventProcessor):
     def to_target(self, slot: int):
         # TODO: This probably wants to take spell_ent and not slot num
         player_pos = location.player_position()
-        _, (_, xhair_pos) = esper.get_components(cmp.Crosshair, cmp.Position)[0]
+        xhair_pos = ecs.Query(cmp.Crosshair, cmp.Position).first_cmp(cmp.Position)
         xhair_pos.x, xhair_pos.y = player_pos.x, player_pos.y
 
         for spell_ent, (spell_cmp) in esper.get_component(cmp.Spell):
@@ -255,8 +255,7 @@ class BoardRenderProcessor(RenderProcessor):
 
         in_fov = self._get_fov(board)
 
-        drawable_entities = ecs.Query().filter(cmp.Position, cmp.Visible)
-        nonwall_drawables = drawable_entities.exclude(cmp.Cell).get()
+        nonwall_drawables= ecs.Query(cmp.Position, cmp.Visible).exclude(cmp.Cell).get()
         for _, (pos, vis) in nonwall_drawables:
             if not in_fov[pos.x][pos.y]:
                 continue
@@ -300,25 +299,36 @@ class TargetInputEventProcessor(InputEventProcessor):
 
     def __init__(self, board):
         self.board = board
-        crosshair, _ = ecs.Query().filter(cmp.Crosshair).first()
+        crosshair, _ = ecs.Query(cmp.Crosshair).first()
         to_level = (scene.to_phase, [scene.Phase.level])
 
         self.action_map = {
-            input.KEYMAP[input.Input.MOVE_DOWN]: (event.Movement, [crosshair, 0, 1]),
-            input.KEYMAP[input.Input.MOVE_LEFT]: (event.Movement, [crosshair, -1, 0]),
-            input.KEYMAP[input.Input.MOVE_UP]: (event.Movement, [crosshair, 0, -1]),
-            input.KEYMAP[input.Input.MOVE_RIGHT]: (event.Movement, [crosshair, 1, 0]),
+            input.KEYMAP[input.Input.MOVE_DOWN]: (self.move_crosshair, [0, 1]),
+            input.KEYMAP[input.Input.MOVE_LEFT]: (self.move_crosshair, [-1, 0]),
+            input.KEYMAP[input.Input.MOVE_UP]: (self.move_crosshair, [0, -1]),
+            input.KEYMAP[input.Input.MOVE_RIGHT]: (self.move_crosshair, [1, 0]),
             input.KEYMAP[input.Input.ESC]: to_level,
             input.KEYMAP[input.Input.SELECT]: (self.deal_damage, [crosshair]),
         }
 
+    def move_crosshair(self, x, y):
+        crosshair, (_, pos) = ecs.Query(cmp.Crosshair, cmp.Position).first()
+        _ , (spell_cmp, _) = ecs.Query(cmp.Spell, cmp.CurrentSpell).first()
+
+        player_pos = location.player_position()
+        new_pos = cmp.Position(pos.x+x, pos.y+y)
+        dist_to_player = location.euclidean_distance(player_pos, new_pos)
+        if dist_to_player < spell_cmp.target_range:
+            event.Movement(crosshair, x, y)
+
+
+
     def deal_damage(self, positioned_entity: int):
-        player, _ = ecs.Query().filter(cmp.Player).first()
+        player, _ = ecs.Query(cmp.Player).first()
         pos = esper.component_for_entity(positioned_entity, cmp.Position)
         self.board.build_entity_cache()  # expensive, but okay
 
-        query = ecs.Query().filter(cmp.Spell, cmp.CurrentSpell)
-        spell_ent, (spell_cmp, _) = query.first()
+        spell_ent, (spell_cmp, _) = ecs.Query(cmp.Spell, cmp.CurrentSpell).first()
         for target in self.board.entities[pos.x][pos.y]:
             if esper.has_component(target, cmp.Actor):
                 event.Damage(player, target, spell_cmp.damage)
@@ -339,7 +349,7 @@ class TargetRenderProcessor(BoardRenderProcessor):
 
         cell_rgbs = self._board_to_cell_rgbs(self.board)
 
-        drawable_areas = ecs.Query().filter(cmp.Position, cmp.EffectArea).get()
+        drawable_areas = ecs.Query(cmp.Position, cmp.EffectArea).get()
         for _, (pos, aoe) in drawable_areas:
             cell = cell_rgbs[pos.x][pos.y]
             cell_rgbs[pos.x][pos.y] = cell[0], cell[1], aoe.color
@@ -354,7 +364,7 @@ class InventoryRenderProcessor(BoardRenderProcessor):
     board: location.Board
 
     def display_inventory(self):
-        menu_selection = ecs.Query().filter(cmp.MenuSelection).first_cmp()
+        menu_selection = ecs.Query(cmp.MenuSelection).first_cmp()
 
         inv_map = create.inventory_map()
         for i, (name, entities) in enumerate(inv_map):
@@ -387,12 +397,12 @@ class InventoryInputEventProcessor(InputEventProcessor):
         }
 
     def move_selection(self, diff: int):
-        menu_selection = ecs.Query().filter(cmp.MenuSelection).first_cmp()
+        menu_selection = ecs.Query(cmp.MenuSelection).first_cmp()
         menu_selection.item += diff
 
     def use_item(self):
         inv_map = create.inventory_map()
-        menu_selection = ecs.Query().filter(cmp.MenuSelection).first_cmp()
+        menu_selection = ecs.Query(cmp.MenuSelection).first_cmp()
         selection_set = inv_map[menu_selection.item][1]
         print(f"using one of {selection_set}")
 

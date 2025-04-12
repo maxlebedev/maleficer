@@ -6,6 +6,10 @@ class Query:
     entities = None
     include = None
 
+    def __init__(self, *include):
+        if include:
+            self.filter(*include)
+
     def filter(self, *include):
         comp_db = esper._components
         self.include = include
@@ -18,14 +22,19 @@ class Query:
             [self.entities.difference_update(comp_db[ct]) for ct in exclude]
         return self
 
-    def get(self):
+    def get(self, *include):
         entity_db = esper._entities
-        if self.entities and self.include:
-            for entity in self.entities:
-                yield entity, [entity_db[entity][cmp] for cmp in self.include]
+        if not self.entities or not self.include:
+            return
+        if not include:
+            include = self.include
 
-    def first(self):
-        return next(self.get())
+        for entity in self.entities:
+            yield entity, [entity_db[entity][cmp] for cmp in include]
 
-    def first_cmp(self):
-        return next(self.get())[1][0]
+    def first(self, *include):
+        return next(self.get(*include))
+
+    def first_cmp(self, *include):
+        """get only the components of the first entity"""
+        return next(self.get(*include))[1][0]

@@ -112,7 +112,7 @@ class Spell:
 
 @component
 class CurrentSpell:
-    """the spell we casting right now"""
+    """the spell we are casting right now"""
     pass
 
 
