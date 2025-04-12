@@ -1,4 +1,6 @@
 # ECS funcs to extend esper
+from collections.abc import Generator
+
 import esper
 
 
@@ -22,7 +24,7 @@ class Query:
             [self.entities.difference_update(comp_db[ct]) for ct in exclude]
         return self
 
-    def get(self, *include):
+    def get(self, *include) -> Generator[tuple[int, list]]:
         entity_db = esper._entities
         if not self.entities or not self.include:
             return
@@ -32,9 +34,12 @@ class Query:
         for entity in self.entities:
             yield entity, [entity_db[entity][cmp] for cmp in include]
 
-    def first(self, *include):
+    def first(self, *include) -> tuple[int, list]:
         return next(self.get(*include))
 
-    def first_cmp(self, *include):
+    def first_cmp(self, *include) -> object | list[object]:
         """get only the components of the first entity"""
-        return next(self.get(*include))[1][0]
+        components = next(self.get(*include))[1]
+        if len(include) == 1:
+            return components[0]
+        return components

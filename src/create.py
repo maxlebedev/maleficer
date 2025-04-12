@@ -1,6 +1,7 @@
 # factories
+import collections
+
 import esper
-import collections 
 
 import components as cmp
 import display
@@ -55,8 +56,8 @@ def inventory_map() -> list:
     sorted_map = sorted(inventory_map.items())
     return sorted_map
 
+
 def starting_spell() -> int:
     spell_cmp = cmp.Spell(slot=1, target_range=5, damage=1)
     sample_spell = esper.create_entity(spell_cmp)
     return sample_spell
-

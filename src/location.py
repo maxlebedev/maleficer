@@ -7,9 +7,9 @@ import esper
 import tcod
 
 import components as cmp
+import create
 import display
 import typ
-import create
 
 
 def player_position():

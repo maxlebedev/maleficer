@@ -1,10 +1,10 @@
 import esper
 import tcod
 
+import create
 import display
 import location
 import scene
-import create
 
 FLAGS = tcod.context.SDL_WINDOW_RESIZABLE  # | tcod.context.SDL_WINDOW_FULLSCREEN
 

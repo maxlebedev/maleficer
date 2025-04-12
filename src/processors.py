@@ -1,5 +1,5 @@
-from collections import defaultdict
 import random
+from collections import defaultdict
 from dataclasses import dataclass
 
 import esper
@@ -8,14 +8,14 @@ from tcod import libtcodpy
 from tcod.map import compute_fov
 
 import components as cmp
+import create
 import display
+import ecs
 import event
 import input
 import location
 import scene
 import typ
-import ecs
-import create
 
 # TODO: I'm namespacing the processors, but I should probably break them down by phase?
 
@@ -255,7 +255,7 @@ class BoardRenderProcessor(RenderProcessor):
 
         in_fov = self._get_fov(board)
 
-        nonwall_drawables= ecs.Query(cmp.Position, cmp.Visible).exclude(cmp.Cell).get()
+        nonwall_drawables = ecs.Query(cmp.Position, cmp.Visible).exclude(cmp.Cell).get()
         for _, (pos, vis) in nonwall_drawables:
             if not in_fov[pos.x][pos.y]:
                 continue
@@ -313,15 +313,13 @@ class TargetInputEventProcessor(InputEventProcessor):
 
     def move_crosshair(self, x, y):
         crosshair, (_, pos) = ecs.Query(cmp.Crosshair, cmp.Position).first()
-        _ , (spell_cmp, _) = ecs.Query(cmp.Spell, cmp.CurrentSpell).first()
+        _, (spell_cmp, _) = ecs.Query(cmp.Spell, cmp.CurrentSpell).first()
 
         player_pos = location.player_position()
-        new_pos = cmp.Position(pos.x+x, pos.y+y)
+        new_pos = cmp.Position(pos.x + x, pos.y + y)
         dist_to_player = location.euclidean_distance(player_pos, new_pos)
         if dist_to_player < spell_cmp.target_range:
             event.Movement(crosshair, x, y)
-
-
 
     def deal_damage(self, positioned_entity: int):
         player, _ = ecs.Query(cmp.Player).first()
@@ -369,8 +367,8 @@ class InventoryRenderProcessor(BoardRenderProcessor):
         inv_map = create.inventory_map()
         for i, (name, entities) in enumerate(inv_map):
             text = f"{len(entities)}x {name}"
-            fg=display.Color.WHITE
-            bg=display.Color.BLACK
+            fg = display.Color.WHITE
+            bg = display.Color.BLACK
             if menu_selection.item == i:
                 fg, bg = bg, fg
             self.console.print(1, 3 + i, string=text, fg=fg, bg=bg)
