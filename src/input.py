@@ -24,6 +24,7 @@ class Input(enum.Enum):
     SELECT = enum.auto()
     ONE = enum.auto()
     TWO = enum.auto()
+    TAB = enum.auto()
 
 
 def load_keymap(keymap_json_path):

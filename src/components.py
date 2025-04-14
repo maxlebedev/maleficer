@@ -105,7 +105,6 @@ class InInventory:
 class Spell:
     slot: int
     target_range: int
-    damage: int
     # mana cost?
     pass
 
@@ -126,3 +125,16 @@ class MenuSelection:
 @component
 class MenuItem:
     order: int
+
+
+@component
+class DamageEffect:
+    """a spell (or w.e) deals damage"""
+    amount: int
+
+
+@component
+class MoveEffect:
+    """a spell (or w.e) moves a target"""
+    # target is chosen at spell creation time, so only rly useful for player
+    target: int

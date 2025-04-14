@@ -1,12 +1,12 @@
 # ECS funcs to extend esper
 from collections.abc import Generator
 
-import esper
 
+import esper
 
 class Query:
     entities = None
-    include = None
+    include = tuple()
 
     def __init__(self, *include):
         if include:
@@ -34,12 +34,12 @@ class Query:
         for entity in self.entities:
             yield entity, [entity_db[entity][cmp] for cmp in include]
 
-    def first(self, *include) -> tuple[int, list]:
+
+    def first(self, *include):
         return next(self.get(*include))
 
-    def first_cmp(self, *include) -> object | list[object]:
+    def first_cmp(self, *include):
         """get only the components of the first entity"""
         components = next(self.get(*include))[1]
-        if len(include) == 1:
-            return components[0]
-        return components
+        for component in components:
+            yield component

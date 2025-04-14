@@ -1,5 +1,4 @@
 import random
-from collections import defaultdict
 from dataclasses import dataclass
 
 import esper
@@ -112,7 +111,7 @@ class InputEventProcessor(esper.Processor):
 @dataclass
 class GameInputEventProcessor(InputEventProcessor):
     def __init__(self):
-        player, _ = esper.get_component(cmp.Player)[0]
+        player, _ = ecs.Query(cmp.Player).first()
         self.action_map = {
             input.KEYMAP[input.Input.MOVE_DOWN]: (event.Movement, [player, 0, 1]),
             input.KEYMAP[input.Input.MOVE_LEFT]: (event.Movement, [player, -1, 0]),
@@ -120,13 +119,14 @@ class GameInputEventProcessor(InputEventProcessor):
             input.KEYMAP[input.Input.MOVE_RIGHT]: (event.Movement, [player, 1, 0]),
             input.KEYMAP[input.Input.ESC]: (scene.to_phase, [scene.Phase.menu]),
             input.KEYMAP[input.Input.ONE]: (self.to_target, [1]),
-            input.KEYMAP[input.Input.TWO]: (scene.to_phase, [scene.Phase.inventory]),
+            input.KEYMAP[input.Input.TWO]: (self.to_target, [2]),
+            input.KEYMAP[input.Input.TAB]: (scene.to_phase, [scene.Phase.inventory]),
         }
 
     def to_target(self, slot: int):
         # TODO: This probably wants to take spell_ent and not slot num
         player_pos = location.player_position()
-        xhair_pos = ecs.Query(cmp.Crosshair, cmp.Position).first_cmp(cmp.Position)
+        xhair_pos = next(ecs.Query(cmp.Crosshair, cmp.Position).first_cmp(cmp.Position))
         xhair_pos.x, xhair_pos.y = player_pos.x, player_pos.y
 
         for spell_ent, (spell_cmp) in esper.get_component(cmp.Spell):
@@ -200,7 +200,7 @@ class RenderProcessor(esper.Processor):
 
         # left panel
         self.console.draw_frame(x=0, **panel_params)
-        _, (_, actor) = esper.get_components(cmp.Player, cmp.Actor)[0]
+        actor = next(ecs.Query(cmp.Player, cmp.Actor).first_cmp(cmp.Actor))
         self.render_bar(1, 1, actor.hp, actor.max_hp, display.PANEL_WIDTH - 2)
 
         # inventory
@@ -301,6 +301,7 @@ class TargetInputEventProcessor(InputEventProcessor):
         self.board = board
         crosshair, _ = ecs.Query(cmp.Crosshair).first()
         to_level = (scene.to_phase, [scene.Phase.level])
+        # TODO: esc out of target mode allows skeletons a turn, when it shouldn't
 
         self.action_map = {
             input.KEYMAP[input.Input.MOVE_DOWN]: (self.move_crosshair, [0, 1]),
@@ -308,12 +309,12 @@ class TargetInputEventProcessor(InputEventProcessor):
             input.KEYMAP[input.Input.MOVE_UP]: (self.move_crosshair, [0, -1]),
             input.KEYMAP[input.Input.MOVE_RIGHT]: (self.move_crosshair, [1, 0]),
             input.KEYMAP[input.Input.ESC]: to_level,
-            input.KEYMAP[input.Input.SELECT]: (self.deal_damage, [crosshair]),
+            input.KEYMAP[input.Input.SELECT]: (self.spell_to_events, [crosshair]),
         }
 
     def move_crosshair(self, x, y):
         crosshair, (_, pos) = ecs.Query(cmp.Crosshair, cmp.Position).first()
-        _, (spell_cmp, _) = ecs.Query(cmp.Spell, cmp.CurrentSpell).first()
+        spell_cmp = next(ecs.Query(cmp.Spell, cmp.CurrentSpell).first_cmp(cmp.Spell))
 
         player_pos = location.player_position()
         new_pos = cmp.Position(pos.x + x, pos.y + y)
@@ -321,15 +322,24 @@ class TargetInputEventProcessor(InputEventProcessor):
         if dist_to_player < spell_cmp.target_range:
             event.Movement(crosshair, x, y)
 
-    def deal_damage(self, positioned_entity: int):
-        player, _ = ecs.Query(cmp.Player).first()
+    def spell_to_events(self, positioned_entity: int):
         pos = esper.component_for_entity(positioned_entity, cmp.Position)
         self.board.build_entity_cache()  # expensive, but okay
 
-        spell_ent, (spell_cmp, _) = ecs.Query(cmp.Spell, cmp.CurrentSpell).first()
-        for target in self.board.entities[pos.x][pos.y]:
-            if esper.has_component(target, cmp.Actor):
-                event.Damage(player, target, spell_cmp.damage)
+        spell_ent, (_, _) = ecs.Query(cmp.Spell, cmp.CurrentSpell).first()
+
+        player, (_, player_pos) =ecs.Query(cmp.Player, cmp.Position).first()
+        dmg_effect = esper.try_component(spell_ent, cmp.DamageEffect)
+        if dmg_effect:
+            for target in self.board.entities[pos.x][pos.y]:
+                if esper.has_component(target, cmp.Actor):
+                    event.Damage(player, target, dmg_effect.amount)
+
+        move_effect = esper.try_component(spell_ent, cmp.MoveEffect)
+        if move_effect:
+            x = pos.x - player_pos.x
+            y = pos.y - player_pos.y
+            event.Movement(move_effect.target, x, y)
 
         esper.remove_component(spell_ent, cmp.CurrentSpell)
         scene.to_phase(scene.Phase.level, NPCProcessor)
@@ -362,7 +372,7 @@ class InventoryRenderProcessor(BoardRenderProcessor):
     board: location.Board
 
     def display_inventory(self):
-        menu_selection = ecs.Query(cmp.MenuSelection).first_cmp()
+        menu_selection = next(ecs.Query(cmp.MenuSelection).first_cmp())
 
         inv_map = create.inventory_map()
         for i, (name, entities) in enumerate(inv_map):
@@ -370,7 +380,7 @@ class InventoryRenderProcessor(BoardRenderProcessor):
             fg = display.Color.WHITE
             bg = display.Color.BLACK
             if menu_selection.item == i:
-                fg, bg = bg, fg
+               fg, bg = bg, fg
             self.console.print(1, 3 + i, string=text, fg=fg, bg=bg)
 
     def process(self) -> None:
@@ -395,12 +405,12 @@ class InventoryInputEventProcessor(InputEventProcessor):
         }
 
     def move_selection(self, diff: int):
-        menu_selection = ecs.Query(cmp.MenuSelection).first_cmp()
+        menu_selection = next(ecs.Query(cmp.MenuSelection).first_cmp())
         menu_selection.item += diff
 
     def use_item(self):
         inv_map = create.inventory_map()
-        menu_selection = ecs.Query(cmp.MenuSelection).first_cmp()
+        menu_selection = next(ecs.Query(cmp.MenuSelection).first_cmp())
         selection_set = inv_map[menu_selection.item][1]
         print(f"using one of {selection_set}")
 

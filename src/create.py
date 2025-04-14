@@ -5,6 +5,7 @@ import esper
 
 import components as cmp
 import display
+import ecs
 
 
 # TODO: should these take a position?
@@ -57,7 +58,15 @@ def inventory_map() -> list:
     return sorted_map
 
 
-def starting_spell() -> int:
-    spell_cmp = cmp.Spell(slot=1, target_range=5, damage=1)
-    sample_spell = esper.create_entity(spell_cmp)
+def damage_spell() -> int:
+    spell_cmp = cmp.Spell(slot=1, target_range=5)
+    dmg_effect = cmp.DamageEffect(amount=1)
+    sample_spell = esper.create_entity(spell_cmp, dmg_effect)
+    return sample_spell
+
+def tp_spell() -> int:
+    player, _ = ecs.Query(cmp.Player).first()
+    spell_cmp = cmp.Spell(slot=2, target_range=4)
+    dmg_effect = cmp.MoveEffect(target=player)
+    sample_spell = esper.create_entity(spell_cmp, dmg_effect)
     return sample_spell

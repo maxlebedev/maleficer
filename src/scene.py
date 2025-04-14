@@ -92,6 +92,7 @@ def to_phase(phase: Phase, start_proc: type[esper.Processor] | None = None):
 
 
 def oneshot(proctype: type[esper.Processor]):
+    """only works on processors that are already registered"""
     proc_instance = esper.get_processor(proctype)
     if proc_instance:
         proc_instance.process()
