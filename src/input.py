@@ -24,6 +24,7 @@ class Input(enum.Enum):
     SELECT = enum.auto()
     ONE = enum.auto()
     TWO = enum.auto()
+    THREE = enum.auto()
     TAB = enum.auto()
 
 

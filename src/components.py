@@ -138,3 +138,8 @@ class MoveEffect:
     """a spell (or w.e) moves a target"""
     # target is chosen at spell creation time, so only rly useful for player
     target: int
+
+@component
+class State:
+    """all of the conditions that an entity have"""
+    map: dict[typ.Condition, int]

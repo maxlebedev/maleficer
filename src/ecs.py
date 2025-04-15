@@ -13,15 +13,19 @@ class Query:
             self.filter(*include)
 
     def filter(self, *include):
-        comp_db = esper._components
+        cmp_db = esper._components
         self.include = include
-        self.entities = set.intersection(*[comp_db[ct] for ct in include])
+        cmp_sets = [cmp_db[cmp] for cmp in include if cmp in cmp_db]
+        if cmp_sets:
+            self.entities = set.intersection(*cmp_sets)
         return self
+        
 
     def exclude(self, *exclude):
-        comp_db = esper._components
+        cmp_db = esper._components
+        exclude = [cmp for cmp in exclude if cmp in cmp_db[cmp]]
         if self.entities:
-            [self.entities.difference_update(comp_db[ct]) for ct in exclude]
+            [self.entities.difference_update(cmp_db[cmp]) for cmp in exclude]
         return self
 
     def get(self, *include) -> Generator[tuple[int, list]]:
