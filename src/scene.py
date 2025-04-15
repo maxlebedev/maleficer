@@ -31,22 +31,24 @@ def inventory_setup():
 
 
 def main_menu_phase(context, console):
-    render_proc = processors.MenuRenderProcessor(context, console)
-    input_proc = processors.MenuInputEventProcessor()
+    render = processors.MenuRenderProcessor(context, console)
+    input = processors.MenuInputEventProcessor()
 
-    PHASES[Phase.menu] = [render_proc, input_proc]
+    PHASES[Phase.menu] = [render, input]
 
 
 def level_phase(context, console, game_board):
-    input_proc = processors.GameInputEventProcessor()
-    npc_proc = processors.NPCProcessor()
-    damage_proc = processors.DamageProcessor()
+    upkeep =processors.UpkeepProcessor()
 
-    render_proc = processors.BoardRenderProcessor(console, context, game_board)
-    movement_proc = processors.MovementProcessor(game_board)
+    render = processors.BoardRenderProcessor(console, context, game_board)
+    input = processors.GameInputEventProcessor()
+    npc = processors.NPCProcessor()
+
+    movement = processors.MovementProcessor(game_board)
+    damage = processors.DamageProcessor()
     location.generate_dungeon(game_board)
 
-    level_procs = [render_proc, input_proc, npc_proc, movement_proc, damage_proc]
+    level_procs = [upkeep, render, input, npc, movement, damage]
     # do we want one damage phase or two?
     PHASES[Phase.level] = level_procs
 
@@ -58,21 +60,19 @@ def targeting_phase(context, console, game_board):
     position_cmp = cmp.Position(x=pos.x, y=pos.y)
     esper.create_entity(cmp.Crosshair(), position_cmp, aoe_cmp)
 
-    input_proc = processors.TargetInputEventProcessor(game_board)
-    target_render_proc = processors.TargetRenderProcessor(console, context, game_board)
-    movement_proc = processors.MovementProcessor(game_board)
-    target_procs = [target_render_proc, input_proc, movement_proc]
-    PHASES[Phase.target] = target_procs
+    input = processors.TargetInputEventProcessor(game_board)
+    target_render = processors.TargetRenderProcessor(console, context, game_board)
+    movement = processors.MovementProcessor(game_board)
+    PHASES[Phase.target] = [target_render, input, movement]
 
 
 def inventory_phase(context, console, game_board):
     esper.create_entity(cmp.MenuSelection())
 
-    input_proc = processors.InventoryInputEventProcessor()
-    render_proc = processors.InventoryRenderProcessor(console, context, game_board)
+    input = processors.InventoryInputEventProcessor()
+    render = processors.InventoryRenderProcessor(console, context, game_board)
 
-    inventory_procs = [render_proc, input_proc]
-    PHASES[Phase.inventory] = inventory_procs
+    PHASES[Phase.inventory] = [render, input]
 
 
 def to_phase(phase: Phase, start_proc: type[esper.Processor] | None = None):

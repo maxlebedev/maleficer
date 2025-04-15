@@ -207,6 +207,10 @@ class RenderProcessor(esper.Processor):
         for i, (name, entities) in enumerate(inv_map):
             self.console.print(1, 3 + i, f"{len(entities)}x {name}")
 
+        # spells
+        for i, (spell_ent, spell_cmp) in  enumerate(ecs.Query(cmp.Spell).get()):
+            pass
+
         # right panel
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
         for i, message in enumerate(event.Log.messages):
@@ -414,3 +418,16 @@ class InventoryInputEventProcessor(InputEventProcessor):
         print(f"using one of {selection_set}")
 
         scene.to_phase(scene.Phase.level, NPCProcessor)
+
+@dataclass
+class UpkeepProcessor(InputEventProcessor):
+    """tick down all Conditions"""
+
+    def process(self) -> None:
+        for _, (status,) in ecs.Query(cmp.State).get():
+            for condition, val in status.map:
+                status.map[condition] = max(0, val-1)
+                if status.map[condition] == 0:
+                    del status.map[condition]
+
+
