@@ -23,7 +23,7 @@ class Query:
 
     def exclude(self, *exclude):
         cmp_db = esper._components
-        exclude = [cmp for cmp in exclude if cmp in cmp_db[cmp]]
+        exclude = [cmp for cmp in exclude if cmp in cmp_db]
         if self.entities:
             [self.entities.difference_update(cmp_db[cmp]) for cmp in exclude]
         return self
