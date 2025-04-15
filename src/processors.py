@@ -73,14 +73,16 @@ class DamageProcessor(esper.Processor):
                 continue
 
             actor = esper.component_for_entity(damage.target, cmp.Actor)
+            target_name = esper.component_for_entity(damage.target, cmp.Onymous).name
             actor.hp -= damage.amount
+            actor.hp = min(actor.max_hp, max(0, actor.hp)) # between 0 and max
 
-            src_actor = esper.component_for_entity(damage.source, cmp.Actor)
-            message = f"{src_actor.name} deals {damage.amount} to {actor.name}"
+            src_named = esper.component_for_entity(damage.source, cmp.Onymous)
+            message = f"{src_named.name} deals {damage.amount} to {target_name}"
             event.Log.append(message)
 
             if actor.hp <= 0:
-                message = f"{actor.name} dies"
+                message = f"{target_name} is no more"
                 event.Log.append(message)
                 esper.delete_entity(damage.target, immediate=True)
                 # crashes if player gets deleted
@@ -208,8 +210,12 @@ class RenderProcessor(esper.Processor):
             self.console.print(1, 3 + i, f"{len(entities)}x {name}")
 
         # spells
-        for i, (spell_ent, spell_cmp) in  enumerate(ecs.Query(cmp.Spell).get()):
-            pass
+        self.console.print(1, 8, "-"*(display.PANEL_WIDTH-2))
+        spells = ecs.Query(cmp.Spell, cmp.Onymous).get()
+        for i, (_, (spell_cmp, named)) in  enumerate(spells):
+            text = f"Slot {spell_cmp.slot}: {named.name}"
+            # TODO: 9 is arbitrary 
+            self.console.print(1, 9 + i, text)
 
         # right panel
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
@@ -302,7 +308,7 @@ class TargetInputEventProcessor(InputEventProcessor):
 
     def __init__(self, board):
         self.board = board
-        crosshair, _ = ecs.Query(cmp.Crosshair).first()
+        pos = next(ecs.Query(cmp.Crosshair, cmp.Position).first_cmp(cmp.Position))
         to_level = (scene.to_phase, [scene.Phase.level])
         # TODO: esc out of target mode allows skeletons a turn, when it shouldn't
 
@@ -312,7 +318,7 @@ class TargetInputEventProcessor(InputEventProcessor):
             input.KEYMAP[input.Input.MOVE_UP]: (self.move_crosshair, [0, -1]),
             input.KEYMAP[input.Input.MOVE_RIGHT]: (self.move_crosshair, [1, 0]),
             input.KEYMAP[input.Input.ESC]: to_level,
-            input.KEYMAP[input.Input.SELECT]: (self.spell_to_events, [crosshair]),
+            input.KEYMAP[input.Input.SELECT]: (self.spell_to_events, [pos]),
         }
 
     def move_crosshair(self, x, y):
@@ -325,18 +331,17 @@ class TargetInputEventProcessor(InputEventProcessor):
         if dist_to_player < spell_cmp.target_range:
             event.Movement(crosshair, x, y)
 
-    def spell_to_events(self, positioned_entity: int):
-        pos = esper.component_for_entity(positioned_entity, cmp.Position)
+    def spell_to_events(self, pos):
         self.board.build_entity_cache()  # expensive, but okay
 
-        spell_ent, (_, _) = ecs.Query(cmp.Spell, cmp.CurrentSpell).first()
+        spell_ent, _ = ecs.Query(cmp.Spell, cmp.CurrentSpell).first()
 
-        player, (_, player_pos) =ecs.Query(cmp.Player, cmp.Position).first()
+        player_pos = location.player_position()
         dmg_effect = esper.try_component(spell_ent, cmp.DamageEffect)
         if dmg_effect:
             for target in self.board.entities[pos.x][pos.y]:
                 if esper.has_component(target, cmp.Actor):
-                    event.Damage(player, target, dmg_effect.amount)
+                    event.Damage(dmg_effect.source, target, dmg_effect.amount)
 
         move_effect = esper.try_component(spell_ent, cmp.MoveEffect)
         if move_effect:
@@ -414,8 +419,19 @@ class InventoryInputEventProcessor(InputEventProcessor):
     def use_item(self):
         inv_map = create.inventory_map()
         menu_selection = next(ecs.Query(cmp.MenuSelection).first_cmp())
-        selection_set = inv_map[menu_selection.item][1]
-        print(f"using one of {selection_set}")
+        name = inv_map[menu_selection.item][0]
+        selection = inv_map[menu_selection.item][1].pop()
+        print(f"using {name}: {selection}")
+
+        heal_effect = esper.try_component(selection, cmp.HealEffect)
+        player, _ = ecs.Query(cmp.Player).first()
+        if heal_effect:
+            event.Damage(selection, player, -1*heal_effect.amount)
+
+        # esper.delete_entity(selection)
+        esper.remove_component(selection, cmp.InInventory)
+        # TODO: if inventory is empty, fail to go to inventory mode?
+
 
         scene.to_phase(scene.Phase.level, NPCProcessor)
 

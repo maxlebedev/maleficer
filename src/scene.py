@@ -21,13 +21,15 @@ class Phase(enum.Enum):
 def player_setup():
     vis = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN)
     pos = cmp.Position(x=1, y=1)
-    actor = cmp.Actor(max_hp=10, name="player")
-    esper.create_entity(cmp.Player(), pos, vis, cmp.Blocking(), actor)
+    actor = cmp.Actor(max_hp=10)
+    named = cmp.Onymous(name="player")
+    esper.create_entity(cmp.Player(), pos, vis, cmp.Blocking(), actor, named)
 
 
 def inventory_setup():
-    esper.create_entity(cmp.InInventory(), cmp.Actor(name="bottle of water", max_hp=1))
-    esper.create_entity(cmp.InInventory(), cmp.Actor(name="lighter", max_hp=1))
+
+    esper.create_entity(cmp.InInventory(), cmp.Actor(max_hp=1), cmp.Onymous(name="bottle of water"))
+    esper.create_entity(cmp.InInventory(), cmp.Actor(max_hp=1), cmp.Onymous(name="lighter"))
 
 
 def main_menu_phase(context, console):

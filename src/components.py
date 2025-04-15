@@ -69,8 +69,12 @@ class Melee:
 
 
 @component
-class Actor:  # Destroyable
-    name: str  # consider a Named/Onymous component?
+class Onymous:
+    name: str
+
+
+@component
+class Actor:  # Destroyable, harmable?
     max_hp: int
     armor: int = 0
 
@@ -130,14 +134,22 @@ class MenuItem:
 @component
 class DamageEffect:
     """a spell (or w.e) deals damage"""
+    source: int
     amount: int
 
 
 @component
 class MoveEffect:
     """a spell (or w.e) moves a target"""
-    # target is chosen at spell creation time, so only rly useful for player
+    # target is chosen at spell creation time,
+    # so this won't work for arbitrary enemies
     target: int
+
+@component
+class HealEffect:
+    target: int
+    amount: int
+# TODO: maybe if MoveEffect, HealEffect lack a target, we go into target phase to get one?
 
 @component
 class State:
