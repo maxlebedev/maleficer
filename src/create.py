@@ -66,7 +66,7 @@ def inventory_map() -> list:
 
 def damage_spell() -> int:
     player, _ = ecs.Query(cmp.Player).first()
-    spell_cmp = cmp.Spell(slot=1, target_range=5)
+    spell_cmp = cmp.Spell(slot=1, target_range=5, cooldown=2)
     dmg_effect = cmp.DamageEffect(amount=1, source=player)
     named = cmp.Onymous(name="firebolt")
     sample_spell = esper.create_entity(spell_cmp, dmg_effect, named)
@@ -75,7 +75,7 @@ def damage_spell() -> int:
 
 def tp_spell() -> int:
     player, _ = ecs.Query(cmp.Player).first()
-    spell_cmp = cmp.Spell(slot=2, target_range=4)
+    spell_cmp = cmp.Spell(slot=2, target_range=4, cooldown=5)
     dmg_effect = cmp.MoveEffect(target=player)
     named = cmp.Onymous(name="blink")
     sample_spell = esper.create_entity(spell_cmp, dmg_effect, named)

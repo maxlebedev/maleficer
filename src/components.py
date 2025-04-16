@@ -109,8 +109,7 @@ class InInventory:
 class Spell:
     slot: int
     target_range: int
-    # mana cost?
-    pass
+    cooldown: int
 
 
 @component

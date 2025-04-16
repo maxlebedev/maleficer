@@ -53,7 +53,8 @@ class MovementProcessor(esper.Processor):
                     esper.remove_component(target, cmp.Position)
                     esper.add_component(target, cmp.InInventory())
                     create.inventory_map()
-                    message = "player picked up an item"
+                    name = esper.component_for_entity(target, cmp.Onymous).name
+                    message = f"player picked up {name}"
                     event.Log.append(message)
                     # oneshot call some collectable processor?
 
@@ -216,9 +217,12 @@ class RenderProcessor(esper.Processor):
         # spells
         self.console.print(1, 8, "-" * (display.PANEL_WIDTH - 2))
         spells = ecs.Query(cmp.Spell, cmp.Onymous).get()
-        for i, (_, (spell_cmp, named)) in enumerate(spells):
-            text = f"Slot {spell_cmp.slot}: {named.name}"
+        for i, (spell_ent, (spell_cmp, named)) in enumerate(spells):
             # TODO: 9 is arbitrary
+            text = f"Slot{spell_cmp.slot}:{named.name}"
+            if state := esper.try_component(spell_ent, cmp.State):
+                if cd := state.map.get(typ.Condition.Cooldown):
+                    text = f"{text}:{typ.Condition.Cooldown.name} {cd}"
             self.console.print(1, 9 + i, text)
 
         # right panel
@@ -336,9 +340,16 @@ class TargetInputEventProcessor(InputEventProcessor):
             event.Movement(crosshair, x, y)
 
     def spell_to_events(self, pos):
+        def grant_condition(entity: int, condition: typ.Condition, value:int):
+            state = esper.try_component(entity, cmp.State)
+            if not state:
+                state = cmp.State(map={})
+                esper.add_component(entity, state)
+            state.map[condition] = value # consider if we add or overwrite
+
         self.board.build_entity_cache()  # expensive, but okay
 
-        spell_ent, _ = ecs.Query(cmp.Spell, cmp.CurrentSpell).first()
+        spell_ent, (spell_cmp, _) = ecs.Query(cmp.Spell, cmp.CurrentSpell).first()
 
         player_pos = location.player_position()
         dmg_effect = esper.try_component(spell_ent, cmp.DamageEffect)
@@ -352,6 +363,7 @@ class TargetInputEventProcessor(InputEventProcessor):
             x = pos.x - player_pos.x
             y = pos.y - player_pos.y
             event.Movement(move_effect.target, x, y)
+        grant_condition(spell_ent, typ.Condition.Cooldown, spell_cmp.cooldown)
 
         esper.remove_component(spell_ent, cmp.CurrentSpell)
         scene.to_phase(scene.Phase.level, NPCProcessor)
@@ -445,7 +457,7 @@ class UpkeepProcessor(InputEventProcessor):
 
     def process(self) -> None:
         for _, (status,) in ecs.Query(cmp.State).get():
-            for condition, val in status.map:
-                status.map[condition] = max(0, val - 1)
+            for condition in list(status.map.keys()):
+                status.map[condition] = max(0, status.map[condition]- 1)
                 if status.map[condition] == 0:
                     del status.map[condition]
