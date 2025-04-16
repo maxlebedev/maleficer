@@ -144,7 +144,7 @@ def load_tileset(atlas_path: str, width: int, height: int) -> tcod.tileset.Tiles
         xx, yy = _idx_to_point(val, width)
         tileset.remap(ord(letter), xx, yy)
 
-    codepath = itertools.count(ord("z")+1)
+    codepath = itertools.count(ord("z") + 1)
     for glyph in Glyph:
         xx, yy = _idx_to_point(glyph.value, width)
         tileset.remap(next(codepath), xx, yy)
@@ -153,7 +153,7 @@ def load_tileset(atlas_path: str, width: int, height: int) -> tcod.tileset.Tiles
 
 
 def remap_glyphs():
-    codepath = itertools.count(ord("z")+1)
+    codepath = itertools.count(ord("z") + 1)
     glyph_map = {glyph.name: next(codepath) for glyph in Glyph}
 
     return IntEnum("Glyph", glyph_map)

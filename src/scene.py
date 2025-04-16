@@ -27,9 +27,12 @@ def player_setup():
 
 
 def inventory_setup():
-
-    esper.create_entity(cmp.InInventory(), cmp.Actor(max_hp=1), cmp.Onymous(name="bottle of water"))
-    esper.create_entity(cmp.InInventory(), cmp.Actor(max_hp=1), cmp.Onymous(name="lighter"))
+    esper.create_entity(
+        cmp.InInventory(), cmp.Actor(max_hp=1), cmp.Onymous(name="bottle of water")
+    )
+    esper.create_entity(
+        cmp.InInventory(), cmp.Actor(max_hp=1), cmp.Onymous(name="lighter")
+    )
 
 
 def main_menu_phase(context, console):
@@ -40,7 +43,7 @@ def main_menu_phase(context, console):
 
 
 def level_phase(context, console, game_board):
-    upkeep =processors.UpkeepProcessor()
+    upkeep = processors.UpkeepProcessor()
 
     render = processors.BoardRenderProcessor(console, context, game_board)
     input = processors.GameInputEventProcessor()

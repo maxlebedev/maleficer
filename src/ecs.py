@@ -4,6 +4,7 @@ from collections.abc import Generator
 
 import esper
 
+
 class Query:
     entities = None
     include = tuple()
@@ -19,7 +20,6 @@ class Query:
         if cmp_sets:
             self.entities = set.intersection(*cmp_sets)
         return self
-        
 
     def exclude(self, *exclude):
         cmp_db = esper._components
@@ -37,7 +37,6 @@ class Query:
 
         for entity in self.entities:
             yield entity, [entity_db[entity][cmp] for cmp in include]
-
 
     def first(self, *include):
         return next(self.get(*include))

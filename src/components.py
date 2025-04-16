@@ -134,6 +134,7 @@ class MenuItem:
 @component
 class DamageEffect:
     """a spell (or w.e) deals damage"""
+
     source: int
     amount: int
 
@@ -141,17 +142,23 @@ class DamageEffect:
 @component
 class MoveEffect:
     """a spell (or w.e) moves a target"""
+
     # target is chosen at spell creation time,
     # so this won't work for arbitrary enemies
     target: int
+
 
 @component
 class HealEffect:
     target: int
     amount: int
+
+
 # TODO: maybe if MoveEffect, HealEffect lack a target, we go into target phase to get one?
+
 
 @component
 class State:
     """all of the conditions that an entity have"""
+
     map: dict[typ.Condition, int]

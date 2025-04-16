@@ -73,12 +73,16 @@ class DamageProcessor(esper.Processor):
                 continue
 
             actor = esper.component_for_entity(damage.target, cmp.Actor)
-            target_name = esper.component_for_entity(damage.target, cmp.Onymous).name
             actor.hp -= damage.amount
-            actor.hp = min(actor.max_hp, max(0, actor.hp)) # between 0 and max
+            actor.hp = min(actor.max_hp, max(0, actor.hp))  # between 0 and max
 
-            src_named = esper.component_for_entity(damage.source, cmp.Onymous)
-            message = f"{src_named.name} deals {damage.amount} to {target_name}"
+            to_name = lambda x: esper.component_for_entity(x, cmp.Onymous).name
+            src_name = to_name(damage.source)
+            target_name = to_name(damage.target)
+
+            message = f"{src_name} heals {-1 * damage.amount} to {target_name}"
+            if damage.amount > 0:
+                message = f"{src_name} deals {damage.amount} to {target_name}"
             event.Log.append(message)
 
             if actor.hp <= 0:
@@ -210,11 +214,11 @@ class RenderProcessor(esper.Processor):
             self.console.print(1, 3 + i, f"{len(entities)}x {name}")
 
         # spells
-        self.console.print(1, 8, "-"*(display.PANEL_WIDTH-2))
+        self.console.print(1, 8, "-" * (display.PANEL_WIDTH - 2))
         spells = ecs.Query(cmp.Spell, cmp.Onymous).get()
-        for i, (_, (spell_cmp, named)) in  enumerate(spells):
+        for i, (_, (spell_cmp, named)) in enumerate(spells):
             text = f"Slot {spell_cmp.slot}: {named.name}"
-            # TODO: 9 is arbitrary 
+            # TODO: 9 is arbitrary
             self.console.print(1, 9 + i, text)
 
         # right panel
@@ -388,7 +392,7 @@ class InventoryRenderProcessor(BoardRenderProcessor):
             fg = display.Color.WHITE
             bg = display.Color.BLACK
             if menu_selection.item == i:
-               fg, bg = bg, fg
+                fg, bg = bg, fg
             self.console.print(1, 3 + i, string=text, fg=fg, bg=bg)
 
     def process(self) -> None:
@@ -426,14 +430,14 @@ class InventoryInputEventProcessor(InputEventProcessor):
         heal_effect = esper.try_component(selection, cmp.HealEffect)
         player, _ = ecs.Query(cmp.Player).first()
         if heal_effect:
-            event.Damage(selection, player, -1*heal_effect.amount)
+            event.Damage(selection, player, -1 * heal_effect.amount)
 
         # esper.delete_entity(selection)
         esper.remove_component(selection, cmp.InInventory)
         # TODO: if inventory is empty, fail to go to inventory mode?
 
-
         scene.to_phase(scene.Phase.level, NPCProcessor)
+
 
 @dataclass
 class UpkeepProcessor(InputEventProcessor):
@@ -442,8 +446,6 @@ class UpkeepProcessor(InputEventProcessor):
     def process(self) -> None:
         for _, (status,) in ecs.Query(cmp.State).get():
             for condition, val in status.map:
-                status.map[condition] = max(0, val-1)
+                status.map[condition] = max(0, val - 1)
                 if status.map[condition] == 0:
                     del status.map[condition]
-
-

@@ -72,6 +72,7 @@ def damage_spell() -> int:
     sample_spell = esper.create_entity(spell_cmp, dmg_effect, named)
     return sample_spell
 
+
 def tp_spell() -> int:
     player, _ = ecs.Query(cmp.Player).first()
     spell_cmp = cmp.Spell(slot=2, target_range=4)
