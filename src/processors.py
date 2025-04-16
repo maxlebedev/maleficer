@@ -352,14 +352,12 @@ class TargetInputEventProcessor(InputEventProcessor):
         spell_ent, (spell_cmp, _) = ecs.Query(cmp.Spell, cmp.CurrentSpell).first()
 
         player_pos = location.player_position()
-        dmg_effect = esper.try_component(spell_ent, cmp.DamageEffect)
-        if dmg_effect:
+        if dmg_effect:= esper.try_component(spell_ent, cmp.DamageEffect):
             for target in self.board.entities[pos.x][pos.y]:
                 if esper.has_component(target, cmp.Actor):
                     event.Damage(dmg_effect.source, target, dmg_effect.amount)
 
-        move_effect = esper.try_component(spell_ent, cmp.MoveEffect)
-        if move_effect:
+        if move_effect:= esper.try_component(spell_ent, cmp.MoveEffect):
             x = pos.x - player_pos.x
             y = pos.y - player_pos.y
             event.Movement(move_effect.target, x, y)
@@ -439,9 +437,8 @@ class InventoryInputEventProcessor(InputEventProcessor):
         selection = inv_map[menu_selection.item][1].pop()
         print(f"using {name}: {selection}")
 
-        heal_effect = esper.try_component(selection, cmp.HealEffect)
         player, _ = ecs.Query(cmp.Player).first()
-        if heal_effect:
+        if heal_effect:= esper.try_component(selection, cmp.HealEffect):
             event.Damage(selection, player, -1 * heal_effect.amount)
 
         # esper.delete_entity(selection)

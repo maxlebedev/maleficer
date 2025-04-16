@@ -111,6 +111,9 @@ class Spell:
     target_range: int
     cooldown: int
 
+    def __post_init__(self):
+        self.cooldown += 1
+
 
 @component
 class CurrentSpell:

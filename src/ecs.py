@@ -16,8 +16,7 @@ class Query:
     def filter(self, *include):
         cmp_db = esper._components
         self.include = include
-        cmp_sets = [cmp_db[cmp] for cmp in include if cmp in cmp_db]
-        if cmp_sets:
+        if cmp_sets:= [cmp_db[cmp] for cmp in include if cmp in cmp_db]:
             self.entities = set.intersection(*cmp_sets)
         return self
 

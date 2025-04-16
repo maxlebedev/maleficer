@@ -175,7 +175,7 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
         room_y = random.randint(0, display.BOARD_HEIGHT - room_height - 1)
 
         new_room = RectangularRoom(room_x, room_y, room_width, room_height)
-        if any(intersects(board, new_room, other_room) for other_room in rooms):
+        if any(intersects(board, new_room, room) for room in rooms):
             continue  # This room intersects, so go to the next attempt.
 
         centers.append(new_room.center)
