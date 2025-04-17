@@ -1,5 +1,6 @@
 import random
 from dataclasses import dataclass
+import functools
 
 import esper
 import tcod
@@ -110,8 +111,11 @@ class InputEventProcessor(esper.Processor):
                 if not isinstance(input_event, tcod.event.KeyDown):
                     continue
                 if input_event.sym in self.action_map:
-                    func, args = self.action_map[input_event.sym]
-                    func(*args)
+                    match self.action_map[input_event.sym]:
+                        case (func, args):
+                            func(*args)
+                        case func:
+                            func()
                     listen = False
 
 
@@ -119,11 +123,12 @@ class InputEventProcessor(esper.Processor):
 class GameInputEventProcessor(InputEventProcessor):
     def __init__(self):
         player, _ = ecs.Query(cmp.Player).first()
+        move = functools.partial(event.Movement, player)
         self.action_map = {
-            input.KEYMAP[input.Input.MOVE_DOWN]: (event.Movement, [player, 0, 1]),
-            input.KEYMAP[input.Input.MOVE_LEFT]: (event.Movement, [player, -1, 0]),
-            input.KEYMAP[input.Input.MOVE_UP]: (event.Movement, [player, 0, -1]),
-            input.KEYMAP[input.Input.MOVE_RIGHT]: (event.Movement, [player, 1, 0]),
+            input.KEYMAP[input.Input.MOVE_DOWN]: (move, [0, 1]),
+            input.KEYMAP[input.Input.MOVE_LEFT]: (move, [-1, 0]),
+            input.KEYMAP[input.Input.MOVE_UP]: (move, [0, -1]),
+            input.KEYMAP[input.Input.MOVE_RIGHT]: (move, [1, 0]),
             input.KEYMAP[input.Input.ESC]: (scene.to_phase, [scene.Phase.menu]),
             input.KEYMAP[input.Input.ONE]: (self.to_target, [1]),
             input.KEYMAP[input.Input.TWO]: (self.to_target, [2]),
@@ -153,8 +158,7 @@ class NPCProcessor(esper.Processor):
             event.Movement(entity, *dir)
 
         player_pos = location.player_position()
-        for entity, melee in esper.get_component(cmp.Melee):
-            epos = esper.component_for_entity(entity, cmp.Position)
+        for entity, (melee, epos) in ecs.Query(cmp.Melee, cmp.Position).get():
             dist_to_player = location.euclidean_distance(player_pos, epos)
             if dist_to_player > melee.radius:
                 continue
@@ -305,7 +309,7 @@ class MenuRenderProcessor(esper.Processor):
 class MenuInputEventProcessor(InputEventProcessor):
     def __init__(self):
         self.action_map = {
-            input.KEYMAP[input.Input.ESC]: (self.exit, []),
+            input.KEYMAP[input.Input.ESC]: self.exit,
             input.KEYMAP[input.Input.SELECT]: (scene.to_phase, [scene.Phase.level]),
         }
 
@@ -317,8 +321,7 @@ class TargetInputEventProcessor(InputEventProcessor):
     def __init__(self, board):
         self.board = board
         pos = next(ecs.Query(cmp.Crosshair, cmp.Position).first_cmp(cmp.Position))
-        to_level = (scene.to_phase, [scene.Phase.level])
-        # TODO: esc out of target mode allows skeletons a turn, when it shouldn't
+        to_level = (scene.to_phase, [scene.Phase.level, BoardRenderProcessor])
 
         self.action_map = {
             input.KEYMAP[input.Input.MOVE_DOWN]: (self.move_crosshair, [0, 1]),
@@ -423,7 +426,7 @@ class InventoryInputEventProcessor(InputEventProcessor):
             input.KEYMAP[input.Input.MOVE_DOWN]: (self.move_selection, [1]),
             input.KEYMAP[input.Input.MOVE_UP]: (self.move_selection, [-1]),
             input.KEYMAP[input.Input.ESC]: to_level,
-            input.KEYMAP[input.Input.SELECT]: (self.use_item, []),
+            input.KEYMAP[input.Input.SELECT]: self.use_item,
         }
 
     def move_selection(self, diff: int):

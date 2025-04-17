@@ -1,4 +1,5 @@
 import enum
+import copy
 
 import esper
 
@@ -86,7 +87,7 @@ def to_phase(phase: Phase, start_proc: type[esper.Processor] | None = None):
         esper.remove_processor(type(proc))
     esper._processors = []
 
-    proc_list = PHASES[phase]
+    proc_list = copy.copy(PHASES[phase]) # copy to prevent mutation of original
     if start_proc:
         while start_proc and not isinstance(proc_list[0], start_proc):
             proc_list.append(proc_list.pop(0))
