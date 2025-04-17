@@ -343,24 +343,24 @@ class TargetInputEventProcessor(InputEventProcessor):
             event.Movement(crosshair, x, y)
 
     def spell_to_events(self, pos):
-        def grant_condition(entity: int, condition: typ.Condition, value:int):
+        def grant_condition(entity: int, condition: typ.Condition, value: int):
             state = esper.try_component(entity, cmp.State)
             if not state:
                 state = cmp.State(map={})
                 esper.add_component(entity, state)
-            state.map[condition] = value # consider if we add or overwrite
+            state.map[condition] = value  # consider if we add or overwrite
 
         self.board.build_entity_cache()  # expensive, but okay
 
         spell_ent, (spell_cmp, _) = ecs.Query(cmp.Spell, cmp.CurrentSpell).first()
 
         player_pos = location.player_position()
-        if dmg_effect:= esper.try_component(spell_ent, cmp.DamageEffect):
+        if dmg_effect := esper.try_component(spell_ent, cmp.DamageEffect):
             for target in self.board.entities[pos.x][pos.y]:
                 if esper.has_component(target, cmp.Actor):
                     event.Damage(dmg_effect.source, target, dmg_effect.amount)
 
-        if move_effect:= esper.try_component(spell_ent, cmp.MoveEffect):
+        if move_effect := esper.try_component(spell_ent, cmp.MoveEffect):
             x = pos.x - player_pos.x
             y = pos.y - player_pos.y
             event.Movement(move_effect.target, x, y)
@@ -441,7 +441,7 @@ class InventoryInputEventProcessor(InputEventProcessor):
         print(f"using {name}: {selection}")
 
         player, _ = ecs.Query(cmp.Player).first()
-        if heal_effect:= esper.try_component(selection, cmp.HealEffect):
+        if heal_effect := esper.try_component(selection, cmp.HealEffect):
             event.Damage(selection, player, -1 * heal_effect.amount)
 
         # esper.delete_entity(selection)
@@ -458,6 +458,6 @@ class UpkeepProcessor(InputEventProcessor):
     def process(self) -> None:
         for _, (status,) in ecs.Query(cmp.State).get():
             for condition in list(status.map.keys()):
-                status.map[condition] = max(0, status.map[condition]- 1)
+                status.map[condition] = max(0, status.map[condition] - 1)
                 if status.map[condition] == 0:
                     del status.map[condition]
