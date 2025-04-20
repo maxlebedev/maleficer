@@ -27,12 +27,12 @@ def main() -> None:
 
     scene.player_setup()
 
-    game_board = location.Board()
+    location.BOARD = location.Board()
 
     scene.main_menu_phase(context, console)
-    scene.level_phase(context, console, game_board)
-    scene.targeting_phase(context, console, game_board)
-    scene.inventory_phase(context, console, game_board)
+    scene.level_phase(context, console, location.BOARD)
+    scene.targeting_phase(context, console, location.BOARD)
+    scene.inventory_phase(context, console, location.BOARD)
     scene.to_phase(scene.Phase.menu)
 
     scene.inventory_setup()

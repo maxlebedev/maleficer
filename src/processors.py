@@ -349,7 +349,6 @@ class TargetInputEventProcessor(InputEventProcessor):
 
     def __init__(self, board):
         self.board = board
-        pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(cmp.Position)
 
         self.action_map = {
             input.KEYMAP[input.Input.MOVE_DOWN]: (self.move_crosshair, [0, 1]),
@@ -357,7 +356,7 @@ class TargetInputEventProcessor(InputEventProcessor):
             input.KEYMAP[input.Input.MOVE_UP]: (self.move_crosshair, [0, -1]),
             input.KEYMAP[input.Input.MOVE_RIGHT]: (self.move_crosshair, [1, 0]),
             input.KEYMAP[input.Input.ESC]: self.to_level,
-            input.KEYMAP[input.Input.SELECT]: (self.spell_to_events, [pos]),
+            input.KEYMAP[input.Input.SELECT]: self.spell_to_events,
         }
 
     def to_level(self):
@@ -377,22 +376,14 @@ class TargetInputEventProcessor(InputEventProcessor):
         if dist_to_player < spell_cmp.target_range:
             event.Movement(crosshair, x, y)
 
-    def spell_to_events(self, pos):
+    def spell_to_events(self):
         self.board.build_entity_cache()  # expensive, but okay
 
         spell_ent = ecs.Query(cmp.Spell, cmp.CurrentSpell).first()
         spell_cmp = ecs.cmps[spell_ent][cmp.Spell]
 
-        player_pos = location.player_position()
-        if dmg_effect := esper.try_component(spell_ent, cmp.DamageEffect):
-            for target in self.board.entities[pos.x][pos.y]:
-                if esper.has_component(target, cmp.Actor):
-                    event.Damage(dmg_effect.source, target, dmg_effect.amount)
+        event.effects_to_events(spell_ent)
 
-        if move_effect := esper.try_component(spell_ent, cmp.MoveEffect):
-            x = pos.x - player_pos.x
-            y = pos.y - player_pos.y
-            event.Movement(move_effect.target, x, y)
         condition.grant(spell_ent, typ.Condition.Cooldown, spell_cmp.cooldown)
 
         esper.remove_component(spell_ent, cmp.CurrentSpell)
@@ -470,9 +461,7 @@ class InventoryInputEventProcessor(InputEventProcessor):
         selection = inv_map[menu_selection.item][1].pop()
         print(f"using {name}: {selection}")
 
-        player = ecs.Query(cmp.Player).first()
-        if heal_effect := esper.try_component(selection, cmp.HealEffect):
-            event.Damage(selection, player, -1 * heal_effect.amount)
+        event.effects_to_events(selection)
 
         # esper.delete_entity(selection)
         esper.remove_component(selection, cmp.InInventory)

@@ -93,6 +93,8 @@ class Board:
             self.entities[pos.x][pos.y].add(entity)
 
 
+BOARD: Board
+
 @dataclass
 class RectangularRoom:
     x1: int

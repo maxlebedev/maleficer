@@ -2,7 +2,12 @@ import collections
 import textwrap
 from dataclasses import dataclass
 
+import esper
+
+import components as cmp
 import display
+import ecs
+import location
 
 # an event is somethig that happens
 # an action is somthing someone did
@@ -54,7 +59,31 @@ class Movement(Event):
     x: int
     y: int
 
+
 @dataclass
 class Tick(Event):
     """A tick event is used to explicity track turns, for upkeeps"""
+
     _queue = Queues.tick
+
+
+def effects_to_events(source: int):
+    """take an entity read effects off the entity and apply them to crosshair if needed"""
+    # do I need to build an entity cache?
+
+    if dmg_effect := esper.try_component(source, cmp.DamageEffect):
+        pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(cmp.Position)
+        for target in location.BOARD.entities[pos.x][pos.y]:
+            if esper.has_component(target, cmp.Actor):
+                Damage(dmg_effect.source, target, dmg_effect.amount)
+
+    player = ecs.Query(cmp.Player, cmp.Position).first()
+    player_pos = ecs.cmps[player][cmp.Position]
+    if move_effect := esper.try_component(source, cmp.MoveEffect):
+        pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(cmp.Position)
+        x = pos.x - player_pos.x
+        y = pos.y - player_pos.y
+        Movement(move_effect.target, x, y)
+
+    if heal_effect := esper.try_component(source, cmp.HealEffect):
+        Damage(source, player, -1 * heal_effect.amount)
