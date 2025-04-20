@@ -123,7 +123,6 @@ class InputEventProcessor(esper.Processor):
                         listen = False
 
 
-
 @dataclass
 class GameInputEventProcessor(InputEventProcessor):
     def __init__(self):
@@ -458,7 +457,6 @@ class InventoryInputEventProcessor(InputEventProcessor):
         # TODO: if inventory is empty, fail to go to inventory mode?
         event.Tick()
         scene.to_phase(scene.Phase.level, NPCProcessor)
-
 
 
 @dataclass

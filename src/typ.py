@@ -16,5 +16,6 @@ class Condition(enum.Enum):
 
     Cooldown = enum.auto()
 
+
 class InvalidAction(Exception):
     pass

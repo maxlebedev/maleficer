@@ -12,6 +12,7 @@ import display
 import typ
 import ecs
 
+
 def player_position():
     # TODO: fine to crash if player missing?
     pos = next(ecs.Query(cmp.Player, cmp.Position).first_cmp(cmp.Position))
