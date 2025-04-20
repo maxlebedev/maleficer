@@ -21,7 +21,7 @@ class Log:
         for line in textwrap.wrap(text, display.PANEL_WIDTH - 2):
             cls.messages.append(line.upper())
 
-        cls.messages = cls.messages[-display.PANEL_HEIGHT - 2 :]
+        cls.messages = cls.messages[-display.PANEL_HEIGHT - 3 :]
 
 
 class Queues:

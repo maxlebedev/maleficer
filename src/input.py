@@ -26,6 +26,7 @@ class Input(enum.Enum):
     TWO = enum.auto()
     THREE = enum.auto()
     TAB = enum.auto()
+    SKIP = enum.auto()
 
 
 def load_keymap(keymap_json_path):

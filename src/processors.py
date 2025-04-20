@@ -23,6 +23,7 @@ import typ
 @dataclass
 class MovementProcessor(esper.Processor):
     board: location.Board
+    # TODO: lots of stuff is happening here. Good idea to break up the proccess func
 
     def process(self):
         while event.Queues.movement:
@@ -34,6 +35,7 @@ class MovementProcessor(esper.Processor):
                 # entity intends to move, but dies first
                 continue
 
+            ent_is_player = esper.has_component(ent, cmp.Player)
             pos = esper.component_for_entity(ent, cmp.Position)
             new_x = pos.x + move_x
             new_y = pos.y + move_y
@@ -49,7 +51,11 @@ class MovementProcessor(esper.Processor):
                     if src_is_enemy and target_is_harmable:
                         event.Damage(ent, target, 1)
                         # this should come from some property on the source
-                ent_is_player = esper.has_component(ent, cmp.Player)
+                        # should it be a DamageEffect?
+                    if ent_is_player:
+                        message = f"Failed to move to invalid location"
+                        event.Log.append(message)
+
                 target_is_collectable = esper.has_component(target, cmp.Collectable)
                 if ent_is_player and target_is_collectable:
                     esper.remove_component(target, cmp.Position)
@@ -136,7 +142,12 @@ class GameInputEventProcessor(InputEventProcessor):
             input.KEYMAP[input.Input.ONE]: (self.to_target, [1]),
             input.KEYMAP[input.Input.TWO]: (self.to_target, [2]),
             input.KEYMAP[input.Input.TAB]: (scene.to_phase, [scene.Phase.inventory]),
+            input.KEYMAP[input.Input.SKIP]: self.skip,
         }
+
+    def skip(self):
+        event.Tick()
+
 
     def move(self, x, y):
         player = ecs.Query(cmp.Player).first()
