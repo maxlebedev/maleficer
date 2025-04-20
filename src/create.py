@@ -46,7 +46,7 @@ def potion(pos: cmp.Position) -> int:
     actor = cmp.Actor(max_hp=1)
     named = cmp.Onymous(name="potion")
 
-    player, _ = ecs.Query(cmp.Player).first()
+    player = ecs.Query(cmp.Player).first()
     heal = cmp.HealEffect(target=player, amount=2)
     components = [pos, vis, col, actor, named, heal]
     potion = esper.create_entity(*components)
@@ -65,7 +65,7 @@ def inventory_map() -> list:
 
 
 def damage_spell() -> int:
-    player, _ = ecs.Query(cmp.Player).first()
+    player = ecs.Query(cmp.Player).first()
     spell_cmp = cmp.Spell(slot=1, target_range=5, cooldown=1)
     dmg_effect = cmp.DamageEffect(amount=1, source=player)
     named = cmp.Onymous(name="firebolt")
@@ -74,7 +74,7 @@ def damage_spell() -> int:
 
 
 def tp_spell() -> int:
-    player, _ = ecs.Query(cmp.Player).first()
+    player = ecs.Query(cmp.Player).first()
     spell_cmp = cmp.Spell(slot=2, target_range=4, cooldown=5)
     dmg_effect = cmp.MoveEffect(target=player)
     named = cmp.Onymous(name="blink")

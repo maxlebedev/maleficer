@@ -2,7 +2,6 @@
 
 import enum
 
-
 ENTITY: int
 
 RGB = tuple[int, int, int]

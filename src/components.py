@@ -163,6 +163,9 @@ class HealEffect:
 class State:
     """all of the conditions that an entity have"""
 
-    map: dict[typ.Condition, int]
+    map: dict[typ.Condition, int] # maybe some conditions are additive?
 
-    # maybe some conditions are additive?
+
+@component
+class OnStep:
+    """activates an effect when walked on"""

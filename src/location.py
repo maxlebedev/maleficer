@@ -9,13 +9,13 @@ import tcod
 import components as cmp
 import create
 import display
-import typ
 import ecs
+import typ
 
 
 def player_position():
     # TODO: fine to crash if player missing?
-    pos = next(ecs.Query(cmp.Player, cmp.Position).first_cmp(cmp.Position))
+    pos = ecs.Query(cmp.Player, cmp.Position).cmp(cmp.Position)
     return pos
 
 

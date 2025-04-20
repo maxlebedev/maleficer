@@ -7,6 +7,7 @@ from tcod import libtcodpy
 from tcod.map import compute_fov
 
 import components as cmp
+import condition
 import create
 import display
 import ecs
@@ -15,7 +16,6 @@ import input
 import location
 import scene
 import typ
-import condition
 
 # TODO: I'm namespacing the processors, but I should probably break them down by phase?
 
@@ -30,7 +30,8 @@ class MovementProcessor(esper.Processor):
             ent = movement.source
             move_x = movement.x
             move_y = movement.y
-            if not esper.entity_exists(ent):  # entity intends to move, but dies first
+            if not esper.entity_exists(ent):  
+                # entity intends to move, but dies first
                 continue
 
             pos = esper.component_for_entity(ent, cmp.Position)
@@ -138,15 +139,18 @@ class GameInputEventProcessor(InputEventProcessor):
         }
 
     def move(self, x, y):
-        player, _ = ecs.Query(cmp.Player).first()
+        player = ecs.Query(cmp.Player).first()
         event.Movement(player, x, y)
         event.Tick()
 
     def to_target(self, slot: int):
         # TODO: This probably wants to take spell_ent and not slot num
         player_pos = location.player_position()
-        xhair_pos = next(ecs.Query(cmp.Crosshair, cmp.Position).first_cmp(cmp.Position))
-        xhair_pos.x, xhair_pos.y = player_pos.x, player_pos.y
+        xhair_ent = ecs.Query(cmp.Crosshair, cmp.Position).first()
+        xhair_pos = ecs.cmps[xhair_ent][cmp.Position]
+
+        xhair_pos.x = player_pos.x
+        xhair_pos.y = player_pos.y
 
         casting_spell = None
         for spell_ent, (spell_cmp) in esper.get_component(cmp.Spell):
@@ -225,7 +229,7 @@ class RenderProcessor(esper.Processor):
 
         # left panel
         self.console.draw_frame(x=0, **panel_params)
-        actor = next(ecs.Query(cmp.Player, cmp.Actor).first_cmp(cmp.Actor))
+        actor = ecs.Query(cmp.Player, cmp.Actor).cmp(cmp.Actor)
         self.render_bar(1, 1, actor.hp, actor.max_hp, display.PANEL_WIDTH - 2)
 
         # inventory
@@ -334,21 +338,27 @@ class TargetInputEventProcessor(InputEventProcessor):
 
     def __init__(self, board):
         self.board = board
-        pos = next(ecs.Query(cmp.Crosshair, cmp.Position).first_cmp(cmp.Position))
-        to_level = (scene.to_phase, [scene.Phase.level, BoardRenderProcessor])
+        pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(cmp.Position)
 
         self.action_map = {
             input.KEYMAP[input.Input.MOVE_DOWN]: (self.move_crosshair, [0, 1]),
             input.KEYMAP[input.Input.MOVE_LEFT]: (self.move_crosshair, [-1, 0]),
             input.KEYMAP[input.Input.MOVE_UP]: (self.move_crosshair, [0, -1]),
             input.KEYMAP[input.Input.MOVE_RIGHT]: (self.move_crosshair, [1, 0]),
-            input.KEYMAP[input.Input.ESC]: to_level,
+            input.KEYMAP[input.Input.ESC]: self.to_level,
             input.KEYMAP[input.Input.SELECT]: (self.spell_to_events, [pos]),
         }
 
+    def to_level(self):
+        spell_ent = ecs.Query(cmp.Spell, cmp.CurrentSpell).first()
+        esper.remove_component(spell_ent, cmp.CurrentSpell)
+        scene.to_phase(scene.Phase.level)
+
     def move_crosshair(self, x, y):
-        crosshair, (_, pos) = ecs.Query(cmp.Crosshair, cmp.Position).first()
-        spell_cmp = next(ecs.Query(cmp.Spell, cmp.CurrentSpell).first_cmp(cmp.Spell))
+        crosshair = ecs.Query(cmp.Crosshair, cmp.Position).first()
+        pos = ecs.cmps[crosshair][cmp.Position]
+
+        spell_cmp = ecs.Query(cmp.Spell, cmp.CurrentSpell).cmp(cmp.Spell)
 
         player_pos = location.player_position()
         new_pos = cmp.Position(pos.x + x, pos.y + y)
@@ -359,7 +369,8 @@ class TargetInputEventProcessor(InputEventProcessor):
     def spell_to_events(self, pos):
         self.board.build_entity_cache()  # expensive, but okay
 
-        spell_ent, (spell_cmp, _) = ecs.Query(cmp.Spell, cmp.CurrentSpell).first()
+        spell_ent = ecs.Query(cmp.Spell, cmp.CurrentSpell).first()
+        spell_cmp = ecs.cmps[spell_ent][cmp.Spell]
 
         player_pos = location.player_position()
         if dmg_effect := esper.try_component(spell_ent, cmp.DamageEffect):
@@ -405,7 +416,7 @@ class InventoryRenderProcessor(BoardRenderProcessor):
     board: location.Board
 
     def display_inventory(self):
-        menu_selection = next(ecs.Query(cmp.MenuSelection).first_cmp())
+        menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
 
         inv_map = create.inventory_map()
         for i, (name, entities) in enumerate(inv_map):
@@ -438,17 +449,17 @@ class InventoryInputEventProcessor(InputEventProcessor):
         }
 
     def move_selection(self, diff: int):
-        menu_selection = next(ecs.Query(cmp.MenuSelection).first_cmp())
+        menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
         menu_selection.item += diff
 
     def use_item(self):
         inv_map = create.inventory_map()
-        menu_selection = next(ecs.Query(cmp.MenuSelection).first_cmp())
+        menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
         name = inv_map[menu_selection.item][0]
         selection = inv_map[menu_selection.item][1].pop()
         print(f"using {name}: {selection}")
 
-        player, _ = ecs.Query(cmp.Player).first()
+        player = ecs.Query(cmp.Player).first()
         if heal_effect := esper.try_component(selection, cmp.HealEffect):
             event.Damage(selection, player, -1 * heal_effect.amount)
 

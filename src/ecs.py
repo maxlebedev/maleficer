@@ -1,9 +1,9 @@
 # ECS funcs to extend esper
 from collections.abc import Generator
 
-
 import esper
 
+cmps = esper._entities
 
 class Query:
     entities = None
@@ -40,11 +40,17 @@ class Query:
         for entity in self.entities:
             yield entity, [entity_db[entity][cmp] for cmp in include]
 
-    def first(self, *include):
-        return next(self._get(*include))
+    def first(self) -> int:
+        """get the first entity in the queryset"""
+        if self.entities:
+            for entity in self.entities:
+                return entity
+        raise KeyError
 
-    def first_cmp(self, *include):
-        """get only the components of the first entity"""
-        components = next(self._get(*include))[1]
-        for component in components:
-            yield component
+    def cmp(self, cmp):
+        """Get a given component of the (only) entity in the queryset"""
+        if not self.entities or len(self.entities) != 1:
+            raise KeyError
+        for entity in self.entities:
+            return cmps[entity][cmp]
+        raise KeyError

@@ -11,9 +11,19 @@ rsync . $tmp_path -r --exclude-from=.gitignore
 
 cd $tmp_path
 
+while [[ "$1" == -* ]]; do
+ case $1 in
+   i)
+     powershell.exe -Command "pip install ."
+     ;;
+   x)
+     powershell.exe -Command "python -m PyInstaller --onefile --hide-console hide-early -n maleficer .\\src\\main.py"
+   ;;
+   \?)
+     echo "invalid option"
+   ;;
+ esac
+ shift
+done
+
 powershell.exe -Command "$@"
-
-
-# TODO: add -i cmd which install as well
-# powershell.exe -Command "pip install ."
-# add -x cmd which makes and exe

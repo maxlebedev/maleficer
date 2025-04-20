@@ -1,8 +1,9 @@
 # code around managing conditions
 
-import typ
 import esper
+
 import components as cmp
+import typ
 
 
 def has(entity: int, condition: typ.Condition) -> bool:
