@@ -164,3 +164,5 @@ class State:
     """all of the conditions that an entity have"""
 
     map: dict[typ.Condition, int]
+
+    # maybe some conditions are additive?

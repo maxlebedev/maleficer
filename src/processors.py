@@ -1,6 +1,5 @@
 import random
 from dataclasses import dataclass
-import functools
 
 import esper
 import tcod
@@ -16,6 +15,7 @@ import input
 import location
 import scene
 import typ
+import condition
 
 # TODO: I'm namespacing the processors, but I should probably break them down by phase?
 
@@ -111,29 +111,37 @@ class InputEventProcessor(esper.Processor):
                 if not isinstance(input_event, tcod.event.KeyDown):
                     continue
                 if input_event.sym in self.action_map:
-                    match self.action_map[input_event.sym]:
-                        case (func, args):
-                            func(*args)
-                        case func:
-                            func()
-                    listen = False
+                    try:
+                        match self.action_map[input_event.sym]:
+                            case (func, args):
+                                func(*args)
+                            case func:
+                                func()
+                    except typ.InvalidAction:
+                        print("caught invalid action")
+                    else:
+                        listen = False
+
 
 
 @dataclass
 class GameInputEventProcessor(InputEventProcessor):
     def __init__(self):
-        player, _ = ecs.Query(cmp.Player).first()
-        move = functools.partial(event.Movement, player)
         self.action_map = {
-            input.KEYMAP[input.Input.MOVE_DOWN]: (move, [0, 1]),
-            input.KEYMAP[input.Input.MOVE_LEFT]: (move, [-1, 0]),
-            input.KEYMAP[input.Input.MOVE_UP]: (move, [0, -1]),
-            input.KEYMAP[input.Input.MOVE_RIGHT]: (move, [1, 0]),
+            input.KEYMAP[input.Input.MOVE_DOWN]: (self.move, [0, 1]),
+            input.KEYMAP[input.Input.MOVE_LEFT]: (self.move, [-1, 0]),
+            input.KEYMAP[input.Input.MOVE_UP]: (self.move, [0, -1]),
+            input.KEYMAP[input.Input.MOVE_RIGHT]: (self.move, [1, 0]),
             input.KEYMAP[input.Input.ESC]: (scene.to_phase, [scene.Phase.menu]),
             input.KEYMAP[input.Input.ONE]: (self.to_target, [1]),
             input.KEYMAP[input.Input.TWO]: (self.to_target, [2]),
             input.KEYMAP[input.Input.TAB]: (scene.to_phase, [scene.Phase.inventory]),
         }
+
+    def move(self, x, y):
+        player, _ = ecs.Query(cmp.Player).first()
+        event.Movement(player, x, y)
+        event.Tick()
 
     def to_target(self, slot: int):
         # TODO: This probably wants to take spell_ent and not slot num
@@ -141,10 +149,18 @@ class GameInputEventProcessor(InputEventProcessor):
         xhair_pos = next(ecs.Query(cmp.Crosshair, cmp.Position).first_cmp(cmp.Position))
         xhair_pos.x, xhair_pos.y = player_pos.x, player_pos.y
 
+        casting_spell = None
         for spell_ent, (spell_cmp) in esper.get_component(cmp.Spell):
             if spell_cmp.slot == slot:
-                esper.add_component(spell_ent, cmp.CurrentSpell())
+                casting_spell = spell_ent
 
+        if not casting_spell:
+            return
+        if condition.has(casting_spell, typ.Condition.Cooldown):
+            event.Log.append("spell on cooldown")
+            scene.oneshot(BoardRenderProcessor)
+            raise typ.InvalidAction
+        esper.add_component(casting_spell, cmp.CurrentSpell())
         scene.to_phase(scene.Phase.target)
 
 
@@ -158,7 +174,7 @@ class NPCProcessor(esper.Processor):
             event.Movement(entity, *dir)
 
         player_pos = location.player_position()
-        for entity, (melee, epos) in ecs.Query(cmp.Melee, cmp.Position).get():
+        for entity, (melee, epos) in ecs.Query(cmp.Melee, cmp.Position):
             dist_to_player = location.euclidean_distance(player_pos, epos)
             if dist_to_player > melee.radius:
                 continue
@@ -220,13 +236,12 @@ class RenderProcessor(esper.Processor):
 
         # spells
         self.console.print(1, 8, "-" * (display.PANEL_WIDTH - 2))
-        spells = ecs.Query(cmp.Spell, cmp.Onymous).get()
-        for i, (spell_ent, (spell_cmp, named)) in enumerate(spells):
+        spells = ecs.Query(cmp.Spell, cmp.Onymous)
+        for i, (spell_ent, (spell_cmp, named)) in enumerate(sorted(spells)):
             # TODO: 9 is arbitrary
             text = f"Slot{spell_cmp.slot}:{named.name}"
-            if state := esper.try_component(spell_ent, cmp.State):
-                if cd := state.map.get(typ.Condition.Cooldown):
-                    text = f"{text}:{typ.Condition.Cooldown.name} {cd}"
+            if cd := condition.get_val(spell_ent, typ.Condition.Cooldown):
+                text = f"{text}:{typ.Condition.Cooldown.name} {cd}"
             self.console.print(1, 9 + i, text)
 
         # right panel
@@ -276,7 +291,7 @@ class BoardRenderProcessor(RenderProcessor):
 
         in_fov = self._get_fov(board)
 
-        nonwall_drawables = ecs.Query(cmp.Position, cmp.Visible).exclude(cmp.Cell).get()
+        nonwall_drawables = ecs.Query(cmp.Position, cmp.Visible).exclude(cmp.Cell)
         for _, (pos, vis) in nonwall_drawables:
             if not in_fov[pos.x][pos.y]:
                 continue
@@ -343,13 +358,6 @@ class TargetInputEventProcessor(InputEventProcessor):
             event.Movement(crosshair, x, y)
 
     def spell_to_events(self, pos):
-        def grant_condition(entity: int, condition: typ.Condition, value: int):
-            state = esper.try_component(entity, cmp.State)
-            if not state:
-                state = cmp.State(map={})
-                esper.add_component(entity, state)
-            state.map[condition] = value  # consider if we add or overwrite
-
         self.board.build_entity_cache()  # expensive, but okay
 
         spell_ent, (spell_cmp, _) = ecs.Query(cmp.Spell, cmp.CurrentSpell).first()
@@ -364,9 +372,10 @@ class TargetInputEventProcessor(InputEventProcessor):
             x = pos.x - player_pos.x
             y = pos.y - player_pos.y
             event.Movement(move_effect.target, x, y)
-        grant_condition(spell_ent, typ.Condition.Cooldown, spell_cmp.cooldown)
+        condition.grant(spell_ent, typ.Condition.Cooldown, spell_cmp.cooldown)
 
         esper.remove_component(spell_ent, cmp.CurrentSpell)
+        event.Tick()
         scene.to_phase(scene.Phase.level, NPCProcessor)
 
 
@@ -382,7 +391,7 @@ class TargetRenderProcessor(BoardRenderProcessor):
 
         cell_rgbs = self._board_to_cell_rgbs(self.board)
 
-        drawable_areas = ecs.Query(cmp.Position, cmp.EffectArea).get()
+        drawable_areas = ecs.Query(cmp.Position, cmp.EffectArea)
         for _, (pos, aoe) in drawable_areas:
             cell = cell_rgbs[pos.x][pos.y]
             cell_rgbs[pos.x][pos.y] = cell[0], cell[1], aoe.color
@@ -447,16 +456,20 @@ class InventoryInputEventProcessor(InputEventProcessor):
         # esper.delete_entity(selection)
         esper.remove_component(selection, cmp.InInventory)
         # TODO: if inventory is empty, fail to go to inventory mode?
-
+        event.Tick()
         scene.to_phase(scene.Phase.level, NPCProcessor)
 
 
+
 @dataclass
-class UpkeepProcessor(InputEventProcessor):
+class UpkeepProcessor(esper.Processor):
     """tick down all Conditions"""
 
     def process(self) -> None:
-        for _, (status,) in ecs.Query(cmp.State).get():
+        if not event.Queues.tick:
+            return
+        event.Queues.tick.clear()
+        for _, (status,) in ecs.Query(cmp.State):
             for condition in list(status.map.keys()):
                 status.map[condition] = max(0, status.map[condition] - 1)
                 if status.map[condition] == 0:

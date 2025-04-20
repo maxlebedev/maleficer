@@ -10,11 +10,11 @@ import components as cmp
 import create
 import display
 import typ
-
+import ecs
 
 def player_position():
     # TODO: fine to crash if player missing?
-    _, (_, pos) = esper.get_components(cmp.Player, cmp.Position)[0]
+    pos = next(ecs.Query(cmp.Player, cmp.Position).first_cmp(cmp.Position))
     return pos
 
 

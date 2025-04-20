@@ -27,7 +27,10 @@ class Query:
             [self.entities.difference_update(cmp_db[cmp]) for cmp in exclude]
         return self
 
-    def get(self, *include) -> Generator[tuple[int, list]]:
+    def __iter__(self, *include) -> Generator[tuple[int, list]]:
+        return self._get(*include)
+
+    def _get(self, *include) -> Generator[tuple[int, list]]:
         entity_db = esper._entities
         if not self.entities or not self.include:
             return
@@ -38,10 +41,10 @@ class Query:
             yield entity, [entity_db[entity][cmp] for cmp in include]
 
     def first(self, *include):
-        return next(self.get(*include))
+        return next(self._get(*include))
 
     def first_cmp(self, *include):
         """get only the components of the first entity"""
-        components = next(self.get(*include))[1]
+        components = next(self._get(*include))[1]
         for component in components:
             yield component

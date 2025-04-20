@@ -29,6 +29,7 @@ class Queues:
 
     movement = collections.deque()
     damage = collections.deque()
+    tick = collections.deque()
 
 
 class Event:
@@ -52,3 +53,8 @@ class Movement(Event):
     source: int
     x: int
     y: int
+
+@dataclass
+class Tick(Event):
+    """A tick event is used to explicity track turns, for upkeeps"""
+    _queue = Queues.tick
