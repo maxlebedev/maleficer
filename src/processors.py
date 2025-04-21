@@ -65,15 +65,16 @@ class MovementProcessor(esper.Processor):
                     message = f"player picked up {name}"
                     event.Log.append(message)
                     # oneshot call some collectable processor?
-                target_is_onstep = esper.has_component(target, cmp.OnStep)
-                if target_is_onstep:
+                target_is_trap = esper.has_component(target, cmp.Trap)
+                ent_flies = esper.has_component(ent, cmp.Flying)
+                if target_is_trap and not ent_flies:
                     if dmg:= esper.try_component(target, cmp.DamageEffect):
                         dmg.target = ent
                     event.effects_to_events(target)
 
             if move:
-                pos.x = new_x
-                pos.y = new_y
+                board.entities[pos.x][pos.y].remove(ent)
+                pos.x, pos.y = new_x, new_y
                 board.entities[new_x][new_y].add(ent)
 
 
@@ -380,8 +381,6 @@ class TargetInputEventProcessor(InputEventProcessor):
             event.Movement(crosshair, x, y)
 
     def spell_to_events(self):
-        location.BOARD.build_entity_cache()  # expensive, but okay
-
         spell_ent = ecs.Query(cmp.Spell, cmp.CurrentSpell).first()
         spell_cmp = ecs.cmps[spell_ent][cmp.Spell]
 

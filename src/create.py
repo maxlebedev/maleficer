@@ -22,12 +22,13 @@ def wall(x: int, y: int) -> int:
 
 
 def bat(pos: cmp.Position) -> int:
+
     vis = cmp.Visible(glyph=display.Glyph.BAT, color=display.Color.RED)
     actor = cmp.Actor(max_hp=1)
     named = cmp.Onymous(name="bat")
-    components = [cmp.Enemy(), pos, vis, cmp.Blocking(), actor, cmp.Wander(), named]
+    flying = cmp.Flying()
+    components = [cmp.Enemy(), pos, vis, cmp.Blocking(), actor, cmp.Wander(), named, flying]
     bat = esper.create_entity(*components)
-    # consider a fly cmp that avoids traps
     return bat
 
 
@@ -87,10 +88,10 @@ def trap(pos: cmp.Position) -> int:
     vis = cmp.Visible(glyph=display.Glyph.TRAP, color=display.Color.RED)
     actor = cmp.Actor(max_hp=1)
     named = cmp.Onymous(name="trap")
-    onstep = cmp.OnStep()
+    trap_cmp = cmp.Trap()
 
-    components = [pos, vis, actor, named, onstep]
-    trap = esper.create_entity(*components)
-    dmg = cmp.DamageEffect(source=trap, amount=1)
-    esper.add_component(trap, dmg)
-    return trap
+    components = [pos, vis, actor, named, trap_cmp]
+    trap_ent = esper.create_entity(*components)
+    dmg = cmp.DamageEffect(source=trap_ent, amount=1)
+    esper.add_component(trap_ent, dmg)
+    return trap_ent

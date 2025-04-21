@@ -33,14 +33,10 @@ class Visible:
 class Transparent:
     """does not block light"""
 
-    pass
-
 
 @component
 class Blocking:
     """Can't be moved through"""
-
-    pass
 
 
 @component
@@ -57,15 +53,12 @@ class Enemy:
 class Wander:
     """Walks around randomly"""
 
-    pass
-
 
 @component
 class Melee:
     """Walks towards player"""
 
     radius: int
-    pass
 
 
 @component
@@ -84,7 +77,7 @@ class Actor:  # Destroyable, harmable?
 
 @component
 class Crosshair:
-    pass
+    """used for target selection"""
 
 
 @component
@@ -96,8 +89,6 @@ class EffectArea:
 @component
 class Collectable:
     """can be added to inventory"""
-
-    pass
 
 
 @component
@@ -119,13 +110,10 @@ class Spell:
 class CurrentSpell:
     """the spell we are casting right now"""
 
-    pass
-
 
 @component
 class MenuSelection:
     item: int = 0
-    pass
 
 
 @component
@@ -168,5 +156,9 @@ class State:
 
 
 @component
-class OnStep:
+class Trap:
     """activates an effect when walked on"""
+
+@component
+class Flying:
+    """not affected by OnStep components"""
