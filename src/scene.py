@@ -43,40 +43,39 @@ def main_menu_phase(context, console):
     PHASES[Phase.menu] = [render, input]
 
 
-def level_phase(context, console, game_board):
+def level_phase(context, console):
     upkeep = processors.UpkeepProcessor()
 
-    render = processors.BoardRenderProcessor(console, context, game_board)
+    render = processors.BoardRenderProcessor(console, context)
     input = processors.GameInputEventProcessor()
     npc = processors.NPCProcessor()
 
-    movement = processors.MovementProcessor(game_board)
+    movement = processors.MovementProcessor()
     damage = processors.DamageProcessor()
-    location.generate_dungeon(game_board)
 
     level_procs = [upkeep, render, input, npc, movement, damage]
     # do we want one damage phase or two?
     PHASES[Phase.level] = level_procs
 
 
-def targeting_phase(context, console, game_board):
+def targeting_phase(context, console):
     pos = location.player_position()
 
     aoe_cmp = cmp.EffectArea(color=display.Color.RED)
     position_cmp = cmp.Position(x=pos.x, y=pos.y)
     esper.create_entity(cmp.Crosshair(), position_cmp, aoe_cmp)
 
-    input = processors.TargetInputEventProcessor(game_board)
-    target_render = processors.TargetRenderProcessor(console, context, game_board)
-    movement = processors.MovementProcessor(game_board)
+    input = processors.TargetInputEventProcessor()
+    target_render = processors.TargetRenderProcessor(console, context)
+    movement = processors.MovementProcessor()
     PHASES[Phase.target] = [target_render, input, movement]
 
 
-def inventory_phase(context, console, game_board):
+def inventory_phase(context, console):
     esper.create_entity(cmp.MenuSelection())
 
     input = processors.InventoryInputEventProcessor()
-    render = processors.InventoryRenderProcessor(console, context, game_board)
+    render = processors.InventoryRenderProcessor(console, context)
 
     PHASES[Phase.inventory] = [render, input]
 

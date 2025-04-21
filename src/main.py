@@ -29,11 +29,14 @@ def main() -> None:
 
     location.BOARD = location.Board()
 
+    location.generate_dungeon(location.BOARD)
+
     scene.main_menu_phase(context, console)
-    scene.level_phase(context, console, location.BOARD)
-    scene.targeting_phase(context, console, location.BOARD)
-    scene.inventory_phase(context, console, location.BOARD)
+    scene.level_phase(context, console)
+    scene.targeting_phase(context, console)
+    scene.inventory_phase(context, console)
     scene.to_phase(scene.Phase.menu)
+
 
     scene.inventory_setup()
     create.inventory_map()

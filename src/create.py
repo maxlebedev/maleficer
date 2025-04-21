@@ -27,6 +27,7 @@ def bat(pos: cmp.Position) -> int:
     named = cmp.Onymous(name="bat")
     components = [cmp.Enemy(), pos, vis, cmp.Blocking(), actor, cmp.Wander(), named]
     bat = esper.create_entity(*components)
+    # consider a fly cmp that avoids traps
     return bat
 
 
@@ -80,3 +81,16 @@ def tp_spell() -> int:
     named = cmp.Onymous(name="blink")
     sample_spell = esper.create_entity(spell_cmp, dmg_effect, named)
     return sample_spell
+
+
+def trap(pos: cmp.Position) -> int:
+    vis = cmp.Visible(glyph=display.Glyph.TRAP, color=display.Color.RED)
+    actor = cmp.Actor(max_hp=1)
+    named = cmp.Onymous(name="trap")
+    onstep = cmp.OnStep()
+
+    components = [pos, vis, actor, named, onstep]
+    trap = esper.create_entity(*components)
+    dmg = cmp.DamageEffect(source=trap, amount=1)
+    esper.add_component(trap, dmg)
+    return trap

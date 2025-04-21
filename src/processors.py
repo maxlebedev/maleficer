@@ -22,10 +22,10 @@ import typ
 
 @dataclass
 class MovementProcessor(esper.Processor):
-    board: location.Board
     # TODO: lots of stuff is happening here. Good idea to break up the proccess func
 
     def process(self):
+        board = location.BOARD
         while event.Queues.movement:
             movement = event.Queues.movement.pop()
             ent = movement.source
@@ -39,10 +39,9 @@ class MovementProcessor(esper.Processor):
             pos = esper.component_for_entity(ent, cmp.Position)
             new_x = pos.x + move_x
             new_y = pos.y + move_y
-            # Note: as written, walking into a wall consumes a turn
             move = True
-            self.board.build_entity_cache()  # expensive, but okay
-            for target in self.board.entities[new_x][new_y]:
+            board.build_entity_cache()  # expensive, but okay
+            for target in board.entities[new_x][new_y]:
                 ent_is_actor = esper.has_component(ent, cmp.Actor)
                 if ent_is_actor and esper.has_component(target, cmp.Blocking):
                     move = False
@@ -53,6 +52,7 @@ class MovementProcessor(esper.Processor):
                         # this should come from some property on the source
                         # should it be a DamageEffect?
                     if ent_is_player:
+                        # Note: walking into a wall consumes a turn
                         message = f"Failed to move to invalid location"
                         event.Log.append(message)
 
@@ -69,7 +69,7 @@ class MovementProcessor(esper.Processor):
             if move:
                 pos.x = new_x
                 pos.y = new_y
-                self.board.entities[new_x][new_y].add(ent)
+                board.entities[new_x][new_y].add(ent)
 
 
 @dataclass
@@ -263,25 +263,25 @@ class RenderProcessor(esper.Processor):
         for i, message in enumerate(event.Log.messages):
             self.console.print(1 + display.R_PANEL_START, 1 + i, message)
 
-    def _apply_lighting(self, gameboard, cell_rgbs, in_fov) -> list[list[typ.CELL_RGB]]:
+    def _apply_lighting(self, cell_rgbs, in_fov) -> list[list[typ.CELL_RGB]]:
         """display cells in fov with lighting, explored without, and hide the rest"""
         for x, col in enumerate(cell_rgbs):
             for y, (glyph, fgcolor, _) in enumerate(col):
-                cell = gameboard.get_cell(x, y)
+                cell = location.BOARD.get_cell(x, y)
                 if not cell:
                     continue
                 if in_fov[x][y]:
-                    gameboard.explored.add(cell)
+                    location.BOARD.explored.add(cell)
                     brighter = display.brighter(fgcolor, scale=100)
                     cell_rgbs[x][y] = (glyph, brighter, display.Color.CANDLE)
-                elif cell in gameboard.explored:
+                elif cell in location.BOARD.explored:
                     cell_rgbs[x][y] = (glyph, fgcolor, display.Color.BLACK)
                 else:
                     cell_rgbs[x][y] = (glyph, display.Color.BLACK, display.Color.BLACK)
         return cell_rgbs
 
-    def _get_fov(self, board: location.Board):
-        transparency = board.as_transparency()
+    def _get_fov(self):
+        transparency = location.BOARD.as_transparency()
         pos = location.player_position()
         algo = libtcodpy.FOV_SHADOW
         fov = compute_fov(transparency, (pos.x, pos.y), radius=4, algorithm=algo)
@@ -298,12 +298,12 @@ class RenderProcessor(esper.Processor):
 class BoardRenderProcessor(RenderProcessor):
     console: tcod.console.Console
     context: tcod.context.Context
-    board: location.Board
 
-    def _board_to_cell_rgbs(self, board: location.Board):
+    def _get_cell_rgbs(self):
+        board = location.BOARD
         cell_rgbs = [list(map(board.as_rgb, row)) for row in board.cells]
 
-        in_fov = self._get_fov(board)
+        in_fov = self._get_fov()
 
         nonwall_drawables = ecs.Query(cmp.Position, cmp.Visible).exclude(cmp.Cell)
         for _, (pos, vis) in nonwall_drawables:
@@ -311,13 +311,13 @@ class BoardRenderProcessor(RenderProcessor):
                 continue
             cell_rgbs[pos.x][pos.y] = (vis.glyph, vis.color, vis.bg_color)
 
-        cell_rgbs = self._apply_lighting(board, cell_rgbs, in_fov)
+        cell_rgbs = self._apply_lighting(cell_rgbs, in_fov)
         return cell_rgbs
 
     def process(self):
         self.console.clear()
         self._draw_panels()
-        cell_rgbs = self._board_to_cell_rgbs(self.board)
+        cell_rgbs = self._get_cell_rgbs()
         self.present(cell_rgbs)
 
 
@@ -345,10 +345,8 @@ class MenuInputEventProcessor(InputEventProcessor):
 
 @dataclass
 class TargetInputEventProcessor(InputEventProcessor):
-    board: location.Board
 
-    def __init__(self, board):
-        self.board = board
+    def __init__(self):
 
         self.action_map = {
             input.KEYMAP[input.Input.MOVE_DOWN]: (self.move_crosshair, [0, 1]),
@@ -377,7 +375,7 @@ class TargetInputEventProcessor(InputEventProcessor):
             event.Movement(crosshair, x, y)
 
     def spell_to_events(self):
-        self.board.build_entity_cache()  # expensive, but okay
+        location.BOARD.build_entity_cache()  # expensive, but okay
 
         spell_ent = ecs.Query(cmp.Spell, cmp.CurrentSpell).first()
         spell_cmp = ecs.cmps[spell_ent][cmp.Spell]
@@ -395,13 +393,12 @@ class TargetInputEventProcessor(InputEventProcessor):
 class TargetRenderProcessor(BoardRenderProcessor):
     console: tcod.console.Console
     context: tcod.context.Context
-    board: location.Board
 
     def process(self) -> None:
         self.console.clear()
         self._draw_panels()
 
-        cell_rgbs = self._board_to_cell_rgbs(self.board)
+        cell_rgbs = self._get_cell_rgbs()
 
         drawable_areas = ecs.Query(cmp.Position, cmp.EffectArea)
         for _, (pos, aoe) in drawable_areas:
@@ -415,7 +412,6 @@ class TargetRenderProcessor(BoardRenderProcessor):
 class InventoryRenderProcessor(BoardRenderProcessor):
     console: tcod.console.Console
     context: tcod.context.Context
-    board: location.Board
 
     def display_inventory(self):
         menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
@@ -433,7 +429,7 @@ class InventoryRenderProcessor(BoardRenderProcessor):
         self.console.clear()
         self._draw_panels()
 
-        cell_rgbs = self._board_to_cell_rgbs(self.board)
+        cell_rgbs = self._get_cell_rgbs()
 
         self.display_inventory()
         self.present(cell_rgbs)

@@ -194,6 +194,7 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
             tunnel_between(board, new_room.center, endpt)
             if random.randint(0, 1):
                 create.bat(new_room.center)
+                create.trap(new_room.center)
             else:
                 create.skeleton(new_room.center)
                 create.potion(new_room.center)
