@@ -65,6 +65,11 @@ class MovementProcessor(esper.Processor):
                     message = f"player picked up {name}"
                     event.Log.append(message)
                     # oneshot call some collectable processor?
+                target_is_onstep = esper.has_component(target, cmp.OnStep)
+                if target_is_onstep:
+                    if dmg:= esper.try_component(target, cmp.DamageEffect):
+                        dmg.target = ent
+                    event.effects_to_events(target)
 
             if move:
                 pos.x = new_x

@@ -139,6 +139,7 @@ class DamageEffect:
 
     source: int
     amount: int
+    target: int|None = None
 
 
 @component

@@ -72,10 +72,15 @@ def effects_to_events(source: int):
     # do I need to build an entity cache?
 
     if dmg_effect := esper.try_component(source, cmp.DamageEffect):
-        pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(cmp.Position)
-        for target in location.BOARD.entities[pos.x][pos.y]:
-            if esper.has_component(target, cmp.Actor):
-                Damage(dmg_effect.source, target, dmg_effect.amount)
+        # if DamageEffect has a target use that,
+        # otherwise get targets from xhair
+        if dmg_effect.target:
+            Damage(dmg_effect.source, dmg_effect.target, dmg_effect.amount)
+        else:
+            pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(cmp.Position)
+            for target in location.BOARD.entities[pos.x][pos.y]:
+                if esper.has_component(target, cmp.Actor):
+                    Damage(dmg_effect.source, target, dmg_effect.amount)
 
     player = ecs.Query(cmp.Player, cmp.Position).first()
     player_pos = ecs.cmps[player][cmp.Position]
