@@ -40,7 +40,7 @@ class MovementProcessor(esper.Processor):
             new_x = pos.x + move_x
             new_y = pos.y + move_y
             move = True
-            board.build_entity_cache()  # expensive, but okay
+            board.build_entity_cache()  # keyerror if this isn't here
             for target in board.entities[new_x][new_y]:
                 ent_is_actor = esper.has_component(ent, cmp.Actor)
                 if ent_is_actor and esper.has_component(target, cmp.Blocking):
@@ -180,7 +180,7 @@ class GameInputEventProcessor(InputEventProcessor):
             event.Log.append("spell on cooldown")
             scene.oneshot(BoardRenderProcessor)
             raise typ.InvalidAction
-        esper.add_component(casting_spell, cmp.CurrentSpell())
+        esper.add_component(casting_spell, cmp.Targeting())
         scene.to_phase(scene.Phase.target)
 
 
@@ -360,35 +360,39 @@ class TargetInputEventProcessor(InputEventProcessor):
             input.KEYMAP[input.Input.MOVE_UP]: (self.move_crosshair, [0, -1]),
             input.KEYMAP[input.Input.MOVE_RIGHT]: (self.move_crosshair, [1, 0]),
             input.KEYMAP[input.Input.ESC]: self.to_level,
-            input.KEYMAP[input.Input.SELECT]: self.spell_to_events,
+            input.KEYMAP[input.Input.SELECT]: self.select,
         }
 
     def to_level(self):
-        spell_ent = ecs.Query(cmp.Spell, cmp.CurrentSpell).first()
-        esper.remove_component(spell_ent, cmp.CurrentSpell)
+        spell_ent = ecs.Query(cmp.Targeting).first()
+        esper.remove_component(spell_ent, cmp.Targeting)
         scene.to_phase(scene.Phase.level)
 
     def move_crosshair(self, x, y):
         crosshair = ecs.Query(cmp.Crosshair, cmp.Position).first()
         pos = ecs.cmps[crosshair][cmp.Position]
 
-        spell_cmp = ecs.Query(cmp.Spell, cmp.CurrentSpell).cmp(cmp.Spell)
+        # TODO: maybe break out range to its own cmp and check for it here
+        spell_cmp = ecs.Query(cmp.Spell, cmp.Targeting).cmp(cmp.Spell)
 
         player_pos = location.player_position()
         new_pos = cmp.Position(pos.x + x, pos.y + y)
         dist_to_player = location.euclidean_distance(player_pos, new_pos)
-        if dist_to_player < spell_cmp.target_range:
+        if not spell_cmp or dist_to_player < spell_cmp.target_range:
             event.Movement(crosshair, x, y)
 
-    def spell_to_events(self):
-        spell_ent = ecs.Query(cmp.Spell, cmp.CurrentSpell).first()
-        spell_cmp = ecs.cmps[spell_ent][cmp.Spell]
+    def select(self):
+        xhair_pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(cmp.Position)
+        targeting_entity = ecs.Query(cmp.Targeting).first()
+        if not esper.has_component(targeting_entity, cmp.Target):
+            cell = location.BOARD.cells[xhair_pos.x][xhair_pos.y]
+            trg = cmp.Target(cell)
+            # TODO: in dmg proc, if the target is a Cell,
+            # dmg all things on the cell
+            esper.add_component(targeting_entity, trg)
 
-        event.effects_to_events(spell_ent)
-
-        condition.grant(spell_ent, typ.Condition.Cooldown, spell_cmp.cooldown)
-
-        esper.remove_component(spell_ent, cmp.CurrentSpell)
+        event.effects_to_events(targeting_entity)
+        esper.remove_component(targeting_entity, cmp.Targeting)
         event.Tick()
         scene.to_phase(scene.Phase.level, NPCProcessor)
 

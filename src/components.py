@@ -100,15 +100,19 @@ class InInventory:
 class Spell:
     slot: int
     target_range: int
-    cooldown: int
-
-    def __post_init__(self):
-        self.cooldown += 1
 
 
 @component
-class CurrentSpell:
-    """the spell we are casting right now"""
+class Cooldown:
+    turns: int
+
+    def __post_init__(self):
+        self.turns += 1
+
+
+@component
+class Target:
+    target: int
 
 
 @component
@@ -162,3 +166,7 @@ class Trap:
 @component
 class Flying:
     """not affected by OnStep components"""
+
+@component
+class Targeting:
+    """entity invoking target phase"""

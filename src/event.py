@@ -8,6 +8,8 @@ import components as cmp
 import display
 import ecs
 import location
+import condition
+import typ
 
 # an event is somethig that happens
 # an action is somthing someone did
@@ -92,3 +94,7 @@ def effects_to_events(source: int):
 
     if heal_effect := esper.try_component(source, cmp.HealEffect):
         Damage(source, player, -1 * heal_effect.amount)
+
+    if cd_effect := esper.try_component(source, cmp.Cooldown):
+        condition.grant(source, typ.Condition.Cooldown, cd_effect.turns)
+
