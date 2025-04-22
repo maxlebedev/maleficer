@@ -73,16 +73,16 @@ def effects_to_events(source: int):
     """take an entity read effects off the entity and apply them to crosshair if needed"""
     # do I need to build an entity cache?
 
+    # TODO: are we guarenteed to have a target every time?
+    target = esper.component_for_entity(source, cmp.Target).target
     if dmg_effect := esper.try_component(source, cmp.DamageEffect):
-        # if DamageEffect has a target use that,
-        # otherwise get targets from xhair
-        if dmg_effect.target:
-            Damage(dmg_effect.source, dmg_effect.target, dmg_effect.amount)
+        if esper.has_component(target, cmp.Cell):
+            pos = esper.component_for_entity(target, cmp.Position)
+            for ent in location.BOARD.entities[pos.x][pos.y]:
+                if esper.has_component(ent, cmp.Actor):
+                    Damage(dmg_effect.source, ent, dmg_effect.amount)
         else:
-            pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(cmp.Position)
-            for target in location.BOARD.entities[pos.x][pos.y]:
-                if esper.has_component(target, cmp.Actor):
-                    Damage(dmg_effect.source, target, dmg_effect.amount)
+            Damage(dmg_effect.source, target, dmg_effect.amount)
 
     player = ecs.Query(cmp.Player, cmp.Position).first()
     player_pos = ecs.cmps[player][cmp.Position]
@@ -98,3 +98,5 @@ def effects_to_events(source: int):
     if cd_effect := esper.try_component(source, cmp.Cooldown):
         condition.grant(source, typ.Condition.Cooldown, cd_effect.turns)
 
+    # note that removing Target is bad if persistent entity with static target
+    esper.remove_component(source, cmp.Target)

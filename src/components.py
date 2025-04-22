@@ -112,7 +112,7 @@ class Cooldown:
 
 @component
 class Target:
-    target: int
+    target: int # Not loving the stutter
 
 
 @component
@@ -131,7 +131,6 @@ class DamageEffect:
 
     source: int
     amount: int
-    target: int|None = None
 
 
 @component
@@ -145,11 +144,7 @@ class MoveEffect:
 
 @component
 class HealEffect:
-    target: int
     amount: int
-
-
-# TODO: maybe if MoveEffect, HealEffect lack a target, we go into target phase to get one?
 
 
 @component

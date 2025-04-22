@@ -67,9 +67,9 @@ class MovementProcessor(esper.Processor):
                     # oneshot call some collectable processor?
                 target_is_trap = esper.has_component(target, cmp.Trap)
                 ent_flies = esper.has_component(ent, cmp.Flying)
-                if target_is_trap and not ent_flies:
-                    if dmg:= esper.try_component(target, cmp.DamageEffect):
-                        dmg.target = ent
+                if ent_is_actor and target_is_trap and not ent_flies:
+                    if esper.has_component(target, cmp.DamageEffect):
+                        esper.add_component(target, cmp.Target(target=ent))
                     event.effects_to_events(target)
 
             if move:
@@ -386,9 +386,7 @@ class TargetInputEventProcessor(InputEventProcessor):
         targeting_entity = ecs.Query(cmp.Targeting).first()
         if not esper.has_component(targeting_entity, cmp.Target):
             cell = location.BOARD.cells[xhair_pos.x][xhair_pos.y]
-            trg = cmp.Target(cell)
-            # TODO: in dmg proc, if the target is a Cell,
-            # dmg all things on the cell
+            trg = cmp.Target(target=cell)
             esper.add_component(targeting_entity, trg)
 
         event.effects_to_events(targeting_entity)
