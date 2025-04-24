@@ -112,7 +112,7 @@ class Cooldown:
 
 @component
 class Target:
-    target: int # Not loving the stutter
+    target: int  # Not loving the stutter
 
 
 @component
@@ -151,16 +151,18 @@ class HealEffect:
 class State:
     """all of the conditions that an entity have"""
 
-    map: dict[typ.Condition, int] # maybe some conditions are additive?
+    map: dict[typ.Condition, int]  # maybe some conditions are additive?
 
 
 @component
 class Trap:
     """activates an effect when walked on"""
 
+
 @component
 class Flying:
     """not affected by OnStep components"""
+
 
 @component
 class Targeting:

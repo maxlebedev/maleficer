@@ -5,10 +5,10 @@ from dataclasses import dataclass
 import esper
 
 import components as cmp
+import condition
 import display
 import ecs
 import location
-import condition
 import typ
 
 # an event is somethig that happens

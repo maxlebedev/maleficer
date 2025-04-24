@@ -22,12 +22,20 @@ def wall(x: int, y: int) -> int:
 
 
 def bat(pos: cmp.Position) -> int:
-
     vis = cmp.Visible(glyph=display.Glyph.BAT, color=display.Color.RED)
     actor = cmp.Actor(max_hp=1)
     named = cmp.Onymous(name="bat")
     flying = cmp.Flying()
-    components = [cmp.Enemy(), pos, vis, cmp.Blocking(), actor, cmp.Wander(), named, flying]
+    components = [
+        cmp.Enemy(),
+        pos,
+        vis,
+        cmp.Blocking(),
+        actor,
+        cmp.Wander(),
+        named,
+        flying,
+    ]
     bat = esper.create_entity(*components)
     return bat
 
@@ -70,7 +78,7 @@ def inventory_map() -> list:
 def damage_spell() -> int:
     player = ecs.Query(cmp.Player).first()
     spell_cmp = cmp.Spell(slot=1, target_range=5)
-    cooldown= cmp.Cooldown(turns=1)
+    cooldown = cmp.Cooldown(turns=1)
     dmg_effect = cmp.DamageEffect(amount=1, source=player)
     named = cmp.Onymous(name="firebolt")
     sample_spell = esper.create_entity(spell_cmp, dmg_effect, named, cooldown)

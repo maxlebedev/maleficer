@@ -95,6 +95,7 @@ class Board:
 
 BOARD: Board
 
+
 @dataclass
 class RectangularRoom:
     x1: int

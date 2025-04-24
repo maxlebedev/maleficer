@@ -5,6 +5,7 @@ import esper
 
 cmps = esper._entities
 
+
 class Query:
     entities = None
     include = tuple()

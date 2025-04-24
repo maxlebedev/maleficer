@@ -4,9 +4,24 @@ import tcod
 import create
 import display
 import location
+import processors
 import scene
 
 FLAGS = tcod.context.SDL_WINDOW_RESIZABLE  # | tcod.context.SDL_WINDOW_FULLSCREEN
+
+
+def flash(context, console):
+    """flashes the screen, for use on errors"""
+    console.clear()
+    foo = lambda _: (1, display.Color.WHITE, display.Color.WHITE)
+    cell_rgbs = [list(map(foo, row)) for row in location.BOARD.cells]
+
+    startx, endx = (display.PANEL_WIDTH, display.R_PANEL_START)
+    starty, endy = (0, display.BOARD_HEIGHT)
+
+    console.rgb[startx:endx, starty:endy] = cell_rgbs
+    context.present(console)  # , integer_scaling=True
+    scene.oneshot(processors.BoardRenderProcessor)
 
 
 def main() -> None:
@@ -28,7 +43,6 @@ def main() -> None:
     scene.player_setup()
 
     location.BOARD = location.Board()
-
 
     scene.main_menu_phase(context, console)
     scene.level_phase(context, console)

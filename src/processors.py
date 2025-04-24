@@ -31,7 +31,7 @@ class MovementProcessor(esper.Processor):
             ent = movement.source
             move_x = movement.x
             move_y = movement.y
-            if not esper.entity_exists(ent):  
+            if not esper.entity_exists(ent):
                 # entity intends to move, but dies first
                 continue
 
@@ -55,6 +55,7 @@ class MovementProcessor(esper.Processor):
                         # Note: walking into a wall consumes a turn
                         message = f"Failed to move to invalid location"
                         event.Log.append(message)
+                        esper.dispatch_event("flash")
 
                 target_is_collectable = esper.has_component(target, cmp.Collectable)
                 if ent_is_player and target_is_collectable:
@@ -131,6 +132,7 @@ class InputEventProcessor(esper.Processor):
                             case func:
                                 func()
                     except typ.InvalidAction:
+                        esper.dispatch_event("flash")
                         print("caught invalid action")
                     else:
                         listen = False
@@ -153,7 +155,6 @@ class GameInputEventProcessor(InputEventProcessor):
 
     def skip(self):
         event.Tick()
-
 
     def move(self, x, y):
         player = ecs.Query(cmp.Player).first()
@@ -178,7 +179,6 @@ class GameInputEventProcessor(InputEventProcessor):
             return
         if condition.has(casting_spell, typ.Condition.Cooldown):
             event.Log.append("spell on cooldown")
-            scene.oneshot(BoardRenderProcessor)
             raise typ.InvalidAction
         esper.add_component(casting_spell, cmp.Targeting())
         scene.to_phase(scene.Phase.target)
@@ -351,9 +351,7 @@ class MenuInputEventProcessor(InputEventProcessor):
 
 @dataclass
 class TargetInputEventProcessor(InputEventProcessor):
-
     def __init__(self):
-
         self.action_map = {
             input.KEYMAP[input.Input.MOVE_DOWN]: (self.move_crosshair, [0, 1]),
             input.KEYMAP[input.Input.MOVE_LEFT]: (self.move_crosshair, [-1, 0]),
