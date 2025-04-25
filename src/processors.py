@@ -169,7 +169,7 @@ class GameInputEventProcessor(InputEventProcessor):
     def to_inventory(self):
         try:
             ecs.Query(cmp.InInventory).first()
-        except:
+        except KeyError:
             raise typ.InvalidAction
 
         menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
