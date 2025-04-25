@@ -92,7 +92,7 @@ class MovementProcessor(esper.Processor):
 class DamageProcessor(esper.Processor):
     def process(self):
         while event.Queues.damage:
-            damage = event.Queues.damage.pop()
+            damage = event.Queues.damage.popleft()
             if not all(map(esper.entity_exists, [damage.target, damage.source])):
                 # if either entity doesn't exist anymore, damage fizzles
                 continue
