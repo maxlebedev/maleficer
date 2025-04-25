@@ -56,6 +56,8 @@ def main() -> None:
     create.damage_spell()
     create.tp_spell()
 
+    flash_callback = lambda: flash(context, console)
+    esper.set_handler("flash", flash_callback)
     while True:
         esper.process()
 

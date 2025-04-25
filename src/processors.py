@@ -1,5 +1,6 @@
 import random
 from dataclasses import dataclass
+import copy
 
 import esper
 import tcod
@@ -32,8 +33,7 @@ class MovementProcessor(esper.Processor):
 
         if esper.has_component(source, cmp.Player):
             # Note: walking into a wall consumes a turn
-            message = f"Failed to move to invalid location"
-            event.Log.append(message)
+            event.Log.append("Failed to move to invalid location")
             esper.dispatch_event("flash")
 
     def collect(self, target):
@@ -41,14 +41,13 @@ class MovementProcessor(esper.Processor):
         esper.add_component(target, cmp.InInventory())
         create.inventory_map()
         name = esper.component_for_entity(target, cmp.Onymous).name
-        message = f"player picked up {name}"
-        event.Log.append(message)
+        event.Log.append(f"player picked up {name}")
         # oneshot call some collectable processor?
 
     def process(self):
         board = location.BOARD
         while event.Queues.movement:
-            movement = event.Queues.movement.pop()
+            movement = event.Queues.movement.popleft() # left so player first
             ent = movement.source
             if not esper.entity_exists(ent):
                 # entity intends to move, but dies first
@@ -59,17 +58,24 @@ class MovementProcessor(esper.Processor):
             pos = esper.component_for_entity(ent, cmp.Position)
             new_x = pos.x + movement.x
             new_y = pos.y + movement.y
-            move = True
             board.build_entity_cache()  # keyerror if this isn't here
-            targets = board.entities[new_x][new_y]
+            targets = copy.copy(board.entities[new_x][new_y])
 
+            move = True
+            if ent_is_actor:
+                blockers = esper._components[cmp.Blocking]
+                move = not any(target in blockers for target in targets)
+
+            if move:
+                board.entities[pos.x][pos.y].remove(ent)
+                pos.x, pos.y = new_x, new_y
+                board.entities[new_x][new_y].add(ent)
 
             if ent_is_actor:
                 for target in targets:
                     is_target = lambda x: esper.has_component(target, x)
 
                     if is_target(cmp.Blocking):
-                        # move = False
                         self.bump(ent, target)
 
                     if ent_is_player and is_target(cmp.Collectable):
@@ -80,15 +86,6 @@ class MovementProcessor(esper.Processor):
                         if esper.has_component(target, cmp.DamageEffect):
                             esper.add_component(target, cmp.Target(target=ent))
                         event.effects_to_events(target)
-
-            if ent_is_actor:
-                blockers = esper._components[cmp.Blocking]
-                move = not any(target in blockers for target in targets)
-
-            if move:
-                board.entities[pos.x][pos.y].remove(ent)
-                pos.x, pos.y = new_x, new_y
-                board.entities[new_x][new_y].add(ent)
 
 
 @dataclass
