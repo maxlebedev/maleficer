@@ -167,6 +167,11 @@ class GameInputEventProcessor(InputEventProcessor):
         }
 
     def to_inventory(self):
+        try:
+            ecs.Query(cmp.InInventory).first()
+        except:
+            raise typ.InvalidAction
+
         menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
         menu_selection.item = 0
         scene.to_phase(scene.Phase.inventory)
