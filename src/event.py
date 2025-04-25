@@ -70,11 +70,14 @@ class Tick(Event):
 
 
 def effects_to_events(source: int):
-    """take an entity read effects off the entity and apply them to crosshair if needed"""
-    # do I need to build an entity cache?
+    """read effects off an entity and apply them to crosshair if needed"""
 
     # TODO: are we guarenteed to have a target every time?
-    target = esper.component_for_entity(source, cmp.Target).target
+    if not (target_cmp:= esper.try_component(source, cmp.Target)):
+        print(f"no target on effect holder {source}")
+        return
+
+    target = target_cmp.target
     if dmg_effect := esper.try_component(source, cmp.DamageEffect):
         if esper.has_component(target, cmp.Cell):
             pos = esper.component_for_entity(target, cmp.Position)
