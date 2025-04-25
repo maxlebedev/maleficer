@@ -67,14 +67,16 @@ class Board:
             return self.cells[x][y]
         return None
 
-    def remove_cell(self, x: int, y: int):
-        esper.delete_entity(self.cells[x][y])
-
     def set_cell(self, x: int, y: int, cell: typ.CELL):
         if not self._in_bounds(x, y):
             raise IndexError()
-        self.remove_cell(x, y)
+        esper.delete_entity(self.cells[x][y], immediate=True)
         self.cells[x][y] = cell
+
+    def remove(self, entity: int):
+        if pos := esper.component_for_entity(entity, cmp.Position):
+            esper.remove_component(entity, cmp.Position)
+            self.entities[pos.x][pos.y].remove(entity)
 
     def set_glyph(self, cell: typ.CELL, glyph: int):
         vis = esper.component_for_entity(cell, cmp.Visible)
@@ -91,6 +93,13 @@ class Board:
                 self.entities[x][y] = set()
         for entity, pos in esper.get_component(cmp.Position):
             self.entities[pos.x][pos.y].add(entity)
+
+    def reposition(self, entity: int, x: int, y: int):
+        pos = esper.component_for_entity(entity, cmp.Position)
+        if entity in self.entities[pos.x][pos.y]:
+            self.entities[pos.x][pos.y].remove(entity)
+        pos.x, pos.y = x, y
+        self.entities[pos.x][pos.y].add(entity)
 
 
 BOARD: Board

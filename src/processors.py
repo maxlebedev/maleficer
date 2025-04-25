@@ -42,7 +42,7 @@ class MovementProcessor(esper.Processor):
             esper.dispatch_event("flash")
 
     def collect(self, target):
-        esper.remove_component(target, cmp.Position)
+        location.BOARD.remove(target)
         esper.add_component(target, cmp.InInventory())
         create.inventory_map()
         name = esper.component_for_entity(target, cmp.Onymous).name
@@ -63,7 +63,6 @@ class MovementProcessor(esper.Processor):
             pos = esper.component_for_entity(ent, cmp.Position)
             new_x = pos.x + movement.x
             new_y = pos.y + movement.y
-            board.build_entity_cache()  # keyerror if this isn't here
             targets = copy.copy(board.entities[new_x][new_y])
 
             move = True
@@ -72,9 +71,7 @@ class MovementProcessor(esper.Processor):
                 move = not any(target in blockers for target in targets)
 
             if move:
-                board.entities[pos.x][pos.y].remove(ent)
-                pos.x, pos.y = new_x, new_y
-                board.entities[new_x][new_y].add(ent)
+                board.reposition(ent, new_x, new_y)
 
             if ent_is_actor:
                 for target in targets:
@@ -118,6 +115,8 @@ class DamageProcessor(esper.Processor):
             if actor.hp <= 0:
                 message = f"{target_name} is no more"
                 event.Log.append(message)
+                # TODO: we *have* to remove from board before we delete
+                location.BOARD.remove(damage.target)
                 esper.delete_entity(damage.target, immediate=True)
                 # crashes if player gets deleted
         # this probably not where we process death
@@ -184,10 +183,8 @@ class GameInputEventProcessor(InputEventProcessor):
         # TODO: This probably wants to take spell_ent and not slot num
         player_pos = location.player_position()
         xhair_ent = ecs.Query(cmp.Crosshair, cmp.Position).first()
-        xhair_pos = ecs.cmps[xhair_ent][cmp.Position]
 
-        xhair_pos.x = player_pos.x
-        xhair_pos.y = player_pos.y
+        location.BOARD.reposition(xhair_ent, player_pos.x, player_pos.y)
 
         casting_spell = None
         for spell_ent, (spell_cmp) in esper.get_component(cmp.Spell):
