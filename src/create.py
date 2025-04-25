@@ -116,6 +116,7 @@ def trap(pos: cmp.Position) -> int:
     esper.add_component(trap_ent, dmg)
     return trap_ent
 
+
 def player():
     vis = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN)
     pos = cmp.Position(x=1, y=1)

@@ -21,6 +21,11 @@ import typ
 # TODO: I'm namespacing the processors, but I should probably break them down by phase?
 
 
+def clamp(num: int, high: int, low=0):
+    """clamp a number between high and low"""
+    return min(high, max(low, num))
+
+
 @dataclass
 class MovementProcessor(esper.Processor):
     def bump(self, source, target):
@@ -47,7 +52,7 @@ class MovementProcessor(esper.Processor):
     def process(self):
         board = location.BOARD
         while event.Queues.movement:
-            movement = event.Queues.movement.popleft() # left so player first
+            movement = event.Queues.movement.popleft()  # left so player first
             ent = movement.source
             if not esper.entity_exists(ent):
                 # entity intends to move, but dies first
@@ -99,7 +104,7 @@ class DamageProcessor(esper.Processor):
 
             actor = esper.component_for_entity(damage.target, cmp.Actor)
             actor.hp -= damage.amount
-            actor.hp = min(actor.max_hp, max(0, actor.hp))  # between 0 and max
+            actor.hp = clamp(actor.hp, actor.max_hp)
 
             to_name = lambda x: esper.component_for_entity(x, cmp.Onymous).name
             src_name = to_name(damage.source)
@@ -158,9 +163,14 @@ class GameInputEventProcessor(InputEventProcessor):
             input.KEYMAP[input.Input.ESC]: (scene.to_phase, [scene.Phase.menu]),
             input.KEYMAP[input.Input.ONE]: (self.to_target, [1]),
             input.KEYMAP[input.Input.TWO]: (self.to_target, [2]),
-            input.KEYMAP[input.Input.TAB]: (scene.to_phase, [scene.Phase.inventory]),
+            input.KEYMAP[input.Input.TAB]: self.to_inventory,
             input.KEYMAP[input.Input.SKIP]: self.skip,
         }
+
+    def to_inventory(self):
+        menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
+        menu_selection.item = 0
+        scene.to_phase(scene.Phase.inventory)
 
     def skip(self):
         event.Tick()
@@ -461,7 +471,9 @@ class InventoryInputEventProcessor(InputEventProcessor):
 
     def move_selection(self, diff: int):
         menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
+        inventory_size = len(create.inventory_map()) - 1
         menu_selection.item += diff
+        menu_selection.item = clamp(menu_selection.item, inventory_size)
 
     def use_item(self):
         inv_map = create.inventory_map()
