@@ -40,7 +40,7 @@ def main() -> None:
     context = tcod.context.new(**context_params)
     console = context.new_console(order="F")
 
-    scene.player_setup()
+    create.player()
 
     location.BOARD = location.Board()
 

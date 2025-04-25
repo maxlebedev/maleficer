@@ -37,6 +37,11 @@ def bat(pos: cmp.Position) -> int:
         flying,
     ]
     bat = esper.create_entity(*components)
+
+    # I'm trying having Damage Effects on enemies,
+    # and just effects_to_events to apply
+    dmg_effect = cmp.DamageEffect(amount=1, source=bat)
+    esper.add_component(bat, dmg_effect)
     return bat
 
 
@@ -47,6 +52,9 @@ def skeleton(pos: cmp.Position) -> int:
     melee = cmp.Melee(radius=5)
     components = [cmp.Enemy(), pos, vis, cmp.Blocking(), actor, melee, named]
     skeleton = esper.create_entity(*components)
+
+    dmg_effect = cmp.DamageEffect(amount=1, source=skeleton)
+    esper.add_component(skeleton, dmg_effect)
     return skeleton
 
 
@@ -107,3 +115,10 @@ def trap(pos: cmp.Position) -> int:
     dmg = cmp.DamageEffect(source=trap_ent, amount=1)
     esper.add_component(trap_ent, dmg)
     return trap_ent
+
+def player():
+    vis = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN)
+    pos = cmp.Position(x=1, y=1)
+    actor = cmp.Actor(max_hp=10)
+    named = cmp.Onymous(name="player")
+    esper.create_entity(cmp.Player(), pos, vis, cmp.Blocking(), actor, named)

@@ -22,56 +22,68 @@ import typ
 
 @dataclass
 class MovementProcessor(esper.Processor):
-    # TODO: lots of stuff is happening here. Good idea to break up the proccess func
+    def bump(self, source, target):
+        """one entity bumps into another"""
+        src_is_enemy = esper.has_component(source, cmp.Enemy)
+        target_is_harmable = esper.has_component(target, cmp.Actor)
+        if src_is_enemy and target_is_harmable:
+            esper.add_component(source, cmp.Target(target=target))
+            event.effects_to_events(source)
+
+        if esper.has_component(source, cmp.Player):
+            # Note: walking into a wall consumes a turn
+            message = f"Failed to move to invalid location"
+            event.Log.append(message)
+            esper.dispatch_event("flash")
+
+    def collect(self, target):
+        esper.remove_component(target, cmp.Position)
+        esper.add_component(target, cmp.InInventory())
+        create.inventory_map()
+        name = esper.component_for_entity(target, cmp.Onymous).name
+        message = f"player picked up {name}"
+        event.Log.append(message)
+        # oneshot call some collectable processor?
 
     def process(self):
         board = location.BOARD
         while event.Queues.movement:
             movement = event.Queues.movement.pop()
             ent = movement.source
-            move_x = movement.x
-            move_y = movement.y
             if not esper.entity_exists(ent):
                 # entity intends to move, but dies first
                 continue
 
             ent_is_player = esper.has_component(ent, cmp.Player)
+            ent_is_actor = esper.has_component(ent, cmp.Actor)
             pos = esper.component_for_entity(ent, cmp.Position)
-            new_x = pos.x + move_x
-            new_y = pos.y + move_y
+            new_x = pos.x + movement.x
+            new_y = pos.y + movement.y
             move = True
             board.build_entity_cache()  # keyerror if this isn't here
-            for target in board.entities[new_x][new_y]:
-                ent_is_actor = esper.has_component(ent, cmp.Actor)
-                if ent_is_actor and esper.has_component(target, cmp.Blocking):
-                    move = False
-                    src_is_enemy = esper.has_component(ent, cmp.Enemy)
-                    target_is_harmable = esper.has_component(target, cmp.Actor)
-                    if src_is_enemy and target_is_harmable:
-                        event.Damage(ent, target, 1)
-                        # this should come from some property on the source
-                        # should it be a DamageEffect?
-                    if ent_is_player:
-                        # Note: walking into a wall consumes a turn
-                        message = f"Failed to move to invalid location"
-                        event.Log.append(message)
-                        esper.dispatch_event("flash")
+            targets = board.entities[new_x][new_y]
 
-                target_is_collectable = esper.has_component(target, cmp.Collectable)
-                if ent_is_player and target_is_collectable:
-                    esper.remove_component(target, cmp.Position)
-                    esper.add_component(target, cmp.InInventory())
-                    create.inventory_map()
-                    name = esper.component_for_entity(target, cmp.Onymous).name
-                    message = f"player picked up {name}"
-                    event.Log.append(message)
-                    # oneshot call some collectable processor?
-                target_is_trap = esper.has_component(target, cmp.Trap)
-                ent_flies = esper.has_component(ent, cmp.Flying)
-                if ent_is_actor and target_is_trap and not ent_flies:
-                    if esper.has_component(target, cmp.DamageEffect):
-                        esper.add_component(target, cmp.Target(target=ent))
-                    event.effects_to_events(target)
+
+            if ent_is_actor:
+                for target in targets:
+                    is_target = lambda x: esper.has_component(target, x)
+
+                    if is_target(cmp.Blocking):
+                        # move = False
+                        self.bump(ent, target)
+
+                    if ent_is_player and is_target(cmp.Collectable):
+                        self.collect(target)
+
+                    ent_flies = esper.has_component(ent, cmp.Flying)
+                    if not ent_flies and is_target(cmp.Trap):
+                        if esper.has_component(target, cmp.DamageEffect):
+                            esper.add_component(target, cmp.Target(target=ent))
+                        event.effects_to_events(target)
+
+            if ent_is_actor:
+                blockers = esper._components[cmp.Blocking]
+                move = not any(target in blockers for target in targets)
 
             if move:
                 board.entities[pos.x][pos.y].remove(ent)

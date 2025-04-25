@@ -18,15 +18,6 @@ class Phase(enum.Enum):
     inventory = enum.auto()
 
 
-# do I want this to be in create.py?
-def player_setup():
-    vis = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN)
-    pos = cmp.Position(x=1, y=1)
-    actor = cmp.Actor(max_hp=10)
-    named = cmp.Onymous(name="player")
-    esper.create_entity(cmp.Player(), pos, vis, cmp.Blocking(), actor, named)
-
-
 def inventory_setup():
     esper.create_entity(
         cmp.InInventory(), cmp.Actor(max_hp=1), cmp.Onymous(name="bottle of water")
