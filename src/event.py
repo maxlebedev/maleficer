@@ -72,12 +72,21 @@ class Tick(Event):
 def effects_to_events(source: int):
     """read effects off an entity and apply them to crosshair if needed"""
 
+    if learnable := esper.try_component(source, cmp.Learnable):
+        esper.add_component(learnable.spell, cmp.Known())
+
+    if cd_effect := esper.try_component(source, cmp.Cooldown):
+        condition.grant(source, typ.Condition.Cooldown, cd_effect.turns)
+
     # TODO: are we guarenteed to have a target every time?
     if not (target_cmp:= esper.try_component(source, cmp.Target)):
         print(f"no target on effect holder {source}")
         return
 
     target = target_cmp.target
+    if heal_effect := esper.try_component(source, cmp.HealEffect):
+        Damage(source, target, -1 * heal_effect.amount)
+
     if dmg_effect := esper.try_component(source, cmp.DamageEffect):
         if esper.has_component(target, cmp.Cell):
             pos = esper.component_for_entity(target, cmp.Position)
@@ -87,19 +96,12 @@ def effects_to_events(source: int):
         else:
             Damage(dmg_effect.source, target, dmg_effect.amount)
 
-    player = ecs.Query(cmp.Player, cmp.Position).first()
-    player_pos = ecs.cmps[player][cmp.Position]
+    player_pos = ecs.Query(cmp.Player, cmp.Position).cmp(cmp.Position)
     if move_effect := esper.try_component(source, cmp.MoveEffect):
         pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(cmp.Position)
         x = pos.x - player_pos.x
         y = pos.y - player_pos.y
         Movement(move_effect.target, x, y)
-
-    if heal_effect := esper.try_component(source, cmp.HealEffect):
-        Damage(source, player, -1 * heal_effect.amount)
-
-    if cd_effect := esper.try_component(source, cmp.Cooldown):
-        condition.grant(source, typ.Condition.Cooldown, cd_effect.turns)
 
     # note that removing Target is bad if persistent entity with static target
     esper.remove_component(source, cmp.Target)

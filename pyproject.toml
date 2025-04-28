@@ -11,3 +11,7 @@ dependencies = [
     "ruff>=0.9.7",
     "tcod>=16.2.3",
 ]
+[tool.ruff]
+ignore = [
+  'E731',
+]

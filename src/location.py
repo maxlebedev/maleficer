@@ -207,7 +207,10 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
                 create.trap(new_room.center)
             else:
                 create.skeleton(new_room.center)
-                create.potion(new_room.center)
+                if random.randint(0, 1):
+                    create.potion(new_room.center)
+                else:
+                    create.scroll(new_room.center)
 
         rooms.append(new_room)
     board.build_entity_cache()

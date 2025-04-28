@@ -1,6 +1,6 @@
+import copy
 import random
 from dataclasses import dataclass
-import copy
 
 import esper
 import tcod
@@ -162,6 +162,7 @@ class GameInputEventProcessor(InputEventProcessor):
             input.KEYMAP[input.Input.ESC]: (scene.to_phase, [scene.Phase.menu]),
             input.KEYMAP[input.Input.ONE]: (self.to_target, [1]),
             input.KEYMAP[input.Input.TWO]: (self.to_target, [2]),
+            input.KEYMAP[input.Input.THREE]: (self.to_target, [3]),
             input.KEYMAP[input.Input.TAB]: self.to_inventory,
             input.KEYMAP[input.Input.SKIP]: self.skip,
         }
@@ -277,8 +278,8 @@ class RenderProcessor(esper.Processor):
 
         # spells
         self.console.print(1, 8, "-" * (display.PANEL_WIDTH - 2))
-        spells = ecs.Query(cmp.Spell, cmp.Onymous)
-        for i, (spell_ent, (spell_cmp, named)) in enumerate(sorted(spells)):
+        spells = ecs.Query(cmp.Spell, cmp.Onymous, cmp.Known)
+        for i, (spell_ent, (spell_cmp, named, _)) in enumerate(sorted(spells)):
             # TODO: 9 is arbitrary
             text = f"Slot{spell_cmp.slot}:{named.name}"
             if cd := condition.get_val(spell_ent, typ.Condition.Cooldown):
@@ -502,7 +503,7 @@ class UpkeepProcessor(esper.Processor):
             return
         event.Queues.tick.clear()
         for _, (status,) in ecs.Query(cmp.State):
-            for condition in list(status.map.keys()):
-                status.map[condition] = max(0, status.map[condition] - 1)
-                if status.map[condition] == 0:
-                    del status.map[condition]
+            for status_effect in list(status.map.keys()):
+                status.map[status_effect] = max(0, status.map[condition] - 1)
+                if status.map[status_effect] == 0:
+                    del status.map[status_effect]

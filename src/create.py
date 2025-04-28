@@ -2,6 +2,7 @@
 import collections
 
 import esper
+import random
 
 import components as cmp
 import display
@@ -72,6 +73,36 @@ def potion(pos: cmp.Position) -> int:
     return potion
 
 
+def scroll(pos: cmp.Position) -> int:
+    vis = cmp.Visible(glyph=display.Glyph.SCROLL, color=display.Color.MAGENTA)
+    col = cmp.Collectable()
+    actor = cmp.Actor(max_hp=1)
+    named = cmp.Onymous(name="scroll")
+
+    spell = random_spell()
+    learnable = cmp.Learnable(spell=spell) 
+    # "learn spell" is an effect
+
+    components = [pos, vis, col, actor, named, learnable]
+    scroll = esper.create_entity(*components)
+    return scroll
+
+
+def random_spell() -> int:
+    # currently just a dmg spell
+    cooldown_amt = random.randint(1, 5)
+    damage_amt = random.randint(1, 3)
+    range_amt = random.randint(1, 5)
+
+    player = ecs.Query(cmp.Player).first()
+    spell_cmp = cmp.Spell(slot=3, target_range=range_amt)
+    cooldown = cmp.Cooldown(turns=cooldown_amt)
+    dmg_effect = cmp.DamageEffect(amount=damage_amt, source=player)
+    named = cmp.Onymous(name="rand spell")
+    damage_spell = esper.create_entity(spell_cmp, dmg_effect, named, cooldown)
+    return damage_spell
+
+
 def inventory_map() -> list:
     inventory = esper.get_components(cmp.InInventory, cmp.Onymous)
     inventory_map = collections.defaultdict(set)
@@ -83,23 +114,26 @@ def inventory_map() -> list:
     return sorted_map
 
 
-def damage_spell() -> int:
+def firebolt_spell() -> int:
     player = ecs.Query(cmp.Player).first()
     spell_cmp = cmp.Spell(slot=1, target_range=5)
     cooldown = cmp.Cooldown(turns=1)
     dmg_effect = cmp.DamageEffect(amount=1, source=player)
     named = cmp.Onymous(name="firebolt")
-    sample_spell = esper.create_entity(spell_cmp, dmg_effect, named, cooldown)
-    return sample_spell
+    known = cmp.Known()
+    components = [spell_cmp, dmg_effect, named, cooldown, known]
+    damage_spell = esper.create_entity(*components)
+    return damage_spell
 
 
-def tp_spell() -> int:
+def blink_spell() -> int:
     player = ecs.Query(cmp.Player).first()
     spell_cmp = cmp.Spell(slot=2, target_range=4)
     cooldown = cmp.Cooldown(turns=5)
     dmg_effect = cmp.MoveEffect(target=player)
     named = cmp.Onymous(name="blink")
-    components = [spell_cmp, dmg_effect, named, cooldown]
+    known = cmp.Known()
+    components = [spell_cmp, dmg_effect, named, cooldown, known]
     sample_spell = esper.create_entity(*components)
     return sample_spell
 

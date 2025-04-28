@@ -64,6 +64,7 @@ class Melee:
 @component
 class Onymous:
     name: str
+    # death string?
 
 
 @component
@@ -167,3 +168,12 @@ class Flying:
 @component
 class Targeting:
     """entity invoking target phase"""
+
+@component
+class Learnable:
+    """use to learn spell"""
+    spell: int
+
+@component
+class Known:
+    """spell is castable"""

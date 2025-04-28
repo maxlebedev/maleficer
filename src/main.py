@@ -10,6 +10,7 @@ import scene
 FLAGS = tcod.context.SDL_WINDOW_RESIZABLE  # | tcod.context.SDL_WINDOW_FULLSCREEN
 
 
+# TODO: consider using this template for visual effects (burn/bleed)
 def flash(context, console):
     """flashes the screen, for use on errors"""
     console.clear()
@@ -53,14 +54,17 @@ def main() -> None:
 
     scene.inventory_setup()
     create.inventory_map()
-    create.damage_spell()
-    create.tp_spell()
+    create.firebolt_spell()
+    create.blink_spell()
 
     flash_callback = lambda: flash(context, console)
     esper.set_handler("flash", flash_callback)
+
     while True:
         esper.process()
 
 
 if __name__ == "__main__":
     main()
+
+# each effect hast its own target maybe?
