@@ -93,7 +93,7 @@ def effects_to_events(source: int):
         if esper.has_component(target, cmp.Cell):
             pos = esper.component_for_entity(target, cmp.Position)
             for ent in location.BOARD.entities[pos.x][pos.y]:
-                if esper.has_component(ent, cmp.Actor):
+                if esper.has_component(ent, cmp.Health):
                     Damage(dmg_effect.source, ent, dmg_effect.amount)
         else:
             Damage(dmg_effect.source, target, dmg_effect.amount)

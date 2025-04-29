@@ -30,7 +30,7 @@ class MovementProcessor(esper.Processor):
     def bump(self, source, target):
         """one entity bumps into another"""
         src_is_enemy = esper.has_component(source, cmp.Enemy)
-        target_is_harmable = esper.has_component(target, cmp.Actor)
+        target_is_harmable = esper.has_component(target, cmp.Health)
         if src_is_enemy and target_is_harmable:
             esper.add_component(source, cmp.Target(target=target))
             event.effects_to_events(source)
@@ -58,21 +58,21 @@ class MovementProcessor(esper.Processor):
                 continue
 
             ent_is_player = esper.has_component(ent, cmp.Player)
-            ent_is_actor = esper.has_component(ent, cmp.Actor)
+            ent_has_hp = esper.has_component(ent, cmp.Health)
             pos = esper.component_for_entity(ent, cmp.Position)
             new_x = pos.x + movement.x
             new_y = pos.y + movement.y
             targets = copy.copy(board.entities[new_x][new_y])
 
             move = True
-            if ent_is_actor:
+            if ent_has_hp:
                 blockers = esper._components[cmp.Blocking]
                 move = not any(target in blockers for target in targets)
 
             if move:
                 board.reposition(ent, new_x, new_y)
 
-            if ent_is_actor:
+            if ent_has_hp:
                 for target in targets:
                     is_target = lambda x: esper.has_component(target, x)
 
@@ -98,9 +98,9 @@ class DamageProcessor(esper.Processor):
                 # if either entity doesn't exist anymore, damage fizzles
                 continue
 
-            actor = esper.component_for_entity(damage.target, cmp.Actor)
-            actor.hp -= damage.amount
-            actor.hp = clamp(actor.hp, actor.max_hp)
+            hp = esper.component_for_entity(damage.target, cmp.Health)
+            hp.current -= damage.amount
+            hp.current = clamp(hp.current, hp.max)
 
             to_name = lambda x: esper.component_for_entity(x, cmp.Onymous).name
             src_name = to_name(damage.source)
@@ -111,7 +111,7 @@ class DamageProcessor(esper.Processor):
                 message = f"{src_name} deals {damage.amount} to {target_name}"
             event.Log.append(message)
 
-            if actor.hp <= 0:
+            if hp.current <= 0:
                 message = f"{target_name} is no more"
                 event.Log.append(message)
                 # TODO: we *have* to remove from board before we delete
@@ -269,8 +269,8 @@ class RenderProcessor(esper.Processor):
 
         # left panel
         self.console.draw_frame(x=0, **panel_params)
-        actor = ecs.Query(cmp.Player, cmp.Actor).cmp(cmp.Actor)
-        self.render_bar(1, 1, actor.hp, actor.max_hp, display.PANEL_WIDTH - 2)
+        hp = ecs.Query(cmp.Player, cmp.Health).cmp(cmp.Health)
+        self.render_bar(1, 1, hp.current, hp.max, display.PANEL_WIDTH - 2)
 
         # inventory
         inv_map = create.inventory_map()

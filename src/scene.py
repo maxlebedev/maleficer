@@ -20,10 +20,10 @@ class Phase(enum.Enum):
 
 def inventory_setup():
     esper.create_entity(
-        cmp.InInventory(), cmp.Actor(max_hp=1), cmp.Onymous(name="bottle of water")
+        cmp.InInventory(), cmp.Health(max=1), cmp.Onymous(name="bottle of water")
     )
     esper.create_entity(
-        cmp.InInventory(), cmp.Actor(max_hp=1), cmp.Onymous(name="lighter")
+        cmp.InInventory(), cmp.Health(max=1), cmp.Onymous(name="lighter")
     )
 
 

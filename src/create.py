@@ -25,7 +25,7 @@ def wall(x: int, y: int) -> int:
 
 def bat(pos: cmp.Position) -> int:
     vis = cmp.Visible(glyph=display.Glyph.BAT, color=display.Color.RED)
-    actor = cmp.Actor(max_hp=1)
+    hp = cmp.Health(max=1)
     named = cmp.Onymous(name="bat")
     flying = cmp.Flying()
     components = [
@@ -33,7 +33,7 @@ def bat(pos: cmp.Position) -> int:
         pos,
         vis,
         cmp.Blocking(),
-        actor,
+        hp,
         cmp.Wander(),
         named,
         flying,
@@ -49,10 +49,10 @@ def bat(pos: cmp.Position) -> int:
 
 def skeleton(pos: cmp.Position) -> int:
     vis = cmp.Visible(glyph=display.Glyph.SKELETON, color=display.Color.RED)
-    actor = cmp.Actor(max_hp=3)
+    hp = cmp.Health(max=3)
     named = cmp.Onymous(name="skeleton")
     melee = cmp.Melee(radius=5)
-    components = [cmp.Enemy(), pos, vis, cmp.Blocking(), actor, melee, named]
+    components = [cmp.Enemy(), pos, vis, cmp.Blocking(), hp, melee, named]
     skeleton = esper.create_entity(*components)
 
     dmg_effect = cmp.DamageEffect(amount=1, source=skeleton)
@@ -63,13 +63,13 @@ def skeleton(pos: cmp.Position) -> int:
 def potion(pos: cmp.Position) -> int:
     vis = cmp.Visible(glyph=display.Glyph.POTION, color=display.Color.GREEN)
     col = cmp.Collectable()
-    actor = cmp.Actor(max_hp=1)
+    hp = cmp.Health(max=1)
     named = cmp.Onymous(name="potion")
 
     player = ecs.Query(cmp.Player).first()
     heal = cmp.HealEffect(amount=2)
     target = cmp.Target(target=player)
-    components = [pos, vis, col, actor, named, heal, target]
+    components = [pos, vis, col, hp, named, heal, target]
     potion = esper.create_entity(*components)
     return potion
 
@@ -77,14 +77,14 @@ def potion(pos: cmp.Position) -> int:
 def scroll(pos: cmp.Position) -> int:
     vis = cmp.Visible(glyph=display.Glyph.SCROLL, color=display.Color.MAGENTA)
     col = cmp.Collectable()
-    actor = cmp.Actor(max_hp=1)
+    hp = cmp.Health(max=1)
     named = cmp.Onymous(name="scroll")
 
     spell = random_spell()
     learnable = cmp.Learnable(spell=spell) 
     # "learn spell" is an effect
 
-    components = [pos, vis, col, actor, named, learnable]
+    components = [pos, vis, col, hp, named, learnable]
     scroll = esper.create_entity(*components)
     return scroll
 
@@ -142,11 +142,11 @@ def blink_spell() -> int:
 
 def trap(pos: cmp.Position) -> int:
     vis = cmp.Visible(glyph=display.Glyph.TRAP, color=display.Color.RED)
-    actor = cmp.Actor(max_hp=1)
+    hp = cmp.Health(max=1)
     named = cmp.Onymous(name="trap")
     trap_cmp = cmp.Trap()
 
-    components = [pos, vis, actor, named, trap_cmp]
+    components = [pos, vis, hp, named, trap_cmp]
     trap_ent = esper.create_entity(*components)
     dmg = cmp.DamageEffect(source=trap_ent, amount=1)
     esper.add_component(trap_ent, dmg)
@@ -156,6 +156,6 @@ def trap(pos: cmp.Position) -> int:
 def player():
     vis = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN)
     pos = cmp.Position(x=1, y=1)
-    actor = cmp.Actor(max_hp=10)
+    hp = cmp.Health(max=10)
     named = cmp.Onymous(name="player")
-    esper.create_entity(cmp.Player(), pos, vis, cmp.Blocking(), actor, named)
+    esper.create_entity(cmp.Player(), pos, vis, cmp.Blocking(), hp, named)

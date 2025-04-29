@@ -68,12 +68,12 @@ class Onymous:
 
 
 @component
-class Actor:  # Destroyable, harmable?
-    max_hp: int
+class Health:  # Destroyable, harmable?
+    max: int
     armor: int = 0
 
     def __post_init__(self):
-        self.hp = self.max_hp
+        self.current = self.max
 
 
 @component
