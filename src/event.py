@@ -29,6 +29,7 @@ class Log:
             cls.messages.append(line.upper())
 
         cls.messages = cls.messages[-display.PANEL_HEIGHT - 3 :]
+        esper.dispatch_event("redraw")
 
 
 class Queues:
@@ -75,13 +76,13 @@ def effects_to_events(source: int):
     if learnable := esper.try_component(source, cmp.Learnable):
         known_spells = len(esper._components[cmp.Known])
         # TODO: max spell check
-        esper.add_component(learnable.spell, cmp.Known(known_spells+1))
+        esper.add_component(learnable.spell, cmp.Known(known_spells + 1))
 
     if cd_effect := esper.try_component(source, cmp.Cooldown):
         condition.grant(source, typ.Condition.Cooldown, cd_effect.turns)
 
     # TODO: are we guarenteed to have a target every time?
-    if not (target_cmp:= esper.try_component(source, cmp.Target)):
+    if not (target_cmp := esper.try_component(source, cmp.Target)):
         print(f"no target on effect holder {source}")
         return
 

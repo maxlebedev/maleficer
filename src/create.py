@@ -81,7 +81,7 @@ def scroll(pos: cmp.Position) -> int:
     named = cmp.Onymous(name="scroll")
 
     spell = random_spell()
-    learnable = cmp.Learnable(spell=spell) 
+    learnable = cmp.Learnable(spell=spell)
     # "learn spell" is an effect
 
     components = [pos, vis, col, hp, named, learnable]
@@ -99,7 +99,7 @@ def random_spell() -> int:
     spell_cmp = cmp.Spell(target_range=range_amt)
     cooldown = cmp.Cooldown(turns=cooldown_amt)
     dmg_effect = cmp.DamageEffect(amount=damage_amt, source=player)
-    name = ''.join(random.choices(string.ascii_lowercase, k=5))
+    name = "".join(random.choices(string.ascii_lowercase, k=5))
     named = cmp.Onymous(name=name)
     damage_spell = esper.create_entity(spell_cmp, dmg_effect, named, cooldown)
     return damage_spell

@@ -143,9 +143,9 @@ class InputEventProcessor(esper.Processor):
                                 func(*args)
                             case func:
                                 func()
-                    except typ.InvalidAction:
+                    except typ.InvalidAction as e:
                         esper.dispatch_event("flash")
-                        print("caught invalid action")
+                        event.Log.append(str(e))
                     else:
                         listen = False
 
@@ -187,21 +187,19 @@ class GameInputEventProcessor(InputEventProcessor):
 
     def to_target(self, slot: int):
         # TODO: This probably wants to take spell_ent and not slot num
-        player_pos = location.player_position()
-        xhair_ent = ecs.Query(cmp.Crosshair, cmp.Position).first()
-
-        location.BOARD.reposition(xhair_ent, player_pos.x, player_pos.y)
-
         casting_spell = None
         for spell_ent, (known) in esper.get_component(cmp.Known):
             if known.slot == slot:
                 casting_spell = spell_ent
 
         if not casting_spell:
-            return
+            raise typ.InvalidAction("spell doesn't exist")
         if condition.has(casting_spell, typ.Condition.Cooldown):
-            event.Log.append("spell on cooldown")
-            raise typ.InvalidAction
+            raise typ.InvalidAction("spell on cooldown")
+
+        player_pos = location.player_position()
+        xhair_ent = ecs.Query(cmp.Crosshair, cmp.Position).first()
+        location.BOARD.reposition(xhair_ent, player_pos.x, player_pos.y)
         esper.add_component(casting_spell, cmp.Targeting())
         scene.to_phase(scene.Phase.target)
 

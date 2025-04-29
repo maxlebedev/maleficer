@@ -168,12 +168,16 @@ class Flying:
 class Targeting:
     """entity invoking target phase"""
 
+
 @component
 class Learnable:
     """use to learn spell"""
+
     spell: int
+
 
 @component
 class Known:
     """spell is castable"""
+
     slot: int

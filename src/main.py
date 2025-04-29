@@ -25,6 +25,10 @@ def flash(context, console):
     scene.oneshot(processors.BoardRenderProcessor)
 
 
+def redraw():
+    scene.oneshot(processors.BoardRenderProcessor)
+
+
 def main() -> None:
     tile_atlas = "assets/monochrome-transparent_packed.png"
     tileset = display.load_tileset(tile_atlas, display.TS_WIDTH, display.TS_HEIGHT)
@@ -59,6 +63,7 @@ def main() -> None:
 
     flash_callback = lambda: flash(context, console)
     esper.set_handler("flash", flash_callback)
+    esper.set_handler("redraw", redraw)
 
     while True:
         esper.process()
