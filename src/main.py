@@ -66,5 +66,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-# each effect hast its own target maybe?

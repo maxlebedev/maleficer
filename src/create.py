@@ -3,6 +3,7 @@ import collections
 
 import esper
 import random
+import string
 
 import components as cmp
 import display
@@ -92,13 +93,14 @@ def random_spell() -> int:
     # currently just a dmg spell
     cooldown_amt = random.randint(1, 5)
     damage_amt = random.randint(1, 3)
-    range_amt = random.randint(1, 5)
+    range_amt = random.randint(2, 6)
 
     player = ecs.Query(cmp.Player).first()
     spell_cmp = cmp.Spell(target_range=range_amt)
     cooldown = cmp.Cooldown(turns=cooldown_amt)
     dmg_effect = cmp.DamageEffect(amount=damage_amt, source=player)
-    named = cmp.Onymous(name="rand spell")
+    name = ''.join(random.choices(string.ascii_lowercase, k=5))
+    named = cmp.Onymous(name=name)
     damage_spell = esper.create_entity(spell_cmp, dmg_effect, named, cooldown)
     return damage_spell
 

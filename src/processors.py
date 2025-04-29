@@ -1,4 +1,5 @@
 import copy
+import itertools
 import random
 from dataclasses import dataclass
 
@@ -17,8 +18,6 @@ import input
 import location
 import scene
 import typ
-
-# TODO: I'm namespacing the processors, but I should probably break them down by phase?
 
 
 def clamp(num: int, high: int, low=0):
@@ -163,6 +162,7 @@ class GameInputEventProcessor(InputEventProcessor):
             input.KEYMAP[input.Input.ONE]: (self.to_target, [1]),
             input.KEYMAP[input.Input.TWO]: (self.to_target, [2]),
             input.KEYMAP[input.Input.THREE]: (self.to_target, [3]),
+            input.KEYMAP[input.Input.FOUR]: (self.to_target, [4]),
             input.KEYMAP[input.Input.TAB]: self.to_inventory,
             input.KEYMAP[input.Input.SKIP]: self.skip,
         }
@@ -265,6 +265,7 @@ class RenderProcessor(esper.Processor):
                 display.Glyph.FRAME9,
             ),
         }
+        dashes = "-" * (display.PANEL_WIDTH - 2)
 
         # left panel
         self.console.draw_frame(x=0, **panel_params)
@@ -277,14 +278,32 @@ class RenderProcessor(esper.Processor):
             self.console.print(1, 3 + i, f"{len(entities)}x {name}")
 
         # spells
-        self.console.print(1, 8, "-" * (display.PANEL_WIDTH - 2))
+        self.console.print(1, 8, dashes)
         spells = ecs.Query(cmp.Spell, cmp.Onymous, cmp.Known)
-        for i, (spell_ent, (_, named, known)) in enumerate(sorted(spells)):
+        sorted_spells = sorted(spells, key=lambda x: x[1][2].slot)
+        for i, (spell_ent, (_, named, known)) in enumerate(sorted_spells):
             # TODO: 9 is arbitrary
             text = f"Slot{known.slot}:{named.name}"
             if cd := condition.get_val(spell_ent, typ.Condition.Cooldown):
                 text = f"{text}:{typ.Condition.Cooldown.name} {cd}"
             self.console.print(1, 9 + i, text)
+
+        # if targeting, also print spell info
+        targeting = esper.get_component(cmp.Targeting)
+        if targeting:
+            trg_ent, _ = targeting[0]
+            y_idx = itertools.count(12)
+            self.console.print(1, next(y_idx), dashes)
+            spell_component_details = [
+                ("Damage", cmp.DamageEffect, "amount"),
+                ("Range", cmp.Spell, "target_range"),
+                ("Cooldown", cmp.Cooldown, "turns"),
+            ]
+            for name, try_cmp, attr in spell_component_details:
+                component = esper.try_component(trg_ent, try_cmp)
+                if component:
+                    value = getattr(component, attr)
+                    self.console.print(1, next(y_idx), f"{name}:{value}")
 
         # right panel
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
@@ -487,9 +506,8 @@ class InventoryInputEventProcessor(InputEventProcessor):
 
         event.effects_to_events(selection)
 
-        # esper.delete_entity(selection)
         esper.remove_component(selection, cmp.InInventory)
-        # TODO: if inventory is empty, fail to go to inventory mode?
+        # esper.delete_entity(selection) can't delete bc then its effect fizzles
         event.Tick()
         scene.to_phase(scene.Phase.level, NPCProcessor)
 
@@ -503,7 +521,7 @@ class UpkeepProcessor(esper.Processor):
             return
         event.Queues.tick.clear()
         for _, (status,) in ecs.Query(cmp.State):
-            for status_effect in list(status.map.keys()):
-                status.map[status_effect] = max(0, status.map[status_effect] - 1)
+            for status_effect, duration in list(status.map.items()):
+                status.map[status_effect] = max(0, duration - 1)
                 if status.map[status_effect] == 0:
                     del status.map[status_effect]

@@ -28,3 +28,10 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 # Design Questions
 	- Why explore the level, (vs doing down asap)
 	- What is the progression system?
+
+# Arch concerns
+	- The Targeting phase and associated components are coupled to spell casting, if we have other things that target that'll need to change
+	- Each effect component should have its own target, in case we have dmg+heal on one spell, for exampe
+	- Processors have verbose names, which include phases. Good hint to break them out to phase-based files. Some procs are shared tho
+	- We probably want a death processor rather than handling it at the end of dmg_proc
+
