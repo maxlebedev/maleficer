@@ -95,7 +95,7 @@ def random_spell() -> int:
     range_amt = random.randint(1, 5)
 
     player = ecs.Query(cmp.Player).first()
-    spell_cmp = cmp.Spell(slot=3, target_range=range_amt)
+    spell_cmp = cmp.Spell(target_range=range_amt)
     cooldown = cmp.Cooldown(turns=cooldown_amt)
     dmg_effect = cmp.DamageEffect(amount=damage_amt, source=player)
     named = cmp.Onymous(name="rand spell")
@@ -116,11 +116,11 @@ def inventory_map() -> list:
 
 def firebolt_spell() -> int:
     player = ecs.Query(cmp.Player).first()
-    spell_cmp = cmp.Spell(slot=1, target_range=5)
+    spell_cmp = cmp.Spell(target_range=5)
     cooldown = cmp.Cooldown(turns=1)
     dmg_effect = cmp.DamageEffect(amount=1, source=player)
     named = cmp.Onymous(name="firebolt")
-    known = cmp.Known()
+    known = cmp.Known(slot=1)
     components = [spell_cmp, dmg_effect, named, cooldown, known]
     damage_spell = esper.create_entity(*components)
     return damage_spell
@@ -128,11 +128,11 @@ def firebolt_spell() -> int:
 
 def blink_spell() -> int:
     player = ecs.Query(cmp.Player).first()
-    spell_cmp = cmp.Spell(slot=2, target_range=4)
+    spell_cmp = cmp.Spell(target_range=4)
     cooldown = cmp.Cooldown(turns=5)
     dmg_effect = cmp.MoveEffect(target=player)
     named = cmp.Onymous(name="blink")
-    known = cmp.Known()
+    known = cmp.Known(slot=2)
     components = [spell_cmp, dmg_effect, named, cooldown, known]
     sample_spell = esper.create_entity(*components)
     return sample_spell

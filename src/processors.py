@@ -193,8 +193,8 @@ class GameInputEventProcessor(InputEventProcessor):
         location.BOARD.reposition(xhair_ent, player_pos.x, player_pos.y)
 
         casting_spell = None
-        for spell_ent, (spell_cmp) in esper.get_component(cmp.Spell):
-            if spell_cmp.slot == slot:
+        for spell_ent, (known) in esper.get_component(cmp.Known):
+            if known.slot == slot:
                 casting_spell = spell_ent
 
         if not casting_spell:
@@ -279,9 +279,9 @@ class RenderProcessor(esper.Processor):
         # spells
         self.console.print(1, 8, "-" * (display.PANEL_WIDTH - 2))
         spells = ecs.Query(cmp.Spell, cmp.Onymous, cmp.Known)
-        for i, (spell_ent, (spell_cmp, named, _)) in enumerate(sorted(spells)):
+        for i, (spell_ent, (_, named, known)) in enumerate(sorted(spells)):
             # TODO: 9 is arbitrary
-            text = f"Slot{spell_cmp.slot}:{named.name}"
+            text = f"Slot{known.slot}:{named.name}"
             if cd := condition.get_val(spell_ent, typ.Condition.Cooldown):
                 text = f"{text}:{typ.Condition.Cooldown.name} {cd}"
             self.console.print(1, 9 + i, text)
@@ -504,6 +504,6 @@ class UpkeepProcessor(esper.Processor):
         event.Queues.tick.clear()
         for _, (status,) in ecs.Query(cmp.State):
             for status_effect in list(status.map.keys()):
-                status.map[status_effect] = max(0, status.map[condition] - 1)
+                status.map[status_effect] = max(0, status.map[status_effect] - 1)
                 if status.map[status_effect] == 0:
                     del status.map[status_effect]

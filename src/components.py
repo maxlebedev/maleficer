@@ -99,7 +99,6 @@ class InInventory:
 
 @component
 class Spell:
-    slot: int
     target_range: int
 
 
@@ -177,3 +176,4 @@ class Learnable:
 @component
 class Known:
     """spell is castable"""
+    slot: int
