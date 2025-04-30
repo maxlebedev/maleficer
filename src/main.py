@@ -22,7 +22,7 @@ def flash(context, console):
 
     console.rgb[startx:endx, starty:endy] = cell_rgbs
     context.present(console)  # , integer_scaling=True
-    scene.oneshot(processors.BoardRenderProcessor)
+    esper.dispatch_event("redraw")
 
 
 def redraw():
@@ -62,8 +62,8 @@ def main() -> None:
     create.blink_spell()
 
     flash_callback = lambda: flash(context, console)
-    esper.set_handler("flash", flash_callback)
     esper.set_handler("redraw", redraw)
+    esper.set_handler("flash", flash_callback)
 
     while True:
         esper.process()
