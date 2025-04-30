@@ -26,7 +26,7 @@ def flash(context, console):
 
 
 def redraw():
-    scene.oneshot(processors.BoardRenderProcessor)
+    scene.oneshot(processors.BoardRender)
 
 
 def main() -> None:

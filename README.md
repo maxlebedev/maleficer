@@ -35,6 +35,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 		- In the above case, there can be ambiguity about what the target phase actually sets
 	- Processors have verbose names, which include phases. Good hint to break them out to phase-based files. Some procs are shared tho
 	- We probably want a death processor rather than handling it at the end of dmg_proc
+	- AI behavior probably doesn't *all* want to live in the NPC proc
 
 # TODO:
 	- Trap/Potion/Scroll generation shouldn't just be center of room

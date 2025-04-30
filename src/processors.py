@@ -26,7 +26,7 @@ def clamp(num: int, high: int, low=0):
 
 
 @dataclass
-class MovementProcessor(esper.Processor):
+class Movement(esper.Processor):
     def bump(self, source, target):
         """one entity bumps into another"""
         src_is_enemy = esper.has_component(source, cmp.Enemy)
@@ -90,7 +90,7 @@ class MovementProcessor(esper.Processor):
 
 
 @dataclass
-class DamageProcessor(esper.Processor):
+class Damage(esper.Processor):
     def process(self):
         while event.Queues.damage:
             damage = event.Queues.damage.popleft()
@@ -123,7 +123,7 @@ class DamageProcessor(esper.Processor):
 
 
 @dataclass
-class InputEventProcessor(esper.Processor):
+class InputEvent(esper.Processor):
     action_map = {}
 
     def exit(self):
@@ -151,7 +151,7 @@ class InputEventProcessor(esper.Processor):
 
 
 @dataclass
-class GameInputEventProcessor(InputEventProcessor):
+class GameInputEvent(InputEvent):
     def __init__(self):
         self.action_map = {
             input.KEYMAP[input.Input.MOVE_DOWN]: (self.move, [0, 1]),
@@ -205,7 +205,7 @@ class GameInputEventProcessor(InputEventProcessor):
 
 
 @dataclass
-class NPCProcessor(esper.Processor):
+class NPCTurn(esper.Processor):
     def process(self):
         for entity, _ in esper.get_component(cmp.Wander):
             dir = random.choice([(0, 1), (0, -1), (1, 0), (-1, 0), (0, 0)])
@@ -230,7 +230,7 @@ class NPCProcessor(esper.Processor):
 
 
 @dataclass
-class RenderProcessor(esper.Processor):
+class Render(esper.Processor):
     console: tcod.console.Console
     context: tcod.context.Context
 
@@ -340,7 +340,7 @@ class RenderProcessor(esper.Processor):
 
 
 @dataclass
-class BoardRenderProcessor(RenderProcessor):
+class BoardRender(Render):
     console: tcod.console.Console
     context: tcod.context.Context
 
@@ -367,7 +367,7 @@ class BoardRenderProcessor(RenderProcessor):
 
 
 @dataclass
-class MenuRenderProcessor(esper.Processor):
+class MenuRender(esper.Processor):
     context: tcod.context.Context
     console: tcod.console.Console
 
@@ -380,7 +380,7 @@ class MenuRenderProcessor(esper.Processor):
 
 
 @dataclass
-class MenuInputEventProcessor(InputEventProcessor):
+class MenuInputEvent(InputEvent):
     def __init__(self):
         self.action_map = {
             input.KEYMAP[input.Input.ESC]: self.exit,
@@ -389,7 +389,7 @@ class MenuInputEventProcessor(InputEventProcessor):
 
 
 @dataclass
-class TargetInputEventProcessor(InputEventProcessor):
+class TargetInputEvent(InputEvent):
     def __init__(self):
         self.action_map = {
             input.KEYMAP[input.Input.MOVE_DOWN]: (self.move_crosshair, [0, 1]),
@@ -429,11 +429,11 @@ class TargetInputEventProcessor(InputEventProcessor):
         event.effects_to_events(targeting_entity)
         esper.remove_component(targeting_entity, cmp.Targeting)
         event.Tick()
-        scene.to_phase(scene.Phase.level, NPCProcessor)
+        scene.to_phase(scene.Phase.level, NPCTurn)
 
 
 @dataclass
-class TargetRenderProcessor(BoardRenderProcessor):
+class TargetRender(BoardRender):
     console: tcod.console.Console
     context: tcod.context.Context
 
@@ -452,7 +452,7 @@ class TargetRenderProcessor(BoardRenderProcessor):
 
 
 @dataclass
-class InventoryRenderProcessor(BoardRenderProcessor):
+class InventoryRender(BoardRender):
     console: tcod.console.Console
     context: tcod.context.Context
 
@@ -479,7 +479,7 @@ class InventoryRenderProcessor(BoardRenderProcessor):
 
 
 @dataclass
-class InventoryInputEventProcessor(InputEventProcessor):
+class InventoryInputEvent(InputEvent):
     def __init__(self):
         to_level = (scene.to_phase, [scene.Phase.level])
         self.action_map = {
@@ -507,11 +507,11 @@ class InventoryInputEventProcessor(InputEventProcessor):
         esper.remove_component(selection, cmp.InInventory)
         # esper.delete_entity(selection) can't delete bc then its effect fizzles
         event.Tick()
-        scene.to_phase(scene.Phase.level, NPCProcessor)
+        scene.to_phase(scene.Phase.level, NPCTurn)
 
 
 @dataclass
-class UpkeepProcessor(esper.Processor):
+class Upkeep(esper.Processor):
     """tick down all Conditions"""
 
     def process(self) -> None:
