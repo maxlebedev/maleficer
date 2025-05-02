@@ -107,6 +107,7 @@ BOARD: Board
 
 @dataclass
 class RectangularRoom:
+    # TODO: x1 and x2 should both either be inner or outer
     x1: int
     y1: int
     width: int
@@ -126,6 +127,11 @@ class RectangularRoom:
         center_y = (self.y1 + self.y2) // 2
 
         return cmp.Position(x=center_x, y=center_y)
+
+    def get_random_pos(self) -> cmp.Position:
+        x = random.randint(self.x1+1, self.x2-1)
+        y = random.randint(self.y1+1, self.y2-1)
+        return cmp.Position(x=x, y=y)
 
     @property
     def inner(self) -> tuple[slice, slice]:
@@ -208,9 +214,9 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
             else:
                 create.skeleton(new_room.center)
                 if random.randint(0, 1):
-                    create.potion(new_room.center)
+                    create.potion(new_room.get_random_pos())
                 else:
-                    create.scroll(new_room.center)
+                    create.scroll(new_room.get_random_pos())
 
         rooms.append(new_room)
     board.build_entity_cache()
