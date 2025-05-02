@@ -206,27 +206,32 @@ class GameInputEvent(InputEvent):
 
 @dataclass
 class NPCTurn(esper.Processor):
+
+    def wander(self, entity: int):
+        dir = random.choice([(0, 1), (0, -1), (1, 0), (-1, 0), (0, 0)])
+        if dir == (0, 0):
+            return
+        event.Movement(entity, *dir)
+
     def process(self):
         for entity, _ in esper.get_component(cmp.Wander):
-            dir = random.choice([(0, 1), (0, -1), (1, 0), (-1, 0), (0, 0)])
-            if dir == (0, 0):
-                continue
-            event.Movement(entity, *dir)
+            self.wander(entity)
 
         player_pos = location.player_position()
         for entity, (melee, epos) in ecs.Query(cmp.Melee, cmp.Position):
             dist_to_player = location.euclidean_distance(player_pos, epos)
             if dist_to_player > melee.radius:
-                continue
-            # Naive pathfinding. Does not deal with corners well
-            if player_pos.x > epos.x:
-                event.Movement(entity, x=1, y=0)
-            elif player_pos.y > epos.y:
-                event.Movement(entity, x=0, y=1)
-            elif player_pos.x < epos.x:
-                event.Movement(entity, x=-1, y=0)
-            elif player_pos.y < epos.y:
-                event.Movement(entity, x=0, y=-1)
+                self.wander(entity)
+            else:
+                # Naive pathfinding. Does not deal with corners well
+                if player_pos.x > epos.x:
+                    event.Movement(entity, x=1, y=0)
+                elif player_pos.y > epos.y:
+                    event.Movement(entity, x=0, y=1)
+                elif player_pos.x < epos.x:
+                    event.Movement(entity, x=-1, y=0)
+                elif player_pos.y < epos.y:
+                    event.Movement(entity, x=0, y=-1)
 
 
 @dataclass

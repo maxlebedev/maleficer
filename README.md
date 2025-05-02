@@ -39,5 +39,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 
 # TODO:
 	- Trap/Potion/Scroll generation shouldn't just be center of room
-	- Figure our something better for NPC behavior (better follow, skeletons should wander)
+	- Figure our something better for NPC behavior (better follow)
 	- Should damage actually fizzle if the source is dead? We could just put src.name on the event, which allows the entity to die without issue.
+	- All effects on the targeting entity should get their targets filled in if they haven't already
+        - But, only the non-static targets should get cleared, and we don't have a way to store that info
