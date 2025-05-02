@@ -38,7 +38,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- AI behavior probably doesn't *all* want to live in the NPC proc
 
 # TODO:
-	- Trap/Potion/Scroll generation shouldn't just be center of room
 	- Figure our something better for NPC behavior (better follow)
 	- Should damage actually fizzle if the source is dead? We could just put src.name on the event, which allows the entity to die without issue.
 	- All effects on the targeting entity should get their targets filled in if they haven't already
