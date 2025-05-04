@@ -358,7 +358,13 @@ class BoardRender(Render):
         in_fov = self._get_fov()
 
         nonwall_drawables = ecs.Query(cmp.Position, cmp.Visible).exclude(cmp.Cell)
-        for _, (pos, vis) in nonwall_drawables:
+        for _, (pos, vis) in nonwall_drawables.exclude(cmp.Blocking):
+            if not in_fov[pos.x][pos.y]:
+                continue
+            cell_rgbs[pos.x][pos.y] = (vis.glyph, vis.color, vis.bg_color)
+
+        foreground = nonwall_drawables.filter(cmp.Position, cmp.Visible, cmp.Blocking)
+        for _, (pos, vis, _) in foreground:
             if not in_fov[pos.x][pos.y]:
                 continue
             cell_rgbs[pos.x][pos.y] = (vis.glyph, vis.color, vis.bg_color)
