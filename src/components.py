@@ -162,6 +162,11 @@ class HealEffect:
 
 
 @component
+class BleedEffect:
+    value: int
+
+
+@component
 class State:
     """all of the conditions that an entity have"""
 

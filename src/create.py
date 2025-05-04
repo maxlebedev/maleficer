@@ -140,6 +140,17 @@ def blink_spell() -> int:
     return sample_spell
 
 
+def bleed_spell() -> int:
+    spell_cmp = cmp.Spell(target_range=3)
+    cooldown = cmp.Cooldown(turns=2)
+    dmg_effect = cmp.BleedEffect(value=2)
+    named = cmp.Onymous(name="drain")
+    known = cmp.Known(slot=3)
+    components = [spell_cmp, dmg_effect, named, cooldown, known]
+    sample_spell = esper.create_entity(*components)
+    return sample_spell
+
+
 def trap(pos: cmp.Position) -> int:
     vis = cmp.Visible(glyph=display.Glyph.TRAP, color=display.Color.RED)
     hp = cmp.Health(max=1)

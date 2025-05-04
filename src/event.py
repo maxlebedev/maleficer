@@ -90,6 +90,15 @@ def effects_to_events(source: int):
     if heal_effect := esper.try_component(source, cmp.HealEffect):
         Damage(source, target, -1 * heal_effect.amount)
 
+    if bleed_effect := esper.try_component(source, cmp.BleedEffect):
+        if esper.has_component(target, cmp.Cell):
+            pos = esper.component_for_entity(target, cmp.Position)
+            for ent in location.BOARD.entities[pos.x][pos.y]:
+                if esper.has_component(ent, cmp.Health):
+                    condition.grant(ent, typ.Condition.Bleed, bleed_effect.value)
+        else:
+            condition.grant(target, typ.Condition.Bleed, bleed_effect.value)
+
     if dmg_effect := esper.try_component(source, cmp.DamageEffect):
         if esper.has_component(target, cmp.Cell):
             pos = esper.component_for_entity(target, cmp.Position)

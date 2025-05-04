@@ -18,11 +18,7 @@ import input
 import location
 import scene
 import typ
-
-
-def clamp(num: int, high: int, low=0):
-    """clamp a number between high and low"""
-    return min(high, max(low, num))
+import math_util
 
 
 @dataclass
@@ -98,9 +94,7 @@ class Damage(esper.Processor):
                 # if either entity doesn't exist anymore, damage fizzles
                 continue
 
-            hp = esper.component_for_entity(damage.target, cmp.Health)
-            hp.current -= damage.amount
-            hp.current = clamp(hp.current, hp.max)
+            math_util.apply_damage(damage.target, damage.amount)
 
             to_name = lambda x: esper.component_for_entity(x, cmp.Onymous).name
             src_name = to_name(damage.source)
@@ -111,15 +105,17 @@ class Damage(esper.Processor):
                 message = f"{src_name} deals {damage.amount} to {target_name}"
             event.Log.append(message)
 
-            if hp.current <= 0:
-                message = f"{target_name} is no more"
+
+@dataclass
+class Death(esper.Processor):
+    def process(self):
+        # crashes if player gets deleted
+        for killable, (health, named) in ecs.Query(cmp.Health, cmp.Onymous):
+            if health.current <= 0:
+                message = f"{named.name} is no more"
                 event.Log.append(message)
-                # TODO: we *have* to remove from board before we delete
-                location.BOARD.remove(damage.target)
-                esper.delete_entity(damage.target, immediate=True)
-                # crashes if player gets deleted
-        # this probably not where we process death
-        # death can potentially happen without damage
+                location.BOARD.remove(killable)
+                esper.delete_entity(killable, immediate=True)
 
 
 @dataclass
@@ -506,7 +502,7 @@ class InventoryInputEvent(InputEvent):
         menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
         inventory_size = len(create.inventory_map()) - 1
         menu_selection.item += diff
-        menu_selection.item = clamp(menu_selection.item, inventory_size)
+        menu_selection.item = math_util.clamp(menu_selection.item, inventory_size)
 
     def use_item(self):
         inv_map = create.inventory_map()
@@ -525,14 +521,15 @@ class InventoryInputEvent(InputEvent):
 
 @dataclass
 class Upkeep(esper.Processor):
-    """tick down all Conditions"""
+    """apply and tick down Conditions"""
 
     def process(self) -> None:
         if not event.Queues.tick:
             return
         event.Queues.tick.clear()
-        for _, (status,) in ecs.Query(cmp.State):
+        for entity, (status,) in ecs.Query(cmp.State):
             for status_effect, duration in list(status.map.items()):
+                condition.apply(entity, status_effect, duration)
                 status.map[status_effect] = max(0, duration - 1)
                 if status.map[status_effect] == 0:
                     del status.map[status_effect]

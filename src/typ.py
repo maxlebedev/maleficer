@@ -14,6 +14,7 @@ class Condition(enum.Enum):
     """here goes all statuses"""
 
     Cooldown = enum.auto()
+    Bleed = enum.auto()
 
 
 class InvalidAction(Exception):

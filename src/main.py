@@ -60,6 +60,7 @@ def main() -> None:
     create.inventory_map()
     create.firebolt_spell()
     create.blink_spell()
+    create.bleed_spell()
 
     flash_callback = lambda: flash(context, console)
     esper.set_handler("redraw", redraw)
