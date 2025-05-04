@@ -44,7 +44,7 @@ class Board:
         vis = esper.component_for_entity(cell, cmp.Visible)
         return (vis.glyph, vis.color, vis.bg_color)
 
-    def as_transparency(self) -> list[list[bool]]:
+    def as_transparency(self) -> list[list[int]]:
         transparency = []
         for _ in range(display.BOARD_WIDTH):
             col = [None for _ in range(display.BOARD_HEIGHT)]
@@ -54,6 +54,26 @@ class Board:
             for y, cell in enumerate(col):
                 transparency[x][y] = int(esper.has_component(cell, cmp.Transparent))
         return transparency
+
+    def as_move_graph(self) -> list[list[int]]:
+        graph = []
+        for _ in range(display.BOARD_WIDTH):
+            col = [None for _ in range(display.BOARD_HEIGHT)]
+            graph.append(col)
+
+        for x, col in enumerate(self.cells):
+            for y, cell in enumerate(col):
+                graph[x][y] = int(not(esper.has_component(cell, cmp.Blocking)))
+        return graph
+
+    def has_blocker(self, x, y):
+        for ent in self.entities[x][y]:
+            if esper.has_component(ent, cmp.Player):
+                return False
+            if esper.has_component(ent, cmp.Blocking):
+                return True
+        cell = self.cells[x][y]
+        return esper.has_component(cell, cmp.Blocking)
 
     def _in_bounds(self, x: int, y: int) -> bool:
         if x < 0 or y < 0:

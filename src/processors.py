@@ -213,6 +213,17 @@ class NPCTurn(esper.Processor):
             return
         event.Movement(entity, *dir)
 
+    def pathfind(self, entity_pos, end_pos):
+        cost = location.BOARD.as_move_graph()
+        graph = tcod.path.SimpleGraph(cost=cost, cardinal=1, diagonal=0)
+        pf = tcod.path.Pathfinder(graph)
+        pf.add_root((entity_pos.x, entity_pos.y))
+        path: list = pf.path_to((end_pos.x, end_pos.y)).tolist()
+        if len(path) < 2:
+            return (0,0)
+        return path[1]
+
+
     def process(self):
         for entity, _ in esper.get_component(cmp.Wander):
             self.wander(entity)
@@ -223,15 +234,8 @@ class NPCTurn(esper.Processor):
             if dist_to_player > melee.radius:
                 self.wander(entity)
             else:
-                # Naive pathfinding. Does not deal with corners well
-                if player_pos.x > epos.x:
-                    event.Movement(entity, x=1, y=0)
-                elif player_pos.y > epos.y:
-                    event.Movement(entity, x=0, y=1)
-                elif player_pos.x < epos.x:
-                    event.Movement(entity, x=-1, y=0)
-                elif player_pos.y < epos.y:
-                    event.Movement(entity, x=0, y=-1)
+                x, y = self.pathfind(epos, player_pos)
+                event.Movement(entity, x=x-epos.x, y=y-epos.y)
 
 
 @dataclass
