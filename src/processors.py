@@ -305,6 +305,9 @@ class Render(esper.Processor):
                 if component:
                     value = getattr(component, attr)
                     self.console.print(1, next(y_idx), f"{name}:{value}")
+            if bleed_effect := esper.try_component(trg_ent, cmp.BleedEffect):
+                message = f"Grants Bleed:{bleed_effect.value}"
+                self.console.print(1, next(y_idx), message)
 
         # right panel
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
