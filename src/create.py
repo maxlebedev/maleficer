@@ -1,9 +1,9 @@
 # factories
 import collections
-
-import esper
 import random
 import string
+
+import esper
 
 import components as cmp
 import display

@@ -3,9 +3,9 @@
 import esper
 
 import components as cmp
-import typ
 import event
 import math_util
+import typ
 
 
 def has(entity: int, condition: typ.Condition) -> bool:

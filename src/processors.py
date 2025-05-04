@@ -16,9 +16,9 @@ import ecs
 import event
 import input
 import location
+import math_util
 import scene
 import typ
-import math_util
 
 
 @dataclass
@@ -342,7 +342,7 @@ class Render(esper.Processor):
         startx, endx = (display.PANEL_WIDTH, display.R_PANEL_START)
         starty, endy = (0, display.BOARD_HEIGHT)
         self.console.rgb[startx:endx, starty:endy] = cell_rgbs
-        self.context.present(self.console)  # , integer_scaling=True
+        self.context.present(self.console)
 
 
 @dataclass
@@ -388,7 +388,7 @@ class MenuRender(esper.Processor):
         x = display.PANEL_WIDTH + (display.BOARD_WIDTH // 2)
         y = display.BOARD_HEIGHT // 2
         self.console.print(x, y, "WELCOME TO MALEFICER", alignment=libtcodpy.CENTER)
-        self.context.present(self.console)  # , integer_scaling=True
+        self.context.present(self.console)
 
 
 @dataclass

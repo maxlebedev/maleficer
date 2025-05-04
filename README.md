@@ -38,7 +38,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- AI behavior probably doesn't *all* want to live in the NPC proc
 	- I like context from breadcrumbs, but there is now a search issue with multiple apply functions, multiple Damage things, etc
 	- if a condition causes 0 health, death is still only processed after that turn
-
+	- look into integer_scaling for context.present(console)
 # TODO:
 	- Should damage actually fizzle if the source is dead? We could just put src.name on the event, which allows the entity to die without issue.
 	- All effects on the targeting entity should get their targets filled in if they haven't already

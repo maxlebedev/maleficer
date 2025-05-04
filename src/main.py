@@ -14,14 +14,14 @@ FLAGS = tcod.context.SDL_WINDOW_RESIZABLE  # | tcod.context.SDL_WINDOW_FULLSCREE
 def flash(context, console):
     """flashes the screen, for use on errors"""
     console.clear()
-    foo = lambda _: (1, display.Color.WHITE, display.Color.WHITE)
-    cell_rgbs = [list(map(foo, row)) for row in location.BOARD.cells]
+    white_out = lambda _: (1, display.Color.WHITE, display.Color.WHITE)
+    cell_rgbs = [list(map(white_out, row)) for row in location.BOARD.cells]
 
     startx, endx = (display.PANEL_WIDTH, display.R_PANEL_START)
     starty, endy = (0, display.BOARD_HEIGHT)
 
     console.rgb[startx:endx, starty:endy] = cell_rgbs
-    context.present(console)  # , integer_scaling=True
+    context.present(console)
     esper.dispatch_event("redraw")
 
 
