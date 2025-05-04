@@ -199,14 +199,13 @@ class GameInputEvent(InputEvent):
 
         player_pos = location.player_position()
         xhair_ent = ecs.Query(cmp.Crosshair, cmp.Position).first()
-        location.BOARD.reposition(xhair_ent, player_pos.x, player_pos.y)
+        location.BOARD.reposition(xhair_ent, *player_pos)
         esper.add_component(casting_spell, cmp.Targeting())
         scene.to_phase(scene.Phase.target)
 
 
 @dataclass
 class NPCTurn(esper.Processor):
-
     def wander(self, entity: int):
         dir = random.choice([(0, 1), (0, -1), (1, 0), (-1, 0), (0, 0)])
         if dir == (0, 0):
@@ -217,12 +216,11 @@ class NPCTurn(esper.Processor):
         cost = location.BOARD.as_move_graph()
         graph = tcod.path.SimpleGraph(cost=cost, cardinal=1, diagonal=0)
         pf = tcod.path.Pathfinder(graph)
-        pf.add_root((entity_pos.x, entity_pos.y))
-        path: list = pf.path_to((end_pos.x, end_pos.y)).tolist()
+        pf.add_root(entity_pos.as_tuple)
+        path: list = pf.path_to(end_pos.as_tuple).tolist()
         if len(path) < 2:
-            return (0,0)
+            return (0, 0)
         return path[1]
-
 
     def process(self):
         for entity, _ in esper.get_component(cmp.Wander):
@@ -235,7 +233,7 @@ class NPCTurn(esper.Processor):
                 self.wander(entity)
             else:
                 x, y = self.pathfind(epos, player_pos)
-                event.Movement(entity, x=x-epos.x, y=y-epos.y)
+                event.Movement(entity, x=x - epos.x, y=y - epos.y)
 
 
 @dataclass
@@ -338,7 +336,7 @@ class Render(esper.Processor):
         transparency = location.BOARD.as_transparency()
         pos = location.player_position()
         algo = libtcodpy.FOV_SHADOW
-        fov = compute_fov(transparency, (pos.x, pos.y), radius=4, algorithm=algo)
+        fov = compute_fov(transparency, pos.as_tuple, radius=4, algorithm=algo)
         return fov
 
     def present(self, cell_rgbs):
@@ -431,7 +429,7 @@ class TargetInputEvent(InputEvent):
         xhair_pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(cmp.Position)
         targeting_entity = ecs.Query(cmp.Targeting).first()
         if not esper.has_component(targeting_entity, cmp.Target):
-            cell = location.BOARD.cells[xhair_pos.x][xhair_pos.y]
+            cell = xhair_pos.lookup_in(location.BOARD.cells)
             trg = cmp.Target(target=cell)
             esper.add_component(targeting_entity, trg)
 

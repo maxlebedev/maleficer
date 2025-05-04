@@ -1,7 +1,10 @@
 from dataclasses import dataclass as component
+from typing import TypeVar
 
 import display
 import typ
+
+T = TypeVar("T")
 
 
 @component
@@ -13,6 +16,17 @@ class Player:
 class Position:
     x: int
     y: int
+
+    def __iter__(self):
+        return iter([self.x, self.y])
+
+    def lookup_in(self, matrix: list[list[T]]) -> T:
+        # IDK if I-m keeping this yet
+        return matrix[self.x][self.y]
+
+    @property
+    def as_tuple(self):
+        return (self.x, self.y)
 
 
 @component

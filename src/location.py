@@ -63,7 +63,7 @@ class Board:
 
         for x, col in enumerate(self.cells):
             for y, cell in enumerate(col):
-                graph[x][y] = int(not(esper.has_component(cell, cmp.Blocking)))
+                graph[x][y] = int(not (esper.has_component(cell, cmp.Blocking)))
         return graph
 
     def has_blocker(self, x, y):
@@ -93,10 +93,13 @@ class Board:
         esper.delete_entity(self.cells[x][y], immediate=True)
         self.cells[x][y] = cell
 
+    def entities_at(self, pos: cmp.Position) -> set:
+        return self.entities[pos.x][pos.y]
+
     def remove(self, entity: int):
         if pos := esper.component_for_entity(entity, cmp.Position):
             esper.remove_component(entity, cmp.Position)
-            self.entities[pos.x][pos.y].remove(entity)
+            self.entities_at(pos).remove(entity)
 
     def set_glyph(self, cell: typ.CELL, glyph: int):
         vis = esper.component_for_entity(cell, cmp.Visible)
@@ -112,14 +115,14 @@ class Board:
             for y in range(display.BOARD_HEIGHT):
                 self.entities[x][y] = set()
         for entity, pos in esper.get_component(cmp.Position):
-            self.entities[pos.x][pos.y].add(entity)
+            self.entities_at(pos).add(entity)
 
     def reposition(self, entity: int, x: int, y: int):
         pos = esper.component_for_entity(entity, cmp.Position)
-        if entity in self.entities[pos.x][pos.y]:
-            self.entities[pos.x][pos.y].remove(entity)
+        if entity in self.entities_at(pos):
+            self.entities_at(pos).remove(entity)
         pos.x, pos.y = x, y
-        self.entities[pos.x][pos.y].add(entity)
+        self.entities_at(pos).add(entity)
 
 
 BOARD: Board
@@ -149,8 +152,8 @@ class RectangularRoom:
         return cmp.Position(x=center_x, y=center_y)
 
     def get_random_pos(self) -> cmp.Position:
-        x = random.randint(self.x1+1, self.x2-1)
-        y = random.randint(self.y1+1, self.y2-1)
+        x = random.randint(self.x1 + 1, self.x2 - 1)
+        y = random.randint(self.y1 + 1, self.y2 - 1)
         return cmp.Position(x=x, y=y)
 
     @property
@@ -220,7 +223,7 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
         centers.append(new_room.center)
         for cell in board.as_sequence(*new_room.inner):
             pos = esper.component_for_entity(cell, cmp.Position)
-            board.set_cell(pos.x, pos.y, create.floor(pos.x, pos.y))
+            board.set_cell(*pos, create.floor(*pos))
 
         if len(rooms) == 0:  # start player in first room
             pos = player_position()
