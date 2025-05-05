@@ -30,7 +30,6 @@ def get_val(entity: int, condition: typ.Condition) -> int:
 def apply(entity: int, condition: typ.Condition, value: int):
     match condition:
         case typ.Condition.Bleed:
-            # doing damage outside of dmg proc.
             math_util.apply_damage(entity, value)
             name = esper.component_for_entity(entity, cmp.Onymous).name
             event.Log.append(f"{name} bleeds for {value}")

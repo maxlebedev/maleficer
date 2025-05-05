@@ -223,13 +223,14 @@ class NPCTurn(esper.Processor):
             self.wander(entity)
 
         player_pos = location.player_position()
-        for entity, (melee, epos) in ecs.Query(cmp.Melee, cmp.Position):
-            dist_to_player = location.euclidean_distance(player_pos, epos)
-            if dist_to_player > melee.radius:
-                self.wander(entity)
-            else:
-                x, y = self.pathfind(epos, player_pos)
-                event.Movement(entity, x=x - epos.x, y=y - epos.y)
+        if esper.get_component(cmp.Melee):
+            for entity, (melee, epos) in ecs.Query(cmp.Melee, cmp.Position):
+                dist_to_player = location.euclidean_distance(player_pos, epos)
+                if dist_to_player > melee.radius:
+                    self.wander(entity)
+                else:
+                    x, y = self.pathfind(epos, player_pos)
+                    event.Movement(entity, x=x - epos.x, y=y - epos.y)
 
 
 @dataclass
@@ -278,22 +279,21 @@ class Render(esper.Processor):
         for i, (name, entities) in enumerate(inv_map):
             self.console.print(1, 3 + i, f"{len(entities)}x {name}")
 
+        y_idx = itertools.count(8)
         # spells
-        self.console.print(1, 8, dashes)
+        self.console.print(1, next(y_idx), dashes)
         spells = ecs.Query(cmp.Spell, cmp.Onymous, cmp.Known)
         sorted_spells = sorted(spells, key=lambda x: x[1][2].slot)
-        for i, (spell_ent, (_, named, known)) in enumerate(sorted_spells):
-            # TODO: 9 is arbitrary
+        for (spell_ent, (_, named, known)) in sorted_spells:
             text = f"Slot{known.slot}:{named.name}"
             if cd := condition.get_val(spell_ent, typ.Condition.Cooldown):
                 text = f"{text}:{typ.Condition.Cooldown.name} {cd}"
-            self.console.print(1, 9 + i, text)
+            self.console.print(1, next(y_idx), text)
 
         # if targeting, also print spell info
         targeting = esper.get_component(cmp.Targeting)
         if targeting:
             trg_ent, _ = targeting[0]
-            y_idx = itertools.count(12)
             self.console.print(1, next(y_idx), dashes)
             spell_component_details = [
                 ("Damage", cmp.DamageEffect, "amount"),

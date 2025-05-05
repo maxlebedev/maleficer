@@ -74,9 +74,11 @@ def effects_to_events(source: int):
     """read effects off an entity and apply them to crosshair if needed"""
 
     if learnable := esper.try_component(source, cmp.Learnable):
-        known_spells = len(esper._components[cmp.Known])
-        # TODO: max spell check
-        esper.add_component(learnable.spell, cmp.Known(known_spells + 1))
+        known_spells = len(esper.get_component(cmp.Known))
+        if known_spells == 4:
+            Log.append("Max spells learned")
+        else:
+            esper.add_component(learnable.spell, cmp.Known(known_spells + 1))
 
     if cd_effect := esper.try_component(source, cmp.Cooldown):
         condition.grant(source, typ.Condition.Cooldown, cd_effect.turns)
