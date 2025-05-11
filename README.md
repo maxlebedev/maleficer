@@ -44,6 +44,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- Should damage actually fizzle if the source is dead? We could just put src.name on the event, which allows the entity to die without issue.
 	- All effects on the targeting entity should get their targets filled in if they haven't already
 		- But, only the non-static targets should get cleared, and we don't have a way to store that info
-	- AOE spells, targeting
 	- better spell learning, unlearn, learn confirm
 	- consider a separate font
+	- ranged enemy
