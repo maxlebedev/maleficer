@@ -92,6 +92,7 @@ def effects_to_events(source: int):
         known_spells = len(esper.get_component(cmp.Known))
         if known_spells == 4:
             Log.append("Max spells learned")
+            raise typ.InvalidAction("learning failed")
         else:
             esper.add_component(learnable.spell, cmp.Known(known_spells + 1))
 

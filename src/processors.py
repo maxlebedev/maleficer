@@ -438,10 +438,14 @@ class TargetInputEvent(InputEvent):
             trg = cmp.Target(target=cell)
             esper.add_component(targeting_entity, trg)
 
-        event.effects_to_events(targeting_entity)
-        esper.remove_component(targeting_entity, cmp.Targeting)
-        event.Tick()
-        scene.to_phase(scene.Phase.level, NPCTurn)
+        try:
+            event.effects_to_events(targeting_entity)
+            esper.remove_component(targeting_entity, cmp.Targeting)
+            event.Tick()
+            scene.to_phase(scene.Phase.level, NPCTurn)
+        except typ.InvalidAction as e:
+            esper.dispatch_event("flash")
+            event.Log.append(str(e))
 
 
 @dataclass
@@ -521,12 +525,16 @@ class InventoryInputEvent(InputEvent):
         selection = inv_map[menu_selection.item][1].pop()
         print(f"using {name}: {selection}")
 
-        event.effects_to_events(selection)
 
-        esper.remove_component(selection, cmp.InInventory)
-        # esper.delete_entity(selection) can't delete bc then its effect fizzles
-        event.Tick()
-        scene.to_phase(scene.Phase.level, NPCTurn)
+        try:
+            event.effects_to_events(selection)
+            esper.remove_component(selection, cmp.InInventory)
+            event.Tick()
+            scene.to_phase(scene.Phase.level, NPCTurn)
+        except typ.InvalidAction as e:
+            esper.dispatch_event("flash")
+            event.Log.append(str(e))
+
 
 
 @dataclass
