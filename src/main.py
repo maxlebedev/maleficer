@@ -1,4 +1,5 @@
 import random
+import time
 
 import esper
 import tcod
@@ -25,6 +26,17 @@ def flash(context, console):
     console.rgb[startx:endx, starty:endy] = cell_rgbs
     context.present(console)
     esper.dispatch_event("redraw")
+
+
+def flash_pos(context, console, position, color: display.Color):
+    """visual bleed confirmation"""
+    esper.dispatch_event("redraw")
+    cell = location.BOARD.cells[position.x][position.y]
+    glyph, fg, _ = location.BOARD.as_rgb(cell)
+    cell = (glyph, fg, color)
+    console.rgb[display.PANEL_WIDTH + position.x, position.y] = cell
+    context.present(console)
+    time.sleep(0.1)  # display long enough to be seen
 
 
 def redraw():
@@ -71,10 +83,11 @@ def main() -> None:
     for spell in spells:
         spell()
 
-
     flash_callback = lambda: flash(context, console)
     esper.set_handler("redraw", redraw)
     esper.set_handler("flash", flash_callback)
+    flash_pos_callback = lambda x, y: flash_pos(context, console, x, y)
+    esper.set_handler("flash_pos", flash_pos_callback)
 
     while True:
         esper.process()

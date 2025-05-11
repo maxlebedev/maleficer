@@ -3,6 +3,7 @@
 import esper
 
 import components as cmp
+import display
 import event
 import math_util
 import typ
@@ -30,6 +31,8 @@ def get_val(entity: int, condition: typ.Condition) -> int:
 def apply(entity: int, condition: typ.Condition, value: int):
     match condition:
         case typ.Condition.Bleed:
+            pos = esper.component_for_entity(entity, cmp.Position)
+            esper.dispatch_event("flash_pos", pos, display.Color.RED)
             math_util.apply_damage(entity, value)
             name = esper.component_for_entity(entity, cmp.Onymous).name
             event.Log.append(f"{name} bleeds for {value}")

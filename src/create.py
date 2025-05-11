@@ -90,7 +90,7 @@ def scroll(pos: cmp.Position) -> int:
 
 
 def random_spell(power_budget=10) -> int:
-    stats = {'damage': 1, 'range': 2, 'cooldown': 1}
+    stats = {"damage": 1, "range": 2, "cooldown": 1}
     remaining_points = power_budget - sum(stats.values())
     waste_chance = 0.2
     while remaining_points > 0:
@@ -103,8 +103,8 @@ def random_spell(power_budget=10) -> int:
     player = ecs.Query(cmp.Player).first()
     spell_cmp = cmp.Spell(target_range=stats["range"])
     cooldown = cmp.Cooldown(turns=stats["cooldown"])
-    if not random.randint(0,1):
-        harm_effect = cmp.BleedEffect(value=max(1, stats["damage"]//2))
+    if not random.randint(0, 1):
+        harm_effect = cmp.BleedEffect(value=max(1, stats["damage"] // 2))
         # TODO: 0,1,2,3 all result in 1 bleed. One bleed is just dmg but worse
         # we probably want to pick dmg/bleed first, then adjust accordingly
     else:
@@ -133,7 +133,7 @@ def firebolt_spell() -> int:
     dmg_effect = cmp.DamageEffect(amount=1, source=player)
     aoe = cmp.EffectArea(radius=1)
     named = cmp.Onymous(name="firebolt")
-    slot_num = len(esper.get_component(cmp.Known))+1
+    slot_num = len(esper.get_component(cmp.Known)) + 1
     known = cmp.Known(slot=slot_num)
     components = [spell_cmp, dmg_effect, named, cooldown, known, aoe]
     damage_spell = esper.create_entity(*components)
@@ -146,7 +146,7 @@ def blink_spell() -> int:
     cooldown = cmp.Cooldown(turns=5)
     dmg_effect = cmp.MoveEffect(target=player)
     named = cmp.Onymous(name="blink")
-    slot_num = len(esper.get_component(cmp.Known))+1
+    slot_num = len(esper.get_component(cmp.Known)) + 1
     known = cmp.Known(slot=slot_num)
     components = [spell_cmp, dmg_effect, named, cooldown, known]
     sample_spell = esper.create_entity(*components)
@@ -158,7 +158,7 @@ def bleed_spell() -> int:
     cooldown = cmp.Cooldown(turns=2)
     dmg_effect = cmp.BleedEffect(value=2)
     named = cmp.Onymous(name="mutilate")
-    slot_num = len(esper.get_component(cmp.Known))+1
+    slot_num = len(esper.get_component(cmp.Known)) + 1
     known = cmp.Known(slot=slot_num)
     components = [spell_cmp, dmg_effect, named, cooldown, known]
     sample_spell = esper.create_entity(*components)

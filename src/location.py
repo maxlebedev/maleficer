@@ -32,7 +32,7 @@ def coords_within_radius(pos: cmp.Position, radius: int):
             current = cmp.Position(x=x, y=y)
             dist = euclidean_distance(pos, current)
             if dist <= radius:
-                ret_coords.append([x,y])
+                ret_coords.append([x, y])
     return ret_coords
 
 

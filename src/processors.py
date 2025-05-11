@@ -284,7 +284,7 @@ class Render(esper.Processor):
         self.console.print(1, next(y_idx), dashes)
         spells = ecs.Query(cmp.Spell, cmp.Onymous, cmp.Known)
         sorted_spells = sorted(spells, key=lambda x: x[1][2].slot)
-        for (spell_ent, (_, named, known)) in sorted_spells:
+        for spell_ent, (_, named, known) in sorted_spells:
             text = f"Slot{known.slot}:{named.name}"
             if cd := condition.get_val(spell_ent, typ.Condition.Cooldown):
                 text = f"{text}:{typ.Condition.Cooldown.name} {cd}"
@@ -525,7 +525,6 @@ class InventoryInputEvent(InputEvent):
         selection = inv_map[menu_selection.item][1].pop()
         print(f"using {name}: {selection}")
 
-
         try:
             event.effects_to_events(selection)
             esper.remove_component(selection, cmp.InInventory)
@@ -534,7 +533,6 @@ class InventoryInputEvent(InputEvent):
         except typ.InvalidAction as e:
             esper.dispatch_event("flash")
             event.Log.append(str(e))
-
 
 
 @dataclass
