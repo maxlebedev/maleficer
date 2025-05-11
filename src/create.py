@@ -105,6 +105,8 @@ def random_spell(power_budget=10) -> int:
     cooldown = cmp.Cooldown(turns=stats["cooldown"])
     if not random.randint(0,1):
         harm_effect = cmp.BleedEffect(value=max(1, stats["damage"]//2))
+        # TODO: 0,1,2,3 all result in 1 bleed. One bleed is just dmg but worse
+        # we probably want to pick dmg/bleed first, then adjust accordingly
     else:
         harm_effect = cmp.DamageEffect(amount=stats["damage"], source=player)
     name = "".join(random.choices(string.ascii_lowercase, k=5))
@@ -129,10 +131,11 @@ def firebolt_spell() -> int:
     spell_cmp = cmp.Spell(target_range=5)
     cooldown = cmp.Cooldown(turns=1)
     dmg_effect = cmp.DamageEffect(amount=1, source=player)
+    aoe = cmp.EffectArea(radius=1)
     named = cmp.Onymous(name="firebolt")
     slot_num = len(esper.get_component(cmp.Known))+1
     known = cmp.Known(slot=slot_num)
-    components = [spell_cmp, dmg_effect, named, cooldown, known]
+    components = [spell_cmp, dmg_effect, named, cooldown, known, aoe]
     damage_spell = esper.create_entity(*components)
     return damage_spell
 

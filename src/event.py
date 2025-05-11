@@ -70,6 +70,21 @@ class Tick(Event):
     _queue = Queues.tick
 
 
+def collect_all_affected_entities(target: int) -> list[int]:
+    targeting_ent = ecs.Query(cmp.Targeting).first()
+    pos = esper.component_for_entity(target, cmp.Position)
+    if not esper.has_component(targeting_ent, cmp.EffectArea):
+        entities = [e for e in location.BOARD.entities[pos.x][pos.y]]
+        return entities
+    aoe = esper.component_for_entity(targeting_ent, cmp.EffectArea)
+
+    entities = []
+
+    for x, y in location.coords_within_radius(pos, aoe.radius):
+        entities += [e for e in location.BOARD.entities[x][y]]
+    return entities
+
+
 def effects_to_events(source: int):
     """read effects off an entity and apply them to crosshair if needed"""
 
@@ -83,7 +98,6 @@ def effects_to_events(source: int):
     if cd_effect := esper.try_component(source, cmp.Cooldown):
         condition.grant(source, typ.Condition.Cooldown, cd_effect.turns)
 
-    # TODO: are we guarenteed to have a target every time?
     if not (target_cmp := esper.try_component(source, cmp.Target)):
         print(f"no target on effect holder {source}")
         return
@@ -95,7 +109,8 @@ def effects_to_events(source: int):
     if bleed_effect := esper.try_component(source, cmp.BleedEffect):
         if esper.has_component(target, cmp.Cell):
             pos = esper.component_for_entity(target, cmp.Position)
-            for ent in location.BOARD.entities[pos.x][pos.y]:
+            entities = collect_all_affected_entities(target)
+            for ent in entities:
                 if esper.has_component(ent, cmp.Health):
                     condition.grant(ent, typ.Condition.Bleed, bleed_effect.value)
         else:
@@ -104,7 +119,8 @@ def effects_to_events(source: int):
     if dmg_effect := esper.try_component(source, cmp.DamageEffect):
         if esper.has_component(target, cmp.Cell):
             pos = esper.component_for_entity(target, cmp.Position)
-            for ent in location.BOARD.entities[pos.x][pos.y]:
+            entities = collect_all_affected_entities(target)
+            for ent in entities:
                 if esper.has_component(ent, cmp.Health):
                     Damage(dmg_effect.source, ent, dmg_effect.amount)
         else:

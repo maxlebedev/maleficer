@@ -455,10 +455,17 @@ class TargetRender(BoardRender):
 
         cell_rgbs = self._get_cell_rgbs()
 
-        drawable_areas = ecs.Query(cmp.Position, cmp.EffectArea)
-        for _, (pos, aoe) in drawable_areas:
-            cell = cell_rgbs[pos.x][pos.y]
-            cell_rgbs[pos.x][pos.y] = cell[0], cell[1], aoe.color
+        radius = 0
+        targeting_ent = ecs.Query(cmp.Targeting).first()
+        if esper.has_component(targeting_ent, cmp.EffectArea):
+            aoe = esper.component_for_entity(targeting_ent, cmp.EffectArea)
+            radius = aoe.radius
+
+        pos = ecs.Query(cmp.Crosshair).cmp(cmp.Position)
+
+        for x, y in location.coords_within_radius(pos, radius):
+            cell = cell_rgbs[x][y]
+            cell_rgbs[x][y] = cell[0], cell[1], display.Color.TARGET
 
         self.present(cell_rgbs)
 

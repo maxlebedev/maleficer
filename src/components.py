@@ -97,8 +97,7 @@ class Crosshair:
 
 @component
 class EffectArea:
-    color: typ.RGB
-    # radius/cell set/aoe formula?
+    radius: int = 0
 
 
 @component

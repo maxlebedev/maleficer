@@ -19,6 +19,23 @@ def player_position():
     return pos
 
 
+def coords_within_radius(pos: cmp.Position, radius: int):
+    min_x = max(0, pos.x - radius)
+    max_x = min(display.BOARD_WIDTH, pos.x + radius + 1)
+    min_y = max(0, pos.y - radius)
+    max_y = min(display.BOARD_HEIGHT, pos.y + radius + 1)
+
+    ret_coords = []
+
+    for x in range(min_x, max_x):
+        for y in range(min_y, max_y):
+            current = cmp.Position(x=x, y=y)
+            dist = euclidean_distance(pos, current)
+            if dist <= radius:
+                ret_coords.append([x,y])
+    return ret_coords
+
+
 class Board:
     """
     Note: the cell matrix is stored as columns, so [x][y] is the right acces pattern

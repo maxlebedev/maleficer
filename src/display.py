@@ -37,6 +37,7 @@ class Color:
     CANDLE = (97, 85, 52)
     BAR_FILLED = GREEN
     BAR_EMPTY = RED
+    TARGET = RED
 
 
 class Glyph(IntEnum):

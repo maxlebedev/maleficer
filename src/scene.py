@@ -53,9 +53,8 @@ def level_phase(context, console):
 def targeting_phase(context, console):
     pos = location.player_position()
 
-    aoe_cmp = cmp.EffectArea(color=display.Color.RED)
     position_cmp = cmp.Position(x=pos.x, y=pos.y)
-    esper.create_entity(cmp.Crosshair(), position_cmp, aoe_cmp)
+    esper.create_entity(cmp.Crosshair(), position_cmp)
 
     input = processors.TargetInputEvent()
     target_render = processors.TargetRender(console, context)
