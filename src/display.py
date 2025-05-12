@@ -33,6 +33,7 @@ class Color:
     DGREY = (50, 50, 50)
     YELLOW = (55, 55, 37)
     MAGENTA = (253, 61, 181)
+    BLOOD_RED = (187, 10, 30)
 
     CANDLE = (97, 85, 52)
     BAR_FILLED = GREEN
@@ -61,6 +62,7 @@ class Glyph(IntEnum):
     POTION = 581
     TRAP = 737
     SCROLL = 768
+    STAIRS = 297
 
 
 letter_map = {

@@ -259,4 +259,7 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
                     create.scroll(new_room.get_random_pos())
 
         rooms.append(new_room)
+
+        last_center = rooms[-1].center
+        board.set_cell(*last_center.as_tuple, create.stairs(last_center))
     board.build_entity_cache()

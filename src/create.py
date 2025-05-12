@@ -23,6 +23,12 @@ def wall(x: int, y: int) -> int:
     return cell
 
 
+def stairs(pos: cmp.Position) -> int:
+    vis = cmp.Visible(glyph=display.Glyph.STAIRS, color=display.Color.LGREY)
+    cell = esper.create_entity(cmp.Cell(), pos, vis, cmp.Transparent())
+    return cell
+
+
 def bat(pos: cmp.Position) -> int:
     vis = cmp.Visible(glyph=display.Glyph.BAT, color=display.Color.RED)
     hp = cmp.Health(max=1)
