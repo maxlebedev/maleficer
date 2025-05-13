@@ -13,7 +13,6 @@ import scene
 FLAGS = tcod.context.SDL_WINDOW_RESIZABLE  # | tcod.context.SDL_WINDOW_FULLSCREEN
 
 
-# TODO: consider using this template for visual effects (burn/bleed)
 def flash(context, console):
     """flashes the screen, for use on errors"""
     console.clear()
