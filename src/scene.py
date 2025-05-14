@@ -46,7 +46,6 @@ def level_phase(context, console):
     death = processors.Death()
 
     level_procs = [upkeep, render, input, npc, damage, death, movement]
-    # do we want one damage phase or two?
     PHASES[Phase.level] = level_procs
 
 

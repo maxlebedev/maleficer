@@ -53,30 +53,32 @@ class Movement(esper.Processor):
                 # entity intends to move, but dies first
                 continue
 
-            ent_is_player = esper.has_component(mover, cmp.Player)
+            has = esper.has_component
+
             pos = esper.component_for_entity(mover, cmp.Position)
             new_x = pos.x + movement.x
             new_y = pos.y + movement.y
             targets = copy.copy(board.entities[new_x][new_y])
-            has = lambda x, y: esper.has_component(x, y)
 
             blocked = any(has(target, cmp.Blocking) for target in targets)
             if has(mover, cmp.Crosshair) or not blocked:
                 board.reposition(mover, new_x, new_y)
 
-            if has(mover, cmp.Health):
-                for target in targets:
-                    if has(target, cmp.Blocking):
-                        self.bump(mover, target)
+            if not has(mover, cmp.Health):
+                continue
 
-                    if ent_is_player and has(target, cmp.Collectable):
-                        self.collect(target)
+            for target in targets:
+                if has(target, cmp.Blocking):
+                    self.bump(mover, target)
 
-                    ent_flies = esper.has_component(mover, cmp.Flying)
-                    if not ent_flies and has(target, cmp.OnStep):
-                        if esper.has_component(target, cmp.DamageEffect):
-                            esper.add_component(target, cmp.Target(target=mover))
-                        event.effects_to_events(target)
+                if has(mover, cmp.Player) and has(target, cmp.Collectable):
+                    self.collect(target)
+
+                ent_flies = esper.has_component(mover, cmp.Flying)
+                if not ent_flies and has(target, cmp.OnStep):
+                    if esper.has_component(target, cmp.DamageEffect):
+                        esper.add_component(target, cmp.Target(target=mover))
+                    event.effects_to_events(target)
 
 
 @dataclass
