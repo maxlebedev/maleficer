@@ -175,7 +175,7 @@ def trap(pos: cmp.Position) -> int:
     vis = cmp.Visible(glyph=display.Glyph.TRAP, color=display.Color.RED)
     hp = cmp.Health(max=1)
     named = cmp.Onymous(name="trap")
-    trap_cmp = cmp.Trap()
+    trap_cmp = cmp.OnStep()
 
     components = [pos, vis, hp, named, trap_cmp]
     trap_ent = esper.create_entity(*components)

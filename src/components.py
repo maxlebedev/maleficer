@@ -173,7 +173,7 @@ class State:
 
 
 @component
-class Trap:
+class OnStep:
     """activates an effect when walked on"""
 
 

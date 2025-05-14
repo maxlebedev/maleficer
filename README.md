@@ -42,6 +42,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- EffectArea could be take a radius, or every cell in the effect could have the cmp. Neither is necessarily better for when we eventually have a line spell. The radius is at least easier to track, and line can be another property on EffectArea
 	- flash_pos redraws screen first, so the flash and glyph aren't desynced
 		- this is the opposite of what flash does. maybe a bad idea?
+	- Should it be possible to ascend to a previous level (def not for now)
 # TODO:
 	- Should damage actually fizzle if the source is dead? We could just put src.name on the event, which allows the entity to die without issue.
 	- All effects on the targeting entity should get their targets filled in if they haven't already
@@ -49,4 +50,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- better spell learning, unlearn, learn confirm
 	- consider a separate font
 	- ranged enemy
-	- lower levels
+	- lower level
+	- on-step effect of stars. Should I rework cmp.Trap to an OnStep?
+	- targeting restrictions. (mutilate can't hit traps)
