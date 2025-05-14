@@ -95,29 +95,40 @@ def scroll(pos: cmp.Position) -> int:
     return scroll
 
 
-def random_spell(power_budget=10) -> int:
+def spell_stats(power_budget=10, waste_chance=0.2) -> tuple[int, int, int]:
     stats = {"damage": 1, "range": 2, "cooldown": 1}
     remaining_points = power_budget - sum(stats.values())
-    waste_chance = 0.2
     while remaining_points > 0:
         if random.random() > waste_chance:
             stat = random.choice(list(stats.keys()))
             stats[stat] += 1
         remaining_points -= 1
     stats["cooldown"] = max(1, 5 - stats["cooldown"])
+    return stats["damage"], stats["range"], stats["cooldown"]
+
+
+def random_spell(power_budget=10) -> int:
+    waste_chance = 0.2
+    match random.randint(0, 3):
+        case 0:
+            waste_chance = 0.4
+    damage, rnge, cooldown = spell_stats(power_budget, waste_chance)
 
     player = ecs.Query(cmp.Player).first()
-    spell_cmp = cmp.Spell(target_range=stats["range"])
-    cooldown = cmp.Cooldown(turns=stats["cooldown"])
-    if not random.randint(0, 1):
-        harm_effect = cmp.BleedEffect(value=max(1, stats["damage"] // 2))
-        # TODO: 0,1,2,3 all result in 1 bleed. One bleed is just dmg but worse
-        # we probably want to pick dmg/bleed first, then adjust accordingly
+    spell_cmp = cmp.Spell(target_range=rnge)
+    cooldown = cmp.Cooldown(turns=cooldown)
+    if waste_chance == 0.4:
+        harm_effect = cmp.BleedEffect(value=damage)
     else:
-        harm_effect = cmp.DamageEffect(amount=stats["damage"], source=player)
+        harm_effect = cmp.DamageEffect(amount=damage, source=player)
     name = "".join(random.choices(string.ascii_lowercase, k=5))
     named = cmp.Onymous(name=name)
     damage_spell = esper.create_entity(spell_cmp, harm_effect, named, cooldown)
+
+    match random.randint(0, 6):
+        case 0:
+            radius = random.randint(1,4)
+            esper.add_component(damage_spell, cmp.EffectArea(radius=radius))
     return damage_spell
 
 
