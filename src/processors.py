@@ -48,40 +48,34 @@ class Movement(esper.Processor):
         board = location.BOARD
         while event.Queues.movement:
             movement = event.Queues.movement.popleft()  # left so player first
-            ent = movement.source
-            if not esper.entity_exists(ent):
+            mover = movement.source
+            if not esper.entity_exists(mover):
                 # entity intends to move, but dies first
                 continue
 
-            ent_is_player = esper.has_component(ent, cmp.Player)
-            ent_has_hp = esper.has_component(ent, cmp.Health)
-            pos = esper.component_for_entity(ent, cmp.Position)
+            ent_is_player = esper.has_component(mover, cmp.Player)
+            pos = esper.component_for_entity(mover, cmp.Position)
             new_x = pos.x + movement.x
             new_y = pos.y + movement.y
             targets = copy.copy(board.entities[new_x][new_y])
+            has = lambda x, y: esper.has_component(x, y)
 
-            move = True
-            if ent_has_hp:
-                blockers = esper._components[cmp.Blocking]
-                move = not any(target in blockers for target in targets)
+            blocked = any(has(target, cmp.Blocking) for target in targets)
+            if has(mover, cmp.Crosshair) or not blocked:
+                board.reposition(mover, new_x, new_y)
 
-            if move:
-                board.reposition(ent, new_x, new_y)
-
-            if ent_has_hp:
+            if has(mover, cmp.Health):
                 for target in targets:
-                    is_target = lambda x: esper.has_component(target, x)
+                    if has(target, cmp.Blocking):
+                        self.bump(mover, target)
 
-                    if is_target(cmp.Blocking):
-                        self.bump(ent, target)
-
-                    if ent_is_player and is_target(cmp.Collectable):
+                    if ent_is_player and has(target, cmp.Collectable):
                         self.collect(target)
 
-                    ent_flies = esper.has_component(ent, cmp.Flying)
-                    if not ent_flies and is_target(cmp.OnStep):
+                    ent_flies = esper.has_component(mover, cmp.Flying)
+                    if not ent_flies and has(target, cmp.OnStep):
                         if esper.has_component(target, cmp.DamageEffect):
-                            esper.add_component(target, cmp.Target(target=ent))
+                            esper.add_component(target, cmp.Target(target=mover))
                         event.effects_to_events(target)
 
 
