@@ -253,7 +253,7 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
                 create.trap(new_room.get_random_pos())
             else:
                 create.skeleton(new_room.center)
-                match random.randint(0, 3):
+                match random.randint(0, 2):
                     case 0:
                         create.potion(new_room.get_random_pos())
                     case 1:

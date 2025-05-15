@@ -34,6 +34,7 @@ class Color:
     YELLOW = (55, 55, 37)
     MAGENTA = (253, 61, 181)
     BLOOD_RED = (187, 10, 30)
+    BROWN = (94,44,4)
 
     CANDLE = (97, 85, 52)
     BAR_FILLED = GREEN

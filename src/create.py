@@ -44,7 +44,7 @@ def stairs(pos: cmp.Position) -> int:
 
 
 def bat(pos: cmp.Position) -> int:
-    vis = cmp.Visible(glyph=display.Glyph.BAT, color=display.Color.RED)
+    vis = cmp.Visible(glyph=display.Glyph.BAT, color=display.Color.BROWN)
     hp = cmp.Health(max=1)
     named = cmp.Onymous(name="bat")
     flying = cmp.Flying()
@@ -68,7 +68,7 @@ def bat(pos: cmp.Position) -> int:
 
 
 def skeleton(pos: cmp.Position) -> int:
-    vis = cmp.Visible(glyph=display.Glyph.SKELETON, color=display.Color.RED)
+    vis = cmp.Visible(glyph=display.Glyph.SKELETON, color=display.Color.BROWN)
     hp = cmp.Health(max=3)
     named = cmp.Onymous(name="skeleton")
     melee = cmp.Melee(radius=5)
