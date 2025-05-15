@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from dataclasses import dataclass as component
 from typing import TypeVar
 
@@ -158,6 +159,12 @@ class MoveEffect:
 @component
 class HealEffect:
     amount: int
+
+
+@component
+class CallbackEffect:
+    """effect that calls a function"""
+    callback: Callable
 
 
 @component

@@ -88,6 +88,11 @@ def collect_all_affected_entities(target: int) -> list[int]:
 def effects_to_events(source: int):
     """read effects off an entity and apply them to crosshair if needed"""
 
+    if callback_cmp := esper.try_component(source, cmp.CallbackEffect):
+        callback_cmp.callback()
+        # the source doesn't exist once we new level. return early for now
+        return
+
     if learnable := esper.try_component(source, cmp.Learnable):
         known_spells = len(esper.get_component(cmp.Known))
         if known_spells == 4:

@@ -4,10 +4,12 @@ import random
 import string
 
 import esper
+from numpy import kaiser
 
 import components as cmp
 import display
 import ecs
+import location
 
 
 # TODO: should these take a position?
@@ -25,8 +27,20 @@ def wall(x: int, y: int) -> int:
 
 def stairs(pos: cmp.Position) -> int:
     vis = cmp.Visible(glyph=display.Glyph.STAIRS, color=display.Color.LGREY)
-    cell = esper.create_entity(cmp.Cell(), pos, vis, cmp.Transparent())
-    return cell
+
+    os = cmp.OnStep()
+    tp = cmp.Transparent()
+    stairs = esper.create_entity(cmp.Cell(), pos, vis, tp, os)
+
+    def descend():
+        player = ecs.Query(cmp.Player).first()
+        if target_cmp := esper.try_component(stairs, cmp.Target):
+            if target_cmp.target == player:
+                location.new_level()
+
+    cbe = cmp.CallbackEffect(callback=descend)
+    esper.add_component(stairs, cbe)
+    return stairs
 
 
 def bat(pos: cmp.Position) -> int:

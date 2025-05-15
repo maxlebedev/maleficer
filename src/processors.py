@@ -76,8 +76,7 @@ class Movement(esper.Processor):
 
                 ent_flies = esper.has_component(mover, cmp.Flying)
                 if not ent_flies and has(target, cmp.OnStep):
-                    if esper.has_component(target, cmp.DamageEffect):
-                        esper.add_component(target, cmp.Target(target=mover))
+                    esper.add_component(target, cmp.Target(target=mover))
                     event.effects_to_events(target)
 
 

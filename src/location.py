@@ -264,3 +264,13 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
     last_center = rooms[-1].center
     board.set_cell(*last_center.as_tuple, create.stairs(last_center))
     board.build_entity_cache()
+
+
+def new_level():
+    global BOARD
+    old_level = ecs.Query(cmp.Position).exclude(cmp.Player, cmp.Crosshair)
+    for to_del, _ in old_level:
+        esper.delete_entity(to_del, immediate=True)
+
+    BOARD = Board()
+    generate_dungeon(BOARD)
