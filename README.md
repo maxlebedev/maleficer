@@ -52,6 +52,4 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- better spell learning, unlearn, learn confirm
 	- consider a separate font
 	- ranged enemy
-	- lower level
-	- on-step effect of stars. Should I rework cmp.Trap to an OnStep?
 	- targeting restrictions. (mutilate can't hit traps)

@@ -307,7 +307,6 @@ class Render(esper.Processor):
                 message = f"Effect Radius:{aoe.radius}"
                 self.console.print(1, next(y_idx), message)
 
-
         # right panel
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
         for i, message in enumerate(event.Log.messages):

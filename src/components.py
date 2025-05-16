@@ -164,6 +164,7 @@ class HealEffect:
 @component
 class CallbackEffect:
     """effect that calls a function"""
+
     callback: Callable
 
 

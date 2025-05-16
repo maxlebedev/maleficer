@@ -141,7 +141,7 @@ def random_spell(power_budget=10) -> int:
 
     match random.randint(0, 6):
         case 0:
-            radius = random.randint(1,4)
+            radius = random.randint(1, 4)
             esper.add_component(damage_spell, cmp.EffectArea(radius=radius))
     return damage_spell
 
