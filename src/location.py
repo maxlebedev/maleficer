@@ -248,16 +248,12 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
         else:  # All rooms after the first get one tunnel and enemy
             endpt = closest_position(new_room.center, centers[:-1])
             tunnel_between(board, new_room.center, endpt)
-            if random.randint(0, 1):
-                create.bat(new_room.center)
-                create.trap(new_room.get_random_pos())
-            else:
-                create.skeleton(new_room.center)
-                match random.randint(0, 2):
-                    case 0:
-                        create.potion(new_room.get_random_pos())
-                    case 1:
-                        create.scroll(new_room.get_random_pos())
+            for _ in range(random.randint(1, 3)):
+                npc_gen = random.choice([create.bat, create.skeleton])
+                npc_gen(new_room.get_random_pos())
+
+            item = random.choice([create.trap, create.potion, create.scroll])
+            item(new_room.get_random_pos())
 
         rooms.append(new_room)
 
