@@ -21,6 +21,7 @@ class Log:
     """Messages to be displayed in in-game log"""
 
     messages: list = []
+    log_len = display.PANEL_HEIGHT - 2
 
     @classmethod
     def append(cls, text: str):
@@ -28,7 +29,7 @@ class Log:
         for line in textwrap.wrap(text, display.PANEL_WIDTH - 2):
             cls.messages.append(line.upper())
 
-        cls.messages = cls.messages[-display.PANEL_HEIGHT - 3 :]
+        cls.messages = cls.messages[-cls.log_len:]
         esper.dispatch_event("redraw")
 
 

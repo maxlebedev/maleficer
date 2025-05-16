@@ -60,8 +60,6 @@ def bat(pos: cmp.Position) -> int:
     ]
     bat = esper.create_entity(*components)
 
-    # I'm trying having Damage Effects on enemies,
-    # and just effects_to_events to apply
     dmg_effect = cmp.DamageEffect(amount=1, source=bat)
     esper.add_component(bat, dmg_effect)
     return bat
