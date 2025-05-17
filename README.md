@@ -52,6 +52,4 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 		- But, only the non-static targets should get cleared, and we don't have a way to store that info
 	- better spell learning, unlearn, learn confirm
 	- consider a separate font
-	- ranged enemy
 	- targeting restrictions. (mutilate can't hit traps)
-	- do I want enemies to hurt each other? It happens a lot

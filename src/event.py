@@ -29,7 +29,7 @@ class Log:
         for line in textwrap.wrap(text, display.PANEL_WIDTH - 2):
             cls.messages.append(line.upper())
 
-        cls.messages = cls.messages[-cls.log_len:]
+        cls.messages = cls.messages[-cls.log_len :]
         esper.dispatch_event("redraw")
 
 

@@ -78,6 +78,19 @@ def skeleton(pos: cmp.Position) -> int:
     return skeleton
 
 
+def warlock(pos: cmp.Position) -> int:
+    vis = cmp.Visible(glyph=display.Glyph.WARLOCK, color=display.Color.INDIGO)
+    hp = cmp.Health(max=3)
+    named = cmp.Onymous(name="warlock")
+    melee = cmp.Ranged(radius=3)
+    components = [cmp.Enemy(), pos, vis, cmp.Blocking(), hp, melee, named]
+    warlock = esper.create_entity(*components)
+
+    dmg_effect = cmp.DamageEffect(amount=1, source=warlock)
+    esper.add_component(warlock, dmg_effect)
+    return warlock
+
+
 def potion(pos: cmp.Position) -> int:
     vis = cmp.Visible(glyph=display.Glyph.POTION, color=display.Color.GREEN)
     col = cmp.Collectable()

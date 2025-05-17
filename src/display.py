@@ -35,6 +35,7 @@ class Color:
     MAGENTA = (253, 61, 181)
     BLOOD_RED = (187, 10, 30)
     BROWN = (94, 44, 4)
+    INDIGO = (75, 0, 130)
 
     CANDLE = (97, 85, 52)
     BAR_FILLED = GREEN
@@ -64,6 +65,7 @@ class Glyph(IntEnum):
     TRAP = 737
     SCROLL = 768
     STAIRS = 297
+    WARLOCK = 80
 
 
 letter_map = {

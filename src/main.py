@@ -35,7 +35,7 @@ def flash_pos(context, console, position, color: display.Color):
     cell = (glyph, fg, color)
     console.rgb[display.PANEL_WIDTH + position.x, position.y] = cell
     context.present(console)
-    time.sleep(0.1)  # display long enough to be seen
+    time.sleep(0.05)  # display long enough to be seen
 
 
 def redraw():

@@ -77,6 +77,13 @@ class Melee:
 
 
 @component
+class Ranged:
+    """Damages player if in LOS"""
+
+    radius: int
+
+
+@component
 class Onymous:
     name: str
     # death string?

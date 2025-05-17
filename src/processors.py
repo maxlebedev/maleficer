@@ -229,6 +229,21 @@ class NPCTurn(esper.Processor):
                     x, y = self.pathfind(epos, player_pos)
                     event.Movement(entity, x=x - epos.x, y=y - epos.y)
 
+        if esper.get_component(cmp.Ranged):
+            for entity, (ranged, epos) in ecs.Query(cmp.Ranged, cmp.Position):
+                dist_to_player = location.euclidean_distance(player_pos, epos)
+                # TODO: ranged units should also sometimss follow
+                # 0.86
+                if dist_to_player > ranged.radius:
+                    self.wander(entity)
+                else:
+                    player = ecs.Query(cmp.Player).first()
+                    dest, trace = location.trace_ray(entity, player)
+                    location.flash_line(trace)
+                    trg = cmp.Target(target=dest)
+                    esper.add_component(entity, trg)
+                    event.effects_to_events(entity)
+
 
 @dataclass
 class Render(esper.Processor):

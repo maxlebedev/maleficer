@@ -249,7 +249,8 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
             endpt = closest_position(new_room.center, centers[:-1])
             tunnel_between(board, new_room.center, endpt)
             for _ in range(random.randint(1, 3)):
-                npc_gen = random.choice([create.bat, create.skeleton])
+                npcs = [create.bat, create.skeleton, create.warlock]
+                npc_gen = random.choice(npcs)
                 npc_gen(new_room.get_random_pos())
 
             item = random.choice([create.trap, create.potion, create.scroll])
@@ -270,3 +271,28 @@ def new_level():
 
     BOARD = Board()
     generate_dungeon(BOARD)
+
+
+def trace_ray(source: int, dest: int):
+    """trace a line between source and dest, returning first blocker and path"""
+    global BOARD
+    source_pos = esper.component_for_entity(source, cmp.Position)
+    dest_pos = esper.component_for_entity(dest, cmp.Position)
+
+    trace = list(tcod.los.bresenham(source_pos.as_tuple, dest_pos.as_tuple))
+    for i, (x, y) in enumerate(trace):
+        entities = BOARD.entities[x][y]
+        for entity in entities:
+            if esper.has_component(entity, cmp.Blocking) and entity not in (
+                source,
+                dest,
+            ):
+                return entity, trace[: i + 1]
+
+    return dest, trace
+
+
+def flash_line(line: list):
+    for x, y in line:
+        pos = cmp.Position(x=x, y=y)
+        esper.dispatch_event("flash_pos", pos, display.Color.BLUE)
