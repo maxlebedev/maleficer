@@ -54,3 +54,4 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- consider a separate font
 	- ranged enemy
 	- targeting restrictions. (mutilate can't hit traps)
+	- do I want enemies to hurt each other? It happens a lot

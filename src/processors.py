@@ -27,7 +27,8 @@ class Movement(esper.Processor):
         """one entity bumps into another"""
         src_is_enemy = esper.has_component(source, cmp.Enemy)
         target_is_harmable = esper.has_component(target, cmp.Health)
-        if src_is_enemy and target_is_harmable:
+        target_is_enemy = esper.has_component(target, cmp.Enemy)
+        if src_is_enemy and target_is_harmable and not target_is_enemy:
             esper.add_component(source, cmp.Target(target=target))
             event.effects_to_events(source)
 
@@ -219,6 +220,7 @@ class NPCTurn(esper.Processor):
 
         player_pos = location.player_position()
         if esper.get_component(cmp.Melee):
+            # TODO: shouldn't need this if
             for entity, (melee, epos) in ecs.Query(cmp.Melee, cmp.Position):
                 dist_to_player = location.euclidean_distance(player_pos, epos)
                 if dist_to_player > melee.radius:
