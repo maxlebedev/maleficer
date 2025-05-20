@@ -37,9 +37,10 @@ class Query:
             return
         if not include:
             include = self.include
-
-        for entity in self.entities:
-            yield entity, [entity_db[entity][cmp] for cmp in include]
+        cmp_set = set(include)
+        for entity in self.entities :
+            if cmp_set.issubset(entity_db[entity].keys()):
+                yield entity, [entity_db[entity][cmp] for cmp in include]
 
     def first(self) -> int:
         """get the first entity in the queryset"""

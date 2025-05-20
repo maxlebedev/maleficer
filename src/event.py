@@ -72,7 +72,10 @@ class Tick(Event):
 
 
 def collect_all_affected_entities(target: int) -> list[int]:
-    targeting_ent = ecs.Query(cmp.Targeting).first()
+    try:
+        targeting_ent = ecs.Query(cmp.Targeting).first()
+    except KeyError:
+        return [target]
     pos = esper.component_for_entity(target, cmp.Position)
     if not esper.has_component(targeting_ent, cmp.EffectArea):
         entities = [e for e in location.BOARD.entities[pos.x][pos.y]]
