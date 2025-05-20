@@ -46,11 +46,18 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- Do we want one damage phase or two?
 	- Crosshair is a big exception to how movement works. might be worth its own function
 	- Currently, Effects (damage, etc) just go on their sources, and are applied on effects_to_events invocation
-	- When I take a step, ranged enemies shoot me before step completes. feels unintuitive
+	- When I take a step, ranged enemies shoot me before step completes. feels correct for melee but unintuitive for range.
 	- mutilate into warlocks is rough
-# TODO:
 	- Should damage actually fizzle if the source is dead? We could just put src.name on the event, which allows the entity to die without issue.
+# TODO:
 	- All effects on the targeting entity should get their targets filled in if they haven't already
 		- But, only the non-static targets should get cleared, and we don't have a way to store that info
 	- better spell learning, unlearn, learn confirm
+		- confirm step where we learn the spell stats?
 	- effect application restrictions. (mutilate can't hit traps)
+	- spell mods (+1 range, +1 dmg pickups)
+	- events that happen out of FOV should not log
+	- on-death effects
+	- trap-summoner enemy
+	- options/keybinds phase
+	- alternate mapgen, with non-rect rooms

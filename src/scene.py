@@ -18,15 +18,6 @@ class Phase(enum.Enum):
     inventory = enum.auto()
 
 
-def inventory_setup():
-    esper.create_entity(
-        cmp.InInventory(), cmp.Health(max=1), cmp.Onymous(name="bottle of water")
-    )
-    esper.create_entity(
-        cmp.InInventory(), cmp.Health(max=1), cmp.Onymous(name="lighter")
-    )
-
-
 def main_menu_phase(context, console):
     render = processors.MenuRender(context, console)
     input = processors.MenuInputEvent()

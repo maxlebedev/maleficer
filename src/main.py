@@ -72,9 +72,6 @@ def main() -> None:
     scene.to_phase(scene.Phase.menu)
     location.generate_dungeon(location.BOARD)
 
-    scene.inventory_setup()
-    create.inventory_map()
-
     starting_spells = [
         create.firebolt_spell,
         create.blink_spell,
