@@ -34,7 +34,7 @@ class Movement(esper.Processor):
 
         if esper.has_component(source, cmp.Player):
             # Note: walking into a wall consumes a turn
-            event.Log.append("Failed to move to invalid location")
+            event.Log.append("can't move there")
             esper.dispatch_event("flash")
 
     def collect(self, target):

@@ -174,7 +174,7 @@ def firebolt_spell() -> int:
     cooldown = cmp.Cooldown(turns=1)
     dmg_effect = cmp.DamageEffect(amount=1, source=player)
     aoe = cmp.EffectArea(radius=1)
-    named = cmp.Onymous(name="firebolt")
+    named = cmp.Onymous(name="Firebolt")
     slot_num = len(esper.get_component(cmp.Known)) + 1
     known = cmp.Known(slot=slot_num)
     components = [spell_cmp, dmg_effect, named, cooldown, known, aoe]
@@ -187,7 +187,7 @@ def blink_spell() -> int:
     spell_cmp = cmp.Spell(target_range=4)
     cooldown = cmp.Cooldown(turns=5)
     dmg_effect = cmp.MoveEffect(target=player)
-    named = cmp.Onymous(name="blink")
+    named = cmp.Onymous(name="Blink")
     slot_num = len(esper.get_component(cmp.Known)) + 1
     known = cmp.Known(slot=slot_num)
     components = [spell_cmp, dmg_effect, named, cooldown, known]
@@ -199,7 +199,7 @@ def bleed_spell() -> int:
     spell_cmp = cmp.Spell(target_range=3)
     cooldown = cmp.Cooldown(turns=2)
     dmg_effect = cmp.BleedEffect(value=2)
-    named = cmp.Onymous(name="mutilate")
+    named = cmp.Onymous(name="Mutilate")
     slot_num = len(esper.get_component(cmp.Known)) + 1
     known = cmp.Known(slot=slot_num)
     components = [spell_cmp, dmg_effect, named, cooldown, known]

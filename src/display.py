@@ -1,5 +1,6 @@
 import itertools
 from enum import IntEnum
+import string
 
 import tcod
 
@@ -148,10 +149,13 @@ def brighter(rgb: typ.RGB, scale: int) -> typ.RGB:
 
 
 def load_tileset(atlas_path: str, width: int, height: int) -> tcod.tileset.Tileset:
+    font_atlas = "assets/Cheepicus_8x8x2.png"
+    font_ts = tcod.tileset.load_tilesheet(font_atlas, 16, 16, tcod.tileset.CHARMAP_CP437)
     tileset = tcod.tileset.load_tilesheet(atlas_path, width, height, None)
-    for letter, val in letter_map.items():
-        xx, yy = _idx_to_point(val, width)
-        tileset.remap(ord(letter), xx, yy)
+
+    for letter in string.printable:
+        tile = font_ts.get_tile(ord(letter))
+        tileset.set_tile(ord(letter), tile)
 
     codepath = itertools.count(ord("z") + 1)
     for glyph in Glyph:

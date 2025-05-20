@@ -27,7 +27,7 @@ class Log:
     def append(cls, text: str):
         print(text)
         for line in textwrap.wrap(text, display.PANEL_WIDTH - 2):
-            cls.messages.append(line.upper())
+            cls.messages.append(line)
 
         cls.messages = cls.messages[-cls.log_len :]
         esper.dispatch_event("redraw")
