@@ -296,3 +296,11 @@ def flash_line(line: list):
     for x, y in line:
         pos = cmp.Position(x=x, y=y)
         esper.dispatch_event("flash_pos", pos, display.Color.BLUE)
+
+def get_fov():
+    global BOARD
+    transparency = BOARD.as_transparency()
+    pos = player_position()
+    algo = tcod.libtcodpy.FOV_SHADOW
+    fov = tcod.map.compute_fov(transparency, pos.as_tuple, radius=4, algorithm=algo)
+    return fov

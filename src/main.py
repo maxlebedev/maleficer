@@ -28,11 +28,14 @@ def flash(context, console):
 
 
 def flash_pos(context, console, position, color: display.Color):
-    """visual bleed confirmation"""
+    """change fg color of a position"""
     esper.dispatch_event("redraw")
     cell = location.BOARD.cells[position.x][position.y]
-    glyph, fg, _ = location.BOARD.as_rgb(cell)
-    cell = (glyph, fg, color)
+    glyph, _, bg = location.BOARD.as_rgb(cell)
+    in_fov = location.get_fov()
+    if in_fov[position.x][position.y]:
+        bg = display.Color.CANDLE
+    cell = (glyph, color, bg)
     console.rgb[display.PANEL_WIDTH + position.x, position.y] = cell
     context.present(console)
     time.sleep(0.05)  # display long enough to be seen

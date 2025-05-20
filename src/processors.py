@@ -342,13 +342,6 @@ class Render(esper.Processor):
                     cell_rgbs[x][y] = (glyph, display.Color.BLACK, display.Color.BLACK)
         return cell_rgbs
 
-    def _get_fov(self):
-        transparency = location.BOARD.as_transparency()
-        pos = location.player_position()
-        algo = libtcodpy.FOV_SHADOW
-        fov = compute_fov(transparency, pos.as_tuple, radius=4, algorithm=algo)
-        return fov
-
     def present(self, cell_rgbs):
         startx, endx = (display.PANEL_WIDTH, display.R_PANEL_START)
         starty, endy = (0, display.BOARD_HEIGHT)
@@ -365,7 +358,7 @@ class BoardRender(Render):
         board = location.BOARD
         cell_rgbs = [list(map(board.as_rgb, row)) for row in board.cells]
 
-        in_fov = self._get_fov()
+        in_fov = location.get_fov()
 
         nonwall_drawables = ecs.Query(cmp.Position, cmp.Visible).exclude(cmp.Cell)
         for _, (pos, vis) in nonwall_drawables.exclude(cmp.Blocking):
