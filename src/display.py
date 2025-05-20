@@ -1,6 +1,6 @@
 import itertools
-from enum import IntEnum
 import string
+from enum import IntEnum
 
 import tcod
 
@@ -150,7 +150,9 @@ def brighter(rgb: typ.RGB, scale: int) -> typ.RGB:
 
 def load_tileset(atlas_path: str, width: int, height: int) -> tcod.tileset.Tileset:
     font_atlas = "assets/Cheepicus_8x8x2.png"
-    font_ts = tcod.tileset.load_tilesheet(font_atlas, 16, 16, tcod.tileset.CHARMAP_CP437)
+    font_ts = tcod.tileset.load_tilesheet(
+        font_atlas, 16, 16, tcod.tileset.CHARMAP_CP437
+    )
     tileset = tcod.tileset.load_tilesheet(atlas_path, width, height, None)
 
     for letter in string.printable:
