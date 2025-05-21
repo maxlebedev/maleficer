@@ -4,12 +4,12 @@ import random
 import string
 
 import esper
-from numpy import kaiser
 
 import components as cmp
 import display
 import ecs
 import location
+import scene
 
 
 # TODO: should these take a position?
@@ -166,6 +166,22 @@ def inventory_map() -> list:
     # then display is just a matter of lookup
     sorted_map = sorted(inventory_map.items())
     return sorted_map
+
+
+def main_menu_opts():
+    to_level = lambda: scene.to_phase(scene.Phase.level)
+    cbe = cmp.CallbackEffect(callback=to_level)
+    mm = cmp.MainMenu()
+    name = cmp.Onymous(name="Start Game")
+    menu_item = cmp.MenuItem(order=0)
+    components = [menu_item, name, cbe, mm]
+    esper.create_entity(*components)
+
+    to_opts = lambda: print("here we would have an option phase") 
+    cbe = cmp.CallbackEffect(callback=to_opts)
+    mm = cmp.MainMenu()
+    components = [cmp.MenuItem(order=1), cmp.Onymous(name="Options"), cbe, mm]
+    esper.create_entity(*components)
 
 
 def firebolt_spell() -> int:

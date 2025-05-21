@@ -145,6 +145,11 @@ class MenuSelection:
 class MenuItem:
     order: int
 
+@component
+class MainMenu:
+    """Indicates an element of the main menu"""
+    pass
+
 
 @component
 class DamageEffect:

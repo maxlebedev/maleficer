@@ -2,11 +2,11 @@ import copy
 import itertools
 import random
 from dataclasses import dataclass
+from functools import partial
 
 import esper
 import tcod
 from tcod import libtcodpy
-from tcod.map import compute_fov
 
 import components as cmp
 import condition
@@ -392,6 +392,18 @@ class MenuRender(esper.Processor):
         x = display.PANEL_WIDTH + (display.BOARD_WIDTH // 2)
         y = display.BOARD_HEIGHT // 2
         self.console.print(x, y, "WELCOME TO MALEFICER", alignment=libtcodpy.CENTER)
+
+        menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
+        center_print = partial(self.console.print, alignment=libtcodpy.CENTER)
+
+        menu_elements = ecs.Query(cmp.MenuItem, cmp.MainMenu, cmp.Onymous)
+        for i, (_, (mi, _, on)) in enumerate(menu_elements):
+            fg = display.Color.WHITE
+            bg = display.Color.BLACK
+            if menu_selection.item == mi.order:
+                fg, bg = bg, fg
+            center_print(x=x, y=y + 2 + i, string=on.name, fg=fg, bg=bg)
+
         self.context.present(self.console)
 
 
@@ -399,9 +411,24 @@ class MenuRender(esper.Processor):
 class MenuInputEvent(InputEvent):
     def __init__(self):
         self.action_map = {
+            input.KEYMAP[input.Input.MOVE_DOWN]: (self.move_selection, [1]),
+            input.KEYMAP[input.Input.MOVE_UP]: (self.move_selection, [-1]),
             input.KEYMAP[input.Input.ESC]: self.exit,
-            input.KEYMAP[input.Input.SELECT]: (scene.to_phase, [scene.Phase.level]),
+            input.KEYMAP[input.Input.SELECT]: self.select,
         }
+
+    def select(self):
+        menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
+        for entity, (mi, _) in ecs.Query(cmp.MenuItem, cmp.MainMenu):
+            if mi.order == menu_selection.item:
+                event.effects_to_events(entity)
+
+    def move_selection(self, diff: int):
+        menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
+        menu_selection.item += diff
+
+        tot_items = len([_ for _ in ecs.Query(cmp.MenuItem, cmp.MainMenu)]) - 1
+        menu_selection.item = math_util.clamp(menu_selection.item, tot_items)
 
 
 @dataclass

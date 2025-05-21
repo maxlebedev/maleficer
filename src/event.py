@@ -91,6 +91,8 @@ def collect_all_affected_entities(target: int) -> list[int]:
 
 def effects_to_events(source: int):
     """read effects off an entity and apply them to crosshair if needed"""
+    # technically, every event can be callbackevent. for dmg, some standard dmg function can be used. would I want to refactor things to make that true?
+    # it would break this function up
 
     if callback_cmp := esper.try_component(source, cmp.CallbackEffect):
         callback_cmp.callback()
