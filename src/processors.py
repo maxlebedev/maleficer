@@ -405,7 +405,8 @@ class MenuRender(esper.Processor):
         center_print = partial(self.console.print, alignment=libtcodpy.CENTER)
 
         menu_elements = ecs.Query(cmp.MenuItem, cmp.MainMenu, cmp.Onymous)
-        for i, (_, (mi, _, on)) in enumerate(menu_elements):
+        sorted_menu = sorted(menu_elements, key=lambda x: x[1][0].order)
+        for i, (_, (mi, _, on)) in enumerate(sorted_menu):
             fg = display.Color.WHITE
             bg = display.Color.BLACK
             if menu_selection.item == mi.order:

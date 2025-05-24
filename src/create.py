@@ -19,12 +19,12 @@ def floor(x: int, y: int) -> int:
     return cell
 
 
-def wall(x: int, y: int) -> int:
+def wall(x: int, y: int, breakable=False) -> int:
     vis = cmp.Visible(glyph=display.Glyph.WALL, color=display.Color.LGREY)
     pos = cmp.Position(x, y)
     blocking = cmp.Blocking()
     cell = esper.create_entity(cmp.Cell(), pos, vis, blocking)
-    if not random.randint(0, 15):
+    if breakable or not random.randint(0, 15):
         esper.add_component(cell, cmp.Health(max=1))
         esper.add_component(cell, cmp.Onymous(name="wall"))
         vis.glyph = display.Glyph.BWALL
@@ -187,7 +187,9 @@ def main_menu_opts():
     to_opts = lambda: scene.to_phase(scene.Phase.options)
     cbe = cmp.CallbackEffect(callback=to_opts)
     mm = cmp.MainMenu()
-    components = [cmp.MenuItem(order=1), cmp.Onymous(name="Options"), cbe, mm]
+    name = cmp.Onymous(name="Options")
+    menu_item = cmp.MenuItem(order=1)
+    components = [menu_item, name, cbe, mm]
     esper.create_entity(*components)
 
 
