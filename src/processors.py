@@ -567,6 +567,35 @@ class InventoryInputEvent(InputEvent):
 
 
 @dataclass
+class OptionsRender(esper.Processor):
+    context: tcod.context.Context
+    console: tcod.console.Console
+
+    def process(self):
+        self.console.clear()
+        center_print = partial(self.console.print, alignment=libtcodpy.CENTER)
+        x = display.PANEL_WIDTH + (display.BOARD_WIDTH // 2)
+        y = display.BOARD_HEIGHT // 2
+        center_print(x, y, "Options")
+
+        fg = display.Color.WHITE
+        bg = display.Color.BLACK
+        for i, (k, v) in enumerate(input.KEYMAP.items()):
+            text = f"{k.name}:{v.name}"
+            center_print(x=x, y=y + 2 + i, string=text, fg=fg, bg=bg)
+
+        self.context.present(self.console)
+
+
+@dataclass
+class OptionsInputEvent(InputEvent):
+    def __init__(self):
+        self.action_map = {
+            input.KEYMAP[input.Input.ESC]: (scene.to_phase, [scene.Phase.menu]),
+        }
+
+
+@dataclass
 class Upkeep(esper.Processor):
     """apply and tick down Conditions"""
 

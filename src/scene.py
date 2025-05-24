@@ -13,6 +13,7 @@ PHASES = dict()
 
 class Phase(enum.Enum):
     menu = enum.auto()
+    options = enum.auto()
     level = enum.auto()
     target = enum.auto()
     inventory = enum.auto()
@@ -59,6 +60,13 @@ def inventory_phase(context, console):
     render = processors.InventoryRender(console, context)
 
     PHASES[Phase.inventory] = [render, input]
+
+
+def options_phase(context, console):
+    render = processors.OptionsRender(context, console)
+    input = processors.OptionsInputEvent()
+
+    PHASES[Phase.options] = [render, input]
 
 
 def to_phase(phase: Phase, start_proc: type[esper.Processor] | None = None):

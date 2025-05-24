@@ -177,7 +177,7 @@ def main_menu_opts():
     components = [menu_item, name, cbe, mm]
     esper.create_entity(*components)
 
-    to_opts = lambda: print("here we would have an option phase") 
+    to_opts = lambda: scene.to_phase(scene.Phase.options)
     cbe = cmp.CallbackEffect(callback=to_opts)
     mm = cmp.MainMenu()
     components = [cmp.MenuItem(order=1), cmp.Onymous(name="Options"), cbe, mm]

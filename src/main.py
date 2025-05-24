@@ -69,6 +69,7 @@ def main() -> None:
     scene.level_phase(context, console)
     scene.targeting_phase(context, console)
     scene.inventory_phase(context, console)
+    scene.options_phase(context, console)
     scene.to_phase(scene.Phase.menu)
     location.generate_dungeon(location.BOARD)
 
