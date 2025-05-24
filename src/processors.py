@@ -155,7 +155,7 @@ class GameInputEvent(InputEvent):
             input.KEYMAP[input.Input.TWO]: (self.to_target, [2]),
             input.KEYMAP[input.Input.THREE]: (self.to_target, [3]),
             input.KEYMAP[input.Input.FOUR]: (self.to_target, [4]),
-            input.KEYMAP[input.Input.TAB]: self.to_inventory,
+            input.KEYMAP[input.Input.INVENTORY]: self.to_inventory,
             input.KEYMAP[input.Input.SKIP]: self.skip,
         }
 
@@ -573,16 +573,19 @@ class OptionsRender(esper.Processor):
 
     def process(self):
         self.console.clear()
-        center_print = partial(self.console.print, alignment=libtcodpy.CENTER)
         x = display.PANEL_WIDTH + (display.BOARD_WIDTH // 2)
         y = display.BOARD_HEIGHT // 2
-        center_print(x, y, "Options")
+        self.console.print(x, y, "OPTIONS", alignment=libtcodpy.CENTER)
 
-        fg = display.Color.WHITE
-        bg = display.Color.BLACK
-        for i, (k, v) in enumerate(input.KEYMAP.items()):
-            text = f"{k.name}:{v.name}"
-            center_print(x=x, y=y + 2 + i, string=text, fg=fg, bg=bg)
+        y_idx = itertools.count(y+2)
+        for k, v in input.KEYMAP.items():
+            height = next(y_idx)
+            self.console.print(
+                x=x, y=height, string=f"{k.name}: ", alignment=libtcodpy.RIGHT
+            )
+            self.console.print(
+                x=x + 1, y=height, string=v.name, alignment=libtcodpy.LEFT
+            )
 
         self.context.present(self.console)
 
