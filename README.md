@@ -48,9 +48,12 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- Currently, Effects (damage, etc) just go on their sources, and are applied on `effects_to_events` invocation
 		- This makes `effects_to_events` a sort of do-everything function
 	- When I take a step, ranged enemies shoot me before step completes. feels correct for melee but unintuitive for range.
-	- mutilate into warlocks is rough
+	- mutilate into warlocks is rough. Maybe warlocks aren't a lvl 1 spawn
 	- Should damage actually fizzle if the source is dead? We could just put src.name on the event, which allows the entity to die without issue.
 	- MenuItem is used for actual menus, but not for inventory (not 1:1 with entities)
+	- Right now levels are limited to the board size. We could decouple those and have the board "scroll"
+	- Breakable walls
+		- if walls have health, that's all works, but 
 # TODO:
 	- All effects on the targeting entity should get their targets filled in if they haven't already
 		- But, only the non-static targets should get cleared, and we don't have a way to store that info
@@ -62,3 +65,9 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- on-death effects
 	- trap-summoner enemy
 	- alternate mapgen, with non-rect rooms
+		- caves, laberynth with locked doors
+		- set-piece features
+	- cave gen
+		- blobbly room
+		- take all other rooms within X radius and make wobbly lines between
+		- If there are none, get the closest

@@ -110,8 +110,16 @@ class Death(esper.Processor):
             if health.current <= 0:
                 message = f"{named.name} is no more"
                 event.Log.append(message)
-                location.BOARD.remove(killable)
-                esper.delete_entity(killable, immediate=True)
+                if esper.has_component(killable, cmp.Cell):
+                    # TODO: would be cool to implement as an on-death effect
+                    pos = esper.component_for_entity(killable, cmp.Position)
+                    floor = create.floor(pos.x, pos.y)
+                    location.BOARD.set_cell(pos.x, pos.y, floor)
+                    location.BOARD.build_entity_cache()
+                else:
+                    location.BOARD.remove(killable)
+                    esper.delete_entity(killable, immediate=True)
+
 
 
 @dataclass

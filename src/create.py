@@ -21,7 +21,14 @@ def floor(x: int, y: int) -> int:
 
 def wall(x: int, y: int) -> int:
     vis = cmp.Visible(glyph=display.Glyph.WALL, color=display.Color.LGREY)
-    cell = esper.create_entity(cmp.Cell(), cmp.Position(x, y), vis, cmp.Blocking())
+    pos = cmp.Position(x, y)
+    blocking = cmp.Blocking()
+    cell = esper.create_entity(cmp.Cell(), pos, vis, blocking)
+    if not random.randint(0, 15):
+        esper.add_component(cell, cmp.Health(max=1))
+        esper.add_component(cell, cmp.Onymous(name="wall"))
+        vis.glyph = display.Glyph.BWALL
+
     return cell
 
 

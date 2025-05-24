@@ -49,6 +49,7 @@ class Glyph(IntEnum):
     NONE = 0
     FLOOR = 3
     WALL = 637
+    BWALL = 643
     PLAYER = 73
     FRAME1 = 947
     FRAME2 = 948
