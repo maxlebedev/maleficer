@@ -61,5 +61,4 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- events that happen out of FOV should not log
 	- on-death effects
 	- trap-summoner enemy
-	- options/keybinds phase
 	- alternate mapgen, with non-rect rooms
