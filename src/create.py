@@ -19,12 +19,12 @@ def floor(x: int, y: int) -> int:
     return cell
 
 
-def wall(x: int, y: int, breakable=False) -> int:
+def wall(x: int, y: int, breakable: int = False) -> int:
     vis = cmp.Visible(glyph=display.Glyph.WALL, color=display.Color.LGREY)
     pos = cmp.Position(x, y)
     blocking = cmp.Blocking()
     cell = esper.create_entity(cmp.Cell(), pos, vis, blocking)
-    if breakable or not random.randint(0, 15):
+    if breakable:
         esper.add_component(cell, cmp.Health(max=1))
         esper.add_component(cell, cmp.Onymous(name="wall"))
         vis.glyph = display.Glyph.BWALL

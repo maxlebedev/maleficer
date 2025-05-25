@@ -52,8 +52,15 @@ class Board:
         ]
         self.cells = []
         self.board_size = display.BOARD_WIDTH * display.BOARD_HEIGHT
+        def make_wall(x, y):
+            if x in (0, display.BOARD_WIDTH-1):
+                return create.wall(x, y)
+            if y in (0, display.BOARD_HEIGHT-1):
+                return create.wall(x, y)
+            return create.wall(x, y, breakable =  not random.randint(0, 15))
+
         for x in range(display.BOARD_WIDTH):
-            col = [create.wall(x, y) for y in range(display.BOARD_HEIGHT)]
+            col = [make_wall(x, y) for y in range(display.BOARD_HEIGHT)]
             self.cells.append(col)
 
     @classmethod
