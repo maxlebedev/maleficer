@@ -67,7 +67,3 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- alternate mapgen, with non-rect rooms
 		- caves, laberynth with locked doors
 		- set-piece features
-	- cave gen
-		- blobbly room
-		- take all other rooms within X radius and make wobbly lines between
-		- If there are none, get the closest

@@ -312,3 +312,78 @@ def get_fov():
     algo = tcod.libtcodpy.FOV_SHADOW
     fov = tcod.map.compute_fov(transparency, pos.as_tuple, radius=4, algorithm=algo)
     return fov
+
+def count_neighbors(board, pos: cmp.Position):
+    offsets = [
+        (-1, -1), (-1, 0), (-1, 1),
+        (0, -1),           (0, 1),
+        (1, -1),  (1, 0),  (1, 1)
+    ]
+    indices = [(pos.x + dx, pos.y + dy) for dx, dy in offsets]
+    neighbor_walls = 0
+    for x, y in indices:
+        cell = board.get_cell(x,y)
+        if cell and esper.has_components(cell, cmp.Cell, cmp.Blocking):
+            # TODO: this is a proxy for a "wall" type
+            neighbor_walls += 1
+    return neighbor_walls
+
+
+def cave_dungeon(board):
+    for cell in board.as_sequence():
+        if not random.randint(0, 1):
+            player_pos = esper.component_for_entity(cell, cmp.Position)
+            board.set_cell(*player_pos, create.floor(*player_pos))
+    # Horizontal Blanking
+    x_slice = slice(3, display.BOARD_WIDTH-3)
+    midpoint = display.BOARD_HEIGHT//2
+    y_slice = slice(midpoint-1, midpoint+2)
+    for cell in board.as_sequence(x_slice, y_slice):
+        player_pos = esper.component_for_entity(cell, cmp.Position)
+        board.set_cell(*player_pos, create.floor(*player_pos))
+
+    neighbours = [[0 for _ in range(display.BOARD_HEIGHT)] 
+                  for _ in range(display.BOARD_WIDTH)]
+    for _ in range(4):
+        for cell in board.as_sequence():
+            player_pos = esper.component_for_entity(cell, cmp.Position)
+            wall_count = count_neighbors(board, player_pos)
+            neighbours[player_pos.x][player_pos.y] = wall_count
+    for x, row in enumerate(neighbours):
+        for y in range(len(row)):
+            if neighbours[x][y] >= 5:
+                breakable =  not random.randint(0, 15)
+                board.set_cell(x, y, create.wall(x, y, breakable=breakable))
+            elif neighbours[x][y] <= 4:
+                board.set_cell(x, y, create.floor(x, y))
+
+    boarder = {(0, y) for y in range(display.BOARD_HEIGHT)}
+    boarder |= {(display.BOARD_WIDTH-1, y) for y in range(display.BOARD_HEIGHT)}
+    boarder |= {(x, 0) for x in range(display.BOARD_WIDTH)}
+    boarder |= {(x, display.BOARD_HEIGHT-1) for x in range(display.BOARD_WIDTH)}
+
+    for x,y in boarder:
+        board.set_cell(x, y, create.wall(x, y))
+
+
+    player_pos = player_position()
+    player_pos.x, player_pos.y = display.BOARD_WIDTH//2, display.BOARD_HEIGHT//2
+
+    valid_spawns = []
+    while len(valid_spawns) < 20:
+        x = random.randint(0, display.BOARD_WIDTH-1)
+        y = random.randint(0, display.BOARD_HEIGHT-1)
+        cell = board.cells[x][y]
+        pos = esper.component_for_entity(cell, cmp.Position)
+        wall_count = count_neighbors(board, pos)
+        if wall_count == 0:
+            dist = euclidean_distance(player_pos, pos)
+            valid_spawns.append([dist, pos])
+    valid_spawns = sorted(valid_spawns, key=lambda x: x[0])
+    stairs = create.stairs(valid_spawns[-1][1])
+    board.set_cell(*valid_spawns[-1][1], stairs)
+    spawnables = [create.trap, create.potion, create.scroll, create.bat, create.skeleton, create.warlock]
+    for _, pos in valid_spawns[:-1]:
+        spawn = random.choice(spawnables)
+        spawn(pos)
+    board.build_entity_cache()

@@ -22,7 +22,7 @@ class Position:
         return iter([self.x, self.y])
 
     def lookup_in(self, matrix: list[list[T]]) -> T:
-        # IDK if I-m keeping this yet
+        # IDK if I'm keeping this yet
         return matrix[self.x][self.y]
 
     @property
