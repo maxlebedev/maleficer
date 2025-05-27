@@ -52,12 +52,13 @@ class Board:
         ]
         self.cells = []
         self.board_size = display.BOARD_WIDTH * display.BOARD_HEIGHT
+
         def make_wall(x, y):
-            if x in (0, display.BOARD_WIDTH-1):
+            if x in (0, display.BOARD_WIDTH - 1):
                 return create.wall(x, y)
-            if y in (0, display.BOARD_HEIGHT-1):
+            if y in (0, display.BOARD_HEIGHT - 1):
                 return create.wall(x, y)
-            return create.wall(x, y, breakable =  not random.randint(0, 15))
+            return create.wall(x, y, breakable=not random.randint(0, 15))
 
         for x in range(display.BOARD_WIDTH):
             col = [make_wall(x, y) for y in range(display.BOARD_HEIGHT)]
@@ -313,6 +314,7 @@ def get_fov():
     fov = tcod.map.compute_fov(transparency, pos.as_tuple, radius=4, algorithm=algo)
     return fov
 
+
 def count_neighbors(board, pos: cmp.Position):
     offsets = [
         (-1, -1), (-1, 0), (-1, 1),
@@ -322,7 +324,7 @@ def count_neighbors(board, pos: cmp.Position):
     indices = [(pos.x + dx, pos.y + dy) for dx, dy in offsets]
     neighbor_walls = 0
     for x, y in indices:
-        cell = board.get_cell(x,y)
+        cell = board.get_cell(x, y)
         if cell and esper.has_components(cell, cmp.Cell, cmp.Blocking):
             # TODO: this is a proxy for a "wall" type
             neighbor_walls += 1
@@ -352,27 +354,26 @@ def cave_dungeon(board):
     for x, row in enumerate(neighbours):
         for y in range(len(row)):
             if neighbours[x][y] >= 5:
-                breakable =  not random.randint(0, 15)
+                breakable = not random.randint(0, 15)
                 board.set_cell(x, y, create.wall(x, y, breakable=breakable))
             elif neighbours[x][y] <= 4:
                 board.set_cell(x, y, create.floor(x, y))
 
     boarder = {(0, y) for y in range(display.BOARD_HEIGHT)}
-    boarder |= {(display.BOARD_WIDTH-1, y) for y in range(display.BOARD_HEIGHT)}
+    boarder |= {(display.BOARD_WIDTH - 1, y) for y in range(display.BOARD_HEIGHT)}
     boarder |= {(x, 0) for x in range(display.BOARD_WIDTH)}
-    boarder |= {(x, display.BOARD_HEIGHT-1) for x in range(display.BOARD_WIDTH)}
+    boarder |= {(x, display.BOARD_HEIGHT - 1) for x in range(display.BOARD_WIDTH)}
 
-    for x,y in boarder:
+    for x, y in boarder:
         board.set_cell(x, y, create.wall(x, y))
 
-
     player_pos = player_position()
-    player_pos.x, player_pos.y = display.BOARD_WIDTH//2, display.BOARD_HEIGHT//2
+    player_pos.x, player_pos.y = display.BOARD_WIDTH // 2, display.BOARD_HEIGHT // 2
 
     valid_spawns = []
     while len(valid_spawns) < 20:
-        x = random.randint(0, display.BOARD_WIDTH-1)
-        y = random.randint(0, display.BOARD_HEIGHT-1)
+        x = random.randint(0, display.BOARD_WIDTH - 1)
+        y = random.randint(0, display.BOARD_HEIGHT - 1)
         cell = board.cells[x][y]
         pos = esper.component_for_entity(cell, cmp.Position)
         wall_count = count_neighbors(board, pos)
@@ -382,8 +383,24 @@ def cave_dungeon(board):
     valid_spawns = sorted(valid_spawns, key=lambda x: x[0])
     stairs = create.stairs(valid_spawns[-1][1])
     board.set_cell(*valid_spawns[-1][1], stairs)
-    spawnables = [create.trap, create.potion, create.scroll, create.bat, create.skeleton, create.warlock]
+    spawnables = [
+        create.trap,
+        create.potion,
+        create.scroll,
+        create.bat,
+        create.skeleton,
+        create.warlock,
+    ]
     for _, pos in valid_spawns[:-1]:
         spawn = random.choice(spawnables)
         spawn(pos)
     board.build_entity_cache()
+
+
+def in_player_perception(source: int):
+    """true if the source is close enough for player to hear"""
+    PLAYER_PERCEPTION_RADIUS = 10
+    player_pos = player_position()
+    pos = esper.component_for_entity(source, cmp.Position)
+    dist_to_player = euclidean_distance(player_pos, pos)
+    return dist_to_player < PLAYER_PERCEPTION_RADIUS

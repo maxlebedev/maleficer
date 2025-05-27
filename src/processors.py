@@ -99,7 +99,9 @@ class Damage(esper.Processor):
             message = f"{src_name} heals {-1 * damage.amount} to {target_name}"
             if damage.amount > 0:
                 message = f"{src_name} deals {damage.amount} to {target_name}"
-            event.Log.append(message)
+
+            if location.in_player_perception(damage.source):
+                event.Log.append(message)
 
 
 @dataclass
@@ -119,7 +121,6 @@ class Death(esper.Processor):
                 else:
                     location.BOARD.remove(killable)
                     esper.delete_entity(killable, immediate=True)
-
 
 
 @dataclass
@@ -586,7 +587,7 @@ class OptionsRender(esper.Processor):
         y = display.BOARD_HEIGHT // 2
         self.console.print(x, y, "OPTIONS", alignment=libtcodpy.CENTER)
 
-        y_idx = itertools.count(y+2)
+        y_idx = itertools.count(y + 2)
         for k, v in input.KEYMAP.items():
             height = next(y_idx)
             self.console.print(

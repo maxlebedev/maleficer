@@ -67,3 +67,4 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- alternate mapgen, with non-rect rooms
 		- caves, laberynth with locked doors
 		- set-piece features
+    - should we always place the stairs as far back as we can?
