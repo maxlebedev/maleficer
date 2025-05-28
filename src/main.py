@@ -73,6 +73,7 @@ def main() -> None:
     scene.to_phase(scene.Phase.menu)
     # location.generate_dungeon(location.BOARD)
     location.cave_dungeon(location.BOARD)
+    # location.maze_dungeon(location.BOARD)
 
     starting_spells = [
         create.firebolt_spell,

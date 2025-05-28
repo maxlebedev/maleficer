@@ -113,7 +113,6 @@ class Death(esper.Processor):
                 message = f"{named.name} is no more"
                 event.Log.append(message)
                 if esper.has_component(killable, cmp.Cell):
-                    # TODO: would be cool to implement as an on-death effect
                     pos = esper.component_for_entity(killable, cmp.Position)
                     floor = create.floor(pos.x, pos.y)
                     location.BOARD.set_cell(pos.x, pos.y, floor)

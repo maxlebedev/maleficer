@@ -316,11 +316,7 @@ def get_fov():
 
 
 def count_neighbors(board, pos: cmp.Position):
-    offsets = [
-        (-1, -1), (-1, 0), (-1, 1),
-        (0, -1),           (0, 1),
-        (1, -1),  (1, 0),  (1, 1)
-    ]
+    offsets = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
     indices = [(pos.x + dx, pos.y + dy) for dx, dy in offsets]
     neighbor_walls = 0
     for x, y in indices:
@@ -331,21 +327,32 @@ def count_neighbors(board, pos: cmp.Position):
     return neighbor_walls
 
 
+def build_perimeter_wall(board):
+    boarder = {(0, y) for y in range(display.BOARD_HEIGHT)}
+    boarder |= {(display.BOARD_WIDTH - 1, y) for y in range(display.BOARD_HEIGHT)}
+    boarder |= {(x, 0) for x in range(display.BOARD_WIDTH)}
+    boarder |= {(x, display.BOARD_HEIGHT - 1) for x in range(display.BOARD_WIDTH)}
+
+    for x, y in boarder:
+        board.set_cell(x, y, create.wall(x, y))
+
+
 def cave_dungeon(board):
     for cell in board.as_sequence():
         if not random.randint(0, 1):
             player_pos = esper.component_for_entity(cell, cmp.Position)
             board.set_cell(*player_pos, create.floor(*player_pos))
     # Horizontal Blanking
-    x_slice = slice(3, display.BOARD_WIDTH-3)
-    midpoint = display.BOARD_HEIGHT//2
-    y_slice = slice(midpoint-1, midpoint+2)
+    x_slice = slice(3, display.BOARD_WIDTH - 3)
+    midpoint = display.BOARD_HEIGHT // 2
+    y_slice = slice(midpoint - 1, midpoint + 2)
     for cell in board.as_sequence(x_slice, y_slice):
         player_pos = esper.component_for_entity(cell, cmp.Position)
         board.set_cell(*player_pos, create.floor(*player_pos))
 
-    neighbours = [[0 for _ in range(display.BOARD_HEIGHT)] 
-                  for _ in range(display.BOARD_WIDTH)]
+    neighbours = [
+        [0 for _ in range(display.BOARD_HEIGHT)] for _ in range(display.BOARD_WIDTH)
+    ]
     for _ in range(4):
         for cell in board.as_sequence():
             player_pos = esper.component_for_entity(cell, cmp.Position)
@@ -359,13 +366,7 @@ def cave_dungeon(board):
             elif neighbours[x][y] <= 4:
                 board.set_cell(x, y, create.floor(x, y))
 
-    boarder = {(0, y) for y in range(display.BOARD_HEIGHT)}
-    boarder |= {(display.BOARD_WIDTH - 1, y) for y in range(display.BOARD_HEIGHT)}
-    boarder |= {(x, 0) for x in range(display.BOARD_WIDTH)}
-    boarder |= {(x, display.BOARD_HEIGHT - 1) for x in range(display.BOARD_WIDTH)}
-
-    for x, y in boarder:
-        board.set_cell(x, y, create.wall(x, y))
+    build_perimeter_wall(board)
 
     player_pos = player_position()
     player_pos.x, player_pos.y = display.BOARD_WIDTH // 2, display.BOARD_HEIGHT // 2
@@ -404,3 +405,76 @@ def in_player_perception(source: int):
     pos = esper.component_for_entity(source, cmp.Position)
     dist_to_player = euclidean_distance(player_pos, pos)
     return dist_to_player < PLAYER_PERCEPTION_RADIUS
+
+
+def maze_dungeon(board):
+    """
+    plan:
+        every even coord is a space. every odd a wall
+        we start at a random location get all neighbor spaces and pick one at random
+        add current space to backtrack stack
+        break wall between them. Add both to visited set
+        then pick an unvisited neighbor and repeat
+        when there are no neighbors, pop stack and try again for that space
+
+        place stairs in one of the backtrack spots
+    """
+    def neighbors(board, seen: set, cell: int):
+        offsets = [(-2, 0), (0, -2), (0, 2),(2, 0)]
+        pos = esper.component_for_entity(cell, cmp.Position)
+        indices = [(pos.x + dx, pos.y + dy) for dx, dy in offsets]
+
+        neighbors = []
+        for x, y in indices:
+            if x in {0, display.BOARD_WIDTH-1} or y in {0, display.BOARD_HEIGHT-1}:
+                continue
+            cell = board.get_cell(x, y)
+            if cell and cell not in seen:
+                neighbors.append(cell)
+        return neighbors
+
+    def break_wall_between(cell1, cell2):
+        pos1 = esper.component_for_entity(cell1, cmp.Position)
+        pos2 = esper.component_for_entity(cell2, cmp.Position)
+        x = (pos1.x + pos2.x)//2
+        y = (pos1.y + pos2.y)//2
+        board.set_cell(x, y, create.floor(x,y))
+
+    for cell in board.as_sequence():
+        pos = esper.component_for_entity(cell, cmp.Position)
+        if pos.x % 2 == 1 and pos.y % 2 == 1:
+            board.set_cell(*pos, create.floor(*pos))
+        else:
+            board.set_cell(*pos, create.wall(*pos))
+    build_perimeter_wall(board)
+
+    start_x = random.randrange(1, display.BOARD_WIDTH, 2)
+    start_y = random.randrange(1, display.BOARD_HEIGHT, 2)
+
+    player_pos = player_position()
+    player_pos.x, player_pos.y = start_x, start_y 
+
+    current = board.get_cell(start_x, start_y)
+    backtrack = [current]
+    seen = {current}
+    stair_cells = []
+    while backtrack:
+        n = neighbors(board, seen, current)
+        if n:
+            next = random.choice(n)
+            break_wall_between(current, next)
+            backtrack.append(next)
+            current = next
+            seen.add(current)
+        else:
+            pos = esper.component_for_entity(current, cmp.Position)
+            wall_count = count_neighbors(board, pos)
+            if wall_count >= 5:
+                stair_cells.append(current)
+            current = backtrack.pop()
+
+    stair_cell = random.choice(stair_cells)
+    pos = esper.component_for_entity(stair_cell, cmp.Position)
+    board.set_cell(*pos, create.stairs(pos))
+
+    board.build_entity_cache()
