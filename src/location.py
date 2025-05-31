@@ -402,7 +402,9 @@ def in_player_perception(source: int):
     """true if the source is close enough for player to hear"""
     PLAYER_PERCEPTION_RADIUS = 10
     player_pos = player_position()
-    pos = esper.component_for_entity(source, cmp.Position)
+    pos = esper.try_component(source, cmp.Position)
+    if not pos:
+        return True
     dist_to_player = euclidean_distance(player_pos, pos)
     return dist_to_player < PLAYER_PERCEPTION_RADIUS
 

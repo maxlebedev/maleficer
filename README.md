@@ -64,6 +64,8 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- on-death effects
 	- trap-summoner enemy
 	- alternate mapgen, with non-rect rooms
-		- caves, laberynth with locked doors
+		- laberynth with locked doors
 		- set-piece features
 	- unlearning spells
+	    - you can "unlearn" by reverting to scroll
+	- Found a wall I was able to walk through. BUG

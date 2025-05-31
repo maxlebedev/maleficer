@@ -116,14 +116,16 @@ def scroll(pos: cmp.Position) -> int:
     vis = cmp.Visible(glyph=display.Glyph.SCROLL, color=display.Color.MAGENTA)
     col = cmp.Collectable()
     hp = cmp.Health(max=1)
-    named = cmp.Onymous(name="scroll")
 
     spell = random_spell()
     learnable = cmp.Learnable(spell=spell)
+    named = cmp.Onymous(name="scroll")
     # "learn spell" is an effect
 
     components = [pos, vis, col, hp, named, learnable]
     scroll = esper.create_entity(*components)
+    spell_name = esper.component_for_entity(spell, cmp.Onymous).name
+    named.name = f"{spell_name} scroll"
     return scroll
 
 
@@ -155,13 +157,13 @@ def random_spell(power_budget=10) -> int:
         harm_effect = cmp.DamageEffect(amount=damage, source=player)
     name = "".join(random.choices(string.ascii_lowercase, k=5))
     named = cmp.Onymous(name=name)
-    damage_spell = esper.create_entity(spell_cmp, harm_effect, named, cooldown)
+    spell = esper.create_entity(spell_cmp, harm_effect, named, cooldown)
 
     match random.randint(0, 6):
         case 0:
             radius = random.randint(1, 4)
-            esper.add_component(damage_spell, cmp.EffectArea(radius=radius))
-    return damage_spell
+            esper.add_component(spell, cmp.EffectArea(radius=radius))
+    return spell
 
 
 def inventory_map() -> list:
