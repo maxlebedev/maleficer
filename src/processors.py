@@ -554,7 +554,26 @@ class InventoryInputEvent(InputEvent):
             input.KEYMAP[input.Input.MOVE_UP]: (self.move_selection, [-1]),
             input.KEYMAP[input.Input.ESC]: to_level,
             input.KEYMAP[input.Input.SELECT]: self.use_item,
+            input.KEYMAP[input.Input.SPELL1]: [self.unlearn, [1]],
+            input.KEYMAP[input.Input.SPELL2]: [self.unlearn, [2]],
+            input.KEYMAP[input.Input.SPELL3]: [self.unlearn, [3]],
+            input.KEYMAP[input.Input.SPELL4]: [self.unlearn, [4]],
         }
+
+    def unlearn(self, slot):
+        """temporary way to unlearn spells by slot. doesn't work with empty inventory"""
+        unlearned = False
+        for spell_ent, (known) in esper.get_component(cmp.Known):
+            if known.slot == slot:
+                esper.remove_component(spell_ent, cmp.Known)
+                dummy_pos = cmp.Position(0,0)
+                scroll = create.scroll(dummy_pos, spell_ent)
+                esper.add_component(scroll, cmp.InInventory())
+                unlearned = True
+        if not unlearned:
+            esper.dispatch_event("flash")
+            event.Log.append("can't unlearn, spell doesn't exist")
+
 
     def move_selection(self, diff: int):
         menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)

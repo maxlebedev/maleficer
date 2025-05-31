@@ -112,12 +112,13 @@ def potion(pos: cmp.Position) -> int:
     return potion
 
 
-def scroll(pos: cmp.Position) -> int:
+def scroll(pos: cmp.Position, spell: int|None=None) -> int:
     vis = cmp.Visible(glyph=display.Glyph.SCROLL, color=display.Color.MAGENTA)
     col = cmp.Collectable()
     hp = cmp.Health(max=1)
-
-    spell = random_spell()
+    
+    if not spell:
+        spell = random_spell()
     learnable = cmp.Learnable(spell=spell)
     named = cmp.Onymous(name="scroll")
     # "learn spell" is an effect
