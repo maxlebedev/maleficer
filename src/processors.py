@@ -110,8 +110,9 @@ class Death(esper.Processor):
         # crashes if player gets deleted
         for killable, (health, named) in ecs.Query(cmp.Health, cmp.Onymous):
             if health.current <= 0:
-                message = f"{named.name} is no more"
-                event.Log.append(message)
+                if location.in_player_perception(killable):
+                    message = f"{named.name} is no more"
+                    event.Log.append(message)
                 if esper.has_component(killable, cmp.Cell):
                     pos = esper.component_for_entity(killable, cmp.Position)
                     floor = create.floor(pos.x, pos.y)
