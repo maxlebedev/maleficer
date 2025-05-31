@@ -255,6 +255,8 @@ class Render(esper.Processor):
     console: tcod.console.Console
     context: tcod.context.Context
 
+    dashes = "-" * (display.PANEL_WIDTH - 2)
+
     def render_bar(self, x: int, y: int, curr: int, maximum: int, total_width: int):
         bar_width = int(curr / maximum * total_width)
         bg = display.Color.BAR_EMPTY
@@ -266,6 +268,25 @@ class Render(esper.Processor):
 
         text = f"HP: {curr}/{maximum}"
         self.console.print(x=x, y=y, string=text, fg=display.Color.DGREY)
+
+    def _draw_select_info(self, y_idx, entity):
+        self.console.print(1, next(y_idx), self.dashes)
+        spell_component_details = [
+            ("Damage", cmp.DamageEffect, "amount"),
+            ("Range", cmp.Spell, "target_range"),
+            ("Cooldown", cmp.Cooldown, "turns"),
+        ]
+        for name, try_cmp, attr in spell_component_details:
+            component = esper.try_component(entity, try_cmp)
+            if component:
+                value = getattr(component, attr)
+                self.console.print(1, next(y_idx), f"{name}:{value}")
+        if bleed_effect := esper.try_component(entity, cmp.BleedEffect):
+            message = f"Grants Bleed:{bleed_effect.value}"
+            self.console.print(1, next(y_idx), message)
+        if aoe := esper.try_component(entity, cmp.EffectArea):
+            message = f"Effect Radius:{aoe.radius}"
+            self.console.print(1, next(y_idx), message)
 
     def _draw_panels(self):
         panel_params = {
@@ -284,7 +305,6 @@ class Render(esper.Processor):
                 display.Glyph.FRAME9,
             ),
         }
-        dashes = "-" * (display.PANEL_WIDTH - 2)
 
         # left panel
         self.console.draw_frame(x=0, **panel_params)
@@ -298,7 +318,7 @@ class Render(esper.Processor):
 
         y_idx = itertools.count(8)
         # spells
-        self.console.print(1, next(y_idx), dashes)
+        self.console.print(1, next(y_idx), self.dashes)
         spells = ecs.Query(cmp.Spell, cmp.Onymous, cmp.Known)
         sorted_spells = sorted(spells, key=lambda x: x[1][2].slot)
         for spell_ent, (_, named, known) in sorted_spells:
@@ -308,26 +328,9 @@ class Render(esper.Processor):
             self.console.print(1, next(y_idx), text)
 
         # if targeting, also print spell info
-        targeting = esper.get_component(cmp.Targeting)
-        if targeting:
+        if targeting := esper.get_component(cmp.Targeting):
             trg_ent, _ = targeting[0]
-            self.console.print(1, next(y_idx), dashes)
-            spell_component_details = [
-                ("Damage", cmp.DamageEffect, "amount"),
-                ("Range", cmp.Spell, "target_range"),
-                ("Cooldown", cmp.Cooldown, "turns"),
-            ]
-            for name, try_cmp, attr in spell_component_details:
-                component = esper.try_component(trg_ent, try_cmp)
-                if component:
-                    value = getattr(component, attr)
-                    self.console.print(1, next(y_idx), f"{name}:{value}")
-            if bleed_effect := esper.try_component(trg_ent, cmp.BleedEffect):
-                message = f"Grants Bleed:{bleed_effect.value}"
-                self.console.print(1, next(y_idx), message)
-            if aoe := esper.try_component(trg_ent, cmp.EffectArea):
-                message = f"Effect Radius:{aoe.radius}"
-                self.console.print(1, next(y_idx), message)
+            self._draw_select_info(y_idx, trg_ent)
 
         # right panel
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
