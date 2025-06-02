@@ -21,6 +21,14 @@ import scene
 import typ
 
 
+def get_selected_menuitem():
+    # TODO: move somewhere
+    inv_map = create.inventory_map()
+    menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
+    selection = inv_map[menu_selection.item][1].pop()
+    return selection
+
+
 @dataclass
 class Movement(esper.Processor):
     def bump(self, source, target):
@@ -333,14 +341,9 @@ class Render(esper.Processor):
             self._draw_select_info(y_idx, trg_ent)
         else:
             if scene.CURRENT_PHASE == scene.Phase.inventory:
-            # TODO: this menu_selection check is repeated in code. DRY it up
-                if menu_selection := esper.get_component(cmp.MenuSelection):
-                    menu_item_num = menu_selection[0][1].item
-                    for i, (_ , entities) in enumerate(inv_map):
-                        if menu_item_num == i:
-                            entity = next(iter(entities))
-                            if learnable := esper.try_component(entity, cmp.Learnable):
-                                self._draw_select_info(y_idx, learnable.spell)
+                selection = get_selected_menuitem()
+                if learnable := esper.try_component(selection, cmp.Learnable):
+                    self._draw_select_info(y_idx, learnable.spell)
 
         # right panel
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
@@ -594,10 +597,8 @@ class InventoryInputEvent(InputEvent):
         menu_selection.item = math_util.clamp(menu_selection.item, inventory_size)
 
     def use_item(self):
-        inv_map = create.inventory_map()
-        menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
-        name = inv_map[menu_selection.item][0]
-        selection = inv_map[menu_selection.item][1].pop()
+        selection = get_selected_menuitem()
+        name = esper.component_for_entity(selection, cmp.Onymous).name
         print(f"using {name}: {selection}")
 
         try:

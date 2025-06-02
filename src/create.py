@@ -14,7 +14,7 @@ import scene
 
 # TODO: should these take a position?
 def floor(x: int, y: int) -> int:
-    vis = cmp.Visible(glyph=display.Glyph.FLOOR, color=display.Color.LGREY)
+    vis = cmp.Visible(glyph=display.Glyph.FLOOR, color=display.Color.DGREY)
     cell = esper.create_entity(cmp.Cell(), cmp.Position(x, y), vis, cmp.Transparent())
     return cell
 
