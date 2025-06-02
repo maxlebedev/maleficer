@@ -60,7 +60,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 		- confirm step where we learn the spell stats?
 	- effect application restrictions. (mutilate can't hit traps)
 	- spell mods (+1 range, +1 dmg pickups)
-	- events that happen out of FOV should not log
 	- on-death effects
 	- trap-summoner enemy
 	- alternate mapgen, with non-rect rooms
@@ -68,3 +67,4 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 		- set-piece features
 	- Found a wall I was able to walk through. BUG
 	- When learning and unlearning spells, npcs take a turn, but health loss isn't reflected until player moves
+	- consider learned spells starting with maxed cooldown
