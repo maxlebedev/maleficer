@@ -66,6 +66,5 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- alternate mapgen, with non-rect rooms
 		- laberynth with locked doors
 		- set-piece features
-	- unlearning spells
-	    - you can "unlearn" by reverting to scroll
 	- Found a wall I was able to walk through. BUG
+	- When learning and unlearning spells, npcs take a turn, but health loss isn't reflected until player moves

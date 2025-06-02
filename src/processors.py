@@ -570,6 +570,8 @@ class InventoryInputEvent(InputEvent):
                 scroll = create.scroll(dummy_pos, spell_ent)
                 esper.add_component(scroll, cmp.InInventory())
                 unlearned = True
+                event.Tick()
+                scene.to_phase(scene.Phase.level, NPCTurn)
         if not unlearned:
             esper.dispatch_event("flash")
             event.Log.append("can't unlearn, spell doesn't exist")
@@ -640,6 +642,8 @@ class Upkeep(esper.Processor):
         event.Queues.tick.clear()
         for entity, (status,) in ecs.Query(cmp.State):
             for status_effect, duration in list(status.map.items()):
+                # TODO: we only want "active" things to tick down
+                # or else cooldowns can be cheesed by swapping out spells
                 condition.apply(entity, status_effect, duration)
                 status.map[status_effect] = max(0, duration - 1)
                 if status.map[status_effect] == 0:
