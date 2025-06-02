@@ -37,7 +37,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- I like context from breadcrumbs, but there is now a search issue with multiple apply functions, multiple Damage things, etc
 	- if a condition causes 0 health, death is still only processed after that turn
 	- look into integer_scaling for context.present(console)
-	- spell power buget should be `lvl * some multiple`
 	- Queries that return nothing can crash sometimes :(
 	- EffectArea could be take a radius, or every cell in the effect could have the cmp. Neither is necessarily better for when we eventually have a line spell. The radius is at least easier to track, and line can be another property on EffectArea
 	- flash_pos redraws screen first, so the flash and glyph aren't desynced
@@ -53,11 +52,10 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- MenuItem is used for actual menus, but not for inventory (not 1:1 with entities)
 	- Right now levels are limited to the board size. We could decouple those and have the board "scroll"
     - should we always place the stairs as far back as we can?
-# TODO:
+# TODO
 	- All effects on the targeting entity should get their targets filled in if they haven't already
 		- But, only the non-static targets should get cleared, and we don't have a way to store that info
 	- better spell learning, unlearn, learn confirm
-		- confirm step where we learn the spell stats?
 	- effect application restrictions. (mutilate can't hit traps)
 	- spell mods (+1 range, +1 dmg pickups)
 	- on-death effects
@@ -65,6 +63,9 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- alternate mapgen, with non-rect rooms
 		- laberynth with locked doors
 		- set-piece features
-	- Found a wall I was able to walk through. BUG
-	- When learning and unlearning spells, npcs take a turn, but health loss isn't reflected until player moves
 	- consider learned spells starting with maxed cooldown
+	- In caves, NPCs shouldn't spawn too close to player
+	- spell power buget should be `lvl * some multiple`
+# BUGS
+	- Found a wall I was able to walk through.
+	- When learning and unlearning spells, npcs take a turn, but health loss isn't reflected until player moves
