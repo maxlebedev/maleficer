@@ -331,6 +331,16 @@ class Render(esper.Processor):
         if targeting := esper.get_component(cmp.Targeting):
             trg_ent, _ = targeting[0]
             self._draw_select_info(y_idx, trg_ent)
+        else:
+            if scene.CURRENT_PHASE == scene.Phase.inventory:
+            # TODO: this menu_selection check is repeated in code. DRY it up
+                if menu_selection := esper.get_component(cmp.MenuSelection):
+                    menu_item_num = menu_selection[0][1].item
+                    for i, (_ , entities) in enumerate(inv_map):
+                        if menu_item_num == i:
+                            entity = next(iter(entities))
+                            if learnable := esper.try_component(entity, cmp.Learnable):
+                                self._draw_select_info(y_idx, learnable.spell)
 
         # right panel
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)

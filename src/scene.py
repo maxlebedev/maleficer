@@ -9,6 +9,7 @@ import location
 import processors
 
 PHASES = dict()
+CURRENT_PHASE = None
 
 
 class Phase(enum.Enum):
@@ -71,6 +72,7 @@ def options_phase(context, console):
 
 def to_phase(phase: Phase, start_proc: type[esper.Processor] | None = None):
     """We dynamically add and remove processors when moving between phases. Each phase has its own proc loop."""
+    global CURRENT_PHASE
     for proc in esper._processors:
         esper.remove_processor(type(proc))
     esper._processors = []
@@ -83,6 +85,7 @@ def to_phase(phase: Phase, start_proc: type[esper.Processor] | None = None):
     proc_list = list(reversed(proc_list))
     for i, proc in enumerate(proc_list):
         esper.add_processor(proc, priority=i)
+    CURRENT_PHASE = phase
 
 
 def oneshot(proctype: type[esper.Processor]):
