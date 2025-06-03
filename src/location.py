@@ -12,6 +12,9 @@ import display
 import ecs
 import typ
 
+BOARD: "Board"
+LEVEL = 1
+
 
 def player_position():
     # TODO: fine to crash if player missing?
@@ -148,9 +151,6 @@ class Board:
             self.entities_at(pos).remove(entity)
         pos.x, pos.y = x, y
         self.entities_at(pos).add(entity)
-
-
-BOARD: Board
 
 
 @dataclass
@@ -421,14 +421,15 @@ def maze_dungeon(board):
 
         place stairs in one of the backtrack spots
     """
+
     def neighbors(board, seen: set, cell: int):
-        offsets = [(-2, 0), (0, -2), (0, 2),(2, 0)]
+        offsets = [(-2, 0), (0, -2), (0, 2), (2, 0)]
         pos = esper.component_for_entity(cell, cmp.Position)
         indices = [(pos.x + dx, pos.y + dy) for dx, dy in offsets]
 
         neighbors = []
         for x, y in indices:
-            if x in {0, display.BOARD_WIDTH-1} or y in {0, display.BOARD_HEIGHT-1}:
+            if x in {0, display.BOARD_WIDTH - 1} or y in {0, display.BOARD_HEIGHT - 1}:
                 continue
             cell = board.get_cell(x, y)
             if cell and cell not in seen:
@@ -438,9 +439,9 @@ def maze_dungeon(board):
     def break_wall_between(cell1, cell2):
         pos1 = esper.component_for_entity(cell1, cmp.Position)
         pos2 = esper.component_for_entity(cell2, cmp.Position)
-        x = (pos1.x + pos2.x)//2
-        y = (pos1.y + pos2.y)//2
-        board.set_cell(x, y, create.floor(x,y))
+        x = (pos1.x + pos2.x) // 2
+        y = (pos1.y + pos2.y) // 2
+        board.set_cell(x, y, create.floor(x, y))
 
     for cell in board.as_sequence():
         pos = esper.component_for_entity(cell, cmp.Position)
@@ -454,7 +455,7 @@ def maze_dungeon(board):
     start_y = random.randrange(1, display.BOARD_HEIGHT, 2)
 
     player_pos = player_position()
-    player_pos.x, player_pos.y = start_x, start_y 
+    player_pos.x, player_pos.y = start_x, start_y
 
     current = board.get_cell(start_x, start_y)
     backtrack = [current]

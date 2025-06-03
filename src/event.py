@@ -105,7 +105,7 @@ def effects_to_events(source: int):
             Log.append("Max spells learned")
             raise typ.InvalidAction("learning failed")
         else:
-            slotnum = min({1,2,3,4}-{k[1].slot for k in known_spells})
+            slotnum = min({1, 2, 3, 4} - {k[1].slot for k in known_spells})
             esper.add_component(learnable.spell, cmp.Known(slotnum))
 
     if cd_effect := esper.try_component(source, cmp.Cooldown):

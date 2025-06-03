@@ -14,7 +14,7 @@ import scene
 
 # TODO: should these take a position?
 def floor(x: int, y: int) -> int:
-    vis = cmp.Visible(glyph=display.Glyph.FLOOR, color=display.Color.DGREY)
+    vis = cmp.Visible(glyph=display.Glyph.FLOOR, color=display.Color.FLOOR)
     cell = esper.create_entity(cmp.Cell(), cmp.Position(x, y), vis, cmp.Transparent())
     return cell
 
@@ -43,6 +43,7 @@ def stairs(pos: cmp.Position) -> int:
         player = ecs.Query(cmp.Player).first()
         if target_cmp := esper.try_component(stairs, cmp.Target):
             if target_cmp.target == player:
+                location.LEVEL += 1
                 location.new_level()
 
     cbe = cmp.CallbackEffect(callback=descend)
@@ -98,7 +99,7 @@ def warlock(pos: cmp.Position) -> int:
     return warlock
 
 
-def potion(pos: cmp.Position) -> int:
+def potion(pos: cmp.Position | None = None) -> int:
     vis = cmp.Visible(glyph=display.Glyph.POTION, color=display.Color.GREEN)
     col = cmp.Collectable()
     hp = cmp.Health(max=1)
@@ -107,26 +108,31 @@ def potion(pos: cmp.Position) -> int:
     player = ecs.Query(cmp.Player).first()
     heal = cmp.HealEffect(amount=2)
     target = cmp.Target(target=player)
-    components = [pos, vis, col, hp, named, heal, target]
+    components = [vis, col, hp, named, heal, target]
     potion = esper.create_entity(*components)
+    if pos:
+        esper.add_component(potion, pos)
     return potion
 
 
-def scroll(pos: cmp.Position, spell: int|None=None) -> int:
+def scroll(pos: cmp.Position | None = None, spell: int | None = None) -> int:
     vis = cmp.Visible(glyph=display.Glyph.SCROLL, color=display.Color.MAGENTA)
     col = cmp.Collectable()
     hp = cmp.Health(max=1)
-    
+
     if not spell:
-        spell = random_spell()
+        spell = random_spell(5 + (location.LEVEL * 5))
     learnable = cmp.Learnable(spell=spell)
-    named = cmp.Onymous(name="scroll")
     # "learn spell" is an effect
 
-    components = [pos, vis, col, hp, named, learnable]
+    components = [vis, col, hp, learnable]
     scroll = esper.create_entity(*components)
+    if pos:
+        esper.add_component(scroll, pos)
+
     spell_name = esper.component_for_entity(spell, cmp.Onymous).name
-    named.name = f"{spell_name} scroll"
+    named = cmp.Onymous(name=f"{spell_name} scroll")
+    esper.add_component(scroll, named)
     return scroll
 
 
@@ -254,3 +260,7 @@ def player():
     hp = cmp.Health(max=10)
     named = cmp.Onymous(name="player")
     esper.create_entity(cmp.Player(), pos, vis, cmp.Blocking(), hp, named)
+
+def starting_inventory():
+    starting_potion = potion()
+    esper.add_component(starting_potion, cmp.InInventory())

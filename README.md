@@ -66,6 +66,8 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- consider learned spells starting with maxed cooldown
 	- In caves, NPCs shouldn't spawn too close to player
 	- spell power buget should be `lvl * some multiple`
+	- drop option for inventory items
+	- pin AOE to range-1
 # BUGS
 	- Found a wall I was able to walk through.
 	- When learning and unlearning spells, npcs take a turn, but health loss isn't reflected until player moves

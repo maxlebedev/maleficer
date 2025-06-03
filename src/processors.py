@@ -579,8 +579,7 @@ class InventoryInputEvent(InputEvent):
         for spell_ent, (known) in esper.get_component(cmp.Known):
             if known.slot == slot:
                 esper.remove_component(spell_ent, cmp.Known)
-                dummy_pos = cmp.Position(0,0)
-                scroll = create.scroll(dummy_pos, spell_ent)
+                scroll = create.scroll(spell=spell_ent)
                 esper.add_component(scroll, cmp.InInventory())
                 unlearned = True
                 event.Tick()

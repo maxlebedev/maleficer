@@ -86,6 +86,7 @@ def main() -> None:
         spell()
 
     create.main_menu_opts()
+    create.starting_inventory()
 
     flash_callback = lambda: flash(context, console)
     esper.set_handler("redraw", redraw)

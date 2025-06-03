@@ -41,6 +41,7 @@ class Color:
     BAR_FILLED = GREEN
     BAR_EMPTY = RED
     TARGET = RED
+    FLOOR = (70, 70, 70)
 
 
 class Glyph(IntEnum):
