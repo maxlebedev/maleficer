@@ -153,10 +153,10 @@ def random_spell(power_budget=10) -> int:
     match random.randint(0, 3):
         case 0:
             waste_chance = 0.4
-    damage, rnge, cooldown = spell_stats(power_budget, waste_chance)
+    damage, target_range, cooldown = spell_stats(power_budget, waste_chance)
 
     player = ecs.Query(cmp.Player).first()
-    spell_cmp = cmp.Spell(target_range=rnge)
+    spell_cmp = cmp.Spell(target_range=target_range)
     cooldown = cmp.Cooldown(turns=cooldown)
     if waste_chance == 0.4:
         harm_effect = cmp.BleedEffect(value=damage)
@@ -167,8 +167,9 @@ def random_spell(power_budget=10) -> int:
     spell = esper.create_entity(spell_cmp, harm_effect, named, cooldown)
 
     match random.randint(0, 6):
+        # TODO: pull this into the power budget calculation
         case 0:
-            radius = random.randint(1, 4)
+            radius = random.randint(1, target_range-1)
             esper.add_component(spell, cmp.EffectArea(radius=radius))
     return spell
 

@@ -28,6 +28,12 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- Why explore the level, (vs doing down asap)
 	- What is the progression system?
 
+# Map Plans
+	- cave levels
+	- laberynth levels
+		- locked doors
+	- set-piece features
+
 # Arch concerns
 	- The Targeting phase and associated components are coupled to spell casting, if we have other things that target that'll need to change
 		- Each effect component should have its own target, in case we have dmg+heal on one spell, for exampe
@@ -47,7 +53,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- Currently, Effects (damage, etc) just go on their sources, and are applied on `effects_to_events` invocation
 		- This makes `effects_to_events` a sort of do-everything function
 	- When I take a step, ranged enemies shoot me before step completes. feels correct for melee but unintuitive for range.
-	- mutilate into warlocks is rough. Maybe warlocks aren't a lvl 1 spawn
 	- Should damage actually fizzle if the source is dead? We could just put src.name on the event, which allows the entity to die without issue.
 	- MenuItem is used for actual menus, but not for inventory (not 1:1 with entities)
 	- Right now levels are limited to the board size. We could decouple those and have the board "scroll"
@@ -60,14 +65,10 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- spell mods (+1 range, +1 dmg pickups)
 	- on-death effects
 	- trap-summoner enemy
-	- alternate mapgen, with non-rect rooms
-		- laberynth with locked doors
-		- set-piece features
 	- consider learned spells starting with maxed cooldown
 	- In caves, NPCs shouldn't spawn too close to player
 	- spell power buget should be `lvl * some multiple`
 	- drop option for inventory items
-	- pin AOE to range-1
 # BUGS
 	- Found a wall I was able to walk through.
 	- When learning and unlearning spells, npcs take a turn, but health loss isn't reflected until player moves

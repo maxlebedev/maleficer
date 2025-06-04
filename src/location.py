@@ -385,15 +385,16 @@ def cave_dungeon(board):
     stairs = create.stairs(valid_spawns[-1][1])
     board.set_cell(*valid_spawns[-1][1], stairs)
     spawnables = [
-        create.trap,
-        create.potion,
-        create.scroll,
-        create.bat,
-        create.skeleton,
-        create.warlock,
+        [create.trap,3],
+        [create.potion,2],
+        [create.scroll,1],
+        [create.bat,5],
+        [create.skeleton,3],
+        [create.warlock,1],
     ]
     for _, pos in valid_spawns[:-1]:
-        spawn = random.choice(spawnables)
+        s_ent, s_weight = zip(*spawnables)
+        spawn = random.choices(s_ent, s_weight)[0]
         spawn(pos)
     board.build_entity_cache()
 
