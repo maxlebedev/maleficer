@@ -28,6 +28,7 @@ class Input(enum.Enum):
     SPELL4 = enum.auto()
     INVENTORY = enum.auto()
     SKIP = enum.auto()
+    ALTERNATE = enum.auto()
 
 
 def load_keymap(keymap_json_path):

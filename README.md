@@ -56,7 +56,8 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- Should damage actually fizzle if the source is dead? We could just put src.name on the event, which allows the entity to die without issue.
 	- MenuItem is used for actual menus, but not for inventory (not 1:1 with entities)
 	- Right now levels are limited to the board size. We could decouple those and have the board "scroll"
-    - should we always place the stairs as far back as we can?
+	- should we always place the stairs as far back as we can?
+	- wet status from water tiles? are we that sort of game?
 # TODO
 	- All effects on the targeting entity should get their targets filled in if they haven't already
 		- But, only the non-static targets should get cleared, and we don't have a way to store that info

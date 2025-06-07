@@ -168,10 +168,10 @@ class GameInputEvent(InputEvent):
             input.KEYMAP[input.Input.MOVE_UP]: (self.move, [0, -1]),
             input.KEYMAP[input.Input.MOVE_RIGHT]: (self.move, [1, 0]),
             input.KEYMAP[input.Input.ESC]: (scene.to_phase, [scene.Phase.menu]),
-            input.KEYMAP[input.Input.SPELL1]: (self.to_target, [1]),
-            input.KEYMAP[input.Input.SPELL2]: (self.to_target, [2]),
-            input.KEYMAP[input.Input.SPELL3]: (self.to_target, [3]),
-            input.KEYMAP[input.Input.SPELL4]: (self.to_target, [4]),
+            input.KEYMAP[input.Input.SPELL1]: (self.handle_slot_key, [1]),
+            input.KEYMAP[input.Input.SPELL2]: (self.handle_slot_key, [2]),
+            input.KEYMAP[input.Input.SPELL3]: (self.handle_slot_key, [3]),
+            input.KEYMAP[input.Input.SPELL4]: (self.handle_slot_key, [4]),
             input.KEYMAP[input.Input.INVENTORY]: self.to_inventory,
             input.KEYMAP[input.Input.SKIP]: self.skip,
         }
@@ -194,8 +194,32 @@ class GameInputEvent(InputEvent):
         event.Movement(player, x, y)
         event.Tick()
 
+    def handle_slot_key(self, slot: int):
+        state = tcod.event.get_keyboard_state()
+        alt_key = input.KEYMAP[input.Input.ALTERNATE]
+        if state[alt_key.scancode]:
+            self.unlearn(slot)
+            return
+        self.to_target(slot)
+
+    def unlearn(self, slot):
+        """take a spell and turn it into a scroll"""
+        unlearned = False
+        for spell_ent, (known) in esper.get_component(cmp.Known):
+            if known.slot == slot:
+                esper.remove_component(spell_ent, cmp.Known)
+                scroll = create.scroll(spell=spell_ent)
+                esper.add_component(scroll, cmp.InInventory())
+                unlearned = True
+                event.Tick()
+                scene.to_phase(scene.Phase.level, NPCTurn)
+        if not unlearned:
+            esper.dispatch_event("flash")
+            event.Log.append("can't unlearn, spell doesn't exist")
+
     def to_target(self, slot: int):
         # TODO: This probably wants to take spell_ent and not slot num
+
         casting_spell = None
         for spell_ent, (known) in esper.get_component(cmp.Known):
             if known.slot == slot:
@@ -567,27 +591,7 @@ class InventoryInputEvent(InputEvent):
             input.KEYMAP[input.Input.MOVE_UP]: (self.move_selection, [-1]),
             input.KEYMAP[input.Input.ESC]: to_level,
             input.KEYMAP[input.Input.SELECT]: self.use_item,
-            input.KEYMAP[input.Input.SPELL1]: [self.unlearn, [1]],
-            input.KEYMAP[input.Input.SPELL2]: [self.unlearn, [2]],
-            input.KEYMAP[input.Input.SPELL3]: [self.unlearn, [3]],
-            input.KEYMAP[input.Input.SPELL4]: [self.unlearn, [4]],
         }
-
-    def unlearn(self, slot):
-        """temporary way to unlearn spells by slot. doesn't work with empty inventory"""
-        unlearned = False
-        for spell_ent, (known) in esper.get_component(cmp.Known):
-            if known.slot == slot:
-                esper.remove_component(spell_ent, cmp.Known)
-                scroll = create.scroll(spell=spell_ent)
-                esper.add_component(scroll, cmp.InInventory())
-                unlearned = True
-                event.Tick()
-                scene.to_phase(scene.Phase.level, NPCTurn)
-        if not unlearned:
-            esper.dispatch_event("flash")
-            event.Log.append("can't unlearn, spell doesn't exist")
-
 
     def move_selection(self, diff: int):
         menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
