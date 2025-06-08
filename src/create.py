@@ -88,7 +88,7 @@ def skeleton(pos: cmp.Position) -> int:
 
 def warlock(pos: cmp.Position) -> int:
     vis = cmp.Visible(glyph=display.Glyph.WARLOCK, color=display.Color.INDIGO)
-    hp = cmp.Health(max=3)
+    hp = cmp.Health(max=2)
     named = cmp.Onymous(name="warlock")
     melee = cmp.Ranged(radius=3)
     components = [cmp.Enemy(), pos, vis, cmp.Blocking(), hp, melee, named]

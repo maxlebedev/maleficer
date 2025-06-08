@@ -281,7 +281,6 @@ def new_level():
     levels = [generate_dungeon, cave_dungeon, maze_dungeon]
     level_func = random.choice(levels)
     level_func(BOARD)
-    generate_dungeon(BOARD)
 
 
 def trace_ray(source: int, dest: int):
