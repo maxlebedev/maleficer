@@ -169,7 +169,7 @@ def random_spell(power_budget=10) -> int:
     match random.randint(0, 6):
         # TODO: pull this into the power budget calculation
         case 0:
-            radius = random.randint(1, target_range-1)
+            radius = random.randint(1, target_range - 1)
             esper.add_component(spell, cmp.EffectArea(radius=radius))
     return spell
 
@@ -261,6 +261,7 @@ def player():
     hp = cmp.Health(max=10)
     named = cmp.Onymous(name="player")
     esper.create_entity(cmp.Player(), pos, vis, cmp.Blocking(), hp, named)
+
 
 def starting_inventory():
     starting_potion = potion()

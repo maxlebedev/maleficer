@@ -111,6 +111,10 @@ class Damage(esper.Processor):
             if location.in_player_perception(damage.source):
                 event.Log.append(message)
 
+            hp = esper.component_for_entity(damage.target, cmp.Health)
+            if hp.current <= 0:
+                scene.oneshot(Death)
+
 
 @dataclass
 class Death(esper.Processor):
