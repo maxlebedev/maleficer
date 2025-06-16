@@ -60,7 +60,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 # TODO
 	- All effects on the targeting entity should get their targets filled in if they haven't already
 		- But, only the non-static targets should get cleared, and we don't have a way to store that info
-	- better spell learning, unlearn, learn confirm
 	- effect application restrictions. (mutilate can't hit traps)
 	- spell mods (+1 range, +1 dmg pickups)
 	- on-death effects
