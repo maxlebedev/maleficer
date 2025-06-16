@@ -342,8 +342,8 @@ def build_perimeter_wall(board):
 def cave_dungeon(board):
     for cell in board.as_sequence():
         if not random.randint(0, 1):
-            player_pos = esper.component_for_entity(cell, cmp.Position)
-            board.set_cell(*player_pos, create.floor(*player_pos))
+            cell_pos = esper.component_for_entity(cell, cmp.Position)
+            board.set_cell(*cell_pos, create.floor(*cell_pos))
     # Horizontal Blanking
     x_slice = slice(3, display.BOARD_WIDTH - 3)
     midpoint = display.BOARD_HEIGHT // 2
@@ -355,7 +355,8 @@ def cave_dungeon(board):
     neighbours = [
         [0 for _ in range(display.BOARD_HEIGHT)] for _ in range(display.BOARD_WIDTH)
     ]
-    for _ in range(4):
+    celL_autamata_passes = 4
+    for _ in range(celL_autamata_passes):
         for cell in board.as_sequence():
             player_pos = esper.component_for_entity(cell, cmp.Position)
             wall_count = count_neighbors(board, player_pos)
@@ -371,7 +372,8 @@ def cave_dungeon(board):
     build_perimeter_wall(board)
 
     player_pos = player_position()
-    player_pos.x, player_pos.y = display.BOARD_WIDTH // 2, display.BOARD_HEIGHT // 2
+    player_pos.x = display.BOARD_WIDTH // 2
+    player_pos.y = display.BOARD_HEIGHT // 2
 
     valid_spawns = []
     while len(valid_spawns) < 20:

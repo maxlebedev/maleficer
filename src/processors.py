@@ -594,7 +594,7 @@ class InventoryInputEvent(InputEvent):
             input.KEYMAP[input.Input.MOVE_DOWN]: (self.move_selection, [1]),
             input.KEYMAP[input.Input.MOVE_UP]: (self.move_selection, [-1]),
             input.KEYMAP[input.Input.ESC]: to_level,
-            input.KEYMAP[input.Input.SELECT]: self.use_item,
+            input.KEYMAP[input.Input.SELECT]: self.handle_select,
         }
 
     def move_selection(self, diff: int):
@@ -603,8 +603,24 @@ class InventoryInputEvent(InputEvent):
         menu_selection.item += diff
         menu_selection.item = math_util.clamp(menu_selection.item, inventory_size)
 
-    def use_item(self):
+    def handle_select(self):
+        state = tcod.event.get_keyboard_state()
+        alt_key = input.KEYMAP[input.Input.ALTERNATE]
         selection = get_selected_menuitem()
+        if state[alt_key.scancode]:
+            self.drop(selection)
+            return
+        self.use_item(selection)
+
+    def drop(self, selection):
+        esper.remove_component(selection, cmp.InInventory)
+        player_pos = location.player_position()
+        drop_pos = cmp.Position(x=player_pos.x,y=player_pos.y)
+        esper.add_component(selection, drop_pos)
+        scene.to_phase(scene.Phase.level, NPCTurn)
+
+
+    def use_item(self, selection):
         name = esper.component_for_entity(selection, cmp.Onymous).name
         print(f"using {name}: {selection}")
 
