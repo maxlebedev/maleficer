@@ -65,9 +65,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- spell mods (+1 range, +1 dmg pickups)
 	- on-death effects
 	- trap-summoner enemy
-	- consider learned spells starting with maxed cooldown
 	- In caves, NPCs shouldn't spawn too close to player
-	- drop option for inventory items
 	- break up Arch Concerns into open questions and arch docs
 # BUGS
 	- Found a wall I was able to walk through.
