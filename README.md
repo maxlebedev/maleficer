@@ -41,7 +41,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- Processors have verbose names, which include phases. Good hint to break them out to phase-based files. Some procs are shared tho
 	- AI behavior probably doesn't *all* want to live in the NPC proc
 	- I like context from breadcrumbs, but there is now a search issue with multiple apply functions, multiple Damage things, etc
-	- if a condition causes 0 health, death is still only processed after that turn
 	- look into integer_scaling for context.present(console)
 	- Queries that return nothing can crash sometimes :(
 	- EffectArea could be take a radius, or every cell in the effect could have the cmp. Neither is necessarily better for when we eventually have a line spell. The radius is at least easier to track, and line can be another property on EffectArea

@@ -258,7 +258,8 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
             tunnel_between(board, new_room.center, endpt)
             for _ in range(random.randint(1, 3)):
                 npcs = [create.bat, create.skeleton, create.warlock]
-                npc_gen = random.choice(npcs)
+                weights = [3, 2, 1]
+                npc_gen = random.choices(npcs, weights)[0]
                 npc_gen(new_room.get_random_pos())
 
             item = random.choice([create.trap, create.potion, create.scroll])
