@@ -100,14 +100,17 @@ def trigger_all_callbacks(entity, trigger_cmp):
         # TODO: this need a refactor pass
         esper.remove_component(entity, cmp.Target)
 
+
 def apply_cooldown(source: int):
     if cd_effect := esper.try_component(source, cmp.Cooldown):
         condition.grant(source, typ.Condition.Cooldown, cd_effect.turns)
+
 
 def apply_healing(source: int):
     if target_cmp := esper.try_component(source, cmp.Target):
         if heal_effect := esper.try_component(source, cmp.HealEffect):
             Damage(source, target_cmp.target, -1 * heal_effect.amount)
+
 
 def apply_bleed(source: int):
     if target_cmp := esper.try_component(source, cmp.Target):
@@ -120,6 +123,7 @@ def apply_bleed(source: int):
                         condition.grant(ent, typ.Condition.Bleed, bleed_effect.value)
             else:
                 condition.grant(target, typ.Condition.Bleed, bleed_effect.value)
+
 
 def apply_damage(source: int):
     if target_cmp := esper.try_component(source, cmp.Target):
@@ -142,6 +146,7 @@ def apply_move(source: int):
         y = pos.y - player_pos.y
         Movement(move_effect.target, x, y)
 
+
 def apply_learn(source: int):
     if learnable := esper.try_component(source, cmp.Learnable):
         known_spells = esper.get_component(cmp.Known)
@@ -155,24 +160,3 @@ def apply_learn(source: int):
                 condition.grant(
                     learnable.spell, typ.Condition.Cooldown, cd_effect.turns
                 )
-
-def effects_to_events(source: int):
-    """read effects off an entity and apply them to crosshair if needed"""
-    if not (target_cmp := esper.try_component(source, cmp.Target)):
-        comps = esper.components_for_entity(source)
-        print(f"no target on effect holder {source}, {comps}")
-        return
-
-    target = target_cmp.target
-
-    if dmg_effect := esper.try_component(source, cmp.DamageEffect):
-        if esper.has_component(target, cmp.Cell):
-            entities = collect_all_affected_entities(target)
-            for ent in entities:
-                if esper.has_component(ent, cmp.Health):
-                    Damage(dmg_effect.source, ent, dmg_effect.amount)
-        else:
-            Damage(dmg_effect.source, target, dmg_effect.amount)
-
-    # note that removing Target is bad if persistent entity with static target
-    esper.remove_component(source, cmp.Target)

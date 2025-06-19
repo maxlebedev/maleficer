@@ -38,7 +38,7 @@ class Movement(esper.Processor):
         target_is_enemy = esper.has_component(target, cmp.Enemy)
         if src_is_enemy and target_is_harmable and not target_is_enemy:
             esper.add_component(source, cmp.Target(target=target))
-            event.effects_to_events(source)
+            event.trigger_all_callbacks(source, cmp.EnemyTrigger)
 
         if esper.has_component(source, cmp.Player):
             # Note: walking into a wall consumes a turn
@@ -284,7 +284,7 @@ class NPCTurn(esper.Processor):
                 location.flash_line(trace)
                 trg = cmp.Target(target=dest)
                 esper.add_component(entity, trg)
-                event.effects_to_events(entity)
+                event.trigger_all_callbacks(entity, cmp.EnemyTrigger)
 
 
 @dataclass
@@ -353,7 +353,7 @@ class Render(esper.Processor):
         for i, (name, entities) in enumerate(inv_map):
             self.console.print(1, 3 + i, f"{len(entities)}x {name}")
 
-        y_idx = itertools.count(8)
+        y_idx = itertools.count(max(8, 3+len(inv_map)))
         # spells
         self.console.print(1, next(y_idx), self.dashes)
         spells = ecs.Query(cmp.Spell, cmp.Onymous, cmp.Known)
@@ -616,10 +616,9 @@ class InventoryInputEvent(InputEvent):
     def drop(self, selection):
         esper.remove_component(selection, cmp.InInventory)
         player_pos = location.player_position()
-        drop_pos = cmp.Position(x=player_pos.x,y=player_pos.y)
+        drop_pos = cmp.Position(x=player_pos.x, y=player_pos.y)
         esper.add_component(selection, drop_pos)
         scene.to_phase(scene.Phase.level, NPCTurn)
-
 
     def use_item(self, selection):
         try:

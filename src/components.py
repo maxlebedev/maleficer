@@ -229,10 +229,15 @@ class DeathTrigger(Trigger):
 @component
 class UseTrigger(Trigger):
     """item use, spell use, menu selection"""
+
     pass
 
 
 @component
 class StepTrigger(Trigger):
     pass
-# an on-step, and some enemy trigger
+
+
+@component
+class EnemyTrigger(Trigger):
+    pass

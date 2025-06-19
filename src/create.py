@@ -57,6 +57,7 @@ def bat(pos: cmp.Position) -> int:
     hp = cmp.Health(max=1)
     named = cmp.Onymous(name="bat")
     flying = cmp.Flying()
+    et = cmp.EnemyTrigger(callbacks=[event.apply_damage])
     components = [
         cmp.Enemy(),
         pos,
@@ -66,6 +67,7 @@ def bat(pos: cmp.Position) -> int:
         cmp.Wander(),
         named,
         flying,
+        et,
     ]
     bat = esper.create_entity(*components)
 
@@ -79,7 +81,8 @@ def skeleton(pos: cmp.Position) -> int:
     hp = cmp.Health(max=3)
     named = cmp.Onymous(name="skeleton")
     melee = cmp.Melee(radius=5)
-    components = [cmp.Enemy(), pos, vis, cmp.Blocking(), hp, melee, named]
+    et = cmp.EnemyTrigger(callbacks=[event.apply_damage])
+    components = [cmp.Enemy(), pos, vis, cmp.Blocking(), hp, melee, named, et]
     skeleton = esper.create_entity(*components)
 
     dmg_effect = cmp.DamageEffect(amount=1, source=skeleton)
@@ -92,7 +95,8 @@ def warlock(pos: cmp.Position) -> int:
     hp = cmp.Health(max=2)
     named = cmp.Onymous(name="warlock")
     melee = cmp.Ranged(radius=3)
-    components = [cmp.Enemy(), pos, vis, cmp.Blocking(), hp, melee, named]
+    et = cmp.EnemyTrigger(callbacks=[event.apply_damage])
+    components = [cmp.Enemy(), pos, vis, cmp.Blocking(), hp, melee, named, et]
     warlock = esper.create_entity(*components)
 
     dmg_effect = cmp.DamageEffect(amount=1, source=warlock)

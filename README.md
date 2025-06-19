@@ -66,10 +66,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- trap-summoner enemy
 	- In caves, NPCs shouldn't spawn too close to player
 	- break up Arch Concerns into open questions and arch docs
-	- `effects_to_events` refactor
-		- Triggers are a type of cmp that have callbacks.
-		- On death for example, we get the DeathTrigger (if exist) and run all those funcs
-		- how do we hangle targets here? still checking for target cmp?
-		- all callbacks take the source entity as input
+	- The trigger/callback thing shouldn't live in event.py
 # BUGS
 	- Found a wall I was able to walk through.

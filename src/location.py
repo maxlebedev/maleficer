@@ -279,7 +279,7 @@ def new_level():
         esper.delete_entity(to_del, immediate=True)
 
     BOARD = Board()
-    levels = [generate_dungeon, cave_dungeon, maze_dungeon]
+    levels = [generate_dungeon, cave_dungeon]  # , maze_dungeon
     level_func = random.choice(levels)
     level_func(BOARD)
 
