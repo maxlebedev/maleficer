@@ -10,6 +10,7 @@ import display
 import ecs
 import location
 import scene
+import event
 
 
 # TODO: should these take a position?
@@ -39,15 +40,15 @@ def stairs(pos: cmp.Position) -> int:
     tp = cmp.Transparent()
     stairs = esper.create_entity(cmp.Cell(), pos, vis, tp, os)
 
-    def descend():
+    def descend(_):
         player = ecs.Query(cmp.Player).first()
         if target_cmp := esper.try_component(stairs, cmp.Target):
             if target_cmp.target == player:
                 location.LEVEL += 1
                 location.new_level()
 
-    cbe = cmp.CallbackEffect(callback=descend)
-    esper.add_component(stairs, cbe)
+    st = cmp.StepTrigger(callbacks=[descend])
+    esper.add_component(stairs, st)
     return stairs
 
 
@@ -107,8 +108,9 @@ def potion(pos: cmp.Position | None = None) -> int:
 
     player = ecs.Query(cmp.Player).first()
     heal = cmp.HealEffect(amount=2)
+    ut = cmp.UseTrigger(callbacks=[event.apply_healing])
     target = cmp.Target(target=player)
-    components = [vis, col, hp, named, heal, target]
+    components = [vis, col, hp, named, heal, target, ut]
     potion = esper.create_entity(*components)
     if pos:
         esper.add_component(potion, pos)
@@ -123,9 +125,9 @@ def scroll(pos: cmp.Position | None = None, spell: int | None = None) -> int:
     if not spell:
         spell = random_spell(5 + (location.LEVEL * 5))
     learnable = cmp.Learnable(spell=spell)
-    # "learn spell" is an effect
+    ut = cmp.UseTrigger(callbacks=[event.apply_learn])
 
-    components = [vis, col, hp, learnable]
+    components = [vis, col, hp, learnable, ut]
     scroll = esper.create_entity(*components)
     if pos:
         esper.add_component(scroll, pos)
@@ -158,13 +160,16 @@ def random_spell(power_budget=10) -> int:
     player = ecs.Query(cmp.Player).first()
     spell_cmp = cmp.Spell(target_range=target_range)
     cooldown = cmp.Cooldown(turns=cooldown)
+    ut = cmp.UseTrigger(callbacks=[event.apply_cooldown])
     if waste_chance == 0.4:
         harm_effect = cmp.BleedEffect(value=damage)
+        ut.callbacks.append(event.apply_bleed)
     else:
         harm_effect = cmp.DamageEffect(amount=damage, source=player)
+        ut.callbacks.append(event.apply_damage)
     name = "".join(random.choices(string.ascii_lowercase, k=5))
     named = cmp.Onymous(name=name)
-    spell = esper.create_entity(spell_cmp, harm_effect, named, cooldown)
+    spell = esper.create_entity(spell_cmp, harm_effect, named, cooldown, ut)
 
     match random.randint(0, 6):
         # TODO: pull this into the power budget calculation
@@ -186,20 +191,20 @@ def inventory_map() -> list:
 
 
 def main_menu_opts():
-    to_level = lambda: scene.to_phase(scene.Phase.level)
-    cbe = cmp.CallbackEffect(callback=to_level)
+    to_level = lambda _: scene.to_phase(scene.Phase.level)
     mm = cmp.MainMenu()
     name = cmp.Onymous(name="Start Game")
     menu_item = cmp.MenuItem(order=0)
-    components = [menu_item, name, cbe, mm]
+    ut = cmp.UseTrigger(callbacks=[to_level])
+    components = [menu_item, name, mm, ut]
     esper.create_entity(*components)
 
-    to_opts = lambda: scene.to_phase(scene.Phase.options)
-    cbe = cmp.CallbackEffect(callback=to_opts)
+    to_opts = lambda _: scene.to_phase(scene.Phase.options)
+    ut = cmp.UseTrigger(callbacks=[to_opts])
     mm = cmp.MainMenu()
     name = cmp.Onymous(name="Options")
     menu_item = cmp.MenuItem(order=1)
-    components = [menu_item, name, cbe, mm]
+    components = [menu_item, name, ut, mm]
     esper.create_entity(*components)
 
 
@@ -212,8 +217,10 @@ def firebolt_spell() -> int:
     named = cmp.Onymous(name="Firebolt")
     slot_num = len(esper.get_component(cmp.Known)) + 1
     known = cmp.Known(slot=slot_num)
-    components = [spell_cmp, dmg_effect, named, cooldown, known, aoe]
+    ut = cmp.UseTrigger(callbacks=[event.apply_cooldown, event.apply_damage])
+    components = [spell_cmp, dmg_effect, named, cooldown, known, aoe, ut]
     damage_spell = esper.create_entity(*components)
+
     return damage_spell
 
 
@@ -221,11 +228,12 @@ def blink_spell() -> int:
     player = ecs.Query(cmp.Player).first()
     spell_cmp = cmp.Spell(target_range=4)
     cooldown = cmp.Cooldown(turns=5)
+    ut = cmp.UseTrigger(callbacks=[event.apply_cooldown, event.apply_move])
     dmg_effect = cmp.MoveEffect(target=player)
     named = cmp.Onymous(name="Blink")
     slot_num = len(esper.get_component(cmp.Known)) + 1
     known = cmp.Known(slot=slot_num)
-    components = [spell_cmp, dmg_effect, named, cooldown, known]
+    components = [spell_cmp, dmg_effect, named, cooldown, ut, known]
     sample_spell = esper.create_entity(*components)
     return sample_spell
 
@@ -234,10 +242,11 @@ def bleed_spell() -> int:
     spell_cmp = cmp.Spell(target_range=3)
     cooldown = cmp.Cooldown(turns=2)
     dmg_effect = cmp.BleedEffect(value=2)
+    ut = cmp.UseTrigger(callbacks=[event.apply_cooldown, event.apply_bleed])
     named = cmp.Onymous(name="Mutilate")
     slot_num = len(esper.get_component(cmp.Known)) + 1
     known = cmp.Known(slot=slot_num)
-    components = [spell_cmp, dmg_effect, named, cooldown, known]
+    components = [spell_cmp, dmg_effect, named, cooldown, known, ut]
     sample_spell = esper.create_entity(*components)
     return sample_spell
 
@@ -248,7 +257,8 @@ def trap(pos: cmp.Position) -> int:
     named = cmp.Onymous(name="trap")
     trap_cmp = cmp.OnStep()
 
-    components = [pos, vis, hp, named, trap_cmp]
+    st = cmp.StepTrigger(callbacks=[event.apply_damage])
+    components = [pos, vis, hp, named, trap_cmp, st]
     trap_ent = esper.create_entity(*components)
     dmg = cmp.DamageEffect(source=trap_ent, amount=1)
     esper.add_component(trap_ent, dmg)

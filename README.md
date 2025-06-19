@@ -56,6 +56,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- should we always place the stairs as far back as we can?
 	- wet status from water tiles? are we that sort of game?
 	- We have two damage process steps, one for player damage, and one for everything else. This means enemies the player would kill don't attack back
+	- Bleed damage feels like it takes an extra turn. this is intentional. it only takes effect on the start of the turn after it is applied
 # TODO
 	- All effects on the targeting entity should get their targets filled in if they haven't already
 		- But, only the non-static targets should get cleared, and we don't have a way to store that info
@@ -65,5 +66,10 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- trap-summoner enemy
 	- In caves, NPCs shouldn't spawn too close to player
 	- break up Arch Concerns into open questions and arch docs
+	- `effects_to_events` refactor
+		- Triggers are a type of cmp that have callbacks.
+		- On death for example, we get the DeathTrigger (if exist) and run all those funcs
+		- how do we hangle targets here? still checking for target cmp?
+		- all callbacks take the source entity as input
 # BUGS
 	- Found a wall I was able to walk through.

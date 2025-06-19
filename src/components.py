@@ -176,13 +176,6 @@ class HealEffect:
 
 
 @component
-class CallbackEffect:
-    """effect that calls a function"""
-
-    callback: Callable
-
-
-@component
 class BleedEffect:
     value: int
 
@@ -221,3 +214,25 @@ class Known:
     """spell is castable"""
 
     slot: int
+
+
+@component
+class Trigger:
+    callbacks: list[Callable]
+
+
+@component
+class DeathTrigger(Trigger):
+    pass
+
+
+@component
+class UseTrigger(Trigger):
+    """item use, spell use, menu selection"""
+    pass
+
+
+@component
+class StepTrigger(Trigger):
+    pass
+# an on-step, and some enemy trigger

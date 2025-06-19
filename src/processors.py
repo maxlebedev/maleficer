@@ -86,7 +86,7 @@ class Movement(esper.Processor):
                 ent_flies = esper.has_component(mover, cmp.Flying)
                 if not ent_flies and has(target, cmp.OnStep):
                     esper.add_component(target, cmp.Target(target=mover))
-                    event.effects_to_events(target)
+                    event.trigger_all_callbacks(target, cmp.StepTrigger)
 
 
 @dataclass
@@ -122,6 +122,7 @@ class Death(esper.Processor):
         # crashes if player gets deleted
         for killable, (health, named) in ecs.Query(cmp.Health, cmp.Onymous):
             if health.current <= 0:
+                event.trigger_all_callbacks(killable, cmp.DeathTrigger)
                 if location.in_player_perception(killable):
                     message = f"{named.name} is no more"
                     event.Log.append(message)
@@ -475,7 +476,7 @@ class MenuInputEvent(InputEvent):
         menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
         for entity, (mi, _) in ecs.Query(cmp.MenuItem, cmp.MainMenu):
             if mi.order == menu_selection.item:
-                event.effects_to_events(entity)
+                event.trigger_all_callbacks(entity, cmp.UseTrigger)
 
     def move_selection(self, diff: int):
         menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
@@ -524,7 +525,7 @@ class TargetInputEvent(InputEvent):
             esper.add_component(targeting_entity, trg)
 
         try:
-            event.effects_to_events(targeting_entity)
+            event.trigger_all_callbacks(targeting_entity, cmp.UseTrigger)
             esper.remove_component(targeting_entity, cmp.Targeting)
             event.Tick()
             scene.to_phase(scene.Phase.level, NPCTurn)
@@ -621,11 +622,8 @@ class InventoryInputEvent(InputEvent):
 
 
     def use_item(self, selection):
-        name = esper.component_for_entity(selection, cmp.Onymous).name
-        print(f"using {name}: {selection}")
-
         try:
-            event.effects_to_events(selection)
+            event.trigger_all_callbacks(selection, cmp.UseTrigger)
             esper.remove_component(selection, cmp.InInventory)
             event.Tick()
             scene.to_phase(scene.Phase.level, NPCTurn)
