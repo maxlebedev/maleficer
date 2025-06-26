@@ -269,6 +269,22 @@ def trap(pos: cmp.Position) -> int:
     return trap_ent
 
 
+def bomb(pos: cmp.Position) -> int:
+    vis = cmp.Visible(glyph=display.Glyph.BOMB, color=display.Color.RED)
+    hp = cmp.Health(max=1)
+    named = cmp.Onymous(name="bomb")
+    die_cmp = cmp.OnDeath()
+    aoe = cmp.EffectArea(radius=1)
+
+    dt = cmp.DeathTrigger(callbacks=[event.apply_damage])
+    components = [pos, vis, hp, named, die_cmp, aoe, dt]
+    bomb_ent = esper.create_entity(*components)
+    dmg = cmp.DamageEffect(source=bomb_ent, amount=1)
+    esper.add_component(bomb_ent, dmg)
+
+    return bomb_ent
+
+
 def player():
     vis = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN)
     pos = cmp.Position(x=1, y=1)

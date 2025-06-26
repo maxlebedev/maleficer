@@ -68,6 +68,7 @@ class Glyph(IntEnum):
     SCROLL = 768
     STAIRS = 297
     WARLOCK = 80
+    BOMB = 486
 
 
 letter_map = {

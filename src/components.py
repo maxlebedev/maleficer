@@ -193,6 +193,11 @@ class OnStep:
 
 
 @component
+class OnDeath:
+    """activates an effect when entity dies"""
+
+
+@component
 class Flying:
     """not affected by OnStep components"""
 
