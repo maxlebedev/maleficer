@@ -60,6 +60,9 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- wet status from water tiles? are we that sort of game?
 	- We have two damage process steps, one for player damage, and one for everything else. This means enemies the player would kill don't attack back
 	- Bleed damage feels like it takes an extra turn. this is intentional. it only takes effect on the start of the turn after it is applied
+	- StepTrigger callbacks get their targets from the movement proc, in the OnStep case
+	- Should there be a death event queue?
+	- Because we allow already dead entities to resolve their queued damage, enemies get one final retaliation
 # TODO
 	- All effects on the targeting entity should get their targets filled in if they haven't already
 		- But, only the non-static targets should get cleared, and we don't have a way to store that info
@@ -70,5 +73,14 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- In caves, NPCs shouldn't spawn too close to player
 	- break up Arch Concerns into open questions and arch docs
 	- The trigger/callback thing shouldn't live in event.py
+	- Bomb-lobber enemy
+		- Bomb entities, spawned by lobber
+		- Aura that shows dmg radius, on bombs
+		- A Dying X condition
+		- An on-death AOE damage trigger
+		- A cooldown for lobber enemy (and warlock)
+		- On-death targeting (does target get sent same way every time?)
 # BUGS
 	- Found a wall I was able to walk through.
+	- warlock missles should hit potions
+	- shouldn't the warlocks be dead before their retaliation hits fire?

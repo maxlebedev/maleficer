@@ -94,21 +94,21 @@ class Damage(esper.Processor):
     def process(self):
         while event.Queues.damage:
             damage = event.Queues.damage.popleft()
-            if not all(map(esper.entity_exists, [damage.target, damage.source])):
-                # if either entity doesn't exist anymore, damage fizzles
+            if not all(map(esper.entity_exists, [damage.target])):
+                # if entity doesn't exist anymore, damage fizzles
                 continue
 
             math_util.apply_damage(damage.target, damage.amount)
 
             to_name = lambda x: esper.component_for_entity(x, cmp.Onymous).name
-            src_name = to_name(damage.source)
+            src_name = damage.source[cmp.Onymous].name
             target_name = to_name(damage.target)
 
             message = f"{src_name} heals {-1 * damage.amount} to {target_name}"
             if damage.amount > 0:
                 message = f"{src_name} deals {damage.amount} to {target_name}"
 
-            if location.in_player_perception(damage.source):
+            if cmp.Position not in damage.source or location.in_player_perception(damage.source[cmp.Position]):
                 event.Log.append(message)
 
             hp = esper.component_for_entity(damage.target, cmp.Health)

@@ -51,7 +51,7 @@ class Event:
 @dataclass
 class Damage(Event):
     _queue = Queues.damage
-    source: int
+    source: dict
     target: int
     amount: int
 
@@ -71,16 +71,12 @@ class Tick(Event):
     _queue = Queues.tick
 
 
-def collect_all_affected_entities(target: int) -> list[int]:
-    try:
-        targeting_ent = ecs.Query(cmp.Targeting).first()
-    except KeyError:
-        return [target]
+def collect_all_affected_entities(source: int, target: int) -> list[int]:
     pos = esper.component_for_entity(target, cmp.Position)
-    if not esper.has_component(targeting_ent, cmp.EffectArea):
+    if not esper.has_component(source, cmp.EffectArea):
         entities = [e for e in location.BOARD.entities[pos.x][pos.y]]
         return entities
-    aoe = esper.component_for_entity(targeting_ent, cmp.EffectArea)
+    aoe = esper.component_for_entity(source, cmp.EffectArea)
 
     entities = []
 
@@ -109,7 +105,8 @@ def apply_cooldown(source: int):
 def apply_healing(source: int):
     if target_cmp := esper.try_component(source, cmp.Target):
         if heal_effect := esper.try_component(source, cmp.HealEffect):
-            Damage(source, target_cmp.target, -1 * heal_effect.amount)
+            src_frz = freeze_entity(source)
+            Damage(src_frz, target_cmp.target, -1 * heal_effect.amount)
 
 
 def apply_bleed(source: int):
@@ -117,7 +114,7 @@ def apply_bleed(source: int):
         target = target_cmp.target
         if bleed_effect := esper.try_component(source, cmp.BleedEffect):
             if esper.has_component(target, cmp.Cell):
-                entities = collect_all_affected_entities(target)
+                entities = collect_all_affected_entities(source, target)
                 for ent in entities:
                     if esper.has_component(ent, cmp.Health):
                         condition.grant(ent, typ.Condition.Bleed, bleed_effect.value)
@@ -129,13 +126,14 @@ def apply_damage(source: int):
     if target_cmp := esper.try_component(source, cmp.Target):
         target = target_cmp.target
         if dmg_effect := esper.try_component(source, cmp.DamageEffect):
+            src_frz = freeze_entity(source)
             if esper.has_component(target, cmp.Cell):
-                entities = collect_all_affected_entities(target)
+                entities = collect_all_affected_entities(source, target)
                 for ent in entities:
                     if esper.has_component(ent, cmp.Health):
-                        Damage(dmg_effect.source, ent, dmg_effect.amount)
+                        Damage(src_frz, ent, dmg_effect.amount)
             else:
-                Damage(dmg_effect.source, target, dmg_effect.amount)
+                Damage(src_frz, target, dmg_effect.amount)
 
 
 def apply_move(source: int):
@@ -160,3 +158,9 @@ def apply_learn(source: int):
                 condition.grant(
                     learnable.spell, typ.Condition.Cooldown, cd_effect.turns
                 )
+
+def freeze_entity(source: int):
+    """save an entity to a type:component dict"""
+    components = esper.components_for_entity(source)
+    ret = {type(cmp): cmp for cmp in components}
+    return ret

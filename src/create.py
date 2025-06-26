@@ -80,7 +80,7 @@ def skeleton(pos: cmp.Position) -> int:
     vis = cmp.Visible(glyph=display.Glyph.SKELETON, color=display.Color.BROWN)
     hp = cmp.Health(max=3)
     named = cmp.Onymous(name="skeleton")
-    melee = cmp.Melee(radius=5)
+    melee = cmp.Melee(radius=10)
     et = cmp.EnemyTrigger(callbacks=[event.apply_damage])
     components = [cmp.Enemy(), pos, vis, cmp.Blocking(), hp, melee, named, et]
     skeleton = esper.create_entity(*components)
