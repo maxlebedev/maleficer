@@ -246,3 +246,10 @@ class StepTrigger(Trigger):
 @component
 class EnemyTrigger(Trigger):
     pass
+
+
+@component
+class Aura:
+    """Visual radius"""
+    color: typ.RGB
+    radius: int = 0

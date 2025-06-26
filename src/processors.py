@@ -429,6 +429,15 @@ class BoardRender(Render):
             cell_rgbs[pos.x][pos.y] = (vis.glyph, vis.color, vis.bg_color)
 
         cell_rgbs = self._apply_lighting(cell_rgbs, in_fov)
+
+        aura_ents = ecs.Query(cmp.Position, cmp.Aura)
+        for _, (pos, aura) in aura_ents:
+            for x, y in location.coords_within_radius(pos, aura.radius):
+                if not in_fov[x][y]:
+                    continue
+                cell = cell_rgbs[x][y]
+                cell_rgbs[x][y] = cell[0], cell[1], aura.color
+
         return cell_rgbs
 
     def process(self):

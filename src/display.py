@@ -36,6 +36,7 @@ class Color:
     BLOOD_RED = (187, 10, 30)
     BROWN = (94, 44, 4)
     INDIGO = (75, 0, 130)
+    LIGHT_RED = (223, 80, 80)
 
     CANDLE = (97, 85, 52)
     BAR_FILLED = GREEN

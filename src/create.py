@@ -275,9 +275,10 @@ def bomb(pos: cmp.Position) -> int:
     named = cmp.Onymous(name="bomb")
     die_cmp = cmp.OnDeath()
     aoe = cmp.EffectArea(radius=1)
+    aura = cmp.Aura(radius=1, color=display.Color.LIGHT_RED)
 
     dt = cmp.DeathTrigger(callbacks=[event.apply_damage])
-    components = [pos, vis, hp, named, die_cmp, aoe, dt]
+    components = [pos, vis, hp, named, die_cmp, aoe, aura, dt]
     bomb_ent = esper.create_entity(*components)
     dmg = cmp.DamageEffect(source=bomb_ent, amount=1)
     esper.add_component(bomb_ent, dmg)

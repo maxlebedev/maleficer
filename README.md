@@ -75,7 +75,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- The trigger/callback thing shouldn't live in event.py
 	- Bomb-lobber enemy
 		- Bomb entities, spawned by lobber
-			- Aura that shows dmg radius, on bombs
 			- A Dying X condition
 		- A cooldown for lobber enemy (and warlock)
 # BUGS
