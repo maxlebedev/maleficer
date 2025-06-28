@@ -106,9 +106,13 @@ class Damage(esper.Processor):
 
             message = f"{src_name} heals {-1 * damage.amount} to {target_name}"
             if damage.amount > 0:
-                message = f"{src_name} deals {damage.amount} to {target_name}{damage.target}"
+                message = (
+                    f"{src_name} deals {damage.amount} to {target_name}{damage.target}"
+                )
 
-            if cmp.Position not in damage.source or location.in_player_perception(damage.source[cmp.Position]):
+            if cmp.Position not in damage.source or location.in_player_perception(
+                damage.source[cmp.Position]
+            ):
                 event.Log.append(message)
 
             hp = esper.component_for_entity(damage.target, cmp.Health)
@@ -356,7 +360,7 @@ class Render(esper.Processor):
         for i, (name, entities) in enumerate(inv_map):
             self.console.print(1, 3 + i, f"{len(entities)}x {name}")
 
-        y_idx = itertools.count(max(8, 3+len(inv_map)))
+        y_idx = itertools.count(max(8, 3 + len(inv_map)))
         # spells
         self.console.print(1, next(y_idx), self.dashes)
         spells = ecs.Query(cmp.Spell, cmp.Onymous, cmp.Known)

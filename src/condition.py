@@ -6,9 +6,9 @@ from numpy import kaiser
 import components as cmp
 import display
 import event
-import typ
-import scene
 import processors
+import scene
+import typ
 
 
 def has(entity: int, condition: typ.Condition) -> bool:

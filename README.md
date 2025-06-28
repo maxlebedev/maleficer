@@ -80,9 +80,11 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 		- replace line animation with bomb spawn animation. also explosions
 	- Should all ranged animations happen simultaneously?
 	- lob_bomb probably doesn't wanna be in event. maybe none of them do
+	- for enemies on cooldown, we don't just wanna do nothing
 # BUGS
 	- Found a wall I was able to walk through.
 	- warlock missles should hit potions
 	- shouldn't the warlocks be dead before their retaliation hits fire?
 	- bomb lobber bugs
 		- bombs stopped by walls should actually be stopped by walls
+	- cooldowns are off by 1 for enemies?

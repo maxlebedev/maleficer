@@ -251,5 +251,6 @@ class EnemyTrigger(Trigger):
 @component
 class Aura:
     """Visual radius"""
+
     color: typ.RGB
     radius: int = 0

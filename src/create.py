@@ -6,13 +6,13 @@ import string
 import esper
 
 import components as cmp
-import processors
+import condition
 import display
 import ecs
-import location
-import scene
 import event
-import condition
+import location
+import processors
+import scene
 import typ
 
 
@@ -105,6 +105,7 @@ def warlock(pos: cmp.Position) -> int:
     dmg_effect = cmp.DamageEffect(amount=1, source=warlock)
     esper.add_component(warlock, dmg_effect)
     return warlock
+
 
 def goblin(pos: cmp.Position) -> int:
     """throws bombs"""
@@ -295,7 +296,7 @@ def bomb(pos: cmp.Position) -> int:
     aoe = cmp.EffectArea(radius=1)
     aura = cmp.Aura(radius=1, color=display.Color.LIGHT_RED)
 
-    dmg_proc = lambda _ : scene.oneshot(processors.Damage)
+    dmg_proc = lambda _: scene.oneshot(processors.Damage)
     dt = cmp.DeathTrigger(callbacks=[event.apply_damage, dmg_proc])
     components = [pos, vis, hp, named, die_cmp, aoe, aura, dt]
     bomb_ent = esper.create_entity(*components)

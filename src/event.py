@@ -1,7 +1,7 @@
 import collections
+import random
 import textwrap
 from dataclasses import dataclass
-import random
 
 import esper
 
@@ -101,11 +101,10 @@ def trigger_all_callbacks(entity, trigger_cmp):
             func(entity)
             # TypeError
 
-    # I don't remember why these are here. 
+    # I don't remember why these are here.
     # item use and spells have their own. so perhaps enemy/death
     if esper.entity_exists(entity) and esper.has_component(entity, cmp.Target):
         esper.remove_component(entity, cmp.Target)
-
 
 
 def apply_cooldown(source: int):
@@ -170,6 +169,7 @@ def apply_learn(source: int):
                     learnable.spell, typ.Condition.Cooldown, cd_effect.turns
                 )
 
+
 def fire_at_player(source: int):
     if condition.has(source, typ.Condition.Cooldown):
         return
@@ -183,11 +183,12 @@ def fire_at_player(source: int):
 
 def lob_bomb(source: int):
     import create
+
     if condition.has(source, typ.Condition.Cooldown):
         return
     player = ecs.Query(cmp.Player).first()
     dest_cell, _ = location.trace_ray(source, player)
-    if dest_cell != player: # no LOS on player
+    if dest_cell != player:  # no LOS on player
         return False
 
     player_pos = location.player_position()
@@ -210,6 +211,7 @@ def lob_bomb(source: int):
         location.BOARD.build_entity_cache()
         condition.grant(source, typ.Condition.Cooldown, 2)
     # we can choose to only lob at empty spots, or only traceable spots
+
 
 def freeze_entity(source: int):
     """save an entity to a type:component dict"""
