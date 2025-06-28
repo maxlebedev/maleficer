@@ -8,7 +8,7 @@ def clamp(num: int, high: int, low=0):
     return min(high, max(low, num))
 
 
-def apply_damage(entity: int, value: int):
+def clamp_damage(entity: int, value: int):
     hp = esper.component_for_entity(entity, cmp.Health)
     hp.current -= value
     hp.current = clamp(hp.current, hp.max)

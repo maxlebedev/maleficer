@@ -6,11 +6,14 @@ import string
 import esper
 
 import components as cmp
+import processors
 import display
 import ecs
 import location
 import scene
 import event
+import condition
+import typ
 
 
 # TODO: should these take a position?
@@ -94,14 +97,29 @@ def warlock(pos: cmp.Position) -> int:
     vis = cmp.Visible(glyph=display.Glyph.WARLOCK, color=display.Color.INDIGO)
     hp = cmp.Health(max=2)
     named = cmp.Onymous(name="warlock")
-    melee = cmp.Ranged(radius=3)
-    et = cmp.EnemyTrigger(callbacks=[event.apply_damage])
-    components = [cmp.Enemy(), pos, vis, cmp.Blocking(), hp, melee, named, et]
+    ranged = cmp.Ranged(radius=3)
+    et = cmp.EnemyTrigger(callbacks=[event.fire_at_player, event.apply_damage])
+    components = [cmp.Enemy(), pos, vis, cmp.Blocking(), hp, ranged, named, et]
     warlock = esper.create_entity(*components)
 
     dmg_effect = cmp.DamageEffect(amount=1, source=warlock)
     esper.add_component(warlock, dmg_effect)
     return warlock
+
+def goblin(pos: cmp.Position) -> int:
+    """throws bombs"""
+    vis = cmp.Visible(glyph=display.Glyph.GOBLIN, color=display.Color.DARK_GREEN)
+    hp = cmp.Health(max=2)
+    named = cmp.Onymous(name="goblin")
+    ranged = cmp.Ranged(radius=3)
+
+    et = cmp.EnemyTrigger(callbacks=[event.lob_bomb])
+    components = [cmp.Enemy(), pos, vis, cmp.Blocking(), hp, ranged, named, et]
+    goblin = esper.create_entity(*components)
+
+    dmg_effect = cmp.DamageEffect(amount=1, source=goblin)
+    esper.add_component(goblin, dmg_effect)
+    return goblin
 
 
 def potion(pos: cmp.Position | None = None) -> int:
@@ -277,11 +295,13 @@ def bomb(pos: cmp.Position) -> int:
     aoe = cmp.EffectArea(radius=1)
     aura = cmp.Aura(radius=1, color=display.Color.LIGHT_RED)
 
-    dt = cmp.DeathTrigger(callbacks=[event.apply_damage])
+    dmg_proc = lambda _ : scene.oneshot(processors.Damage)
+    dt = cmp.DeathTrigger(callbacks=[event.apply_damage, dmg_proc])
     components = [pos, vis, hp, named, die_cmp, aoe, aura, dt]
     bomb_ent = esper.create_entity(*components)
     dmg = cmp.DamageEffect(source=bomb_ent, amount=1)
     esper.add_component(bomb_ent, dmg)
+    condition.grant(bomb_ent, typ.Condition.Dying, 2)
 
     return bomb_ent
 

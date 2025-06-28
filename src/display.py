@@ -27,6 +27,7 @@ class Color:
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
     GREEN = (0, 255, 0)
+    DARK_GREEN = (95, 172, 36)
     RED = (255, 0, 0)
     BLUE = (0, 0, 255)
     LGREY = (100, 100, 100)
@@ -70,6 +71,7 @@ class Glyph(IntEnum):
     STAIRS = 297
     WARLOCK = 80
     BOMB = 486
+    GOBLIN = 127
 
 
 letter_map = {

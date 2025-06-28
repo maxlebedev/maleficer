@@ -33,7 +33,7 @@ def get_selected_menuitem():
 class Movement(esper.Processor):
     def bump(self, source, target):
         """one entity bumps into another"""
-        src_is_enemy = esper.has_component(source, cmp.Enemy)
+        src_is_enemy = esper.has_components(source, cmp.Enemy, cmp.Melee)
         target_is_harmable = esper.has_component(target, cmp.Health)
         target_is_enemy = esper.has_component(target, cmp.Enemy)
         if src_is_enemy and target_is_harmable and not target_is_enemy:
@@ -98,7 +98,7 @@ class Damage(esper.Processor):
                 # if entity doesn't exist anymore, damage fizzles
                 continue
 
-            math_util.apply_damage(damage.target, damage.amount)
+            math_util.clamp_damage(damage.target, damage.amount)
 
             to_name = lambda x: esper.component_for_entity(x, cmp.Onymous).name
             src_name = damage.source[cmp.Onymous].name
@@ -106,36 +106,42 @@ class Damage(esper.Processor):
 
             message = f"{src_name} heals {-1 * damage.amount} to {target_name}"
             if damage.amount > 0:
-                message = f"{src_name} deals {damage.amount} to {target_name}"
+                message = f"{src_name} deals {damage.amount} to {target_name}{damage.target}"
 
             if cmp.Position not in damage.source or location.in_player_perception(damage.source[cmp.Position]):
                 event.Log.append(message)
 
             hp = esper.component_for_entity(damage.target, cmp.Health)
-            if hp.current <= 0:
-                scene.oneshot(Death)
+            if hp.current <= 0 and damage.target not in event.Queues.death:
+                print(f"{target_name} queued for death")
+                event.Death(damage.target)
 
 
 @dataclass
 class Death(esper.Processor):
     def process(self):
         # crashes if player gets deleted
-        for killable, (health, named) in ecs.Query(cmp.Health, cmp.Onymous):
-            if health.current <= 0:
-                pos = esper.component_for_entity(killable, cmp.Position)
-                if killable_cell := location.BOARD.get_cell(*pos):
-                    esper.add_component(killable, cmp.Target(target=killable_cell))
-                    event.trigger_all_callbacks(killable, cmp.DeathTrigger)
-                if location.in_player_perception(pos):
-                    message = f"{named.name} is no more"
-                    event.Log.append(message)
-                if esper.has_component(killable, cmp.Cell):
-                    floor = create.floor(pos.x, pos.y)
-                    location.BOARD.set_cell(pos.x, pos.y, floor)
-                    location.BOARD.build_entity_cache()
-                else:
-                    location.BOARD.remove(killable)
-                    esper.delete_entity(killable, immediate=True)
+        while event.Queues.death:
+            killable = event.Queues.death.popleft().entity
+            if not esper.entity_exists(killable):
+                continue
+            named = esper.component_for_entity(killable, cmp.Onymous)
+            print(f"death proc for {named.name}{killable}")
+
+            pos = esper.component_for_entity(killable, cmp.Position)
+            if killable_cell := location.BOARD.get_cell(*pos):
+                esper.add_component(killable, cmp.Target(target=killable_cell))
+                event.trigger_all_callbacks(killable, cmp.DeathTrigger)
+            if location.in_player_perception(pos):
+                message = f"{named.name}{killable} is no more"
+                event.Log.append(message)
+            if esper.has_component(killable, cmp.Cell):
+                floor = create.floor(pos.x, pos.y)
+                location.BOARD.set_cell(pos.x, pos.y, floor)
+                location.BOARD.build_entity_cache()
+            else:
+                location.BOARD.remove(killable)
+                esper.delete_entity(killable, immediate=True)
 
 
 @dataclass
@@ -281,11 +287,6 @@ class NPCTurn(esper.Processor):
             if dist_to_player > ranged.radius:
                 self.wander(entity)
             else:
-                player = ecs.Query(cmp.Player).first()
-                dest, trace = location.trace_ray(entity, player)
-                location.flash_line(trace)
-                trg = cmp.Target(target=dest)
-                esper.add_component(entity, trg)
                 event.trigger_all_callbacks(entity, cmp.EnemyTrigger)
 
 

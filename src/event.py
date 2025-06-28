@@ -1,6 +1,7 @@
 import collections
 import textwrap
 from dataclasses import dataclass
+import random
 
 import esper
 
@@ -39,6 +40,7 @@ class Queues:
     movement = collections.deque()
     damage = collections.deque()
     tick = collections.deque()
+    death = collections.deque()
 
 
 class Event:
@@ -71,6 +73,12 @@ class Tick(Event):
     _queue = Queues.tick
 
 
+@dataclass
+class Death(Event):
+    _queue = Queues.death
+    entity: int
+
+
 def collect_all_affected_entities(source: int, target: int) -> list[int]:
     pos = esper.component_for_entity(target, cmp.Position)
     if not esper.has_component(source, cmp.EffectArea):
@@ -81,7 +89,7 @@ def collect_all_affected_entities(source: int, target: int) -> list[int]:
     entities = []
 
     for x, y in location.coords_within_radius(pos, aoe.radius):
-        entities += [e for e in location.BOARD.entities[x][y]]
+        entities += [e for e in location.BOARD.entities[x][y] if e != source]
     return entities
 
 
@@ -92,9 +100,12 @@ def trigger_all_callbacks(entity, trigger_cmp):
                 return
             func(entity)
             # TypeError
-    if esper.has_component(entity, cmp.Target):
-        # TODO: this need a refactor pass
+
+    # I don't remember why these are here. 
+    # item use and spells have their own. so perhaps enemy/death
+    if esper.entity_exists(entity) and esper.has_component(entity, cmp.Target):
         esper.remove_component(entity, cmp.Target)
+
 
 
 def apply_cooldown(source: int):
@@ -158,6 +169,47 @@ def apply_learn(source: int):
                 condition.grant(
                     learnable.spell, typ.Condition.Cooldown, cd_effect.turns
                 )
+
+def fire_at_player(source: int):
+    if condition.has(source, typ.Condition.Cooldown):
+        return
+    player = ecs.Query(cmp.Player).first()
+    dest, trace = location.trace_ray(source, player)
+    location.flash_line(trace)
+    trg = cmp.Target(target=dest)
+    esper.add_component(source, trg)
+    condition.grant(source, typ.Condition.Cooldown, 2)
+
+
+def lob_bomb(source: int):
+    import create
+    if condition.has(source, typ.Condition.Cooldown):
+        return
+    player = ecs.Query(cmp.Player).first()
+    dest_cell, _ = location.trace_ray(source, player)
+    if dest_cell != player: # no LOS on player
+        return False
+
+    player_pos = location.player_position()
+    # location.BOARD.has_blocker(x,y)
+    # find some free spot in there
+    offsets = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+    indices = [(player_pos.x + dx, player_pos.y + dy) for dx, dy in offsets]
+    selection = random.choice(indices)
+    while location.BOARD.has_blocker(*selection):
+        selection = random.choice(indices)
+
+    if target_cell := location.BOARD.get_cell(*selection):
+        dest, _ = location.trace_ray(source, target_cell)
+        dest_pos = esper.component_for_entity(dest, cmp.Position)
+        pos_copy = cmp.Position(*dest_pos)
+        # trace_ray can be stopped on (not before) the first blocker
+        bomb_ent = create.bomb(pos_copy)
+        print(f"lobbed bomb {bomb_ent}")
+
+        location.BOARD.build_entity_cache()
+        condition.grant(source, typ.Condition.Cooldown, 2)
+    # we can choose to only lob at empty spots, or only traceable spots
 
 def freeze_entity(source: int):
     """save an entity to a type:component dict"""

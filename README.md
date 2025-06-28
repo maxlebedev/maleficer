@@ -63,6 +63,8 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- StepTrigger callbacks get their targets from the movement proc, in the OnStep case
 	- Should there be a death event queue?
 	- Because we allow already dead entities to resolve their queued damage, enemies get one final retaliation
+	- reusing Position components breaks things
+	- DeathTriggers with dmg need to have oneshot(Dmg) called after
 # TODO
 	- All effects on the targeting entity should get their targets filled in if they haven't already
 		- But, only the non-static targets should get cleared, and we don't have a way to store that info
@@ -74,10 +76,13 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- break up Arch Concerns into open questions and arch docs
 	- The trigger/callback thing shouldn't live in event.py
 	- Bomb-lobber enemy
-		- Bomb entities, spawned by lobber
-			- A Dying X condition
-		- A cooldown for lobber enemy (and warlock)
+		- bomb placement needs to account for blocking and LOS
+		- replace line animation with bomb spawn animation. also explosions
+	- Should all ranged animations happen simultaneously?
+	- lob_bomb probably doesn't wanna be in event. maybe none of them do
 # BUGS
 	- Found a wall I was able to walk through.
 	- warlock missles should hit potions
 	- shouldn't the warlocks be dead before their retaliation hits fire?
+	- bomb lobber bugs
+		- bombs stopped by walls should actually be stopped by walls

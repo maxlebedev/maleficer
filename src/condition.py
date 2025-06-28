@@ -1,12 +1,14 @@
 # code around managing conditions
 
 import esper
+from numpy import kaiser
 
 import components as cmp
 import display
 import event
-import math_util
 import typ
+import scene
+import processors
 
 
 def has(entity: int, condition: typ.Condition) -> bool:
@@ -33,8 +35,14 @@ def apply(entity: int, condition: typ.Condition, value: int):
         case typ.Condition.Bleed:
             pos = esper.component_for_entity(entity, cmp.Position)
             esper.dispatch_event("flash_pos", pos, display.Color.BLOOD_RED)
-            math_util.apply_damage(entity, value)
-            name = esper.component_for_entity(entity, cmp.Onymous).name
-            event.Log.append(f"{name} bleeds for {value}")
+            bleed_src = {cmp.Onymous: cmp.Onymous(name="bleed")}
+            # TODO: maybe a single global "bleed" entity
+            event.Damage(bleed_src, entity, value)
+            scene.oneshot(processors.Damage)
+
+        case typ.Condition.Dying:
+            if value == 1:
+                if entity not in event.Queues.death:
+                    event.Death(entity)
         case _:
             return
