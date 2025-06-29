@@ -100,7 +100,8 @@ def warlock(pos: cmp.Position) -> int:
     named = cmp.Onymous(name="warlock")
     ranged = cmp.Ranged(radius=3)
     et = cmp.EnemyTrigger(callbacks=[behavior.fire_at_player, behavior.apply_damage])
-    components = [cmp.Enemy(), pos, vis, cmp.Blocking(), hp, ranged, named, et]
+    cooldown = cmp.Cooldown(turns=1)
+    components = [cmp.Enemy(), pos, vis, cmp.Blocking(), hp, ranged, named, et, cooldown]
     warlock = esper.create_entity(*components)
 
     dmg_effect = cmp.DamageEffect(amount=1, source=warlock)
@@ -116,7 +117,8 @@ def goblin(pos: cmp.Position) -> int:
     ranged = cmp.Ranged(radius=3)
 
     et = cmp.EnemyTrigger(callbacks=[behavior.lob_bomb])
-    components = [cmp.Enemy(), pos, vis, cmp.Blocking(), hp, ranged, named, et]
+    cooldown = cmp.Cooldown(turns=2)
+    components = [cmp.Enemy(), pos, vis, cmp.Blocking(), hp, ranged, named, et, cooldown]
     goblin = esper.create_entity(*components)
 
     dmg_effect = cmp.DamageEffect(amount=1, source=goblin)

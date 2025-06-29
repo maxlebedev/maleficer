@@ -39,7 +39,7 @@ def lob_bomb(source: int):
         print(f"lobbed bomb {bomb_ent}")
 
         location.BOARD.build_entity_cache()
-        condition.grant(source, typ.Condition.Cooldown, 2)
+        apply_cooldown(source)
     # we can choose to only lob at empty spots, or only traceable spots
 
 
@@ -51,7 +51,7 @@ def fire_at_player(source: int):
     location.flash_line(trace)
     trg = cmp.Target(target=dest)
     esper.add_component(source, trg)
-    condition.grant(source, typ.Condition.Cooldown, 2)
+    apply_cooldown(source)
 
 
 def apply_cooldown(source: int):

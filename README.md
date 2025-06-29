@@ -1,8 +1,17 @@
 
-Maleficer is a Berlin definition rogulike which takes inspiration from tactics games.
-The combat of many rogulikes boils down to walking into enemies until they die, and I'm aiming to replace that with a more rich experiance.
+Maleficer is a classic rogulike with focus on tactical combat.
+The baseline combat of many rogulikes boils down to walking into enemies until they die, and I'm aiming to replace that with a more rich experiance.
 I also take inspiration from modern TTRPGs like Trespassor, especially in terms of mechanical clarity. 
 (and a vehicle for teaching myself game dev, ecs pattern, etc)
+
+# Inspiration
+	- classic roguelikes
+		- Nethack
+		- Shattered Pixed Dungeon
+		- Dungeons of Dredmor
+	- Modern TTPGS like Trespassor
+	- Rift Wizard
+	- Tactics games
 
 # Dependancies
 	- libsdl2-dev
@@ -78,6 +87,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 		- replace line animation with bomb spawn animation. also explosions
 	- Should all ranged animations happen simultaneously?
 	- for enemies on cooldown, we don't just wanna do nothing
+	- spell with pushback
 # BUGS
 	- Found a wall I was able to walk through.
 	- warlock missles should hit potions

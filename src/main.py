@@ -91,7 +91,7 @@ def main() -> None:
     flash_callback = lambda: flash(context, console)
     esper.set_handler("redraw", redraw)
     esper.set_handler("flash", flash_callback)
-    flash_pos_callback = lambda x, y: flash_pos(context, console, x, y)
+    flash_pos_callback = lambda p, c: flash_pos(context, console, p, c)
     esper.set_handler("flash_pos", flash_pos_callback)
 
     while True:
