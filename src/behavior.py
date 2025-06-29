@@ -25,8 +25,7 @@ def lob_bomb(source: int):
     player_pos = location.player_position()
     # location.BOARD.has_blocker(x,y)
     # find some free spot in there
-    offsets = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
-    indices = [(player_pos.x + dx, player_pos.y + dy) for dx, dy in offsets]
+    indices = location.get_neighbor_coords(player_pos)
     selection = random.choice(indices)
     while location.BOARD.has_blocker(*selection):
         selection = random.choice(indices)

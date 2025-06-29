@@ -91,10 +91,15 @@ class Movement(esper.Processor):
 
 @dataclass
 class Damage(esper.Processor):
+    def _make_message(self, source: str, target: str, amount: int):
+        if amount > 0:
+            return f"{source} deals {amount} to {target}"
+        return f"{source} heals {-1 * amount} to {target}"
+
     def process(self):
         while event.Queues.damage:
             damage = event.Queues.damage.popleft()
-            if not all(map(esper.entity_exists, [damage.target])):
+            if not esper.entity_exists(damage.target):
                 # if entity doesn't exist anymore, damage fizzles
                 continue
 
@@ -102,11 +107,9 @@ class Damage(esper.Processor):
 
             to_name = lambda x: esper.component_for_entity(x, cmp.Onymous).name
             src_name = damage.source[cmp.Onymous].name
-            target_name = to_name(damage.target)+str(damage.target)
+            target_name = f"{to_name(damage.target)}#{damage.target}"
 
-            message = f"{src_name} heals {-1 * damage.amount} to {target_name}"
-            if damage.amount > 0:
-                message = f"{src_name} deals {damage.amount} to {target_name}"
+            message = self._make_message(src_name, target_name, damage.amount)
 
             if cmp.Position not in damage.source or location.in_player_perception(
                 damage.source[cmp.Position]
@@ -121,20 +124,18 @@ class Damage(esper.Processor):
 @dataclass
 class Death(esper.Processor):
     def process(self):
-        # crashes if player gets deleted
         while event.Queues.death:
             killable = event.Queues.death.popleft().entity
             if not esper.entity_exists(killable):
                 continue
             named = esper.component_for_entity(killable, cmp.Onymous)
-            print(f"death proc for {named.name}{killable}")
 
             pos = esper.component_for_entity(killable, cmp.Position)
             if killable_cell := location.BOARD.get_cell(*pos):
                 esper.add_component(killable, cmp.Target(target=killable_cell))
                 event.trigger_all_callbacks(killable, cmp.DeathTrigger)
             if location.in_player_perception(pos):
-                message = f"{named.name}{killable} is no more"
+                message = f"{named.name}#{killable} is no more"
                 event.Log.append(message)
             if esper.has_component(killable, cmp.Cell):
                 floor = create.floor(pos.x, pos.y)

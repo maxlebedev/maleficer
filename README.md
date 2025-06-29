@@ -70,8 +70,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 		- But, only the non-static targets should get cleared, and we don't have a way to store that info
 	- effect application restrictions. (mutilate can't hit traps)
 	- spell mods (+1 range, +1 dmg pickups)
-	- on-death effects
-	- trap-summoner enemy
 	- In caves, NPCs shouldn't spawn too close to player
 	- break up Arch Concerns into open questions and arch docs
 	- The trigger/callback thing shouldn't live in event.py

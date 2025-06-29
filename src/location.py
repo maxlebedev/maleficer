@@ -318,9 +318,14 @@ def get_fov():
     return fov
 
 
-def count_neighbors(board, pos: cmp.Position):
+def get_neighbor_coords(pos: cmp.Position):
     offsets = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
     indices = [(pos.x + dx, pos.y + dy) for dx, dy in offsets]
+    return indices
+
+
+def count_neighbors(board, pos: cmp.Position):
+    indices = get_neighbor_coords(pos)
     neighbor_walls = 0
     for x, y in indices:
         cell = board.get_cell(x, y)
