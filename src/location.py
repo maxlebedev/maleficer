@@ -294,11 +294,9 @@ def trace_ray(source: int, dest: int):
     for i, (x, y) in enumerate(trace):
         entities = BOARD.entities[x][y]
         for entity in entities:
-            if esper.has_component(entity, cmp.Blocking) and entity not in (
-                source,
-                dest,
-            ):
-                return entity, trace[: i + 1]
+            if esper.has_component(entity, cmp.Blocking):
+                if entity not in (source, dest):
+                    return entity, trace[: i + 1]
 
     return dest, trace
 

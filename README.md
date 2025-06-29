@@ -74,6 +74,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- Because we allow already dead entities to resolve their queued damage, enemies get one final retaliation
 	- reusing Position components breaks things
 	- DeathTriggers with dmg need to have oneshot(Dmg) called after
+	- Warlock missles don't hit potions because they are not Blocking
 # TODO
 	- All effects on the targeting entity should get their targets filled in if they haven't already
 		- But, only the non-static targets should get cleared, and we don't have a way to store that info
@@ -89,8 +90,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- for enemies on cooldown, we don't just wanna do nothing
 	- spell with pushback
 # BUGS
-	- Found a wall I was able to walk through.
-	- warlock missles should hit potions
+	- Found a wall I was able to walk through in the caves.
 	- shouldn't the warlocks be dead before their retaliation hits fire?
 	- bombs stopped by walls should actually be stopped by walls
-	- cooldowns are off by 1 for enemies?
