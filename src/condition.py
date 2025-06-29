@@ -42,7 +42,6 @@ def apply(entity: int, condition: typ.Condition, value: int):
 
         case typ.Condition.Dying:
             if value == 1:
-                if entity not in event.Queues.death:
-                    event.Death(entity)
+                event.Death(entity)
         case _:
             return

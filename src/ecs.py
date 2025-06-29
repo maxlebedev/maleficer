@@ -56,3 +56,10 @@ class Query:
         for entity in self.entities:
             return cmps[entity][cmp]
         raise KeyError
+
+
+def freeze_entity(source: int):
+    """save an entity to a type:component dict"""
+    components = esper.components_for_entity(source)
+    ret = {type(cmp): cmp for cmp in components}
+    return ret

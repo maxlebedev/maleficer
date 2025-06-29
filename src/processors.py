@@ -102,13 +102,11 @@ class Damage(esper.Processor):
 
             to_name = lambda x: esper.component_for_entity(x, cmp.Onymous).name
             src_name = damage.source[cmp.Onymous].name
-            target_name = to_name(damage.target)
+            target_name = to_name(damage.target)+str(damage.target)
 
             message = f"{src_name} heals {-1 * damage.amount} to {target_name}"
             if damage.amount > 0:
-                message = (
-                    f"{src_name} deals {damage.amount} to {target_name}{damage.target}"
-                )
+                message = f"{src_name} deals {damage.amount} to {target_name}"
 
             if cmp.Position not in damage.source or location.in_player_perception(
                 damage.source[cmp.Position]
@@ -116,8 +114,7 @@ class Damage(esper.Processor):
                 event.Log.append(message)
 
             hp = esper.component_for_entity(damage.target, cmp.Health)
-            if hp.current <= 0 and damage.target not in event.Queues.death:
-                print(f"{target_name} queued for death")
+            if hp.current <= 0:
                 event.Death(damage.target)
 
 
