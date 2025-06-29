@@ -5,16 +5,15 @@ import string
 
 import esper
 
+import behavior
 import components as cmp
 import condition
 import display
 import ecs
-import event
 import location
 import processors
 import scene
 import typ
-import behavior
 
 
 # TODO: should these take a position?
@@ -57,23 +56,17 @@ def stairs(pos: cmp.Position) -> int:
 
 
 def bat(pos: cmp.Position) -> int:
-    vis = cmp.Visible(glyph=display.Glyph.BAT, color=display.Color.BROWN)
-    hp = cmp.Health(max=1)
-    named = cmp.Onymous(name="bat")
-    flying = cmp.Flying()
-    et = cmp.EnemyTrigger(callbacks=[behavior.apply_damage])
-    components = [
-        cmp.Enemy(),
-        pos,
-        vis,
-        cmp.Blocking(),
-        hp,
-        cmp.Wander(),
-        named,
-        flying,
-        et,
-    ]
-    bat = esper.create_entity(*components)
+    cmps = []
+    cmps.append(pos)
+    cmps.append(cmp.Visible(glyph=display.Glyph.BAT, color=display.Color.BROWN))
+    cmps.append(cmp.Health(max=1))
+    cmps.append(cmp.Onymous(name="bat"))
+    cmps.append(cmp.Flying())
+    cmps.append(cmp.EnemyTrigger(callbacks=[behavior.apply_damage]))
+    cmps.append(cmp.Enemy())
+    cmps.append(cmp.Blocking())
+    cmps.append(cmp.Wander())
+    bat = esper.create_entity(*cmps)
 
     dmg_effect = cmp.DamageEffect(amount=1, source=bat)
     esper.add_component(bat, dmg_effect)
@@ -81,13 +74,17 @@ def bat(pos: cmp.Position) -> int:
 
 
 def skeleton(pos: cmp.Position) -> int:
-    vis = cmp.Visible(glyph=display.Glyph.SKELETON, color=display.Color.BROWN)
-    hp = cmp.Health(max=3)
-    named = cmp.Onymous(name="skeleton")
-    melee = cmp.Melee(radius=10)
-    et = cmp.EnemyTrigger(callbacks=[behavior.apply_damage])
-    components = [cmp.Enemy(), pos, vis, cmp.Blocking(), hp, melee, named, et]
-    skeleton = esper.create_entity(*components)
+    cmps =  io
+    cmps.append(pos)
+
+    cmps.append(cmp.Visible(glyph=display.Glyph.SKELETON, color=display.Color.BROWN))
+    cmps.append(cmp.Health(max=3))
+    cmps.append(cmp.Onymous(name="skeleton"))
+    cmps.append(cmp.Melee(radius=10))
+    cmps.append(cmp.EnemyTrigger(callbacks=[behavior.apply_damage]))
+    cmps.append(cmp.Enemy())
+    cmps.append(cmp.Blocking())
+    skeleton = esper.create_entity(*cmps)
 
     dmg_effect = cmp.DamageEffect(amount=1, source=skeleton)
     esper.add_component(skeleton, dmg_effect)
@@ -95,14 +92,20 @@ def skeleton(pos: cmp.Position) -> int:
 
 
 def warlock(pos: cmp.Position) -> int:
-    vis = cmp.Visible(glyph=display.Glyph.WARLOCK, color=display.Color.INDIGO)
-    hp = cmp.Health(max=2)
-    named = cmp.Onymous(name="warlock")
-    ranged = cmp.Ranged(radius=3)
-    et = cmp.EnemyTrigger(callbacks=[behavior.fire_at_player, behavior.apply_damage])
-    cooldown = cmp.Cooldown(turns=1)
-    components = [cmp.Enemy(), pos, vis, cmp.Blocking(), hp, ranged, named, et, cooldown]
-    warlock = esper.create_entity(*components)
+    cmps = []
+    cmps.append(pos)
+
+    cmps.append(cmp.Visible(glyph=display.Glyph.WARLOCK, color=display.Color.INDIGO))
+    cmps.append(cmp.Health(max=2))
+    cmps.append(cmp.Onymous(name="warlock"))
+    cmps.append(cmp.Ranged(radius=3))
+    cmps.append(
+        cmp.EnemyTrigger(callbacks=[behavior.fire_at_player, behavior.apply_damage])
+    )
+    cmps.append(cmp.Cooldown(turns=1))
+    cmps.append(cmp.Enemy())
+    cmps.append(cmp.Blocking())
+    warlock = esper.create_entity(*cmps)
 
     dmg_effect = cmp.DamageEffect(amount=1, source=warlock)
     esper.add_component(warlock, dmg_effect)
@@ -111,15 +114,18 @@ def warlock(pos: cmp.Position) -> int:
 
 def goblin(pos: cmp.Position) -> int:
     """throws bombs"""
-    vis = cmp.Visible(glyph=display.Glyph.GOBLIN, color=display.Color.DARK_GREEN)
-    hp = cmp.Health(max=2)
-    named = cmp.Onymous(name="goblin")
-    ranged = cmp.Ranged(radius=3)
+    cmps = []
+    cmps.append(pos)
+    cmps.append(cmp.Visible(glyph=display.Glyph.GOBLIN, color=display.Color.DARK_GREEN))
+    cmps.append(cmp.Health(max=2))
+    cmps.append(cmp.Onymous(name="goblin"))
+    cmps.append(cmp.Ranged(radius=3))
 
-    et = cmp.EnemyTrigger(callbacks=[behavior.lob_bomb])
-    cooldown = cmp.Cooldown(turns=2)
-    components = [cmp.Enemy(), pos, vis, cmp.Blocking(), hp, ranged, named, et, cooldown]
-    goblin = esper.create_entity(*components)
+    cmps.append(cmp.EnemyTrigger(callbacks=[behavior.lob_bomb]))
+    cmps.append(cmp.Cooldown(turns=2))
+    cmps.append(cmp.Enemy())
+    cmps.append(cmp.Blocking())
+    goblin = esper.create_entity(*cmps)
 
     dmg_effect = cmp.DamageEffect(amount=1, source=goblin)
     esper.add_component(goblin, dmg_effect)
@@ -127,34 +133,35 @@ def goblin(pos: cmp.Position) -> int:
 
 
 def potion(pos: cmp.Position | None = None) -> int:
-    vis = cmp.Visible(glyph=display.Glyph.POTION, color=display.Color.GREEN)
-    col = cmp.Collectable()
-    hp = cmp.Health(max=1)
-    named = cmp.Onymous(name="potion")
+    cmps = []
+    cmps.append(cmp.Visible(glyph=display.Glyph.POTION, color=display.Color.GREEN))
+    cmps.append(cmp.Collectable())
+    cmps.append(cmp.Health(max=1))
+    cmps.append(cmp.Onymous(name="potion"))
+
+    cmps.append(cmp.HealEffect(amount=2))
+    cmps.append(cmp.UseTrigger(callbacks=[behavior.apply_healing]))
 
     player = ecs.Query(cmp.Player).first()
-    heal = cmp.HealEffect(amount=2)
-    ut = cmp.UseTrigger(callbacks=[behavior.apply_healing])
-    target = cmp.Target(target=player)
-    components = [vis, col, hp, named, heal, target, ut]
-    potion = esper.create_entity(*components)
+    cmps.append(cmp.Target(target=player))
+    potion = esper.create_entity(*cmps)
     if pos:
         esper.add_component(potion, pos)
     return potion
 
 
 def scroll(pos: cmp.Position | None = None, spell: int | None = None) -> int:
-    vis = cmp.Visible(glyph=display.Glyph.SCROLL, color=display.Color.MAGENTA)
-    col = cmp.Collectable()
-    hp = cmp.Health(max=1)
+    cmps = []
+    cmps.append(cmp.Visible(glyph=display.Glyph.SCROLL, color=display.Color.MAGENTA))
+    cmps.append(cmp.Collectable())
+    cmps.append(cmp.Health(max=1))
 
     if not spell:
         spell = random_spell(5 + (location.LEVEL * 5))
-    learnable = cmp.Learnable(spell=spell)
-    ut = cmp.UseTrigger(callbacks=[behavior.apply_learn])
+    cmps.append(cmp.Learnable(spell=spell))
+    cmps.append(cmp.UseTrigger(callbacks=[behavior.apply_learn]))
 
-    components = [vis, col, hp, learnable, ut]
-    scroll = esper.create_entity(*components)
+    scroll = esper.create_entity(*cmps)
     if pos:
         esper.add_component(scroll, pos)
 
@@ -218,91 +225,93 @@ def inventory_map() -> list:
 
 def main_menu_opts():
     to_level = lambda _: scene.to_phase(scene.Phase.level)
-    mm = cmp.MainMenu()
-    name = cmp.Onymous(name="Start Game")
-    menu_item = cmp.MenuItem(order=0)
-    ut = cmp.UseTrigger(callbacks=[to_level])
-    components = [menu_item, name, mm, ut]
-    esper.create_entity(*components)
+    cmps = []
+    cmps.append(cmp.MainMenu())
+    cmps.append(cmp.Onymous(name="Start Game"))
+    cmps.append(cmp.MenuItem(order=0))
+    cmps.append(cmp.UseTrigger(callbacks=[to_level]))
+    esper.create_entity(*cmps)
 
     to_opts = lambda _: scene.to_phase(scene.Phase.options)
-    ut = cmp.UseTrigger(callbacks=[to_opts])
-    mm = cmp.MainMenu()
-    name = cmp.Onymous(name="Options")
-    menu_item = cmp.MenuItem(order=1)
-    components = [menu_item, name, ut, mm]
-    esper.create_entity(*components)
+    cmps = []
+    cmps.append(cmp.UseTrigger(callbacks=[to_opts]))
+    cmps.append(cmp.MainMenu())
+    cmps.append(cmp.Onymous(name="Options"))
+    cmps.append(cmp.MenuItem(order=1))
+    esper.create_entity(*cmps)
 
 
 def firebolt_spell() -> int:
+    cmps = []
     player = ecs.Query(cmp.Player).first()
-    spell_cmp = cmp.Spell(target_range=5)
-    cooldown = cmp.Cooldown(turns=1)
-    dmg_effect = cmp.DamageEffect(amount=1, source=player)
-    aoe = cmp.EffectArea(radius=1)
-    named = cmp.Onymous(name="Firebolt")
+    cmps.append(cmp.Spell(target_range=5))
+    cmps.append(cmp.Cooldown(turns=1))
+    cmps.append(cmp.DamageEffect(amount=1, source=player))
+    cmps.append(cmp.EffectArea(radius=1))
+    cmps.append(cmp.Onymous(name="Firebolt"))
     slot_num = len(esper.get_component(cmp.Known)) + 1
-    known = cmp.Known(slot=slot_num)
-    ut = cmp.UseTrigger(callbacks=[behavior.apply_cooldown, behavior.apply_damage])
-    components = [spell_cmp, dmg_effect, named, cooldown, known, aoe, ut]
-    damage_spell = esper.create_entity(*components)
+    cmps.append(cmp.Known(slot=slot_num))
+    cmps.append(cmp.UseTrigger(callbacks=[behavior.apply_cooldown, behavior.apply_damage]))
+    damage_spell = esper.create_entity(*cmps)
 
     return damage_spell
 
 
 def blink_spell() -> int:
+    cmps = []
     player = ecs.Query(cmp.Player).first()
-    spell_cmp = cmp.Spell(target_range=4)
-    cooldown = cmp.Cooldown(turns=5)
-    ut = cmp.UseTrigger(callbacks=[behavior.apply_cooldown, behavior.apply_move])
-    dmg_effect = cmp.MoveEffect(target=player)
-    named = cmp.Onymous(name="Blink")
+    cmps.append(cmp.Spell(target_range=4))
+    cmps.append(cmp.Cooldown(turns=5))
+    cmps.append(cmp.UseTrigger(callbacks=[behavior.apply_cooldown, behavior.apply_move]))
+    cmps.append(cmp.MoveEffect(target=player))
+    cmps.append(cmp.Onymous(name="Blink"))
     slot_num = len(esper.get_component(cmp.Known)) + 1
-    known = cmp.Known(slot=slot_num)
-    components = [spell_cmp, dmg_effect, named, cooldown, ut, known]
-    sample_spell = esper.create_entity(*components)
+    cmps.append(cmp.Known(slot=slot_num))
+    sample_spell = esper.create_entity(*cmps)
     return sample_spell
 
 
 def bleed_spell() -> int:
-    spell_cmp = cmp.Spell(target_range=3)
-    cooldown = cmp.Cooldown(turns=2)
-    dmg_effect = cmp.BleedEffect(value=2)
-    ut = cmp.UseTrigger(callbacks=[behavior.apply_cooldown, behavior.apply_bleed])
-    named = cmp.Onymous(name="Mutilate")
+    cmps = []
+    cmps.append(cmp.Spell(target_range=3))
+    cmps.append(cmp.Cooldown(turns=2))
+    cmps.append(cmp.BleedEffect(value=2))
+    cmps.append(cmp.UseTrigger(callbacks=[behavior.apply_cooldown, behavior.apply_bleed]))
+    cmps.append(cmp.Onymous(name="Mutilate"))
     slot_num = len(esper.get_component(cmp.Known)) + 1
-    known = cmp.Known(slot=slot_num)
-    components = [spell_cmp, dmg_effect, named, cooldown, known, ut]
-    sample_spell = esper.create_entity(*components)
+    cmps.append(cmp.Known(slot=slot_num))
+    sample_spell = esper.create_entity(*cmps)
     return sample_spell
 
 
 def trap(pos: cmp.Position) -> int:
-    vis = cmp.Visible(glyph=display.Glyph.TRAP, color=display.Color.RED)
-    hp = cmp.Health(max=1)
-    named = cmp.Onymous(name="trap")
-    trap_cmp = cmp.OnStep()
+    cmps = []
+    cmps.append(pos)
+    cmps.append(cmp.Visible(glyph=display.Glyph.TRAP, color=display.Color.RED))
+    cmps.append(cmp.Health(max=1))
+    cmps.append(cmp.Onymous(name="trap"))
+    cmps.append(cmp.OnStep())
 
-    st = cmp.StepTrigger(callbacks=[behavior.apply_damage])
-    components = [pos, vis, hp, named, trap_cmp, st]
-    trap_ent = esper.create_entity(*components)
+    cmps.append(cmp.StepTrigger(callbacks=[behavior.apply_damage]))
+    trap_ent = esper.create_entity(*cmps)
     dmg = cmp.DamageEffect(source=trap_ent, amount=1)
     esper.add_component(trap_ent, dmg)
     return trap_ent
 
 
 def bomb(pos: cmp.Position) -> int:
-    vis = cmp.Visible(glyph=display.Glyph.BOMB, color=display.Color.RED)
-    hp = cmp.Health(max=1)
-    named = cmp.Onymous(name="bomb")
-    die_cmp = cmp.OnDeath()
-    aoe = cmp.EffectArea(radius=1)
-    aura = cmp.Aura(radius=1, color=display.Color.LIGHT_RED)
+    cmps = []
+    cmps.append(pos)
+    cmps.append(cmp.Visible(glyph=display.Glyph.BOMB, color=display.Color.RED))
+    cmps.append(cmp.Health(max=1))
+    cmps.append(cmp.Onymous(name="bomb"))
+    cmps.append(cmp.OnDeath())
+    cmps.append(cmp.EffectArea(radius=1))
+    cmps.append(cmp.Aura(radius=1, color=display.Color.LIGHT_RED))
 
     dmg_proc = lambda _: scene.oneshot(processors.Damage)
-    dt = cmp.DeathTrigger(callbacks=[behavior.apply_damage, dmg_proc])
-    components = [pos, vis, hp, named, die_cmp, aoe, aura, dt]
-    bomb_ent = esper.create_entity(*components)
+    cmps.append(cmp.DeathTrigger(callbacks=[behavior.apply_damage, dmg_proc]))
+    bomb_ent = esper.create_entity(*cmps)
     dmg = cmp.DamageEffect(source=bomb_ent, amount=1)
     esper.add_component(bomb_ent, dmg)
     condition.grant(bomb_ent, typ.Condition.Dying, 2)
@@ -311,11 +320,14 @@ def bomb(pos: cmp.Position) -> int:
 
 
 def player():
-    vis = cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN)
-    pos = cmp.Position(x=1, y=1)
-    hp = cmp.Health(max=10)
-    named = cmp.Onymous(name="player")
-    esper.create_entity(cmp.Player(), pos, vis, cmp.Blocking(), hp, named)
+    cmps = []
+    cmps.append(cmp.Player())
+    cmps.append(cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN))
+    cmps.append(cmp.Position(x=1, y=1))
+    cmps.append(cmp.Health(max=10))
+    cmps.append(cmp.Onymous(name="player"))
+    cmps.append(cmp.Blocking())
+    esper.create_entity(*cmps)
 
 
 def starting_inventory():

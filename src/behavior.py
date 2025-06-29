@@ -7,9 +7,9 @@ import esper
 import components as cmp
 import condition
 import ecs
+import event
 import location
 import typ
-import event
 
 
 def lob_bomb(source: int):
