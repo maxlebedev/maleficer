@@ -301,12 +301,6 @@ def trace_ray(source: int, dest: int):
     return dest, trace
 
 
-def flash_line(line: list):
-    for x, y in line:
-        pos = cmp.Position(x=x, y=y)
-        esper.dispatch_event("flash_pos", pos, display.Color.BLUE)
-
-
 def get_fov():
     global BOARD
     transparency = BOARD.as_transparency()

@@ -10,6 +10,7 @@ import ecs
 import event
 import location
 import typ
+import display
 
 
 def lob_bomb(source: int):
@@ -31,9 +32,11 @@ def lob_bomb(source: int):
         selection = random.choice(indices)
 
     if target_cell := location.BOARD.get_cell(*selection):
-        dest, _ = location.trace_ray(source, target_cell)
+        dest, trace = location.trace_ray(source, target_cell)
         dest_pos = esper.component_for_entity(dest, cmp.Position)
         pos_copy = cmp.Position(*dest_pos)
+
+        flash_line(trace, display.Glyph.BOMB, display.Color.RED)
         # trace_ray can be stopped on (not before) the first blocker
         bomb_ent = create.bomb(pos_copy)
         print(f"lobbed bomb {bomb_ent}")
@@ -48,7 +51,7 @@ def fire_at_player(source: int):
         return
     player = ecs.Query(cmp.Player).first()
     dest, trace = location.trace_ray(source, player)
-    location.flash_line(trace)
+    flash_line(trace, display.Color.BLUE)
     trg = cmp.Target(target=dest)
     esper.add_component(source, trg)
     apply_cooldown(source)
@@ -115,3 +118,8 @@ def apply_learn(source: int):
                 condition.grant(
                     learnable.spell, typ.Condition.Cooldown, cd_effect.turns
                 )
+
+def flash_line(line: list, *args):
+    for x, y in line:
+        pos = cmp.Position(x=x, y=y)
+        esper.dispatch_event("flash_pos", pos, *args)

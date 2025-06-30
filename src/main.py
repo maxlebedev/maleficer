@@ -1,5 +1,6 @@
 import random
 import time
+from functools import partial
 
 import esper
 import tcod
@@ -27,11 +28,17 @@ def flash(context, console):
     esper.dispatch_event("redraw")
 
 
-def flash_pos(context, console, position, color: display.Color):
-    """change fg color of a position"""
+def flash_pos(context, console, position, *args):
+    """change glyph of a position"""
     esper.dispatch_event("redraw")
     cell = location.BOARD.cells[position.x][position.y]
-    glyph, _, bg = location.BOARD.as_rgb(cell)
+    glyph, color, bg = location.BOARD.as_rgb(cell)
+    for arg in args:
+        if isinstance(arg, tuple):
+            color = arg
+        if isinstance(arg, display.Glyph):
+            glyph = arg
+
     in_fov = location.get_fov()
     if in_fov[position.x][position.y]:
         bg = display.Color.CANDLE
@@ -91,7 +98,7 @@ def main() -> None:
     flash_callback = lambda: flash(context, console)
     esper.set_handler("redraw", redraw)
     esper.set_handler("flash", flash_callback)
-    flash_pos_callback = lambda p, c: flash_pos(context, console, p, c)
+    flash_pos_callback = partial(flash_pos, context, console)
     esper.set_handler("flash_pos", flash_pos_callback)
 
     while True:
