@@ -72,6 +72,7 @@ class Glyph(IntEnum):
     WARLOCK = 80
     BOMB = 486
     GOBLIN = 127
+    MAGIC_MISSILE = 618
 
 
 letter_map = {

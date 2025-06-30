@@ -51,7 +51,7 @@ def fire_at_player(source: int):
         return
     player = ecs.Query(cmp.Player).first()
     dest, trace = location.trace_ray(source, player)
-    flash_line(trace, display.Color.BLUE)
+    flash_line(trace, display.Color.BLUE, display.Glyph.MAGIC_MISSILE)
     trg = cmp.Target(target=dest)
     esper.add_component(source, trg)
     apply_cooldown(source)
