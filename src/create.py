@@ -8,7 +8,7 @@ import esper
 import behavior
 import components as cmp
 import condition
-import display
+import display as dis
 import ecs
 import location
 import processors
@@ -18,26 +18,26 @@ import typ
 
 # TODO: should these take a position?
 def floor(x: int, y: int) -> int:
-    vis = cmp.Visible(glyph=display.Glyph.FLOOR, color=display.Color.FLOOR)
+    vis = cmp.Visible(glyph=dis.Glyph.FLOOR, color=dis.Color.FLOOR)
     cell = esper.create_entity(cmp.Cell(), cmp.Position(x, y), vis, cmp.Transparent())
     return cell
 
 
 def wall(x: int, y: int, breakable: int = False) -> int:
-    vis = cmp.Visible(glyph=display.Glyph.WALL, color=display.Color.LGREY)
+    vis = cmp.Visible(glyph=dis.Glyph.WALL, color=dis.Color.LGREY)
     pos = cmp.Position(x, y)
     blocking = cmp.Blocking()
     cell = esper.create_entity(cmp.Cell(), pos, vis, blocking)
     if breakable:
         esper.add_component(cell, cmp.Health(max=1))
         esper.add_component(cell, cmp.Onymous(name="wall"))
-        vis.glyph = display.Glyph.BWALL
+        vis.glyph = dis.Glyph.BWALL
 
     return cell
 
 
 def stairs(pos: cmp.Position) -> int:
-    vis = cmp.Visible(glyph=display.Glyph.STAIRS, color=display.Color.LGREY)
+    vis = cmp.Visible(glyph=dis.Glyph.STAIRS, color=dis.Color.LGREY)
 
     os = cmp.OnStep()
     tp = cmp.Transparent()
@@ -58,7 +58,7 @@ def stairs(pos: cmp.Position) -> int:
 def bat(pos: cmp.Position) -> int:
     cmps = []
     cmps.append(pos)
-    cmps.append(cmp.Visible(glyph=display.Glyph.BAT, color=display.Color.BROWN))
+    cmps.append(cmp.Visible(glyph=dis.Glyph.BAT, color=dis.Color.BROWN))
     cmps.append(cmp.Health(max=1))
     cmps.append(cmp.Onymous(name="bat"))
     cmps.append(cmp.Flying())
@@ -77,7 +77,7 @@ def skeleton(pos: cmp.Position) -> int:
     cmps =  io
     cmps.append(pos)
 
-    cmps.append(cmp.Visible(glyph=display.Glyph.SKELETON, color=display.Color.BROWN))
+    cmps.append(cmp.Visible(glyph=dis.Glyph.SKELETON, color=dis.Color.BROWN))
     cmps.append(cmp.Health(max=3))
     cmps.append(cmp.Onymous(name="skeleton"))
     cmps.append(cmp.Melee(radius=10))
@@ -95,7 +95,7 @@ def warlock(pos: cmp.Position) -> int:
     cmps = []
     cmps.append(pos)
 
-    cmps.append(cmp.Visible(glyph=display.Glyph.WARLOCK, color=display.Color.INDIGO))
+    cmps.append(cmp.Visible(glyph=dis.Glyph.WARLOCK, color=dis.Color.INDIGO))
     cmps.append(cmp.Health(max=2))
     cmps.append(cmp.Onymous(name="warlock"))
     cmps.append(cmp.Ranged(radius=3))
@@ -116,7 +116,7 @@ def goblin(pos: cmp.Position) -> int:
     """throws bombs"""
     cmps = []
     cmps.append(pos)
-    cmps.append(cmp.Visible(glyph=display.Glyph.GOBLIN, color=display.Color.DARK_GREEN))
+    cmps.append(cmp.Visible(glyph=dis.Glyph.GOBLIN, color=dis.Color.DARK_GREEN))
     cmps.append(cmp.Health(max=2))
     cmps.append(cmp.Onymous(name="goblin"))
     cmps.append(cmp.Ranged(radius=3))
@@ -134,7 +134,7 @@ def goblin(pos: cmp.Position) -> int:
 
 def potion(pos: cmp.Position | None = None) -> int:
     cmps = []
-    cmps.append(cmp.Visible(glyph=display.Glyph.POTION, color=display.Color.GREEN))
+    cmps.append(cmp.Visible(glyph=dis.Glyph.POTION, color=dis.Color.GREEN))
     cmps.append(cmp.Collectable())
     cmps.append(cmp.Health(max=1))
     cmps.append(cmp.Onymous(name="potion"))
@@ -152,7 +152,7 @@ def potion(pos: cmp.Position | None = None) -> int:
 
 def scroll(pos: cmp.Position | None = None, spell: int | None = None) -> int:
     cmps = []
-    cmps.append(cmp.Visible(glyph=display.Glyph.SCROLL, color=display.Color.MAGENTA))
+    cmps.append(cmp.Visible(glyph=dis.Glyph.SCROLL, color=dis.Color.MAGENTA))
     cmps.append(cmp.Collectable())
     cmps.append(cmp.Health(max=1))
 
@@ -287,7 +287,7 @@ def bleed_spell() -> int:
 def trap(pos: cmp.Position) -> int:
     cmps = []
     cmps.append(pos)
-    cmps.append(cmp.Visible(glyph=display.Glyph.TRAP, color=display.Color.RED))
+    cmps.append(cmp.Visible(glyph=dis.Glyph.TRAP, color=dis.Color.RED))
     cmps.append(cmp.Health(max=1))
     cmps.append(cmp.Onymous(name="trap"))
     cmps.append(cmp.OnStep())
@@ -302,12 +302,12 @@ def trap(pos: cmp.Position) -> int:
 def bomb(pos: cmp.Position) -> int:
     cmps = []
     cmps.append(pos)
-    cmps.append(cmp.Visible(glyph=display.Glyph.BOMB, color=display.Color.RED))
+    cmps.append(cmp.Visible(glyph=dis.Glyph.BOMB, color=dis.Color.RED))
     cmps.append(cmp.Health(max=1))
     cmps.append(cmp.Onymous(name="bomb"))
     cmps.append(cmp.OnDeath())
     cmps.append(cmp.EffectArea(radius=1))
-    cmps.append(cmp.Aura(radius=1, color=display.Color.LIGHT_RED))
+    cmps.append(cmp.Aura(radius=1, color=dis.Color.LIGHT_RED))
 
     dmg_proc = lambda _: scene.oneshot(processors.Damage)
     cmps.append(cmp.DeathTrigger(callbacks=[behavior.apply_damage, dmg_proc]))
@@ -322,7 +322,7 @@ def bomb(pos: cmp.Position) -> int:
 def player():
     cmps = []
     cmps.append(cmp.Player())
-    cmps.append(cmp.Visible(glyph=display.Glyph.PLAYER, color=display.Color.GREEN))
+    cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.GREEN))
     cmps.append(cmp.Position(x=1, y=1))
     cmps.append(cmp.Health(max=10))
     cmps.append(cmp.Onymous(name="player"))

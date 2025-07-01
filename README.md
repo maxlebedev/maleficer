@@ -85,11 +85,13 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- The trigger/callback thing shouldn't live in event.py
 	- Bomb-lobber enemy
 		- bomb placement needs to account for blocking and LOS
-		- replace line animation with bomb spawn animation. also explosions
+		- bomb explosions. how to represend the countdown?
 	- Should all ranged animations happen simultaneously?
+		- animation queue?
 	- for enemies on cooldown, we don't just wanna do nothing
 	- spell with pushback
 # BUGS
 	- Found a wall I was able to walk through in the caves.
 	- shouldn't the warlocks be dead before their retaliation hits fire?
 	- bombs stopped by walls should actually be stopped by walls
+	- bomb sometimes fall on player's space. not bad but not intended
