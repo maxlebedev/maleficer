@@ -82,12 +82,10 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- spell mods (+1 range, +1 dmg pickups)
 	- In caves, NPCs shouldn't spawn too close to player
 	- break up Arch Concerns into open questions and arch docs
-	- The trigger/callback thing shouldn't live in event.py
 	- Bomb-lobber enemy
 		- bomb placement needs to account for blocking and LOS
 	- Should all ranged animations happen simultaneously?
 		- animation queue?
-	- for enemies on cooldown, we don't just wanna do nothing
 	- spell with pushback
 # BUGS
 	- Found a wall I was able to walk through in the caves.

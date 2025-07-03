@@ -271,6 +271,7 @@ class NPCTurn(esper.Processor):
         return path[1]
 
     def process(self):
+        # some of this probably want so live in behavior.py
         for entity, _ in esper.get_component(cmp.Wander):
             self.wander(entity)
 
@@ -287,9 +288,17 @@ class NPCTurn(esper.Processor):
             dist_to_player = location.euclidean_distance(player_pos, epos)
             # TODO: ranged units should also sometimes follow
             if dist_to_player > ranged.radius:
-                self.wander(entity)
+                if condition.has(entity, typ.Condition.Cooldown):
+                    # on cooldown, so player close enough to follow
+                    x, y = self.pathfind(epos, player_pos)
+                    event.Movement(entity, x=x - epos.x, y=y - epos.y)
+                else:
+                    self.wander(entity)
             else:
-                event.trigger_all_callbacks(entity, cmp.EnemyTrigger)
+                if condition.has(entity, typ.Condition.Cooldown):
+                    self.wander(entity)
+                else:
+                    event.trigger_all_callbacks(entity, cmp.EnemyTrigger)
 
         for entity, (_) in ecs.Query(cmp.Enemy).exclude(cmp.Ranged, cmp.Melee):
             event.trigger_all_callbacks(entity, cmp.EnemyTrigger)

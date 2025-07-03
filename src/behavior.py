@@ -16,8 +16,6 @@ import display
 def lob_bomb(source: int):
     import create
 
-    if condition.has(source, typ.Condition.Cooldown):
-        return
     player = ecs.Query(cmp.Player).first()
     dest_cell, _ = location.trace_ray(source, player)
     if dest_cell != player:  # no LOS on player
@@ -47,8 +45,6 @@ def lob_bomb(source: int):
 
 
 def fire_at_player(source: int):
-    if condition.has(source, typ.Condition.Cooldown):
-        return
     player = ecs.Query(cmp.Player).first()
     dest, trace = location.trace_ray(source, player)
     flash_line(trace, display.Color.BLUE, display.Glyph.MAGIC_MISSILE)
