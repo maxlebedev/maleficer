@@ -74,9 +74,8 @@ def bat(pos: cmp.Position) -> int:
 
 
 def skeleton(pos: cmp.Position) -> int:
-    cmps =  io
+    cmps = []
     cmps.append(pos)
-
     cmps.append(cmp.Visible(glyph=dis.Glyph.SKELETON, color=dis.Color.BROWN))
     cmps.append(cmp.Health(max=3))
     cmps.append(cmp.Onymous(name="skeleton"))
@@ -251,7 +250,8 @@ def firebolt_spell() -> int:
     cmps.append(cmp.Onymous(name="Firebolt"))
     slot_num = len(esper.get_component(cmp.Known)) + 1
     cmps.append(cmp.Known(slot=slot_num))
-    cmps.append(cmp.UseTrigger(callbacks=[behavior.apply_cooldown, behavior.apply_damage]))
+    callbacks = [behavior.apply_cooldown, behavior.apply_damage]
+    cmps.append(cmp.UseTrigger(callbacks=callbacks))
     damage_spell = esper.create_entity(*cmps)
 
     return damage_spell
@@ -262,7 +262,8 @@ def blink_spell() -> int:
     player = ecs.Query(cmp.Player).first()
     cmps.append(cmp.Spell(target_range=4))
     cmps.append(cmp.Cooldown(turns=5))
-    cmps.append(cmp.UseTrigger(callbacks=[behavior.apply_cooldown, behavior.apply_move]))
+    callbacks = [behavior.apply_cooldown, behavior.apply_move]
+    cmps.append(cmp.UseTrigger(callbacks=callbacks))
     cmps.append(cmp.MoveEffect(target=player))
     cmps.append(cmp.Onymous(name="Blink"))
     slot_num = len(esper.get_component(cmp.Known)) + 1
@@ -276,7 +277,8 @@ def bleed_spell() -> int:
     cmps.append(cmp.Spell(target_range=3))
     cmps.append(cmp.Cooldown(turns=2))
     cmps.append(cmp.BleedEffect(value=2))
-    cmps.append(cmp.UseTrigger(callbacks=[behavior.apply_cooldown, behavior.apply_bleed]))
+    callbacks = [behavior.apply_cooldown, behavior.apply_bleed]
+    cmps.append(cmp.UseTrigger(callbacks=callbacks))
     cmps.append(cmp.Onymous(name="Mutilate"))
     slot_num = len(esper.get_component(cmp.Known)) + 1
     cmps.append(cmp.Known(slot=slot_num))
@@ -306,11 +308,23 @@ def bomb(pos: cmp.Position) -> int:
     cmps.append(cmp.Health(max=1))
     cmps.append(cmp.Onymous(name="bomb"))
     cmps.append(cmp.OnDeath())
+    cmps.append(cmp.Enemy())
     cmps.append(cmp.EffectArea(radius=1))
-    cmps.append(cmp.Aura(radius=1, color=dis.Color.LIGHT_RED))
+    cmps.append(cmp.Aura(radius=1, color=dis.Color.WHITE))
 
     dmg_proc = lambda _: scene.oneshot(processors.Damage)
     cmps.append(cmp.DeathTrigger(callbacks=[behavior.apply_damage, dmg_proc]))
+
+    def aura_tick(entity: int):
+        aura = esper.component_for_entity(entity, cmp.Aura)
+        match aura.color:
+            case dis.Color.WHITE:
+                aura.color = dis.Color.LIGHT_RED
+            case dis.Color.LIGHT_RED:
+                aura.color = dis.Color.RED
+
+    cmps.append(cmp.EnemyTrigger(callbacks=[aura_tick]))
+
     bomb_ent = esper.create_entity(*cmps)
     dmg = cmp.DamageEffect(source=bomb_ent, amount=1)
     esper.add_component(bomb_ent, dmg)

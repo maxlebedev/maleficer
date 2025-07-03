@@ -291,6 +291,9 @@ class NPCTurn(esper.Processor):
             else:
                 event.trigger_all_callbacks(entity, cmp.EnemyTrigger)
 
+        for entity, (_) in ecs.Query(cmp.Enemy).exclude(cmp.Ranged, cmp.Melee):
+            event.trigger_all_callbacks(entity, cmp.EnemyTrigger)
+
 
 @dataclass
 class Render(esper.Processor):

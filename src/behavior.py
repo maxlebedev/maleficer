@@ -119,6 +119,7 @@ def apply_learn(source: int):
                     learnable.spell, typ.Condition.Cooldown, cd_effect.turns
                 )
 
+
 def flash_line(line: list, *args):
     for x, y in line:
         pos = cmp.Position(x=x, y=y)
