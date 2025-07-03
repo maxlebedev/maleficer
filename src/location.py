@@ -391,7 +391,7 @@ def cave_dungeon(board):
         [create.potion, 2],
         [create.scroll, 1],
         [create.bat, 5],
-        [create.skeleton, 3],
+        [create.goblin, 3],
         [create.warlock, 1],
     ]
     for _, pos in valid_spawns[:-1]:
