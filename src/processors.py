@@ -287,18 +287,18 @@ class NPCTurn(esper.Processor):
         for entity, (ranged, epos) in ecs.Query(cmp.Ranged, cmp.Position):
             dist_to_player = location.euclidean_distance(player_pos, epos)
             # TODO: ranged units should also sometimes follow
-            if dist_to_player > ranged.radius:
+            if location.sees_player(entity, ranged.radius):
+                if condition.has(entity, typ.Condition.Cooldown):
+                    self.wander(entity)
+                else:
+                    event.trigger_all_callbacks(entity, cmp.EnemyTrigger)
+            else:
                 if condition.has(entity, typ.Condition.Cooldown):
                     # on cooldown, so player close enough to follow
                     x, y = self.follow(epos, player_pos)
                     event.Movement(entity, x=x - epos.x, y=y - epos.y)
                 else:
                     self.wander(entity)
-            else:
-                if condition.has(entity, typ.Condition.Cooldown):
-                    self.wander(entity)
-                else:
-                    event.trigger_all_callbacks(entity, cmp.EnemyTrigger)
 
         for entity, (_) in ecs.Query(cmp.Enemy).exclude(cmp.Ranged, cmp.Melee):
             event.trigger_all_callbacks(entity, cmp.EnemyTrigger)
