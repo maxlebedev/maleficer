@@ -83,20 +83,6 @@ class Death(Event):
             self._queue.append(self)
 
 
-def collect_all_affected_entities(source: int, target: int) -> list[int]:
-    pos = esper.component_for_entity(target, cmp.Position)
-    if not esper.has_component(source, cmp.EffectArea):
-        entities = [e for e in location.BOARD.entities[pos.x][pos.y]]
-        return entities
-    aoe = esper.component_for_entity(source, cmp.EffectArea)
-
-    entities = []
-
-    for x, y in location.coords_within_radius(pos, aoe.radius):
-        entities += [e for e in location.BOARD.entities[x][y] if e != source]
-    return entities
-
-
 def trigger_all_callbacks(entity, trigger_cmp):
     if trigger := esper.try_component(entity, trigger_cmp):
         for func in trigger.callbacks:

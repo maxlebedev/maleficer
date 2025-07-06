@@ -13,35 +13,44 @@ import typ
 import display
 
 
+def collect_all_affected_entities(source: int, target: int) -> list[int]:
+    pos = esper.component_for_entity(target, cmp.Position)
+    if not esper.has_component(source, cmp.EffectArea):
+        entities = [e for e in location.BOARD.entities[pos.x][pos.y]]
+        return entities
+    aoe = esper.component_for_entity(source, cmp.EffectArea)
+
+    entities = []
+
+    for x, y in location.coords_within_radius(pos, aoe.radius):
+        entities += [e for e in location.BOARD.entities[x][y] if e != source]
+    return entities
+
+
 def lob_bomb(source: int):
     import create
 
-    player = ecs.Query(cmp.Player).first()
-    dest_cell, _ = location.trace_ray(source, player)
-    if dest_cell != player:  # no LOS on player
-        return False
+    if not location.sees_player(source):
+        return True
 
     player_pos = location.player_position()
-    # location.BOARD.has_blocker(x,y)
-    # find some free spot in there
     indices = location.get_neighbor_coords(player_pos)
-    selection = random.choice(indices)
-    while location.BOARD.has_blocker(*selection):
-        selection = random.choice(indices)
+    random.shuffle(indices)
+    for selection in indices:
+        if target_cell := location.BOARD.get_cell(*selection):
+            if location.BOARD.has_blocker(*selection):
+                continue
+            dest, trace = location.trace_ray(source, target_cell)
+            if dest != target_cell:  # no LOS
+                continue
+            dest_pos = esper.component_for_entity(dest, cmp.Position)
+            dest_pos = cmp.Position(*dest_pos)
+            flash_line(trace, display.Glyph.BOMB, display.Color.RED)
+            create.bomb(dest_pos)
 
-    if target_cell := location.BOARD.get_cell(*selection):
-        dest, trace = location.trace_ray(source, target_cell)
-        dest_pos = esper.component_for_entity(dest, cmp.Position)
-        pos_copy = cmp.Position(*dest_pos)
-
-        flash_line(trace, display.Glyph.BOMB, display.Color.RED)
-        # trace_ray can be stopped on (not before) the first blocker
-        bomb_ent = create.bomb(pos_copy)
-        print(f"lobbed bomb {bomb_ent}")
-
-        location.BOARD.build_entity_cache()
-        apply_cooldown(source)
-    # we can choose to only lob at empty spots, or only traceable spots
+            location.BOARD.build_entity_cache()
+            apply_cooldown(source)
+            return
 
 
 def fire_at_player(source: int):
@@ -70,7 +79,7 @@ def apply_bleed(source: int):
         target = target_cmp.target
         if bleed_effect := esper.try_component(source, cmp.BleedEffect):
             if esper.has_component(target, cmp.Cell):
-                entities = event.collect_all_affected_entities(source, target)
+                entities = collect_all_affected_entities(source, target)
                 for ent in entities:
                     if esper.has_component(ent, cmp.Health):
                         condition.grant(ent, typ.Condition.Bleed, bleed_effect.value)
@@ -84,7 +93,7 @@ def apply_damage(source: int):
         if dmg_effect := esper.try_component(source, cmp.DamageEffect):
             src_frz = ecs.freeze_entity(source)
             if esper.has_component(target, cmp.Cell):
-                entities = event.collect_all_affected_entities(source, target)
+                entities = collect_all_affected_entities(source, target)
                 for ent in entities:
                     if esper.has_component(ent, cmp.Health):
                         event.Damage(src_frz, ent, dmg_effect.amount)

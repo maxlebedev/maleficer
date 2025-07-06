@@ -82,13 +82,11 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- spell mods (+1 range, +1 dmg pickups)
 	- In caves, NPCs shouldn't spawn too close to player
 	- break up Arch Concerns into open questions and arch docs
-	- Bomb-lobber enemy
-		- bomb placement needs to account for blocking and LOS
 	- Should all ranged animations happen simultaneously?
 		- animation queue?
 	- spell with pushback
+	- sqlite db for storing current lvl value, rng seed for lvls, etc
 # BUGS
 	- Found a wall I was able to walk through in the caves.
 	- shouldn't the warlocks be dead before their retaliation hits fire?
-	- bombs stopped by walls should actually be stopped by walls
-	- bomb sometimes fall on player's space. not bad but not intended
+		- death is queued until end of turn. but maybe some other issue too

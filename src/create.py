@@ -118,7 +118,7 @@ def goblin(pos: cmp.Position) -> int:
     cmps.append(cmp.Visible(glyph=dis.Glyph.GOBLIN, color=dis.Color.DARK_GREEN))
     cmps.append(cmp.Health(max=2))
     cmps.append(cmp.Onymous(name="goblin"))
-    cmps.append(cmp.Ranged(radius=3))
+    cmps.append(cmp.Ranged(radius=5))
 
     cmps.append(cmp.EnemyTrigger(callbacks=[behavior.lob_bomb]))
     cmps.append(cmp.Cooldown(turns=2))

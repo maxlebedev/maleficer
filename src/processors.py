@@ -260,7 +260,7 @@ class NPCTurn(esper.Processor):
             return
         event.Movement(entity, *dir)
 
-    def pathfind(self, entity_pos, end_pos):
+    def follow(self, entity_pos, end_pos):
         cost = location.BOARD.as_move_graph()
         graph = tcod.path.SimpleGraph(cost=cost, cardinal=1, diagonal=0)
         pf = tcod.path.Pathfinder(graph)
@@ -281,7 +281,7 @@ class NPCTurn(esper.Processor):
             if dist_to_player > melee.radius:
                 self.wander(entity)
             else:
-                x, y = self.pathfind(epos, player_pos)
+                x, y = self.follow(epos, player_pos)
                 event.Movement(entity, x=x - epos.x, y=y - epos.y)
 
         for entity, (ranged, epos) in ecs.Query(cmp.Ranged, cmp.Position):
@@ -290,7 +290,7 @@ class NPCTurn(esper.Processor):
             if dist_to_player > ranged.radius:
                 if condition.has(entity, typ.Condition.Cooldown):
                     # on cooldown, so player close enough to follow
-                    x, y = self.pathfind(epos, player_pos)
+                    x, y = self.follow(epos, player_pos)
                     event.Movement(entity, x=x - epos.x, y=y - epos.y)
                 else:
                     self.wander(entity)

@@ -17,9 +17,17 @@ LEVEL = 1
 
 
 def player_position():
-    # TODO: fine to crash if player missing?
     pos = ecs.Query(cmp.Player, cmp.Position).cmp(cmp.Position)
     return pos
+
+def sees_player(entity: int, distance: int|None = None) -> bool:
+    player = ecs.Query(cmp.Player).first()
+    dest_cell, trace = trace_ray(entity, player)
+    if dest_cell != player:  # no LOS on player
+        return False
+    if distance and len(trace) > distance:
+        return False
+    return True
 
 
 def coords_within_radius(pos: cmp.Position, radius: int):
@@ -243,7 +251,7 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
 
         new_room = RectangularRoom(room_x, room_y, room_width, room_height)
         if any(intersects(board, new_room, room) for room in rooms):
-            continue  # This room intersects, so go to the next attempt.
+            continue  # This room intersects, so go to the next attempt
 
         centers.append(new_room.center)
         for cell in board.as_sequence(*new_room.inner):
@@ -285,7 +293,7 @@ def new_level():
 
 
 def trace_ray(source: int, dest: int):
-    """trace a line between source and dest, returning first blocker and path"""
+    """trace a line between source and dest, returning first blocker & path"""
     global BOARD
     source_pos = esper.component_for_entity(source, cmp.Position)
     dest_pos = esper.component_for_entity(dest, cmp.Position)
