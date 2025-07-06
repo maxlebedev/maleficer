@@ -56,10 +56,11 @@ def lob_bomb(source: int):
 def fire_at_player(source: int):
     player = ecs.Query(cmp.Player).first()
     dest, trace = location.trace_ray(source, player)
-    flash_line(trace, display.Color.BLUE, display.Glyph.MAGIC_MISSILE)
-    trg = cmp.Target(target=dest)
-    esper.add_component(source, trg)
-    apply_cooldown(source)
+    if dest == player:
+        flash_line(trace, display.Color.BLUE, display.Glyph.MAGIC_MISSILE)
+        trg = cmp.Target(target=dest)
+        esper.add_component(source, trg)
+        apply_cooldown(source)
 
 
 def apply_cooldown(source: int):
