@@ -119,6 +119,7 @@ class Damage(esper.Processor):
             hp = esper.component_for_entity(damage.target, cmp.Health)
             if hp.current <= 0:
                 event.Death(damage.target)
+                scene.oneshot(Death)
 
 
 @dataclass
@@ -300,7 +301,8 @@ class NPCTurn(esper.Processor):
                 else:
                     self.wander(entity)
 
-        for entity, (_) in ecs.Query(cmp.Enemy).exclude(cmp.Ranged, cmp.Melee):
+        set_behavior = (cmp.Ranged, cmp.Melee, cmp.Wander)
+        for entity, (_) in ecs.Query(cmp.Enemy).exclude(*set_behavior):
             event.trigger_all_callbacks(entity, cmp.EnemyTrigger)
 
 
@@ -554,7 +556,7 @@ class TargetInputEvent(InputEvent):
             event.trigger_all_callbacks(targeting_entity, cmp.UseTrigger)
             esper.remove_component(targeting_entity, cmp.Targeting)
             event.Tick()
-            scene.to_phase(scene.Phase.level, NPCTurn)
+            scene.to_phase(scene.Phase.level, Damage) # to FIRST dmg phase
         except typ.InvalidAction as e:
             esper.dispatch_event("flash")
             event.Log.append(str(e))

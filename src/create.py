@@ -268,8 +268,8 @@ def blink_spell() -> int:
     cmps.append(cmp.Onymous(name="Blink"))
     slot_num = len(esper.get_component(cmp.Known)) + 1
     cmps.append(cmp.Known(slot=slot_num))
-    sample_spell = esper.create_entity(*cmps)
-    return sample_spell
+    blink_spell = esper.create_entity(*cmps)
+    return blink_spell
 
 
 def bleed_spell() -> int:

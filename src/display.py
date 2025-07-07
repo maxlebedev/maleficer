@@ -29,15 +29,17 @@ class Color:
     GREEN = (0, 255, 0)
     DARK_GREEN = (95, 172, 36)
     RED = (255, 0, 0)
+    LIGHT_RED = (223, 80, 80)
+    BLOOD_RED = (187, 10, 30)
     BLUE = (0, 0, 255)
     LGREY = (100, 100, 100)
     DGREY = (50, 50, 50)
     YELLOW = (55, 55, 37)
+    ORANGE = (255,128,0)
     MAGENTA = (253, 61, 181)
-    BLOOD_RED = (187, 10, 30)
     BROWN = (94, 44, 4)
     INDIGO = (75, 0, 130)
-    LIGHT_RED = (223, 80, 80)
+
 
     CANDLE = (97, 85, 52)
     BAR_FILLED = GREEN

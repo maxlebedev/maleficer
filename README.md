@@ -76,6 +76,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- DeathTriggers with dmg need to have oneshot(Dmg) called after
 	- Warlock missles don't hit potions because they are not Blocking
 	- currently the enemy move decision tree is one static thing. break up eventually
+	- TargetInputEvent returns control to the player's Damage phase. otherwise enemies get a turn before player damage resolves
 # TODO
 	- All effects on the targeting entity should get their targets filled in if they haven't already
 		- But, only the non-static targets should get cleared, and we don't have a way to store that info
@@ -93,7 +94,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- archers that make a line AOE before attacking
 		- No argher glyph
 	- break create.py into enemy/spell/etc
+	- do I want proc.Movement to take absolute coords? might make things easier
 # BUGS
 	- Found a wall I was able to walk through in the caves.
-	- shouldn't the warlocks be dead before their retaliation hits fire?
-		- death is queued until end of turn. but maybe some other issue too
