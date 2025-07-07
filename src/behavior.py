@@ -9,6 +9,7 @@ import condition
 import ecs
 import event
 import location
+import math_util
 import typ
 import display
 
@@ -102,12 +103,25 @@ def apply_damage(source: int):
 
 
 def apply_move(source: int):
+    """move target to crosshair"""
     if move_effect := esper.try_component(source, cmp.MoveEffect):
         pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(cmp.Position)
         start = esper.component_for_entity(move_effect.target, cmp.Position)
         x = pos.x - start.x
         y = pos.y - start.y
         event.Movement(move_effect.target, x, y)
+
+
+def apply_push(source: int):
+    """move target N spaces away from source"""
+    push_effect = esper.component_for_entity(source, cmp.PushEffect)
+    source_pos = esper.component_for_entity(push_effect.source, cmp.Position)
+    if target_cmp := esper.try_component(source, cmp.Target):
+        trg_pos = esper.component_for_entity(target_cmp.target, cmp.Position)
+        x, y = math_util.get_push_coords(source_pos.as_tuple, trg_pos.as_tuple, push_effect.distance)
+        entities = collect_all_affected_entities(source, target_cmp.target)
+        for entity in entities:
+            event.Movement(entity, x, y)
 
 
 def apply_learn(source: int):
