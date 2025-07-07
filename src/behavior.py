@@ -102,11 +102,11 @@ def apply_damage(source: int):
 
 
 def apply_move(source: int):
-    player_pos = ecs.Query(cmp.Player, cmp.Position).cmp(cmp.Position)
     if move_effect := esper.try_component(source, cmp.MoveEffect):
         pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(cmp.Position)
-        x = pos.x - player_pos.x
-        y = pos.y - player_pos.y
+        start = esper.component_for_entity(move_effect.target, cmp.Position)
+        x = pos.x - start.x
+        y = pos.y - start.y
         event.Movement(move_effect.target, x, y)
 
 

@@ -86,6 +86,12 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 		- animation queue?
 	- spell with pushback
 	- sqlite db for storing current lvl value, rng seed for lvls, etc
+	- goblins should actually try to be at dist 4 to player
+	- small chance of "named" scrolls with unique effects
+	- one-turn-per-square moving projectiles
+	- archers that make a line AOE before attacking
+		- No argher glyph
+	- break create.py into enemy/spell/etc
 # BUGS
 	- Found a wall I was able to walk through in the caves.
 	- shouldn't the warlocks be dead before their retaliation hits fire?

@@ -20,7 +20,8 @@ def player_position():
     pos = ecs.Query(cmp.Player, cmp.Position).cmp(cmp.Position)
     return pos
 
-def sees_player(entity: int, distance: int|None = None) -> bool:
+
+def sees_player(entity: int, distance: int | None = None) -> bool:
     player = ecs.Query(cmp.Player).first()
     dest_cell, trace = trace_ray(entity, player)
     if dest_cell != player:  # no LOS on player
