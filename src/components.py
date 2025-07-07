@@ -163,7 +163,7 @@ class DamageEffect:
 
 @component
 class MoveEffect:
-    """a spell (or w.e) moves a target"""
+    """a spell (or w.e) moves a target to crosshair"""
 
     # target is chosen at spell creation time,
     # so this won't work for arbitrary enemies

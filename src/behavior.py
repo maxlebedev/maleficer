@@ -106,10 +106,7 @@ def apply_move(source: int):
     """move target to crosshair"""
     if move_effect := esper.try_component(source, cmp.MoveEffect):
         pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(cmp.Position)
-        start = esper.component_for_entity(move_effect.target, cmp.Position)
-        x = pos.x - start.x
-        y = pos.y - start.y
-        event.Movement(move_effect.target, x, y)
+        event.Movement(move_effect.target, pos.x, pos.y)
 
 
 def apply_push(source: int):
@@ -120,8 +117,16 @@ def apply_push(source: int):
         trg_pos = esper.component_for_entity(target_cmp.target, cmp.Position)
         x, y = math_util.get_push_coords(source_pos.as_tuple, trg_pos.as_tuple, push_effect.distance)
         entities = collect_all_affected_entities(source, target_cmp.target)
+
+        """
+        we don't wanna be pushing people through walls, 
+        so we stop at the first blocker
+        target_cell = location.BOARD.get_cell(x, y)
+        dest, trace = location.trace_ray(target_cmp.target, target_cell)
+        """
+
         for entity in entities:
-            event.Movement(entity, x, y)
+            event.Movement(entity, x, y, relative=True)
 
 
 def apply_learn(source: int):

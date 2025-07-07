@@ -64,6 +64,7 @@ class Movement(Event):
     source: int
     x: int
     y: int
+    relative: bool = False
 
 
 @dataclass

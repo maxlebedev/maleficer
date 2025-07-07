@@ -264,7 +264,7 @@ def blink_spell() -> int:
     cmps.append(cmp.Cooldown(turns=5))
     callbacks = [behavior.apply_cooldown, behavior.apply_move]
     cmps.append(cmp.UseTrigger(callbacks=callbacks))
-    cmps.append(cmp.PushEffect(source=player, distance=2))
+    cmps.append(cmp.MoveEffect(target=player))
     cmps.append(cmp.Onymous(name="Blink"))
     slot_num = len(esper.get_component(cmp.Known)) + 1
     cmps.append(cmp.Known(slot=slot_num))
@@ -295,7 +295,7 @@ def push_spell() -> int:
     cmps.append(cmp.Onymous(name="Push"))
 
     player = ecs.Query(cmp.Player).first()
-    cmps.append(cmp.MoveEffect(target=player))
+    cmps.append(cmp.PushEffect(source=player, distance=2))
     slot_num = len(esper.get_component(cmp.Known)) + 1
     cmps.append(cmp.Known(slot=slot_num))
     push_spell = esper.create_entity(*cmps)

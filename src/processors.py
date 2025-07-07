@@ -65,8 +65,11 @@ class Movement(esper.Processor):
             has = esper.has_component
 
             pos = esper.component_for_entity(mover, cmp.Position)
-            new_x = pos.x + movement.x
-            new_y = pos.y + movement.y
+            new_x, new_y = movement.x, movement.y
+            if movement.relative:
+                new_x += pos.x
+                new_y += pos.y
+
             targets = copy.copy(board.entities[new_x][new_y])
 
             blocked = any(has(target, cmp.Blocking) for target in targets)
@@ -207,7 +210,7 @@ class GameInputEvent(InputEvent):
 
     def move(self, x, y):
         player = ecs.Query(cmp.Player).first()
-        event.Movement(player, x, y)
+        event.Movement(player, x, y, relative=True)
         event.Tick()
 
     def handle_slot_key(self, slot: int):
@@ -259,7 +262,7 @@ class NPCTurn(esper.Processor):
         dir = random.choice([(0, 1), (0, -1), (1, 0), (-1, 0), (0, 0)])
         if dir == (0, 0):
             return
-        event.Movement(entity, *dir)
+        event.Movement(entity, *dir, relative=True)
 
     def follow(self, entity_pos, end_pos):
         cost = location.BOARD.as_move_graph()
@@ -283,7 +286,7 @@ class NPCTurn(esper.Processor):
                 self.wander(entity)
             else:
                 x, y = self.follow(epos, player_pos)
-                event.Movement(entity, x=x - epos.x, y=y - epos.y)
+                event.Movement(entity, x=x, y=y)
 
         for entity, (ranged, epos) in ecs.Query(cmp.Ranged, cmp.Position):
             dist_to_player = location.euclidean_distance(player_pos, epos)
@@ -297,7 +300,7 @@ class NPCTurn(esper.Processor):
                 if condition.has(entity, typ.Condition.Cooldown):
                     # on cooldown, so player close enough to follow
                     x, y = self.follow(epos, player_pos)
-                    event.Movement(entity, x=x - epos.x, y=y - epos.y)
+                    event.Movement(entity, x=x, y=y)
                 else:
                     self.wander(entity)
 
@@ -542,7 +545,7 @@ class TargetInputEvent(InputEvent):
         new_pos = cmp.Position(pos.x + x, pos.y + y)
         dist_to_player = location.euclidean_distance(player_pos, new_pos)
         if not spell_cmp or dist_to_player < spell_cmp.target_range:
-            event.Movement(crosshair, x, y)
+            event.Movement(crosshair, x, y, relative=True)
 
     def select(self):
         xhair_pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(cmp.Position)

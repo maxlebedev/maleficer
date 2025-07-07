@@ -86,7 +86,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- break up Arch Concerns into open questions and arch docs
 	- Should all ranged animations happen simultaneously?
 		- animation queue?
-	- spell with pushback
 	- sqlite db for storing current lvl value, rng seed for lvls, etc
 	- goblins should actually try to be at dist 4 to player
 	- small chance of "named" scrolls with unique effects
