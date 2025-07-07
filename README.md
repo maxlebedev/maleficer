@@ -75,6 +75,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- reusing Position components breaks things
 	- DeathTriggers with dmg need to have oneshot(Dmg) called after
 	- Warlock missles don't hit potions because they are not Blocking
+	- currently the enemy move decision tree is one static thing. break up eventually
 # TODO
 	- All effects on the targeting entity should get their targets filled in if they haven't already
 		- But, only the non-static targets should get cleared, and we don't have a way to store that info

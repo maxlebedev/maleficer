@@ -252,9 +252,9 @@ def firebolt_spell() -> int:
     cmps.append(cmp.Known(slot=slot_num))
     callbacks = [behavior.apply_cooldown, behavior.apply_damage]
     cmps.append(cmp.UseTrigger(callbacks=callbacks))
-    damage_spell = esper.create_entity(*cmps)
+    firebolt_spell = esper.create_entity(*cmps)
 
-    return damage_spell
+    return firebolt_spell
 
 
 def blink_spell() -> int:
@@ -321,7 +321,7 @@ def bomb(pos: cmp.Position) -> int:
             case dis.Color.WHITE:
                 aura.color = dis.Color.LIGHT_RED
             case dis.Color.LIGHT_RED:
-                aura.color = dis.Color.RED
+                aura.color = dis.Color.BLOOD_RED
 
     cmps.append(cmp.EnemyTrigger(callbacks=[aura_tick]))
 
