@@ -93,6 +93,8 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- archers that make a line AOE before attacking
 		- No argher glyph
 	- break create.py into enemy/spell/etc
-	- do I want proc.Movement to take absolute coords? might make things easier
+	- living flames move up to 2 squares to enemy
+		- want an animation for getting there
+		- if only moving 1 square can also attack
 # BUGS
 	- Found a wall I was able to walk through in the caves.

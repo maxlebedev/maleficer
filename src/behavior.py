@@ -123,6 +123,7 @@ def apply_push(source: int):
         so we stop at the first blocker
         target_cell = location.BOARD.get_cell(x, y)
         dest, trace = location.trace_ray(target_cmp.target, target_cell)
+        trace[-1]
         """
 
         for entity in entities:

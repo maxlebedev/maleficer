@@ -74,6 +74,7 @@ class Melee:
     """Walks towards player"""
 
     radius: int
+    speed: int = 1
 
 
 @component

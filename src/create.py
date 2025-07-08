@@ -111,6 +111,24 @@ def warlock(pos: cmp.Position) -> int:
     return warlock
 
 
+def living_flame(pos: cmp.Position) -> int:
+    """melee unit, with a dash"""
+    cmps = []
+    cmps.append(pos)
+    cmps.append(cmp.Visible(glyph=dis.Glyph.FLAME, color=dis.Color.ORANGE))
+    cmps.append(cmp.Health(max=3))
+    cmps.append(cmp.Onymous(name="living flame"))
+    cmps.append(cmp.Melee(radius=5, speed=2))
+    cmps.append(cmp.EnemyTrigger(callbacks=[behavior.apply_damage]))
+    cmps.append(cmp.Enemy())
+    cmps.append(cmp.Blocking())
+    flame = esper.create_entity(*cmps)
+
+    dmg_effect = cmp.DamageEffect(amount=1, source=flame)
+    esper.add_component(flame, dmg_effect)
+    return flame
+
+
 def goblin(pos: cmp.Position) -> int:
     """throws bombs"""
     cmps = []
