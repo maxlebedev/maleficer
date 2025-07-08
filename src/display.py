@@ -35,11 +35,10 @@ class Color:
     LGREY = (100, 100, 100)
     DGREY = (50, 50, 50)
     YELLOW = (55, 55, 37)
-    ORANGE = (255,128,0)
+    ORANGE = (255, 128, 0)
     MAGENTA = (253, 61, 181)
     BROWN = (94, 44, 4)
     INDIGO = (75, 0, 130)
-
 
     CANDLE = (97, 85, 52)
     BAR_FILLED = GREEN

@@ -115,16 +115,10 @@ def apply_push(source: int):
     source_pos = esper.component_for_entity(push_effect.source, cmp.Position)
     if target_cmp := esper.try_component(source, cmp.Target):
         trg_pos = esper.component_for_entity(target_cmp.target, cmp.Position)
-        x, y = math_util.get_push_coords(source_pos.as_tuple, trg_pos.as_tuple, push_effect.distance)
+        x, y = math_util.get_push_coords(
+            source_pos.as_tuple, trg_pos.as_tuple, push_effect.distance
+        )
         entities = collect_all_affected_entities(source, target_cmp.target)
-
-        """
-        we don't wanna be pushing people through walls, 
-        so we stop at the first blocker
-        target_cell = location.BOARD.get_cell(x, y)
-        dest, trace = location.trace_ray(target_cmp.target, target_cell)
-        trace[-1]
-        """
 
         for entity in entities:
             event.Movement(entity, x, y, relative=True)

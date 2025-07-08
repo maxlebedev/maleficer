@@ -82,10 +82,10 @@ def to_phase(phase: Phase, start_proc: type[esper.Processor] | None = None):
     if start_proc:
         while start_proc and not isinstance(proc_list[0], start_proc):
             proc_list.append(proc_list.pop(0))
-    
+
     tot_procs = len(proc_list)
     for i, proc in enumerate(proc_list):
-        esper.add_processor(proc, priority=tot_procs-i)
+        esper.add_processor(proc, priority=tot_procs - i)
     CURRENT_PHASE = phase
 
 

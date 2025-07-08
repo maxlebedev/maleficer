@@ -170,9 +170,11 @@ class MoveEffect:
     # so this won't work for arbitrary enemies
     target: int
 
+
 @component
 class PushEffect:
     """different take on forced movement"""
+
     source: int
     distance: int
 

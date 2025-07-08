@@ -559,7 +559,7 @@ class TargetInputEvent(InputEvent):
             event.trigger_all_callbacks(targeting_entity, cmp.UseTrigger)
             esper.remove_component(targeting_entity, cmp.Targeting)
             event.Tick()
-            scene.to_phase(scene.Phase.level, Damage) # to FIRST dmg phase
+            scene.to_phase(scene.Phase.level, Damage)  # to FIRST dmg phase
         except typ.InvalidAction as e:
             esper.dispatch_event("flash")
             event.Log.append(str(e))
