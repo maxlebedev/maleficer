@@ -98,9 +98,8 @@ def warlock(pos: cmp.Position) -> int:
     cmps.append(cmp.Health(max=2))
     cmps.append(cmp.Onymous(name="warlock"))
     cmps.append(cmp.Ranged(radius=3))
-    cmps.append(
-        cmp.EnemyTrigger(callbacks=[behavior.fire_at_player, behavior.apply_damage])
-    )
+    callbacks = [behavior.fire_at_player, behavior.apply_damage]
+    cmps.append(cmp.EnemyTrigger(callbacks=callbacks))
     cmps.append(cmp.Cooldown(turns=1))
     cmps.append(cmp.Enemy())
     cmps.append(cmp.Blocking())
@@ -116,7 +115,7 @@ def living_flame(pos: cmp.Position) -> int:
     cmps = []
     cmps.append(pos)
     cmps.append(cmp.Visible(glyph=dis.Glyph.FLAME, color=dis.Color.ORANGE))
-    cmps.append(cmp.Health(max=3))
+    cmps.append(cmp.Health(max=2))
     cmps.append(cmp.Onymous(name="living flame"))
     cmps.append(cmp.Melee(radius=5, speed=2))
     cmps.append(cmp.EnemyTrigger(callbacks=[behavior.apply_damage]))
