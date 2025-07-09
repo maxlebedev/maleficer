@@ -100,5 +100,10 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- living flames move up to 2 squares to enemy
 		- want an animation for getting there
 		- if only moving 1 square can also attack
+		- if its 2 squares away, player moves into, flame overreaches
+	- currently considering reworking EffectAreas to be a pos collection
+		- or maybe just a func to get that collection
+	- an Ephemeral component for Crosshair, Area Effect type stuff
+	- pieces_at is good and cool. do a pass and use it in more places
 # BUGS
 	- Found a wall I was able to walk through in the caves.

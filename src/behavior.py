@@ -17,7 +17,7 @@ import display
 def collect_all_affected_entities(source: int, target: int) -> list[int]:
     pos = esper.component_for_entity(target, cmp.Position)
     if not esper.has_component(source, cmp.EffectArea):
-        entities = [e for e in location.BOARD.entities[pos.x][pos.y]]
+        entities = [e for e in location.BOARD.pieces_at(pos)]
         return entities
     aoe = esper.component_for_entity(source, cmp.EffectArea)
 
@@ -115,14 +115,15 @@ def apply_push(source: int):
     push_effect = esper.component_for_entity(source, cmp.PushEffect)
     source_pos = esper.component_for_entity(push_effect.source, cmp.Position)
     if target_cmp := esper.try_component(source, cmp.Target):
-        trg_pos = esper.component_for_entity(target_cmp.target, cmp.Position)
-        x, y = math_util.get_push_coords(
-            source_pos.as_tuple, trg_pos.as_tuple, push_effect.distance
-        )
         entities = collect_all_affected_entities(source, target_cmp.target)
 
         for entity in entities:
-            event.Movement(entity, x, y, relative=True)
+            x, y = math_util.get_push_coords(
+                source_pos.as_tuple, entity, push_effect.distance
+            )
+            event.Movement(entity, x, y)
+            flash_pos = cmp.Position(x,y)
+            esper.dispatch_event("flash_pos", flash_pos, display.Color.ORANGE)
 
 
 def apply_learn(source: int):

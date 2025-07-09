@@ -344,6 +344,9 @@ class Render(esper.Processor):
         if bleed_effect := esper.try_component(entity, cmp.BleedEffect):
             message = f"Grants Bleed:{bleed_effect.value}"
             self.console.print(1, next(y_idx), message)
+        if push := esper.try_component(entity, cmp.PushEffect):
+            message = f"Imposes Push:{push.distance}"
+            self.console.print(1, next(y_idx), message)
         if aoe := esper.try_component(entity, cmp.EffectArea):
             message = f"Effect Radius:{aoe.radius}"
             self.console.print(1, next(y_idx), message)

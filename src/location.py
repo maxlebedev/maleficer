@@ -132,6 +132,13 @@ class Board:
     def entities_at(self, pos: cmp.Position) -> set:
         return self.entities[pos.x][pos.y]
 
+    def pieces_at(self, pos: cmp.Position) -> set:
+        """entities, but without cells, crosshair, etc"""
+        entities = self.entities[pos.x][pos.y]
+        cell = self.cells[pos.x][pos.y]
+        xhair = ecs.Query(cmp.Crosshair).first()
+        return {e for e in entities if e not in [cell, xhair]}
+
     def remove(self, entity: int):
         if pos := esper.component_for_entity(entity, cmp.Position):
             esper.remove_component(entity, cmp.Position)
