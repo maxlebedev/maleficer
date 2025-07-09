@@ -88,10 +88,14 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 		- animation queue?
 	- sqlite db for storing current lvl value, rng seed for lvls, etc
 	- goblins should actually try to be at dist 4 to player
+		- when on cooldown BFS a position with dist 4, then move a step
 	- small chance of "named" scrolls with unique effects
 	- one-turn-per-square moving projectiles
 	- archers that make a line AOE before attacking
-		- No argher glyph
+		- No argher glyph, boo
+		- Ideally doing it all via callback
+		- apply condition Aiming 2
+		- if at Aiming 1, fire and hit everying in the area
 	- break create.py into enemy/spell/etc
 	- living flames move up to 2 squares to enemy
 		- want an animation for getting there

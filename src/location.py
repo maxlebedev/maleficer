@@ -21,10 +21,9 @@ def player_position():
     return pos
 
 
-def sees_player(entity: int, distance: int | None = None) -> bool:
-    player = ecs.Query(cmp.Player).first()
-    dest_cell, trace = trace_ray(entity, player)
-    if dest_cell != player:  # no LOS on player
+def can_see(entity: int, target: int, distance: int | None = None) -> bool:
+    dest_cell, trace = trace_ray(entity, target)
+    if dest_cell != target:  # no LOS
         return False
     if distance and len(trace) > distance:
         return False
@@ -294,7 +293,8 @@ def new_level():
 
 
 def trace_ray(source: int, dest: int):
-    """trace a line between source and dest, returning first blocker & path"""
+    """trace a line between source  dest,
+    return first blocker & inclusive path"""
     global BOARD
     source_pos = esper.component_for_entity(source, cmp.Position)
     dest_pos = esper.component_for_entity(dest, cmp.Position)

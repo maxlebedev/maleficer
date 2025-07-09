@@ -291,7 +291,8 @@ class NPCTurn(esper.Processor):
         for entity, (ranged, epos) in ecs.Query(cmp.Ranged, cmp.Position):
             dist_to_player = location.euclidean_distance(player_pos, epos)
             # TODO: ranged units should also sometimes follow
-            if location.sees_player(entity, ranged.radius):
+            player = ecs.Query(cmp.Player).first()
+            if location.can_see(entity, player, ranged.radius):
                 if condition.has(entity, typ.Condition.Cooldown):
                     self.wander(entity)
                 else:

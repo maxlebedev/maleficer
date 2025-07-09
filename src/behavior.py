@@ -31,7 +31,8 @@ def collect_all_affected_entities(source: int, target: int) -> list[int]:
 def lob_bomb(source: int):
     import create
 
-    if not location.sees_player(source):
+    player = ecs.Query(cmp.Player).first()
+    if not location.can_see(source, player):
         return True
 
     player_pos = location.player_position()
