@@ -221,7 +221,7 @@ class GameInputEvent(InputEvent):
             return
         self.to_target(slot)
 
-    def unlearn(self, slot):
+    def unlearn(self, slot: int):
         """take a spell and turn it into a scroll"""
         unlearned = False
         for spell_ent, (known) in esper.get_component(cmp.Known):
@@ -264,12 +264,12 @@ class NPCTurn(esper.Processor):
             return
         event.Movement(entity, *dir, relative=True)
 
-    def follow(self, entity_pos, end_pos, speed):
+    def follow(self, start: cmp.Position, end: cmp.Position, speed: int):
         cost = location.BOARD.as_move_graph()
         graph = tcod.path.SimpleGraph(cost=cost, cardinal=1, diagonal=0)
         pf = tcod.path.Pathfinder(graph)
-        pf.add_root(entity_pos.as_tuple)
-        path: list = pf.path_to(end_pos.as_tuple).tolist()
+        pf.add_root(start.as_tuple)
+        path: list = pf.path_to(end.as_tuple).tolist()
         if len(path) <= speed:
             return path[-1]
         return path[speed]
@@ -299,7 +299,7 @@ class NPCTurn(esper.Processor):
                     event.trigger_all_callbacks(entity, cmp.EnemyTrigger)
             else:
                 if condition.has(entity, typ.Condition.Cooldown):
-                    # on cooldown, so player close enough to follow
+                    # on cooldown, so player was close enough to follow them
                     x, y = self.follow(epos, player_pos, 1)
                     event.Movement(entity, x=x, y=y)
                 else:
@@ -320,16 +320,18 @@ class Render(esper.Processor):
     def render_bar(self, x: int, y: int, curr: int, maximum: int, total_width: int):
         bar_width = int(curr / maximum * total_width)
         bg = display.Color.BAR_EMPTY
-        self.console.draw_rect(x=x, y=y, width=total_width, height=1, ch=1, bg=bg)
+        bar_args = {"x":x, "y":y, "height":1, "ch":1, "bg":bg }
+
+        self.console.draw_rect(width=total_width, **bar_args)
 
         if bar_width > 0:
-            bg = display.Color.BAR_FILLED
-            self.console.draw_rect(x=x, y=y, width=bar_width, height=1, ch=1, bg=bg)
+            bar_args["bg"] = display.Color.BAR_FILLED
+            self.console.draw_rect(width=bar_width, **bar_args)
 
         text = f"HP: {curr}/{maximum}"
         self.console.print(x=x, y=y, string=text, fg=display.Color.DGREY)
 
-    def _draw_select_info(self, y_idx, entity):
+    def _draw_select_info(self, y_idx: itertools.count, entity: int):
         self.console.print(1, next(y_idx), self.dashes)
         spell_component_details = [
             ("Damage", cmp.DamageEffect, "amount"),

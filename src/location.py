@@ -148,9 +148,9 @@ class Board:
         vis = esper.component_for_entity(cell, cmp.Visible)
         vis.glyph = glyph
 
-    def as_sequence(self, x_slice: slice = slice(None), y_slice: slice = slice(None)):
-        for col in self.cells[x_slice]:
-            for cell in col[y_slice]:
+    def as_sequence(self, x: slice = slice(None), y: slice = slice(None)):
+        for col in self.cells[x]:
+            for cell in col[y]:
                 yield cell
 
     def build_entity_cache(self):
@@ -338,7 +338,7 @@ def count_neighbors(board, pos: cmp.Position):
     for x, y in indices:
         cell = board.get_cell(x, y)
         if cell and esper.has_components(cell, cmp.Cell, cmp.Blocking):
-            # TODO: this is a proxy for a "wall" type
+            # This is a proxy for a "wall" type
             neighbor_walls += 1
     return neighbor_walls
 
@@ -425,7 +425,7 @@ def in_player_perception(pos: cmp.Position):
     return dist_to_player < PLAYER_PERCEPTION_RADIUS
 
 
-def maze_dungeon(board):
+def maze_dungeon(board: Board):
     """
     plan:
         every even coord is a space. every odd a wall
@@ -452,7 +452,7 @@ def maze_dungeon(board):
                 neighbors.append(cell)
         return neighbors
 
-    def break_wall_between(cell1, cell2):
+    def break_wall_between(cell1: int, cell2: int):
         pos1 = esper.component_for_entity(cell1, cmp.Position)
         pos2 = esper.component_for_entity(cell2, cmp.Position)
         x = (pos1.x + pos2.x) // 2
