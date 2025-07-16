@@ -148,6 +148,25 @@ def goblin(pos: cmp.Position) -> int:
     return goblin
 
 
+def cyclops(pos: cmp.Position) -> int:
+    cmps = []
+    cmps.append(pos)
+    cmps.append(cmp.Visible(glyph=dis.Glyph.CYCLOPS, color=dis.Color.BROWN))
+    cmps.append(cmp.Health(max=2))
+    cmps.append(cmp.Onymous(name="cyclops"))
+    cmps.append(cmp.Ranged(radius=4))
+    # callbacks = [behavior.apply_cyclops_attack_pattern]
+    callbacks = [behavior.fire_at_player, behavior.apply_damage]
+    cmps.append(cmp.EnemyTrigger(callbacks=callbacks))
+    cmps.append(cmp.Enemy())
+    cmps.append(cmp.Blocking())
+    cyclops = esper.create_entity(*cmps)
+
+    dmg_effect = cmp.DamageEffect(amount=1, source=cyclops)
+    esper.add_component(cyclops, dmg_effect)
+    return cyclops
+
+
 def potion(pos: cmp.Position | None = None) -> int:
     cmps = []
     cmps.append(cmp.Visible(glyph=dis.Glyph.POTION, color=dis.Color.GREEN))

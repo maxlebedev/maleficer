@@ -75,6 +75,7 @@ class Glyph(IntEnum):
     GOBLIN = 127
     MAGIC_MISSILE = 618
     FLAME = 505
+    CYCLOPS = 465
 
 
 letter_map = {

@@ -16,6 +16,7 @@ class Condition(enum.Enum):
     Cooldown = enum.auto()
     Bleed = enum.auto()
     Dying = enum.auto()
+    Aiming = enum.auto()
 
 
 class InvalidAction(Exception):

@@ -145,3 +145,14 @@ def flash_line(line: list, *args):
     for x, y in line:
         pos = cmp.Position(x=x, y=y)
         esper.dispatch_event("flash_pos", pos, *args)
+
+
+def apply_cyclops_attack_pattern(source: int):
+    if not condition.has(source, typ.Condition.Aiming):
+        # draw line
+        # can't use flash for this. new type of EffectArea?
+        pass
+    else:
+        # fire laser
+        # condition.grant(source, typ.Condition.Aiming, 1)
+        pass
