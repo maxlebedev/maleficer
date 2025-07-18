@@ -23,7 +23,7 @@ import typ
 
 def get_selected_menuitem():
     # TODO: move somewhere
-    inv_map = create.inventory_map()
+    inv_map = create.player.inventory_map()
     menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
     selection = inv_map[menu_selection.item][1].pop()
     return selection
@@ -48,7 +48,7 @@ class Movement(esper.Processor):
     def collect(self, target):
         location.BOARD.remove(target)
         esper.add_component(target, cmp.InInventory())
-        create.inventory_map()
+        create.player.inventory_map()
         name = esper.component_for_entity(target, cmp.Onymous).name
         event.Log.append(f"player picked up {name}")
         # oneshot call some collectable processor?
@@ -142,7 +142,7 @@ class Death(esper.Processor):
                 message = f"{named.name}#{killable} is no more"
                 event.Log.append(message)
             if esper.has_component(killable, cmp.Cell):
-                floor = create.floor(pos.x, pos.y)
+                floor = create.tile.floor(pos.x, pos.y)
                 location.BOARD.set_cell(pos.x, pos.y, floor)
                 location.BOARD.build_entity_cache()
             else:
@@ -227,7 +227,7 @@ class GameInputEvent(InputEvent):
         for spell_ent, (known) in esper.get_component(cmp.Known):
             if known.slot == slot:
                 esper.remove_component(spell_ent, cmp.Known)
-                scroll = create.scroll(spell=spell_ent)
+                scroll = create.item.scroll(spell=spell_ent)
                 esper.add_component(scroll, cmp.InInventory())
                 unlearned = True
                 event.Tick()
@@ -377,7 +377,7 @@ class Render(esper.Processor):
         self.render_bar(1, 1, hp.current, hp.max, display.PANEL_WIDTH - 2)
 
         # inventory
-        inv_map = create.inventory_map()
+        inv_map = create.player.inventory_map()
         for i, (name, entities) in enumerate(inv_map):
             self.console.print(1, 3 + i, f"{len(entities)}x {name}")
 
@@ -605,7 +605,7 @@ class InventoryRender(BoardRender):
     def display_inventory(self):
         menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
 
-        inv_map = create.inventory_map()
+        inv_map = create.player.inventory_map()
         for i, (name, entities) in enumerate(inv_map):
             text = f"{len(entities)}x {name}"
             fg = display.Color.WHITE
@@ -637,7 +637,7 @@ class InventoryInputEvent(InputEvent):
 
     def move_selection(self, diff: int):
         menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
-        inventory_size = len(create.inventory_map()) - 1
+        inventory_size = len(create.player.inventory_map()) - 1
         menu_selection.item += diff
         menu_selection.item = math_util.clamp(menu_selection.item, inventory_size)
 

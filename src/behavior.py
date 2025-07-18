@@ -48,7 +48,7 @@ def lob_bomb(source: int):
             dest_pos = esper.component_for_entity(dest, cmp.Position)
             dest_pos = cmp.Position(*dest_pos)
             flash_line(trace, display.Glyph.BOMB, display.Color.RED)
-            create.bomb(dest_pos)
+            create.item.bomb(dest_pos)
 
             location.BOARD.build_entity_cache()
             apply_cooldown(source)

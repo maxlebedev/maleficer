@@ -68,7 +68,7 @@ def main() -> None:
     context = tcod.context.new(**context_params)
     console = context.new_console(order="F")
 
-    create.player()
+    create.player.player()
 
     location.BOARD = location.Board()
 
@@ -83,17 +83,17 @@ def main() -> None:
     # location.maze_dungeon(location.BOARD)
 
     starting_spells = [
-        create.firebolt_spell,
-        create.blink_spell,
-        create.bleed_spell,
+        create.spell.firebolt,
+        create.spell.blink,
+        create.spell.bleed,
     ]
 
     spells = random.sample(starting_spells, 2)
     for spell in spells:
         spell()
 
-    create.main_menu_opts()
-    create.starting_inventory()
+    create.player.main_menu_opts()
+    create.player.starting_inventory()
 
     flash_callback = lambda: flash(context, console)
     esper.set_handler("redraw", redraw)

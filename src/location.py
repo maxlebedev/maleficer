@@ -66,10 +66,10 @@ class Board:
 
         def make_wall(x, y):
             if x in (0, display.BOARD_WIDTH - 1):
-                return create.wall(x, y)
+                return create.tile.wall(x, y)
             if y in (0, display.BOARD_HEIGHT - 1):
-                return create.wall(x, y)
-            return create.wall(x, y, breakable=not random.randint(0, 15))
+                return create.tile.wall(x, y)
+            return create.tile.wall(x, y, breakable=not random.randint(0, 15))
 
         for x in range(display.BOARD_WIDTH):
             col = [make_wall(x, y) for y in range(display.BOARD_HEIGHT)]
@@ -217,9 +217,9 @@ def tunnel_between(board, start: cmp.Position, end: cmp.Position):
 
     # Generate the coordinates for this tunnel.
     for x, y in tcod.los.bresenham((start.x, start.y), (corner_x, corner_y)).tolist():
-        board.set_cell(x, y, create.floor(x, y))
+        board.set_cell(x, y, create.tile.floor(x, y))
     for x, y in tcod.los.bresenham((corner_x, corner_y), (end.x, end.y)).tolist():
-        board.set_cell(x, y, create.floor(x, y))
+        board.set_cell(x, y, create.tile.floor(x, y))
 
 
 def intersects(board: Board, src: RectangularRoom, target: RectangularRoom) -> bool:
@@ -263,7 +263,7 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
         centers.append(new_room.center)
         for cell in board.as_sequence(*new_room.inner):
             pos = esper.component_for_entity(cell, cmp.Position)
-            board.set_cell(*pos, create.floor(*pos))
+            board.set_cell(*pos, create.tile.floor(*pos))
 
         if len(rooms) == 0:  # start player in first room
             pos = player_position()
@@ -272,18 +272,18 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
             endpt = closest_position(new_room.center, centers[:-1])
             tunnel_between(board, new_room.center, endpt)
             for _ in range(random.randint(1, 3)):
-                npcs = [create.bat, create.skeleton, create.warlock]
+                npcs = [create.npc.bat, create.npc.skeleton, create.npc.warlock]
                 weights = [3, 2, 1]
                 npc_gen = random.choices(npcs, weights)[0]
                 npc_gen(new_room.get_random_pos())
 
-            item = random.choice([create.trap, create.potion, create.scroll])
+            item = random.choice([create.item.trap, create.item.potion, create.item.scroll])
             item(new_room.get_random_pos())
 
         rooms.append(new_room)
 
     last_center = rooms[-1].center
-    board.set_cell(*last_center.as_tuple, create.stairs(last_center))
+    board.set_cell(*last_center.as_tuple, create.tile.stairs(last_center))
     board.build_entity_cache()
 
 
@@ -350,21 +350,21 @@ def build_perimeter_wall(board):
     boarder |= {(x, display.BOARD_HEIGHT - 1) for x in range(display.BOARD_WIDTH)}
 
     for x, y in boarder:
-        board.set_cell(x, y, create.wall(x, y))
+        board.set_cell(x, y, create.tile.wall(x, y))
 
 
 def cave_dungeon(board):
     for cell in board.as_sequence():
         if not random.randint(0, 1):
             cell_pos = esper.component_for_entity(cell, cmp.Position)
-            board.set_cell(*cell_pos, create.floor(*cell_pos))
+            board.set_cell(*cell_pos, create.tile.floor(*cell_pos))
     # Horizontal Blanking
     x_slice = slice(3, display.BOARD_WIDTH - 3)
     midpoint = display.BOARD_HEIGHT // 2
     y_slice = slice(midpoint - 1, midpoint + 2)
     for cell in board.as_sequence(x_slice, y_slice):
         player_pos = esper.component_for_entity(cell, cmp.Position)
-        board.set_cell(*player_pos, create.floor(*player_pos))
+        board.set_cell(*player_pos, create.tile.floor(*player_pos))
 
     neighbours = [
         [0 for _ in range(display.BOARD_HEIGHT)] for _ in range(display.BOARD_WIDTH)
@@ -379,9 +379,9 @@ def cave_dungeon(board):
         for y in range(len(row)):
             if neighbours[x][y] >= 5:
                 breakable = not random.randint(0, 15)
-                board.set_cell(x, y, create.wall(x, y, breakable=breakable))
+                board.set_cell(x, y, create.tile.wall(x, y, breakable=breakable))
             elif neighbours[x][y] <= 4:
-                board.set_cell(x, y, create.floor(x, y))
+                board.set_cell(x, y, create.tile.floor(x, y))
 
     build_perimeter_wall(board)
 
@@ -400,15 +400,15 @@ def cave_dungeon(board):
             dist = euclidean_distance(player_pos, pos)
             valid_spawns.append([dist, pos])
     valid_spawns = sorted(valid_spawns, key=lambda x: x[0])
-    stairs = create.stairs(valid_spawns[-1][1])
+    stairs = create.tile.stairs(valid_spawns[-1][1])
     board.set_cell(*valid_spawns[-1][1], stairs)
     spawnables = [
-        [create.trap, 3],
-        [create.potion, 2],
-        [create.scroll, 1],
-        [create.bat, 5],
-        [create.goblin, 3],
-        [create.warlock, 1],
+        [create.item.trap, 3],
+        [create.item.potion, 2],
+        [create.item.scroll, 1],
+        [create.npc.bat, 5],
+        [create.npc.goblin, 3],
+        [create.npc.warlock, 1],
     ]
     for _, pos in valid_spawns[:-1]:
         s_ent, s_weight = zip(*spawnables)
@@ -457,14 +457,14 @@ def maze_dungeon(board: Board):
         pos2 = esper.component_for_entity(cell2, cmp.Position)
         x = (pos1.x + pos2.x) // 2
         y = (pos1.y + pos2.y) // 2
-        board.set_cell(x, y, create.floor(x, y))
+        board.set_cell(x, y, create.tile.floor(x, y))
 
     for cell in board.as_sequence():
         pos = esper.component_for_entity(cell, cmp.Position)
         if pos.x % 2 == 1 and pos.y % 2 == 1:
-            board.set_cell(*pos, create.floor(*pos))
+            board.set_cell(*pos, create.tile.floor(*pos))
         else:
-            board.set_cell(*pos, create.wall(*pos))
+            board.set_cell(*pos, create.tile.wall(*pos))
     build_perimeter_wall(board)
 
     start_x = random.randrange(1, display.BOARD_WIDTH, 2)
@@ -494,6 +494,6 @@ def maze_dungeon(board: Board):
 
     stair_cell = random.choice(stair_cells)
     pos = esper.component_for_entity(stair_cell, cmp.Position)
-    board.set_cell(*pos, create.stairs(pos))
+    board.set_cell(*pos, create.tile.stairs(pos))
 
     board.build_entity_cache()
