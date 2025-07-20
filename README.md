@@ -96,7 +96,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 		- Ideally doing it all via callback
 		- apply condition Aiming 2
 		- if at Aiming 1, fire and hit everying in the area
-	- break create.py into enemy/spell/etc
 	- living flames move up to 2 squares to enemy
 		- want an animation for getting there
 		- if only moving 1 square can also attack

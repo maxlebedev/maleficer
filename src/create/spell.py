@@ -1,11 +1,13 @@
 import random
 import string
+from functools import partial
 
 import esper
 
 import behavior
 import components as cmp
 import ecs
+import location
 
 
 def spell_stats(power_budget=10, waste_chance=0.2) -> tuple[int, int, int]:
@@ -45,7 +47,9 @@ def new(power_budget=10) -> int:
         # TODO: pull this into the power budget calculation
         case 0:
             radius = random.randint(1, target_range - 1)
-            esper.add_component(spell, cmp.EffectArea(radius=radius))
+
+            callback = partial(location.coords_within_radius, radius=radius)
+            esper.add_component(spell, cmp.EffectArea(callback))
     return spell
 
 
@@ -55,7 +59,8 @@ def firebolt() -> int:
     cmps.append(cmp.Spell(target_range=5))
     cmps.append(cmp.Cooldown(turns=1))
     cmps.append(cmp.DamageEffect(amount=1, source=player))
-    cmps.append(cmp.EffectArea(radius=1))
+    callback = partial(location.coords_within_radius, radius=1)
+    cmps.append(cmp.EffectArea(callback))
     cmps.append(cmp.Onymous(name="Firebolt"))
     slot_num = len(esper.get_component(cmp.Known)) + 1
     cmps.append(cmp.Known(slot=slot_num))

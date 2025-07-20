@@ -23,7 +23,7 @@ def collect_all_affected_entities(source: int, target: int) -> list[int]:
 
     entities = []
 
-    for x, y in location.coords_within_radius(pos, aoe.radius):
+    for x, y in aoe.callback(pos):
         entities += [e for e in location.BOARD.entities[x][y] if e != source]
     return entities
 

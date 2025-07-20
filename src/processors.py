@@ -339,8 +339,7 @@ class Render(esper.Processor):
             ("Cooldown", cmp.Cooldown, "turns"),
         ]
         for name, try_cmp, attr in spell_component_details:
-            component = esper.try_component(entity, try_cmp)
-            if component:
+            if component := esper.try_component(entity, try_cmp):
                 value = getattr(component, attr)
                 self.console.print(1, next(y_idx), f"{name}:{value}")
         if bleed_effect := esper.try_component(entity, cmp.BleedEffect):
@@ -350,8 +349,9 @@ class Render(esper.Processor):
             message = f"Imposes Push:{push.distance}"
             self.console.print(1, next(y_idx), message)
         if aoe := esper.try_component(entity, cmp.EffectArea):
-            message = f"Effect Radius:{aoe.radius}"
-            self.console.print(1, next(y_idx), message)
+            for name, value in aoe.callback.keywords.items():
+                message = f"{name.title()}:{value}"
+                self.console.print(1, next(y_idx), message)
 
     def _draw_panels(self):
         panel_params = {
@@ -582,15 +582,14 @@ class TargetRender(BoardRender):
 
         cell_rgbs = self._get_cell_rgbs()
 
-        radius = 0
         targeting_ent = ecs.Query(cmp.Targeting).first()
-        if esper.has_component(targeting_ent, cmp.EffectArea):
-            aoe = esper.component_for_entity(targeting_ent, cmp.EffectArea)
-            radius = aoe.radius
-
         pos = ecs.Query(cmp.Crosshair).cmp(cmp.Position)
+        highlighted = [[pos.x, pos.y]]
 
-        for x, y in location.coords_within_radius(pos, radius):
+        if aoe := esper.try_component(targeting_ent, cmp.EffectArea):
+            highlighted = aoe.callback(pos)
+
+        for x, y in highlighted:
             cell = cell_rgbs[x][y]
             cell_rgbs[x][y] = cell[0], cell[1], display.Color.TARGET
 

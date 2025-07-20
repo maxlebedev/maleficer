@@ -1,5 +1,5 @@
 import esper
-import random
+from functools import partial
 
 import behavior
 import components as cmp
@@ -60,7 +60,8 @@ def bomb(pos: cmp.Position) -> int:
     cmps.append(cmp.Onymous(name="bomb"))
     cmps.append(cmp.OnDeath())
     cmps.append(cmp.Enemy())
-    cmps.append(cmp.EffectArea(radius=1))
+    callback = partial(location.coords_within_radius, radius=1)
+    cmps.append(cmp.EffectArea(callback))
     cmps.append(cmp.Aura(radius=1, color=dis.Color.WHITE))
 
     dmg_proc = lambda _: scene.oneshot(processors.Damage)
