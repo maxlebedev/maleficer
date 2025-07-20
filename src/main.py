@@ -68,7 +68,7 @@ def main() -> None:
     context = tcod.context.new(**context_params)
     console = context.new_console(order="F")
 
-    create.player.player()
+    create.player.alamar()
 
     location.BOARD = location.Board()
 

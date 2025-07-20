@@ -36,7 +36,8 @@ def main_menu_opts():
     esper.create_entity(*cmps)
 
 
-def player():
+def alamar():
+    """default player character"""
     cmps = []
     cmps.append(cmp.Player())
     cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.GREEN))

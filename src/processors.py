@@ -349,6 +349,8 @@ class Render(esper.Processor):
             message = f"Imposes Push:{push.distance}"
             self.console.print(1, next(y_idx), message)
         if aoe := esper.try_component(entity, cmp.EffectArea):
+            # callback kwargs into spell info
+            # this may not be right for other callbacks
             for name, value in aoe.callback.keywords.items():
                 message = f"{name.title()}:{value}"
                 self.console.print(1, next(y_idx), message)
