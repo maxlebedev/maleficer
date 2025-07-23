@@ -655,6 +655,7 @@ class InventoryInputEvent(InputEvent):
         player_pos = location.player_position()
         drop_pos = cmp.Position(x=player_pos.x, y=player_pos.y)
         esper.add_component(selection, drop_pos)
+        location.BOARD.entities_at(drop_pos).add(selection)
         scene.to_phase(scene.Phase.level, NPCTurn)
 
     def use_item(self, selection):

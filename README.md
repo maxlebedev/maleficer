@@ -107,4 +107,3 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- add aoe into the spell power budget calculation
 # BUGS
 	- Found a wall I was able to walk through in the caves.
-	- Dropped items can't be picked up
