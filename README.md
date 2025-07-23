@@ -103,7 +103,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- currently considering reworking EffectAreas to be a pos collection
 		- or maybe just a func to get that collection
 	- an Ephemeral component for Crosshair, Area Effect type stuff
-	- pieces_at is good and cool. do a pass and use it in more places
 	- add aoe into the spell power budget calculation
 # BUGS
 	- Found a wall I was able to walk through in the caves.
