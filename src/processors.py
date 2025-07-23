@@ -1,4 +1,3 @@
-import copy
 import itertools
 import random
 from dataclasses import dataclass
@@ -70,7 +69,7 @@ class Movement(esper.Processor):
                 new_x += pos.x
                 new_y += pos.y
 
-            targets = copy.copy(board.entities[new_x][new_y])
+            targets = {e for e in board.entities[new_x][new_y]}
 
             blocked = any(has(target, cmp.Blocking) for target in targets)
             if has(mover, cmp.Crosshair) or not blocked:
