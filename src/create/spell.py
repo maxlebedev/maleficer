@@ -114,3 +114,17 @@ def push() -> int:
     cmps.append(cmp.Known(slot=slot_num))
     push = esper.create_entity(*cmps)
     return push
+
+def daze() -> int:
+    cmps = []
+    cmps.append(cmp.Spell(target_range=2))
+    cmps.append(cmp.Cooldown(turns=6))
+    callbacks = [behavior.apply_cooldown, behavior.apply_stun]
+    cmps.append(cmp.UseTrigger(callbacks=callbacks))
+    cmps.append(cmp.Onymous(name="Daze"))
+
+    cmps.append(cmp.StunEffect(value=2))
+    slot_num = len(esper.get_component(cmp.Known)) + 1
+    cmps.append(cmp.Known(slot=slot_num))
+    daze = esper.create_entity(*cmps)
+    return daze

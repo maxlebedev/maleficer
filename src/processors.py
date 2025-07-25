@@ -275,11 +275,25 @@ class NPCTurn(esper.Processor):
 
     def process(self):
         # some of this probably want so live in behavior.py
+        stunned = set()
+        def log_stun(entity: int):
+            name = esper.component_for_entity(entity, cmp.Onymous).name
+            event.Log.append(f"{name} is stunned")
+        for entity, _ in esper.get_component(cmp.Enemy):
+            if condition.has(entity, typ.Condition.Stun):
+                stunned.add(entity)
+
         for entity, _ in esper.get_component(cmp.Wander):
+            if entity in stunned:
+                log_stun(entity)
+                continue
             self.wander(entity)
 
         player_pos = location.player_position()
         for entity, (melee, epos) in ecs.Query(cmp.Melee, cmp.Position):
+            if entity in stunned:
+                log_stun(entity)
+                continue
             dist_to_player = location.euclidean_distance(player_pos, epos)
             if dist_to_player > melee.radius:
                 self.wander(entity)
@@ -288,6 +302,9 @@ class NPCTurn(esper.Processor):
                 event.Movement(entity, x=x, y=y)
 
         for entity, (ranged, epos) in ecs.Query(cmp.Ranged, cmp.Position):
+            if entity in stunned:
+                log_stun(entity)
+                continue
             dist_to_player = location.euclidean_distance(player_pos, epos)
             # TODO: ranged units should also sometimes follow
             player = ecs.Query(cmp.Player).first()
@@ -306,6 +323,9 @@ class NPCTurn(esper.Processor):
 
         set_behavior = (cmp.Ranged, cmp.Melee, cmp.Wander)
         for entity, (_) in ecs.Query(cmp.Enemy).exclude(*set_behavior):
+            if entity in stunned:
+                log_stun(entity)
+                continue
             event.trigger_all_callbacks(entity, cmp.EnemyTrigger)
 
 
@@ -346,6 +366,9 @@ class Render(esper.Processor):
             self.console.print(1, next(y_idx), message)
         if push := esper.try_component(entity, cmp.PushEffect):
             message = f"Imposes Push:{push.distance}"
+            self.console.print(1, next(y_idx), message)
+        if stun_effect := esper.try_component(entity, cmp.StunEffect):
+            message = f"Grants Stun:{stun_effect.value}"
             self.console.print(1, next(y_idx), message)
         if aoe := esper.try_component(entity, cmp.EffectArea):
             # callback kwargs into spell info

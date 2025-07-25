@@ -87,6 +87,15 @@ def apply_bleed(source: int):
                 if esper.has_component(ent, cmp.Health):
                     condition.grant(ent, typ.Condition.Bleed, bleed_effect.value)
 
+def apply_stun(source: int):
+    if target_cmp := esper.try_component(source, cmp.Target):
+        target = target_cmp.target
+        if stun_effect := esper.try_component(source, cmp.StunEffect):
+            entities = collect_all_affected_entities(source, target)
+            for ent in entities:
+                if esper.has_component(ent, cmp.Health):
+                    condition.grant(ent, typ.Condition.Stun, stun_effect.value)
+
 
 def apply_damage(source: int):
     if target_cmp := esper.try_component(source, cmp.Target):
