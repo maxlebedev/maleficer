@@ -319,7 +319,7 @@ class Render(esper.Processor):
     def render_bar(self, x: int, y: int, curr: int, maximum: int, total_width: int):
         bar_width = int(curr / maximum * total_width)
         bg = display.Color.BAR_EMPTY
-        bar_args = {"x":x, "y":y, "height":1, "ch":1, "bg":bg }
+        bar_args = {"x": x, "y": y, "height": 1, "ch": 1, "bg": bg}
 
         self.console.draw_rect(width=total_width, **bar_args)
 
@@ -586,9 +586,11 @@ class TargetRender(BoardRender):
         targeting_ent = ecs.Query(cmp.Targeting).first()
         pos = ecs.Query(cmp.Crosshair).cmp(cmp.Position)
         highlighted = [[pos.x, pos.y]]
+        ppos = location.player_position()
+        highlighted = math_util.bresenham_ray(ppos, pos)
 
         if aoe := esper.try_component(targeting_ent, cmp.EffectArea):
-            highlighted = aoe.callback(pos)
+            highlighted += aoe.callback(pos)
 
         for x, y in highlighted:
             cell = cell_rgbs[x][y]

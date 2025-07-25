@@ -277,7 +277,9 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
                 npc_gen = random.choices(npcs, weights)[0]
                 npc_gen(new_room.get_random_pos())
 
-            item = random.choice([create.item.trap, create.item.potion, create.item.scroll])
+            item = random.choice(
+                [create.item.trap, create.item.potion, create.item.scroll]
+            )
             item(new_room.get_random_pos())
 
         rooms.append(new_room)

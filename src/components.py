@@ -106,7 +106,7 @@ class Crosshair:
 
 @component
 class EffectArea:
-    callback: Callable # takes pos, return list[x,y]
+    callback: Callable  # takes pos, return list[x,y]
 
 
 @component

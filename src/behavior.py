@@ -122,7 +122,7 @@ def apply_push(source: int):
                 source_pos.as_tuple, entity, push_effect.distance
             )
             event.Movement(entity, x, y)
-            flash_pos = cmp.Position(x,y)
+            flash_pos = cmp.Position(x, y)
             esper.dispatch_event("flash_pos", flash_pos, display.Color.ORANGE)
 
 
