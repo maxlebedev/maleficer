@@ -31,8 +31,8 @@ def flash(context, console):
 def flash_pos(context, console, position, *args):
     """change glyph of a position"""
     esper.dispatch_event("redraw")
-    cell = location.BOARD.cells[position.x][position.y]
-    glyph, color, bg = location.BOARD.as_rgb(cell)
+    cell = console.rgb[display.PANEL_WIDTH + position.x, position.y]
+    glyph, color, bg = cell
     for arg in args:
         if isinstance(arg, tuple):
             color = arg

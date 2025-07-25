@@ -38,6 +38,9 @@ def apply(entity: int, condition: typ.Condition, value: int):
             # TODO: maybe a single global "bleed" entity
             event.Damage(bleed_src, entity, value)
             scene.oneshot(processors.Damage)
+        case typ.Condition.Stun:
+            pos = esper.component_for_entity(entity, cmp.Position)
+            esper.dispatch_event("flash_pos", pos, display.Color.CYAN)
 
         case typ.Condition.Dying:
             if value == 1:

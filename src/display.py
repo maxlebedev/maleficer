@@ -32,6 +32,7 @@ class Color:
     LIGHT_RED = (223, 80, 80)
     BLOOD_RED = (187, 10, 30)
     BLUE = (0, 0, 255)
+    CYAN = (0, 255, 255)
     LGREY = (100, 100, 100)
     DGREY = (50, 50, 50)
     YELLOW = (55, 55, 37)
