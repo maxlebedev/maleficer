@@ -100,8 +100,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 		- want an animation for getting there
 		- if only moving 1 square can also attack
 		- if its 2 squares away, player moves into, flame overreaches
-	- currently considering reworking EffectAreas to be a pos collection
-		- or maybe just a func to get that collection
 	- an Ephemeral component for Crosshair, Area Effect type stuff
 	- add aoe into the spell power budget calculation
 	- when targeting, valid xhair are should be inicated by aoe
