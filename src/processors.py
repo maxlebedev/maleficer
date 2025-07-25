@@ -574,7 +574,7 @@ class TargetInputEvent(InputEvent):
         player_pos = location.player_position()
         new_pos = cmp.Position(pos.x + x, pos.y + y)
         dist_to_player = location.euclidean_distance(player_pos, new_pos)
-        if not spell_cmp or dist_to_player < spell_cmp.target_range:
+        if not spell_cmp or dist_to_player <= spell_cmp.target_range:
             event.Movement(crosshair, x, y, relative=True)
 
     def select(self):
