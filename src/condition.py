@@ -1,7 +1,6 @@
 # code around managing conditions
 
 import esper
-from numpy import kaiser
 
 import components as cmp
 import display

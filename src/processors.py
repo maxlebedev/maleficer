@@ -586,8 +586,6 @@ class TargetRender(BoardRender):
         targeting_ent = ecs.Query(cmp.Targeting).first()
         pos = ecs.Query(cmp.Crosshair).cmp(cmp.Position)
         highlighted = [[pos.x, pos.y]]
-        ppos = location.player_position()
-        highlighted = math_util.bresenham_ray(ppos, pos)
 
         if aoe := esper.try_component(targeting_ent, cmp.EffectArea):
             highlighted += aoe.callback(pos)

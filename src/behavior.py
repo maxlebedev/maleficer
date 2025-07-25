@@ -15,6 +15,8 @@ import display
 
 
 def collect_all_affected_entities(source: int, target: int) -> list[int]:
+    if not esper.has_component(target, cmp.Cell):
+        return [target]
     pos = esper.component_for_entity(target, cmp.Position)
     if not esper.has_component(source, cmp.EffectArea):
         entities = [e for e in location.BOARD.pieces_at(pos)]
@@ -80,13 +82,10 @@ def apply_bleed(source: int):
     if target_cmp := esper.try_component(source, cmp.Target):
         target = target_cmp.target
         if bleed_effect := esper.try_component(source, cmp.BleedEffect):
-            if esper.has_component(target, cmp.Cell):
-                entities = collect_all_affected_entities(source, target)
-                for ent in entities:
-                    if esper.has_component(ent, cmp.Health):
-                        condition.grant(ent, typ.Condition.Bleed, bleed_effect.value)
-            else:
-                condition.grant(target, typ.Condition.Bleed, bleed_effect.value)
+            entities = collect_all_affected_entities(source, target)
+            for ent in entities:
+                if esper.has_component(ent, cmp.Health):
+                    condition.grant(ent, typ.Condition.Bleed, bleed_effect.value)
 
 
 def apply_damage(source: int):
@@ -94,13 +93,10 @@ def apply_damage(source: int):
         target = target_cmp.target
         if dmg_effect := esper.try_component(source, cmp.DamageEffect):
             src_frz = ecs.freeze_entity(source)
-            if esper.has_component(target, cmp.Cell):
-                entities = collect_all_affected_entities(source, target)
-                for ent in entities:
-                    if esper.has_component(ent, cmp.Health):
-                        event.Damage(src_frz, ent, dmg_effect.amount)
-            else:
-                event.Damage(src_frz, target, dmg_effect.amount)
+            entities = collect_all_affected_entities(source, target)
+            for ent in entities:
+                if esper.has_component(ent, cmp.Health):
+                    event.Damage(src_frz, ent, dmg_effect.amount)
 
 
 def apply_move(source: int):
