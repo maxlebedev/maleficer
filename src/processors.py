@@ -276,9 +276,11 @@ class NPCTurn(esper.Processor):
     def process(self):
         # some of this probably want so live in behavior.py
         stunned = set()
+
         def log_stun(entity: int):
             name = esper.component_for_entity(entity, cmp.Onymous).name
             event.Log.append(f"{name} is stunned")
+
         for entity, _ in esper.get_component(cmp.Enemy):
             if condition.has(entity, typ.Condition.Stun):
                 stunned.add(entity)

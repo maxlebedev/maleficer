@@ -87,6 +87,7 @@ def apply_bleed(source: int):
                 if esper.has_component(ent, cmp.Health):
                     condition.grant(ent, typ.Condition.Bleed, bleed_effect.value)
 
+
 def apply_stun(source: int):
     if target_cmp := esper.try_component(source, cmp.Target):
         target = target_cmp.target

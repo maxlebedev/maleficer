@@ -115,6 +115,7 @@ def push() -> int:
     push = esper.create_entity(*cmps)
     return push
 
+
 def daze() -> int:
     cmps = []
     cmps.append(cmp.Spell(target_range=2))

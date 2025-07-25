@@ -104,5 +104,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 		- or maybe just a func to get that collection
 	- an Ephemeral component for Crosshair, Area Effect type stuff
 	- add aoe into the spell power budget calculation
+	- when targeting, valid xhair are should be inicated by aoe
 # BUGS
 	- Found a wall I was able to walk through in the caves.

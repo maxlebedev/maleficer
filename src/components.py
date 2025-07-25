@@ -188,6 +188,7 @@ class HealEffect:
 class BleedEffect:
     value: int
 
+
 @component
 class StunEffect:
     value: int
