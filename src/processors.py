@@ -281,18 +281,20 @@ class NPCTurn(esper.Processor):
             name = esper.component_for_entity(entity, cmp.Onymous).name
             event.Log.append(f"{name} is stunned")
 
-        for entity, _ in esper.get_component(cmp.Enemy):
+        enemies = ecs.Query(cmp.Enemy)
+
+        for entity, _ in enemies:
             if condition.has(entity, typ.Condition.Stun):
                 stunned.add(entity)
 
-        for entity, _ in esper.get_component(cmp.Wander):
+        for entity, _ in enemies.filter(cmp.Wander):
             if entity in stunned:
                 log_stun(entity)
                 continue
             self.wander(entity)
 
         player_pos = location.player_position()
-        for entity, (melee, epos) in ecs.Query(cmp.Melee, cmp.Position):
+        for entity, (melee, epos) in enemies.filter(cmp.Melee, cmp.Position):
             if entity in stunned:
                 log_stun(entity)
                 continue
@@ -303,7 +305,7 @@ class NPCTurn(esper.Processor):
                 x, y = self.follow(epos, player_pos, melee.speed)
                 event.Movement(entity, x=x, y=y)
 
-        for entity, (ranged, epos) in ecs.Query(cmp.Ranged, cmp.Position):
+        for entity, (ranged, epos) in enemies.filter(cmp.Ranged, cmp.Position):
             if entity in stunned:
                 log_stun(entity)
                 continue
@@ -324,7 +326,7 @@ class NPCTurn(esper.Processor):
                     self.wander(entity)
 
         set_behavior = (cmp.Ranged, cmp.Melee, cmp.Wander)
-        for entity, (_) in ecs.Query(cmp.Enemy).exclude(*set_behavior):
+        for entity, (_) in enemies.exclude(*set_behavior):
             if entity in stunned:
                 log_stun(entity)
                 continue
