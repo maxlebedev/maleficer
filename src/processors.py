@@ -271,6 +271,32 @@ class NPCTurn(esper.Processor):
         path: list = pf.path_to(end.as_tuple).tolist()
         return path[1]
 
+    def process_ranged(self, entity: int, ranged: cmp.Ranged, epos: cmp.Position):
+        player_pos = location.player_position()
+        # TODO: ranged units should also sometimes follow
+        player = ecs.Query(cmp.Player).first()
+        if location.can_see(entity, player, ranged.radius):
+            if condition.has(entity, typ.Condition.Cooldown):
+                self.wander(entity)
+            else:
+                event.trigger_all_callbacks(entity, cmp.EnemyTrigger)
+        else:
+            if condition.has(entity, typ.Condition.Cooldown):
+                # on cooldown, so player was close enough to follow them
+                x, y = self.follow(epos, player_pos)
+                event.Movement(entity, x=x, y=y)
+            else:
+                self.wander(entity)
+
+    def process_melee(self, entity: int, melee: cmp.Melee, epos: cmp.Position):
+        player_pos = location.player_position()
+        dist_to_player = location.euclidean_distance(player_pos, epos)
+        if dist_to_player > melee.radius:
+            self.wander(entity)
+        else:
+            x, y = self.follow(epos, player_pos)
+            event.Movement(entity, x=x, y=y)
+
     def process(self):
         # some of this probably want so live in behavior.py
         stunned = set()
@@ -287,35 +313,14 @@ class NPCTurn(esper.Processor):
         for entity in stunned:
             log_stun(entity)
 
-
         for entity, _ in enemies.filter(cmp.Wander).remove(stunned):
             self.wander(entity)
 
-        player_pos = location.player_position()
         for entity, (melee, epos) in enemies.filter(cmp.Melee, cmp.Position).remove(stunned):
-            dist_to_player = location.euclidean_distance(player_pos, epos)
-            if dist_to_player > melee.radius:
-                self.wander(entity)
-            else:
-                x, y = self.follow(epos, player_pos)
-                event.Movement(entity, x=x, y=y)
+            self.process_melee(entity, melee, epos)
 
         for entity, (ranged, epos) in enemies.filter(cmp.Ranged, cmp.Position).remove(stunned):
-            dist_to_player = location.euclidean_distance(player_pos, epos)
-            # TODO: ranged units should also sometimes follow
-            player = ecs.Query(cmp.Player).first()
-            if location.can_see(entity, player, ranged.radius):
-                if condition.has(entity, typ.Condition.Cooldown):
-                    self.wander(entity)
-                else:
-                    event.trigger_all_callbacks(entity, cmp.EnemyTrigger)
-            else:
-                if condition.has(entity, typ.Condition.Cooldown):
-                    # on cooldown, so player was close enough to follow them
-                    x, y = self.follow(epos, player_pos)
-                    event.Movement(entity, x=x, y=y)
-                else:
-                    self.wander(entity)
+            self.process_ranged(entity, ranged, epos)
 
         set_behavior = (cmp.Ranged, cmp.Melee, cmp.Wander)
         for entity, (_) in enemies.exclude(*set_behavior).remove(stunned):
