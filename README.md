@@ -102,6 +102,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 		- if its 2 squares away, player moves into, flame overreaches
 	- an Ephemeral component for Crosshair, Area Effect type stuff
 	- add aoe into the spell power budget calculation
-	- when targeting, valid xhair are should be inicated by aoe
+	- when targeting, valid xhair area should be inicated by aoe
 # BUGS
 	- Found a wall I was able to walk through in the caves.

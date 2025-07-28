@@ -57,6 +57,11 @@ class Query:
             return cmps[entity][cmp]
         raise KeyError
 
+    def remove(self, entities):
+        if self.entities:
+            self.entities.difference_update(entities)
+        return self
+
 
 def freeze_entity(source: int):
     """save an entity to a type:component dict"""

@@ -263,15 +263,13 @@ class NPCTurn(esper.Processor):
             return
         event.Movement(entity, *dir, relative=True)
 
-    def follow(self, start: cmp.Position, end: cmp.Position, speed: int):
+    def follow(self, start: cmp.Position, end: cmp.Position):
         cost = location.BOARD.as_move_graph()
         graph = tcod.path.SimpleGraph(cost=cost, cardinal=1, diagonal=0)
         pf = tcod.path.Pathfinder(graph)
         pf.add_root(start.as_tuple)
         path: list = pf.path_to(end.as_tuple).tolist()
-        if len(path) <= speed:
-            return path[-1]
-        return path[speed]
+        return path[1]
 
     def process(self):
         # some of this probably want so live in behavior.py
@@ -282,33 +280,29 @@ class NPCTurn(esper.Processor):
             event.Log.append(f"{name} is stunned")
 
         enemies = ecs.Query(cmp.Enemy)
-
         for entity, _ in enemies:
             if condition.has(entity, typ.Condition.Stun):
                 stunned.add(entity)
 
-        for entity, _ in enemies.filter(cmp.Wander):
-            if entity in stunned:
-                log_stun(entity)
-                continue
+        for entity in stunned:
+            log_stun(entity)
+
+
+        for entity, _ in enemies.filter(cmp.Wander).remove(stunned):
             self.wander(entity)
 
         player_pos = location.player_position()
-        for entity, (melee, epos) in enemies.filter(cmp.Melee, cmp.Position):
+        for entity, (melee, epos) in enemies.filter(cmp.Melee, cmp.Position).remove(stunned):
             if entity in stunned:
-                log_stun(entity)
-                continue
+                breakpoint()
             dist_to_player = location.euclidean_distance(player_pos, epos)
             if dist_to_player > melee.radius:
                 self.wander(entity)
             else:
-                x, y = self.follow(epos, player_pos, melee.speed)
+                x, y = self.follow(epos, player_pos)
                 event.Movement(entity, x=x, y=y)
 
-        for entity, (ranged, epos) in enemies.filter(cmp.Ranged, cmp.Position):
-            if entity in stunned:
-                log_stun(entity)
-                continue
+        for entity, (ranged, epos) in enemies.filter(cmp.Ranged, cmp.Position).remove(stunned):
             dist_to_player = location.euclidean_distance(player_pos, epos)
             # TODO: ranged units should also sometimes follow
             player = ecs.Query(cmp.Player).first()
@@ -320,16 +314,13 @@ class NPCTurn(esper.Processor):
             else:
                 if condition.has(entity, typ.Condition.Cooldown):
                     # on cooldown, so player was close enough to follow them
-                    x, y = self.follow(epos, player_pos, 1)
+                    x, y = self.follow(epos, player_pos)
                     event.Movement(entity, x=x, y=y)
                 else:
                     self.wander(entity)
 
         set_behavior = (cmp.Ranged, cmp.Melee, cmp.Wander)
-        for entity, (_) in enemies.exclude(*set_behavior):
-            if entity in stunned:
-                log_stun(entity)
-                continue
+        for entity, (_) in enemies.exclude(*set_behavior).remove(stunned):
             event.trigger_all_callbacks(entity, cmp.EnemyTrigger)
 
 

@@ -61,7 +61,7 @@ class Cell:  # floor, wall, door, etc
 
 @component
 class Enemy:
-    pass
+    speed: int = 1
 
 
 @component
@@ -74,7 +74,6 @@ class Melee:
     """Walks towards player"""
 
     radius: int
-    speed: int = 1
 
 
 @component
