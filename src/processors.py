@@ -293,8 +293,6 @@ class NPCTurn(esper.Processor):
 
         player_pos = location.player_position()
         for entity, (melee, epos) in enemies.filter(cmp.Melee, cmp.Position).remove(stunned):
-            if entity in stunned:
-                breakpoint()
             dist_to_player = location.euclidean_distance(player_pos, epos)
             if dist_to_player > melee.radius:
                 self.wander(entity)
