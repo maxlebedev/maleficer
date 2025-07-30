@@ -269,6 +269,8 @@ class NPCTurn(esper.Processor):
         pf = tcod.path.Pathfinder(graph)
         pf.add_root(start.as_tuple)
         path: list = pf.path_to(end.as_tuple).tolist()
+        if len(path) < 2:
+            return path[-1]
         return path[1]
 
     def process_ranged(self, entity: int, ranged: cmp.Ranged, epos: cmp.Position):
@@ -301,7 +303,6 @@ class NPCTurn(esper.Processor):
         # some of this probably want so live in behavior.py
         stunned = set()
 
-
         enemies = ecs.Query(cmp.Enemy)
         for entity, _ in enemies:
             if condition.has(entity, typ.Condition.Stun):
@@ -314,14 +315,18 @@ class NPCTurn(esper.Processor):
         for entity, _ in enemies.filter(cmp.Wander).remove(stunned):
             self.wander(entity)
 
-        for entity, (melee, epos) in enemies.filter(cmp.Melee, cmp.Position).remove(stunned):
+        for entity, (melee, epos) in enemies.filter(cmp.Melee, cmp.Position).remove(
+            stunned
+        ):
             enemy = esper.component_for_entity(entity, cmp.Enemy)
             self.process_melee(entity, melee, epos)
             for _ in range(1, enemy.speed):
                 scene.oneshot(Movement)
                 self.process_melee(entity, melee, epos)
 
-        for entity, (ranged, epos) in enemies.filter(cmp.Ranged, cmp.Position).remove(stunned):
+        for entity, (ranged, epos) in enemies.filter(cmp.Ranged, cmp.Position).remove(
+            stunned
+        ):
             self.process_ranged(entity, ranged, epos)
 
         set_behavior = (cmp.Ranged, cmp.Melee, cmp.Wander)

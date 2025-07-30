@@ -98,8 +98,8 @@ class Board:
             graph.append(col)
 
         for x, col in enumerate(self.cells):
-            for y, cell in enumerate(col):
-                graph[x][y] = int(not (esper.has_component(cell, cmp.Blocking)))
+            for y, _ in enumerate(col):
+                graph[x][y] = int(not (self.has_blocker(x, y)))
         return graph
 
     def has_blocker(self, x, y):
