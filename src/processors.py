@@ -301,9 +301,6 @@ class NPCTurn(esper.Processor):
         # some of this probably want so live in behavior.py
         stunned = set()
 
-        def log_stun(entity: int):
-            name = esper.component_for_entity(entity, cmp.Onymous).name
-            event.Log.append(f"{name} is stunned")
 
         enemies = ecs.Query(cmp.Enemy)
         for entity, _ in enemies:
@@ -311,13 +308,18 @@ class NPCTurn(esper.Processor):
                 stunned.add(entity)
 
         for entity in stunned:
-            log_stun(entity)
+            name = esper.component_for_entity(entity, cmp.Onymous).name
+            event.Log.append(f"{name} is stunned")
 
         for entity, _ in enemies.filter(cmp.Wander).remove(stunned):
             self.wander(entity)
 
         for entity, (melee, epos) in enemies.filter(cmp.Melee, cmp.Position).remove(stunned):
+            enemy = esper.component_for_entity(entity, cmp.Enemy)
             self.process_melee(entity, melee, epos)
+            for _ in range(1, enemy.speed):
+                scene.oneshot(Movement)
+                self.process_melee(entity, melee, epos)
 
         for entity, (ranged, epos) in enemies.filter(cmp.Ranged, cmp.Position).remove(stunned):
             self.process_ranged(entity, ranged, epos)
