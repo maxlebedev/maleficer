@@ -109,6 +109,13 @@ class EffectArea:
 
 
 @component
+class Locus:
+    """a static set of coords for AOEs and such"""
+    coords : set[list[int]]
+    # effect: Callable # takes pos, applies effect to entites there
+
+
+@component
 class Collectable:
     """can be added to inventory"""
 
@@ -266,4 +273,4 @@ class Aura:
     """Visual radius"""
 
     color: typ.RGB
-    radius: int = 0
+    callback: Callable  # takes pos, return list[x,y]

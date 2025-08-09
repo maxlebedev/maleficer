@@ -59,8 +59,8 @@ def bresenham_ray(origin: cmp.Position, dest: cmp.Position):
 
     ray = []
     while True:
-        coord = [origin.x + x * xx + y * yx, origin.y + x * xy + y * yy]
-        if coord != [dest.x, dest.y] and location.BOARD.has_blocker(*coord):
+        coord = (origin.x + x * xx + y * yx, origin.y + x * xy + y * yy)
+        if coord not in (dest.as_tuple, origin.as_tuple) and location.BOARD.has_blocker(*coord):
             break
         ray.append(coord)
         if err >= 0:
@@ -68,4 +68,5 @@ def bresenham_ray(origin: cmp.Position, dest: cmp.Position):
             err -= 2 * dx
         err += 2 * dy
         x += 1
-    return ray
+    # excluding origin
+    return ray[1:]

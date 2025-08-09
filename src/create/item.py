@@ -62,7 +62,8 @@ def bomb(pos: cmp.Position) -> int:
     cmps.append(cmp.Enemy())
     callback = partial(location.coords_within_radius, radius=1)
     cmps.append(cmp.EffectArea(callback))
-    cmps.append(cmp.Aura(radius=1, color=dis.Color.WHITE))
+
+    cmps.append(cmp.Aura(callback=callback, color=dis.Color.WHITE))
 
     dmg_proc = lambda _: scene.oneshot(processors.Damage)
     cmps.append(cmp.DeathTrigger(callbacks=[behavior.apply_damage, dmg_proc]))

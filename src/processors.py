@@ -3,6 +3,7 @@ import random
 from dataclasses import dataclass
 from functools import partial
 
+import behavior
 import esper
 import tcod
 from tcod import libtcodpy
@@ -257,11 +258,6 @@ class GameInputEvent(InputEvent):
 
 @dataclass
 class NPCTurn(esper.Processor):
-    def wander(self, entity: int):
-        dir = random.choice([(0, 1), (0, -1), (1, 0), (-1, 0), (0, 0)])
-        if dir == (0, 0):
-            return
-        event.Movement(entity, *dir, relative=True)
 
     def follow(self, start: cmp.Position, end: cmp.Position):
         cost = location.BOARD.as_move_graph()
@@ -279,7 +275,7 @@ class NPCTurn(esper.Processor):
         player = ecs.Query(cmp.Player).first()
         if location.can_see(entity, player, ranged.radius):
             if condition.has(entity, typ.Condition.Cooldown):
-                self.wander(entity)
+                behavior.wander(entity)
             else:
                 event.trigger_all_callbacks(entity, cmp.EnemyTrigger)
         else:
@@ -288,13 +284,13 @@ class NPCTurn(esper.Processor):
                 x, y = self.follow(epos, player_pos)
                 event.Movement(entity, x=x, y=y)
             else:
-                self.wander(entity)
+                behavior.wander(entity)
 
     def process_melee(self, entity: int, melee: cmp.Melee, epos: cmp.Position):
         player_pos = location.player_position()
         dist_to_player = location.euclidean_distance(player_pos, epos)
         if dist_to_player > melee.radius:
-            self.wander(entity)
+            behavior.wander(entity)
         else:
             x, y = self.follow(epos, player_pos)
             event.Movement(entity, x=x, y=y)
@@ -313,7 +309,7 @@ class NPCTurn(esper.Processor):
             event.Log.append(f"{name} is stunned")
 
         for entity, _ in enemies.filter(cmp.Wander).remove(stunned):
-            self.wander(entity)
+            behavior.wander(entity)
 
         for entity, (melee, epos) in enemies.filter(cmp.Melee, cmp.Position).remove(
             stunned
@@ -487,7 +483,8 @@ class BoardRender(Render):
 
         aura_ents = ecs.Query(cmp.Position, cmp.Aura)
         for _, (pos, aura) in aura_ents:
-            for x, y in location.coords_within_radius(pos, aura.radius):
+            aura_cells = aura.callback(pos)
+            for x, y in aura_cells:
                 if not in_fov[x][y]:
                     continue
                 cell = cell_rgbs[x][y]

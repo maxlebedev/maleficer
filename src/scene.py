@@ -4,7 +4,6 @@ import enum
 import esper
 
 import components as cmp
-import display
 import location
 import processors
 

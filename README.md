@@ -77,6 +77,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- Warlock missles don't hit potions because they are not Blocking
 	- currently the enemy move decision tree is one static thing. break up eventually
 	- TargetInputEvent returns control to the player's Damage phase. otherwise enemies get a turn before player damage resolves
+	- instead of a melee decision tree, we do melee damage via bump func
 # TODO
 	- All effects on the targeting entity should get their targets filled in if they haven't already
 		- But, only the non-static targets should get cleared, and we don't have a way to store that info
@@ -92,7 +93,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- small chance of "named" scrolls with unique effects
 	- one-turn-per-square moving projectiles
 	- archers that make a line AOE before attacking
-		- No argher glyph, boo
+		- No archer glyph, boo
 		- Ideally doing it all via callback
 		- apply condition Aiming 2
 		- if at Aiming 1, fire and hit everying in the area
@@ -105,5 +106,8 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- when targeting, valid xhair area should be inicated by aoe
 	- the ecs.remove syntax is awkward, but overwriting self.entities state inf ilter necessitates it for now
 	- lots of DRY in the NPC proc
+	- an indicator for which spell is being cast
 # BUGS
 	- Found a wall I was able to walk through in the caves.
+	- Sometimes there are frozen invisible skeletons that only show up after I walk over them
+		- or at the very least, they appear behind me mid-hallway

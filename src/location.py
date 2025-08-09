@@ -163,9 +163,9 @@ class Board:
     def reposition(self, entity: int, x: int, y: int):
         pos = esper.component_for_entity(entity, cmp.Position)
         if entity in self.entities_at(pos):
-            self.entities_at(pos).remove(entity)
+            self.entities[pos.x][pos.y].remove(entity)
         pos.x, pos.y = x, y
-        self.entities_at(pos).add(entity)
+        self.entities[x][y].add(entity)
 
 
 @dataclass
