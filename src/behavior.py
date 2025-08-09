@@ -198,3 +198,5 @@ def apply_cyclops_attack_pattern(source: int):
         esper.remove_component(source, cmp.Locus)
         esper.remove_component(source, cmp.Aura)
 
+    # not moving player means I get hit no matter what?
+    # why? def a bug. Sometimes the aura gets redrawn too

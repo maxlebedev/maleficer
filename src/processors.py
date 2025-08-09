@@ -266,7 +266,7 @@ class NPCTurn(esper.Processor):
         pf.add_root(start.as_tuple)
         path: list = pf.path_to(end.as_tuple).tolist()
         if len(path) < 2:
-            return path[-1]
+            return None
         return path[1]
 
     def process_ranged(self, entity: int, ranged: cmp.Ranged, epos: cmp.Position):
@@ -281,8 +281,8 @@ class NPCTurn(esper.Processor):
         else:
             if condition.has(entity, typ.Condition.Cooldown):
                 # on cooldown, so player was close enough to follow them
-                x, y = self.follow(epos, player_pos)
-                event.Movement(entity, x=x, y=y)
+                if move := self.follow(epos, player_pos):
+                    event.Movement(entity, x=move[0], y=move[1])
             else:
                 behavior.wander(entity)
 
@@ -292,8 +292,8 @@ class NPCTurn(esper.Processor):
         if dist_to_player > melee.radius:
             behavior.wander(entity)
         else:
-            x, y = self.follow(epos, player_pos)
-            event.Movement(entity, x=x, y=y)
+            if move := self.follow(epos, player_pos):
+                event.Movement(entity, x=move[0], y=move[1])
 
     def process(self):
         # some of this probably want so live in behavior.py

@@ -107,7 +107,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- the ecs.remove syntax is awkward, but overwriting self.entities state inf ilter necessitates it for now
 	- lots of DRY in the NPC proc
 	- an indicator for which spell is being cast
+	- refactor draw panels. y_idx to an attr, so sections can be factored out
 # BUGS
 	- Found a wall I was able to walk through in the caves.
-	- Sometimes there are frozen invisible skeletons that only show up after I walk over them
-		- or at the very least, they appear behind me mid-hallway
