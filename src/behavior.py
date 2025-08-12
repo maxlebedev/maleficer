@@ -162,7 +162,7 @@ def flash_line(line: list, *args):
 
 
 # This is perhaps the new template of "complex" enemies
-def apply_cyclops_attack_pattern(source: int):
+def cyclops_attack_pattern(source: int):
     player = ecs.Query(cmp.Player).first()
     ranged = esper.component_for_entity(source, cmp.Ranged)
 
@@ -170,24 +170,24 @@ def apply_cyclops_attack_pattern(source: int):
         wander(source)
         return
 
-    ppos = location.player_position()
     if not esper.has_component(source, cmp.Locus):
         # draw line
+        ppos = location.player_position()
         callback = partial(math_util.bresenham_ray, dest=ppos)
         aura = cmp.Aura(callback=callback, color=display.Color.RED)
         esper.add_component(source, aura)
 
         opos = esper.component_for_entity(source, cmp.Position)
         coords = math_util.bresenham_ray(origin=opos, dest=ppos)
-        le = cmp.Locus(coords=set(coords))
-        esper.add_component(source, le)
+        locus = cmp.Locus(coords=set(coords))
+        esper.add_component(source, locus)
     else:
         # fire laser
         src_frz = ecs.freeze_entity(source)
         dmg_effect = esper.component_for_entity(source, cmp.DamageEffect)
-        le = esper.component_for_entity(source, cmp.Locus)
+        locus = esper.component_for_entity(source, cmp.Locus)
         entities = set()
-        for x, y in le.coords:
+        for x, y in locus.coords:
             entities = location.BOARD.entities_at(cmp.Position(x,y))
             for ent in entities:
                 if ent == source:

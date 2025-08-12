@@ -40,11 +40,12 @@ class Color:
     MAGENTA = (253, 61, 181)
     BROWN = (94, 44, 4)
     INDIGO = (75, 0, 130)
+    CHOCOLATE = (210,105,30)
 
     CANDLE = (97, 85, 52)
     BAR_FILLED = GREEN
     BAR_EMPTY = RED
-    TARGET = RED
+    TARGET = (205,198,170) # might change the color later
     FLOOR = (70, 70, 70)
 
 

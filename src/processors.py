@@ -311,22 +311,22 @@ class NPCTurn(esper.Processor):
         for entity, _ in enemies.filter(cmp.Wander).remove(stunned):
             behavior.wander(entity)
 
-        for entity, (melee, epos) in enemies.filter(cmp.Melee, cmp.Position).remove(
-            stunned
-        ):
+        melee_enemies = enemies.filter(cmp.Melee, cmp.Position).remove(stunned)
+        for entity, (melee, epos) in melee_enemies:
             enemy = esper.component_for_entity(entity, cmp.Enemy)
             self.process_melee(entity, melee, epos)
             for _ in range(1, enemy.speed):
                 scene.oneshot(Movement)
                 self.process_melee(entity, melee, epos)
 
-        for entity, (ranged, epos) in enemies.filter(cmp.Ranged, cmp.Position).remove(
-            stunned
-        ):
+        archers = enemies.filter(cmp.Ranged, cmp.Position).remove(stunned)
+        for entity, (ranged, epos) in archers:
             self.process_ranged(entity, ranged, epos)
 
         set_behavior = (cmp.Ranged, cmp.Melee, cmp.Wander)
-        for entity, (_) in enemies.exclude(*set_behavior).remove(stunned):
+        enemies = ecs.Query(cmp.Enemy)
+        others = enemies.exclude(*set_behavior).remove(stunned)
+        for entity, (_) in others:
             event.trigger_all_callbacks(entity, cmp.EnemyTrigger)
 
 
@@ -411,11 +411,17 @@ class Render(esper.Processor):
         self.console.print(1, next(y_idx), self.dashes)
         spells = ecs.Query(cmp.Spell, cmp.Onymous, cmp.Known)
         sorted_spells = sorted(spells, key=lambda x: x[1][2].slot)
+
+        fg = display.Color.WHITE
+        bg = display.Color.BLACK
         for spell_ent, (_, named, known) in sorted_spells:
             text = f"Slot{known.slot}:{named.name}"
             if cd := condition.get_val(spell_ent, typ.Condition.Cooldown):
                 text = f"{text}:{typ.Condition.Cooldown.name} {cd}"
-            self.console.print(1, next(y_idx), text)
+            if esper.has_component(spell_ent, cmp.Targeting):
+                self.console.print(1, next(y_idx), text, fg=bg, bg=fg)
+            else:
+                self.console.print(1, next(y_idx), text, fg=fg, bg=bg)
 
         # if targeting, also print spell info
         if targeting := esper.get_component(cmp.Targeting):
