@@ -1,5 +1,4 @@
 import itertools
-import random
 from dataclasses import dataclass
 from functools import partial
 
@@ -70,6 +69,10 @@ class Movement(esper.Processor):
                 new_x += pos.x
                 new_y += pos.y
 
+            if last_pos := esper.try_component(mover, cmp.LastPosition):
+                last_pos.pos.x = pos.x
+                last_pos.pos.y = pos.y
+
             targets = {e for e in board.entities[new_x][new_y]}
 
             blocked = any(has(target, cmp.Blocking) for target in targets)
@@ -104,6 +107,13 @@ class Damage(esper.Processor):
             damage = event.Queues.damage.popleft()
             if not esper.entity_exists(damage.target):
                 # if entity doesn't exist anymore, damage fizzles
+                continue
+            if esper.has_component(damage.target, cmp.Cell):
+                pos = esper.component_for_entity(damage.target, cmp.Position)
+                entities = location.BOARD.entities_at(pos)
+                for ent in entities:
+                    if esper.has_component(ent, cmp.Health):
+                        event.Damage(damage.source, ent, damage.amount)
                 continue
 
             math_util.clamp_damage(damage.target, damage.amount)
@@ -269,11 +279,12 @@ class NPCTurn(esper.Processor):
             return None
         return path[1]
 
-    def process_ranged(self, entity: int, ranged: cmp.Ranged, epos: cmp.Position):
-        player_pos = location.player_position()
+    def process_ranged(self, entity: int, epos: cmp.Position):
+        player_pos = location.player_last_position()
+        enemy_cmp = esper.component_for_entity(entity, cmp.Enemy)
         # TODO: ranged units should also sometimes follow
         player = ecs.Query(cmp.Player).first()
-        if location.can_see(entity, player, ranged.radius):
+        if location.can_see(entity, player, enemy_cmp.perception):
             if condition.has(entity, typ.Condition.Cooldown):
                 behavior.wander(entity)
             else:
@@ -286,10 +297,13 @@ class NPCTurn(esper.Processor):
             else:
                 behavior.wander(entity)
 
-    def process_melee(self, entity: int, melee: cmp.Melee, epos: cmp.Position):
-        player_pos = location.player_position()
+    def process_melee(self, entity: int, epos: cmp.Position):
+        player_pos = location.player_last_position()
+        if player_pos.as_tuple == epos.as_tuple:
+            player_pos = location.player_position()
+        enemy_cmp = esper.component_for_entity(entity, cmp.Enemy)
         dist_to_player = location.euclidean_distance(player_pos, epos)
-        if dist_to_player > melee.radius:
+        if dist_to_player > enemy_cmp.perception:
             behavior.wander(entity)
         else:
             if move := self.follow(epos, player_pos):
@@ -312,16 +326,16 @@ class NPCTurn(esper.Processor):
             behavior.wander(entity)
 
         melee_enemies = enemies.filter(cmp.Melee, cmp.Position).remove(stunned)
-        for entity, (melee, epos) in melee_enemies:
+        for entity, (_, epos) in melee_enemies:
             enemy = esper.component_for_entity(entity, cmp.Enemy)
-            self.process_melee(entity, melee, epos)
+            self.process_melee(entity, epos)
             for _ in range(1, enemy.speed):
                 scene.oneshot(Movement)
-                self.process_melee(entity, melee, epos)
+                self.process_melee(entity, epos)
 
         archers = enemies.filter(cmp.Ranged, cmp.Position).remove(stunned)
-        for entity, (ranged, epos) in archers:
-            self.process_ranged(entity, ranged, epos)
+        for entity, (_, epos) in archers:
+            self.process_ranged(entity, epos)
 
         set_behavior = (cmp.Ranged, cmp.Melee, cmp.Wander)
         enemies = ecs.Query(cmp.Enemy)
@@ -412,16 +426,15 @@ class Render(esper.Processor):
         spells = ecs.Query(cmp.Spell, cmp.Onymous, cmp.Known)
         sorted_spells = sorted(spells, key=lambda x: x[1][2].slot)
 
-        fg = display.Color.WHITE
-        bg = display.Color.BLACK
         for spell_ent, (_, named, known) in sorted_spells:
             text = f"Slot{known.slot}:{named.name}"
             if cd := condition.get_val(spell_ent, typ.Condition.Cooldown):
                 text = f"{text}:{typ.Condition.Cooldown.name} {cd}"
+            fg = display.Color.WHITE
+            bg = display.Color.BLACK
             if esper.has_component(spell_ent, cmp.Targeting):
-                self.console.print(1, next(y_idx), text, fg=bg, bg=fg)
-            else:
-                self.console.print(1, next(y_idx), text, fg=fg, bg=bg)
+                fg, bg = bg, fg
+            self.console.print(1, next(y_idx), text, fg=fg, bg=bg)
 
         # if targeting, also print spell info
         if targeting := esper.get_component(cmp.Targeting):

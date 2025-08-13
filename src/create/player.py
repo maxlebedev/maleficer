@@ -45,6 +45,7 @@ def alamar():
     cmps.append(cmp.Health(max=10))
     cmps.append(cmp.Onymous(name="player"))
     cmps.append(cmp.Blocking())
+    cmps.append(cmp.LastPosition(cmp.Position(x=1, y=1)))
     esper.create_entity(*cmps)
 
 

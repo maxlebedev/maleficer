@@ -164,39 +164,29 @@ def flash_line(line: list, *args):
 # This is perhaps the new template of "complex" enemies
 def cyclops_attack_pattern(source: int):
     player = ecs.Query(cmp.Player).first()
-    ranged = esper.component_for_entity(source, cmp.Ranged)
+    enemy_cmp = esper.component_for_entity(source, cmp.Enemy)
 
-    if not location.can_see(source, player, ranged.radius):
-        wander(source)
-        return
-
-    if not esper.has_component(source, cmp.Locus):
+    if not esper.has_component(source, cmp.Aura):
+        if not location.can_see(source, player, enemy_cmp.perception):
+            wander(source)
+            return
         # draw line
         ppos = location.player_position()
         callback = partial(math_util.bresenham_ray, dest=ppos)
         aura = cmp.Aura(callback=callback, color=display.Color.RED)
+        opos = esper.component_for_entity(source, cmp.Position)
         esper.add_component(source, aura)
 
-        opos = esper.component_for_entity(source, cmp.Position)
         coords = math_util.bresenham_ray(origin=opos, dest=ppos)
-        locus = cmp.Locus(coords=set(coords))
+        locus = cmp.Locus(coords=coords)
         esper.add_component(source, locus)
     else:
         # fire laser
         src_frz = ecs.freeze_entity(source)
         dmg_effect = esper.component_for_entity(source, cmp.DamageEffect)
         locus = esper.component_for_entity(source, cmp.Locus)
-        entities = set()
         for x, y in locus.coords:
-            entities = location.BOARD.entities_at(cmp.Position(x,y))
-            for ent in entities:
-                if ent == source:
-                    print(f"skipping {ent=}")
-                    pass
-                if esper.has_component(ent, cmp.Health):
-                    event.Damage(src_frz, ent, dmg_effect.amount)
+            if cell := location.BOARD.get_cell(x, y):
+                event.Damage(src_frz, cell, dmg_effect.amount)
         esper.remove_component(source, cmp.Locus)
         esper.remove_component(source, cmp.Aura)
-
-    # not moving player means I get hit no matter what?
-    # why? def a bug. Sometimes the aura gets redrawn too

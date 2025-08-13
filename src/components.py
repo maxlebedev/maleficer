@@ -31,6 +31,11 @@ class Position:
 
 
 @component
+class LastPosition:
+    pos: Position
+
+
+@component
 class Moving:
     x: int
     y: int
@@ -62,6 +67,7 @@ class Cell:  # floor, wall, door, etc
 @component
 class Enemy:
     speed: int = 1
+    perception: int = 4
 
 
 @component
@@ -73,14 +79,10 @@ class Wander:
 class Melee:
     """Walks towards player"""
 
-    radius: int
-
 
 @component
 class Ranged:
     """Damages player if in LOS"""
-
-    radius: int
 
 
 @component
@@ -111,7 +113,7 @@ class EffectArea:
 @component
 class Locus:
     """a static set of coords for AOEs and such"""
-    coords : set[list[int]]
+    coords : list[list[int]]
     # effect: Callable # takes pos, applies effect to entites there
 
 

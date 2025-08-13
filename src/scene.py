@@ -33,12 +33,13 @@ def level_phase(context, console):
     input = processors.GameInputEvent()
     npc = processors.NPCTurn()
 
+    player_movement = processors.Movement()
     movement = processors.Movement()
     player_dmg = processors.Damage()
     npc_dmg = processors.Damage()
     death = processors.Death()
 
-    level_procs = [upkeep, render, input, player_dmg, npc, movement, npc_dmg, death]
+    level_procs = [upkeep, render, input, player_dmg, player_movement, npc, movement, npc_dmg, death]
     PHASES[Phase.level] = level_procs
 
 
