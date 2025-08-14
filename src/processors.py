@@ -16,7 +16,7 @@ import event
 import input
 import location
 import math_util
-import scene
+import loop
 import typ
 
 
@@ -132,7 +132,7 @@ class Damage(esper.Processor):
             hp = esper.component_for_entity(damage.target, cmp.Health)
             if hp.current <= 0:
                 event.Death(damage.target)
-                scene.oneshot(Death)
+                loop.oneshot(Death)
 
 
 @dataclass
@@ -196,7 +196,7 @@ class GameInputEvent(InputEvent):
             input.KEYMAP[input.Input.MOVE_LEFT]: (self.move, [-1, 0]),
             input.KEYMAP[input.Input.MOVE_UP]: (self.move, [0, -1]),
             input.KEYMAP[input.Input.MOVE_RIGHT]: (self.move, [1, 0]),
-            input.KEYMAP[input.Input.ESC]: (scene.to_phase, [scene.Phase.menu]),
+            input.KEYMAP[input.Input.ESC]: (loop.to_phase, [loop.Phase.menu]),
             input.KEYMAP[input.Input.SPELL1]: (self.handle_slot_key, [1]),
             input.KEYMAP[input.Input.SPELL2]: (self.handle_slot_key, [2]),
             input.KEYMAP[input.Input.SPELL3]: (self.handle_slot_key, [3]),
@@ -213,7 +213,7 @@ class GameInputEvent(InputEvent):
 
         menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
         menu_selection.item = 0
-        scene.to_phase(scene.Phase.inventory)
+        loop.to_phase(loop.Phase.inventory)
 
     def skip(self):
         event.Tick()
@@ -241,7 +241,7 @@ class GameInputEvent(InputEvent):
                 esper.add_component(scroll, cmp.InInventory())
                 unlearned = True
                 event.Tick()
-                scene.to_phase(scene.Phase.level, NPCTurn)
+                loop.to_phase(loop.Phase.level, NPCTurn)
         if not unlearned:
             esper.dispatch_event("flash")
             event.Log.append("can't unlearn, spell doesn't exist")
@@ -263,7 +263,7 @@ class GameInputEvent(InputEvent):
         xhair_ent = ecs.Query(cmp.Crosshair, cmp.Position).first()
         location.BOARD.reposition(xhair_ent, *player_pos)
         esper.add_component(casting_spell, cmp.Targeting())
-        scene.to_phase(scene.Phase.target)
+        loop.to_phase(loop.Phase.target)
 
 
 @dataclass
@@ -330,7 +330,7 @@ class NPCTurn(esper.Processor):
             enemy = esper.component_for_entity(entity, cmp.Enemy)
             self.process_melee(entity, epos)
             for _ in range(1, enemy.speed):
-                scene.oneshot(Movement)
+                loop.oneshot(Movement)
                 self.process_melee(entity, epos)
 
         archers = enemies.filter(cmp.Ranged, cmp.Position).remove(stunned)
@@ -454,7 +454,7 @@ class Render(esper.Processor):
             trg_ent, _ = targeting[0]
             self._draw_selection_info(y_idx, trg_ent)
         else:
-            if scene.CURRENT_PHASE == scene.Phase.inventory:
+            if loop.CURRENT == loop.Phase.inventory:
                 selection = get_selected_menuitem()
                 if learnable := esper.try_component(selection, cmp.Learnable):
                     self._draw_selection_info(y_idx, learnable.spell)
@@ -593,7 +593,7 @@ class TargetInputEvent(InputEvent):
     def to_level(self):
         spell_ent = ecs.Query(cmp.Targeting).first()
         esper.remove_component(spell_ent, cmp.Targeting)
-        scene.to_phase(scene.Phase.level)
+        loop.to_phase(loop.Phase.level)
 
     def move_crosshair(self, x, y):
         crosshair = ecs.Query(cmp.Crosshair, cmp.Position).first()
@@ -620,7 +620,7 @@ class TargetInputEvent(InputEvent):
             event.trigger_all_callbacks(targeting_entity, cmp.UseTrigger)
             esper.remove_component(targeting_entity, cmp.Targeting)
             event.Tick()
-            scene.to_phase(scene.Phase.level, Damage)  # to FIRST dmg phase
+            loop.to_phase(loop.Phase.level, Damage)  # to FIRST dmg phase
         except typ.InvalidAction as e:
             esper.dispatch_event("flash")
             event.Log.append(str(e))
@@ -681,7 +681,7 @@ class InventoryRender(BoardRender):
 @dataclass
 class InventoryInputEvent(InputEvent):
     def __init__(self):
-        to_level = (scene.to_phase, [scene.Phase.level])
+        to_level = (loop.to_phase, [loop.Phase.level])
         self.action_map = {
             input.KEYMAP[input.Input.MOVE_DOWN]: (self.move_selection, [1]),
             input.KEYMAP[input.Input.MOVE_UP]: (self.move_selection, [-1]),
@@ -710,14 +710,14 @@ class InventoryInputEvent(InputEvent):
         drop_pos = cmp.Position(x=player_pos.x, y=player_pos.y)
         esper.add_component(selection, drop_pos)
         location.BOARD.entities_at(drop_pos).add(selection)
-        scene.to_phase(scene.Phase.level, NPCTurn)
+        loop.to_phase(loop.Phase.level, NPCTurn)
 
     def use_item(self, selection):
         try:
             event.trigger_all_callbacks(selection, cmp.UseTrigger)
             esper.remove_component(selection, cmp.InInventory)
             event.Tick()
-            scene.to_phase(scene.Phase.level, NPCTurn)
+            loop.to_phase(loop.Phase.level, NPCTurn)
         except typ.InvalidAction as e:
             esper.dispatch_event("flash")
             event.Log.append(str(e))
@@ -751,7 +751,7 @@ class OptionsRender(esper.Processor):
 class OptionsInputEvent(InputEvent):
     def __init__(self):
         self.action_map = {
-            input.KEYMAP[input.Input.ESC]: (scene.to_phase, [scene.Phase.menu]),
+            input.KEYMAP[input.Input.ESC]: (loop.to_phase, [loop.Phase.menu]),
         }
 
 

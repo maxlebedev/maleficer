@@ -1,3 +1,4 @@
+# game loops
 import copy
 import enum
 
@@ -7,8 +8,8 @@ import components as cmp
 import location
 import processors
 
-PHASES = dict()
-CURRENT_PHASE = None
+ALL = dict()
+CURRENT = None
 
 
 class Phase(enum.Enum):
@@ -23,7 +24,7 @@ def main_menu_phase(context, console):
     render = processors.MenuRender(context, console)
     input = processors.MenuInputEvent()
 
-    PHASES[Phase.menu] = [render, input]
+    ALL[Phase.menu] = [render, input]
 
 
 def level_phase(context, console):
@@ -40,7 +41,7 @@ def level_phase(context, console):
     death = processors.Death()
 
     level_procs = [upkeep, render, input, player_dmg, player_movement, npc, movement, npc_dmg, death]
-    PHASES[Phase.level] = level_procs
+    ALL[Phase.level] = level_procs
 
 
 def targeting_phase(context, console):
@@ -52,7 +53,7 @@ def targeting_phase(context, console):
     input = processors.TargetInputEvent()
     target_render = processors.TargetRender(console, context)
     movement = processors.Movement()
-    PHASES[Phase.target] = [target_render, input, movement]
+    ALL[Phase.target] = [target_render, input, movement]
 
 
 def inventory_phase(context, console):
@@ -61,24 +62,24 @@ def inventory_phase(context, console):
     input = processors.InventoryInputEvent()
     render = processors.InventoryRender(console, context)
 
-    PHASES[Phase.inventory] = [render, input]
+    ALL[Phase.inventory] = [render, input]
 
 
 def options_phase(context, console):
     render = processors.OptionsRender(context, console)
     input = processors.OptionsInputEvent()
 
-    PHASES[Phase.options] = [render, input]
+    ALL[Phase.options] = [render, input]
 
 
 def to_phase(phase: Phase, start_proc: type[esper.Processor] | None = None):
     """We dynamically add and remove processors when moving between phases. Each phase has its own proc loop."""
-    global CURRENT_PHASE
+    global CURRENT
     for proc in esper._processors:
         esper.remove_processor(type(proc))
     esper._processors = []
 
-    proc_list = copy.copy(PHASES[phase])  # copy to prevent mutation of original
+    proc_list = copy.copy(ALL[phase])  # copy to prevent mutation of original
     if start_proc:
         while start_proc and not isinstance(proc_list[0], start_proc):
             proc_list.append(proc_list.pop(0))
@@ -86,7 +87,7 @@ def to_phase(phase: Phase, start_proc: type[esper.Processor] | None = None):
     tot_procs = len(proc_list)
     for i, proc in enumerate(proc_list):
         esper.add_processor(proc, priority=tot_procs - i)
-    CURRENT_PHASE = phase
+    CURRENT = phase
 
 
 def oneshot(proctype: type[esper.Processor]):

@@ -6,7 +6,7 @@ import components as cmp
 import display
 import event
 import processors
-import scene
+import loop
 import typ
 
 
@@ -37,7 +37,7 @@ def apply(entity: int, condition: typ.Condition, value: int):
             bleed_src = {cmp.Onymous: cmp.Onymous(name="bleed")}
             # TODO: maybe a single global "bleed" entity
             event.Damage(bleed_src, entity, value)
-            scene.oneshot(processors.Damage)
+            loop.oneshot(processors.Damage)
         case typ.Condition.Stun:
             pos = esper.component_for_entity(entity, cmp.Position)
             esper.dispatch_event("flash_pos", pos, display.Color.CYAN)

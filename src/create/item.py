@@ -6,7 +6,7 @@ import components as cmp
 import display as dis
 import ecs
 import location
-import scene
+import loop
 from . import spell as create_spell
 import condition
 import typ
@@ -65,7 +65,7 @@ def bomb(pos: cmp.Position) -> int:
 
     cmps.append(cmp.Aura(callback=callback, color=dis.Color.WHITE))
 
-    dmg_proc = lambda _: scene.oneshot(processors.Damage)
+    dmg_proc = lambda _: loop.oneshot(processors.Damage)
     cmps.append(cmp.DeathTrigger(callbacks=[behavior.apply_damage, dmg_proc]))
 
     def aura_tick(entity: int):

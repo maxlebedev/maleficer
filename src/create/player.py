@@ -2,7 +2,7 @@ import collections
 import esper
 
 import components as cmp
-import scene
+import loop
 from . import item
 import display as dis
 
@@ -19,7 +19,7 @@ def inventory_map() -> list:
 
 
 def main_menu_opts():
-    to_level = lambda _: scene.to_phase(scene.Phase.level)
+    to_level = lambda _: loop.to_phase(loop.Phase.level)
     cmps = []
     cmps.append(cmp.MainMenu())
     cmps.append(cmp.Onymous(name="Start Game"))
@@ -27,7 +27,7 @@ def main_menu_opts():
     cmps.append(cmp.UseTrigger(callbacks=[to_level]))
     esper.create_entity(*cmps)
 
-    to_opts = lambda _: scene.to_phase(scene.Phase.options)
+    to_opts = lambda _: loop.to_phase(loop.Phase.options)
     cmps = []
     cmps.append(cmp.UseTrigger(callbacks=[to_opts]))
     cmps.append(cmp.MainMenu())
