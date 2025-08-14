@@ -113,8 +113,7 @@ class EffectArea:
 @component
 class Locus:
     """a static set of coords for AOEs and such"""
-    coords : list[list[int]]
-    # effect: Callable # takes pos, applies effect to entites there
+    coords : list[typ.COORD]
 
 
 @component

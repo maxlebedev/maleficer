@@ -16,7 +16,7 @@ def clamp_damage(entity: int, value: int):
     hp.current = clamp(hp.current, hp.max)
 
 
-def get_push_coords(source: list[int], target: int, steps: int):
+def get_push_coords(source: tuple[int,int], target: int, steps: int):
     """note that diagonals are allowed for pushes"""
     # Convert tuples to numpy arrays for easier vector math
     trg_pos = esper.component_for_entity(target, cmp.Position)

@@ -351,12 +351,12 @@ class Render(esper.Processor):
 
     dashes = "-" * (display.PANEL_WIDTH - 2)
 
-    def render_bar(self, x: int, y: int, curr: int, maximum: int, total_width: int):
-        bar_width = int(curr / maximum * total_width)
+    def render_bar(self, x: int, y: int, curr: int, maximum: int, width: int):
+        bar_width = int(curr / maximum * width)
         bg = display.Color.BAR_EMPTY
         bar_args = {"x": x, "y": y, "height": 1, "ch": 1, "bg": bg}
 
-        self.console.draw_rect(width=total_width, **bar_args)
+        self.console.draw_rect(width=width, **bar_args)
 
         if bar_width > 0:
             bar_args["bg"] = display.Color.BAR_FILLED
@@ -365,7 +365,7 @@ class Render(esper.Processor):
         text = f"HP: {curr}/{maximum}"
         self.console.print(x=x, y=y, string=text, fg=display.Color.DGREY)
 
-    def _draw_select_info(self, y_idx: itertools.count, entity: int):
+    def _draw_selection_info(self, y_idx: itertools.count, entity: int):
         self.console.print(1, next(y_idx), self.dashes)
         spell_component_details = [
             ("Damage", cmp.DamageEffect, "amount"),
@@ -392,6 +392,30 @@ class Render(esper.Processor):
                 message = f"{name.title()}:{value}"
                 self.console.print(1, next(y_idx), message)
 
+    def _spell_section(self):
+        spells = ecs.Query(cmp.Spell, cmp.Onymous, cmp.Known)
+        sorted_spells = sorted(spells, key=lambda x: x[1][2].slot)
+
+        for spell_ent, (_, named, known) in sorted_spells:
+            text = f"Slot{known.slot}:{named.name}"
+            if cd := condition.get_val(spell_ent, typ.Condition.Cooldown):
+                text = f"{text}:{typ.Condition.Cooldown.name} {cd}"
+            fg = display.Color.WHITE
+            bg = display.Color.BLACK
+            if esper.has_component(spell_ent, cmp.Targeting):
+                fg, bg = bg, fg
+            yield text, fg, bg
+
+    def _right_panel(self, panel_params):
+        self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
+        for i, message in enumerate(event.Log.messages):
+            self.console.print(1 + display.R_PANEL_START, 1 + i, message)
+
+    def _inventory(self, inv_map):
+        for i, (name, entities) in enumerate(inv_map):
+            self.console.print(1, 3 + i, f"{len(entities)}x {name}")
+
+
     def _draw_panels(self):
         panel_params = {
             "y": 0,
@@ -417,39 +441,25 @@ class Render(esper.Processor):
 
         # inventory
         inv_map = create.player.inventory_map()
-        for i, (name, entities) in enumerate(inv_map):
-            self.console.print(1, 3 + i, f"{len(entities)}x {name}")
+        self._inventory(inv_map)
 
         y_idx = itertools.count(max(8, 3 + len(inv_map)))
         # spells
         self.console.print(1, next(y_idx), self.dashes)
-        spells = ecs.Query(cmp.Spell, cmp.Onymous, cmp.Known)
-        sorted_spells = sorted(spells, key=lambda x: x[1][2].slot)
-
-        for spell_ent, (_, named, known) in sorted_spells:
-            text = f"Slot{known.slot}:{named.name}"
-            if cd := condition.get_val(spell_ent, typ.Condition.Cooldown):
-                text = f"{text}:{typ.Condition.Cooldown.name} {cd}"
-            fg = display.Color.WHITE
-            bg = display.Color.BLACK
-            if esper.has_component(spell_ent, cmp.Targeting):
-                fg, bg = bg, fg
+        for text, fg, bg, in self._spell_section():
             self.console.print(1, next(y_idx), text, fg=fg, bg=bg)
 
         # if targeting, also print spell info
         if targeting := esper.get_component(cmp.Targeting):
             trg_ent, _ = targeting[0]
-            self._draw_select_info(y_idx, trg_ent)
+            self._draw_selection_info(y_idx, trg_ent)
         else:
             if scene.CURRENT_PHASE == scene.Phase.inventory:
                 selection = get_selected_menuitem()
                 if learnable := esper.try_component(selection, cmp.Learnable):
-                    self._draw_select_info(y_idx, learnable.spell)
+                    self._draw_selection_info(y_idx, learnable.spell)
 
-        # right panel
-        self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
-        for i, message in enumerate(event.Log.messages):
-            self.console.print(1 + display.R_PANEL_START, 1 + i, message)
+        self._right_panel(panel_params)
 
     def _apply_lighting(self, cell_rgbs, in_fov) -> list[list[typ.CELL_RGB]]:
         """display cells in fov with lighting, explored without, and hide the rest"""

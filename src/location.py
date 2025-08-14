@@ -84,7 +84,7 @@ class Board:
         vis = esper.component_for_entity(cell, cmp.Visible)
         return (vis.glyph, vis.color, vis.bg_color)
 
-    def as_transparency(self) -> list[list[int]]:
+    def as_transparency(self) -> list[typ.COORD]:
         transparency = []
         for _ in range(display.BOARD_WIDTH):
             col = [None for _ in range(display.BOARD_HEIGHT)]
@@ -95,7 +95,7 @@ class Board:
                 transparency[x][y] = int(esper.has_component(cell, cmp.Transparent))
         return transparency
 
-    def as_move_graph(self) -> list[list[int]]:
+    def as_move_graph(self) -> list[typ.COORD]:
         graph = []
         for _ in range(display.BOARD_WIDTH):
             col = [None for _ in range(display.BOARD_HEIGHT)]
@@ -276,7 +276,11 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
             endpt = closest_position(new_room.center, centers[:-1])
             tunnel_between(board, new_room.center, endpt)
             for _ in range(random.randint(1, 3)):
-                npcs = [create.npc.bat, create.npc.skeleton, create.npc.warlock]
+                npcs = [
+                    create.npc.bat,
+                    create.npc.skeleton,
+                    create.npc.warlock,
+                ]
                 weights = [3, 2, 1]
                 npc_gen = random.choices(npcs, weights)[0]
                 npc_gen(new_room.get_random_pos())

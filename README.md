@@ -1,5 +1,5 @@
 
-Maleficer is a classic rogulike with focus on tactical combat.
+Maleficer is a classic roguelike with focus on tactical combat.
 The baseline combat of many rogulikes boils down to walking into enemies until they die, and I'm aiming to replace that with a more rich experiance.
 I also take inspiration from modern TTRPGs like Trespassor, especially in terms of mechanical clarity. 
 (and a vehicle for teaching myself game dev, ecs pattern, etc)
@@ -25,7 +25,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 	- info gathering (bigger sight radius, heartbeat counter)
 	- terrain generation (create new hallways, wall pillars)
 	- grant status `Foo X` where x ticks down every turn (Bleed 3, Slow 2, etc)
-
 
 ## Resource Ideas (partial alternatives to current cooldowns)
 	- Mostly cooldown based
@@ -92,11 +91,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 		- when on cooldown BFS a position with dist 4, then move a step
 	- small chance of "named" scrolls with unique effects
 	- one-turn-per-square moving projectiles
-	- archers that make a line AOE before attacking
-		- No archer glyph, boo
-		- Ideally doing it all via callback
-		- apply condition Aiming 2
-		- if at Aiming 1, fire and hit everying in the area
 	- living flames move up to 2 squares to enemy
 		- want an animation for getting there
 		- if only moving 1 square can also attack
