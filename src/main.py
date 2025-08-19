@@ -9,7 +9,7 @@ import create
 import display
 import location
 import processors
-import loop
+import phase
 
 FLAGS = tcod.context.SDL_WINDOW_RESIZABLE  # | tcod.context.SDL_WINDOW_FULLSCREEN
 
@@ -49,7 +49,7 @@ def flash_pos(context, console, position, *args):
 
 
 def redraw():
-    loop.oneshot(processors.BoardRender)
+    phase.oneshot(processors.BoardRender)
 
 
 def main() -> None:
@@ -72,12 +72,12 @@ def main() -> None:
 
     location.BOARD = location.Board()
 
-    loop.main_menu_phase(context, console)
-    loop.level_phase(context, console)
-    loop.targeting_phase(context, console)
-    loop.inventory_phase(context, console)
-    loop.options_phase(context, console)
-    loop.to_phase(loop.Phase.menu)
+    phase.main_menu_phase(context, console)
+    phase.level_phase(context, console)
+    phase.targeting_phase(context, console)
+    phase.inventory_phase(context, console)
+    phase.options_phase(context, console)
+    phase.to_phase(phase.Ontology.menu)
     # location.generate_test_dungeon(location.BOARD)
     location.generate_dungeon(location.BOARD)
     # location.cave_dungeon(location.BOARD)

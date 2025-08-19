@@ -16,7 +16,7 @@ import event
 import input
 import location
 import math_util
-import loop
+import phase
 import typ
 
 
@@ -132,7 +132,7 @@ class Damage(esper.Processor):
             hp = esper.component_for_entity(damage.target, cmp.Health)
             if hp.current <= 0:
                 event.Death(damage.target)
-                loop.oneshot(Death)
+                phase.oneshot(Death)
 
 
 @dataclass
@@ -196,7 +196,7 @@ class GameInputEvent(InputEvent):
             input.KEYMAP[input.Input.MOVE_LEFT]: (self.move, [-1, 0]),
             input.KEYMAP[input.Input.MOVE_UP]: (self.move, [0, -1]),
             input.KEYMAP[input.Input.MOVE_RIGHT]: (self.move, [1, 0]),
-            input.KEYMAP[input.Input.ESC]: (loop.to_phase, [loop.Phase.menu]),
+            input.KEYMAP[input.Input.ESC]: (phase.to_phase, [phase.Ontology.menu]),
             input.KEYMAP[input.Input.SPELL1]: (self.handle_slot_key, [1]),
             input.KEYMAP[input.Input.SPELL2]: (self.handle_slot_key, [2]),
             input.KEYMAP[input.Input.SPELL3]: (self.handle_slot_key, [3]),
@@ -213,7 +213,7 @@ class GameInputEvent(InputEvent):
 
         menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
         menu_selection.item = 0
-        loop.to_phase(loop.Phase.inventory)
+        phase.to_phase(phase.Ontology.inventory)
 
     def skip(self):
         event.Tick()
@@ -241,7 +241,7 @@ class GameInputEvent(InputEvent):
                 esper.add_component(scroll, cmp.InInventory())
                 unlearned = True
                 event.Tick()
-                loop.to_phase(loop.Phase.level, NPCTurn)
+                phase.to_phase(phase.Ontology.level, NPCTurn)
         if not unlearned:
             esper.dispatch_event("flash")
             event.Log.append("can't unlearn, spell doesn't exist")
@@ -263,7 +263,7 @@ class GameInputEvent(InputEvent):
         xhair_ent = ecs.Query(cmp.Crosshair, cmp.Position).first()
         location.BOARD.reposition(xhair_ent, *player_pos)
         esper.add_component(casting_spell, cmp.Targeting())
-        loop.to_phase(loop.Phase.target)
+        phase.to_phase(phase.Ontology.target)
 
 
 @dataclass
@@ -330,7 +330,7 @@ class NPCTurn(esper.Processor):
             enemy = esper.component_for_entity(entity, cmp.Enemy)
             self.process_melee(entity, epos)
             for _ in range(1, enemy.speed):
-                loop.oneshot(Movement)
+                phase.oneshot(Movement)
                 self.process_melee(entity, epos)
 
         archers = enemies.filter(cmp.Ranged, cmp.Position).remove(stunned)
@@ -365,32 +365,34 @@ class Render(esper.Processor):
         text = f"HP: {curr}/{maximum}"
         self.console.print(x=x, y=y, string=text, fg=display.Color.DGREY)
 
-    def _draw_selection_info(self, y_idx: itertools.count, entity: int):
-        self.console.print(1, next(y_idx), self.dashes)
+    def _draw_selection_info(self, entity: int):
+        selection_info = []
         spell_component_details = [
             ("Damage", cmp.DamageEffect, "amount"),
+            ("Heal", cmp.HealEffect, "amount"),
             ("Range", cmp.Spell, "target_range"),
             ("Cooldown", cmp.Cooldown, "turns"),
         ]
         for name, try_cmp, attr in spell_component_details:
             if component := esper.try_component(entity, try_cmp):
                 value = getattr(component, attr)
-                self.console.print(1, next(y_idx), f"{name}:{value}")
+                selection_info.append(f"{name}:{value}")
         if bleed_effect := esper.try_component(entity, cmp.BleedEffect):
             message = f"Grants Bleed:{bleed_effect.value}"
-            self.console.print(1, next(y_idx), message)
+            selection_info.append(message)
         if push := esper.try_component(entity, cmp.PushEffect):
             message = f"Imposes Push:{push.distance}"
-            self.console.print(1, next(y_idx), message)
+            selection_info.append(message)
         if stun_effect := esper.try_component(entity, cmp.StunEffect):
             message = f"Grants Stun:{stun_effect.value}"
-            self.console.print(1, next(y_idx), message)
+            selection_info.append(message)
         if aoe := esper.try_component(entity, cmp.EffectArea):
             # callback kwargs into spell info
             # this may not be right for other callbacks
             for name, value in aoe.callback.keywords.items():
                 message = f"{name.title()}:{value}"
-                self.console.print(1, next(y_idx), message)
+                selection_info.append(message)
+        return selection_info
 
     def _spell_section(self):
         spells = ecs.Query(cmp.Spell, cmp.Onymous, cmp.Known)
@@ -404,7 +406,7 @@ class Render(esper.Processor):
             bg = display.Color.BLACK
             if esper.has_component(spell_ent, cmp.Targeting):
                 fg, bg = bg, fg
-            yield text, fg, bg
+            yield (text, fg, bg)
 
     def _right_panel(self, panel_params):
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
@@ -412,8 +414,7 @@ class Render(esper.Processor):
             self.console.print(1 + display.R_PANEL_START, 1 + i, message)
 
     def _inventory(self, inv_map):
-        for i, (name, entities) in enumerate(inv_map):
-            self.console.print(1, 3 + i, f"{len(entities)}x {name}")
+        return [f"{len(ent)}x {name}" for (name, ent) in inv_map]
 
 
     def _draw_panels(self):
@@ -439,25 +440,35 @@ class Render(esper.Processor):
         hp = ecs.Query(cmp.Player, cmp.Health).cmp(cmp.Health)
         self.render_bar(1, 1, hp.current, hp.max, display.PANEL_WIDTH - 2)
 
+        panel_contents = []
         # inventory
         inv_map = create.player.inventory_map()
-        self._inventory(inv_map)
+        panel_contents += self._inventory(inv_map)
+        panel_contents += ["" for _ in range(4-len(inv_map))]
 
-        y_idx = itertools.count(max(8, 3 + len(inv_map)))
-        # spells
-        self.console.print(1, next(y_idx), self.dashes)
-        for text, fg, bg, in self._spell_section():
-            self.console.print(1, next(y_idx), text, fg=fg, bg=bg)
+        panel_contents.append(self.dashes)
 
+        panel_contents += [contents for contents in self._spell_section()]
+
+        panel_contents.append(self.dashes)
         # if targeting, also print spell info
         if targeting := esper.get_component(cmp.Targeting):
             trg_ent, _ = targeting[0]
-            self._draw_selection_info(y_idx, trg_ent)
+            panel_contents += self._draw_selection_info(trg_ent)
         else:
-            if loop.CURRENT == loop.Phase.inventory:
+            if phase.CURRENT == phase.Ontology.inventory:
                 selection = get_selected_menuitem()
                 if learnable := esper.try_component(selection, cmp.Learnable):
-                    self._draw_selection_info(y_idx, learnable.spell)
+                    panel_contents += self._draw_selection_info(learnable.spell)
+                else:
+                    panel_contents += self._draw_selection_info(selection)
+
+        for y_idx, content in enumerate(panel_contents, start=3):
+            match content:
+                case str():
+                    self.console.print(1, y_idx, content)
+                case tuple():
+                    self.console.print(1, y_idx, *content)
 
         self._right_panel(panel_params)
 
@@ -593,7 +604,7 @@ class TargetInputEvent(InputEvent):
     def to_level(self):
         spell_ent = ecs.Query(cmp.Targeting).first()
         esper.remove_component(spell_ent, cmp.Targeting)
-        loop.to_phase(loop.Phase.level)
+        phase.to_phase(phase.Ontology.level)
 
     def move_crosshair(self, x, y):
         crosshair = ecs.Query(cmp.Crosshair, cmp.Position).first()
@@ -620,7 +631,7 @@ class TargetInputEvent(InputEvent):
             event.trigger_all_callbacks(targeting_entity, cmp.UseTrigger)
             esper.remove_component(targeting_entity, cmp.Targeting)
             event.Tick()
-            loop.to_phase(loop.Phase.level, Damage)  # to FIRST dmg phase
+            phase.to_phase(phase.Ontology.level, Damage)  # to FIRST dmg phase
         except typ.InvalidAction as e:
             esper.dispatch_event("flash")
             event.Log.append(str(e))
@@ -681,7 +692,7 @@ class InventoryRender(BoardRender):
 @dataclass
 class InventoryInputEvent(InputEvent):
     def __init__(self):
-        to_level = (loop.to_phase, [loop.Phase.level])
+        to_level = (phase.to_phase, [phase.Ontology.level])
         self.action_map = {
             input.KEYMAP[input.Input.MOVE_DOWN]: (self.move_selection, [1]),
             input.KEYMAP[input.Input.MOVE_UP]: (self.move_selection, [-1]),
@@ -710,14 +721,14 @@ class InventoryInputEvent(InputEvent):
         drop_pos = cmp.Position(x=player_pos.x, y=player_pos.y)
         esper.add_component(selection, drop_pos)
         location.BOARD.entities_at(drop_pos).add(selection)
-        loop.to_phase(loop.Phase.level, NPCTurn)
+        phase.to_phase(phase.Ontology.level, NPCTurn)
 
     def use_item(self, selection):
         try:
             event.trigger_all_callbacks(selection, cmp.UseTrigger)
             esper.remove_component(selection, cmp.InInventory)
             event.Tick()
-            loop.to_phase(loop.Phase.level, NPCTurn)
+            phase.to_phase(phase.Ontology.level, NPCTurn)
         except typ.InvalidAction as e:
             esper.dispatch_event("flash")
             event.Log.append(str(e))
@@ -751,7 +762,7 @@ class OptionsRender(esper.Processor):
 class OptionsInputEvent(InputEvent):
     def __init__(self):
         self.action_map = {
-            input.KEYMAP[input.Input.ESC]: (loop.to_phase, [loop.Phase.menu]),
+            input.KEYMAP[input.Input.ESC]: (phase.to_phase, [phase.Ontology.menu]),
         }
 
 
@@ -765,8 +776,6 @@ class Upkeep(esper.Processor):
         event.Queues.tick.clear()
         for entity, (status,) in ecs.Query(cmp.State):
             for status_effect, duration in list(status.map.items()):
-                # TODO: we only want "active" things to tick down
-                # or else cooldowns can be cheesed by swapping out spells
                 condition.apply(entity, status_effect, duration)
                 status.map[status_effect] = max(0, duration - 1)
                 if status.map[status_effect] == 0:

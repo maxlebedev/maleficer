@@ -521,3 +521,5 @@ def generate_test_dungeon(board):
     pos.x, pos.y = new_room.center.x, new_room.center.y
     create.npc.cyclops(new_room.get_random_pos())
     create.item.potion(new_room.get_random_pos())
+    create.item.scroll(new_room.get_random_pos())
+    board.build_entity_cache()
