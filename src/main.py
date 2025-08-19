@@ -77,7 +77,7 @@ def main() -> None:
     phase.targeting_phase(context, console)
     phase.inventory_phase(context, console)
     phase.options_phase(context, console)
-    phase.to_phase(phase.Ontology.menu)
+    phase.change_to(phase.Ontology.menu)
     # location.generate_test_dungeon(location.BOARD)
     location.generate_dungeon(location.BOARD)
     # location.cave_dungeon(location.BOARD)

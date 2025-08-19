@@ -113,7 +113,8 @@ class EffectArea:
 @component
 class Locus:
     """a static set of coords for AOEs and such"""
-    coords : list[typ.COORD]
+
+    coords: list[typ.COORD]
 
 
 @component

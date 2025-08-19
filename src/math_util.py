@@ -16,7 +16,7 @@ def clamp_damage(entity: int, value: int):
     hp.current = clamp(hp.current, hp.max)
 
 
-def get_push_coords(source: tuple[int,int], target: int, steps: int):
+def get_push_coords(source: tuple[int, int], target: int, steps: int):
     """note that diagonals are allowed for pushes"""
     # Convert tuples to numpy arrays for easier vector math
     trg_pos = esper.component_for_entity(target, cmp.Position)
@@ -58,9 +58,10 @@ def bresenham_ray(origin: cmp.Position, dest: cmp.Position):
     y, x = 0, 0
 
     ray = []
+    anchor_pts = (dest.as_tuple, origin.as_tuple)
     while True:
         coord = (origin.x + x * xx + y * yx, origin.y + x * xy + y * yy)
-        if coord not in (dest.as_tuple, origin.as_tuple) and location.BOARD.has_blocker(*coord):
+        if coord not in anchor_pts and location.BOARD.has_blocker(*coord):
             break
         ray.append(coord)
         if err >= 0:

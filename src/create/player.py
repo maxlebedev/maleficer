@@ -19,7 +19,7 @@ def inventory_map() -> list:
 
 
 def main_menu_opts():
-    to_level = lambda _: phase.to_phase(phase.Ontology.level)
+    to_level = lambda _: phase.change_to(phase.Ontology.level)
     cmps = []
     cmps.append(cmp.MainMenu())
     cmps.append(cmp.Onymous(name="Start Game"))
@@ -27,7 +27,7 @@ def main_menu_opts():
     cmps.append(cmp.UseTrigger(callbacks=[to_level]))
     esper.create_entity(*cmps)
 
-    to_opts = lambda _: phase.to_phase(phase.Ontology.options)
+    to_opts = lambda _: phase.change_to(phase.Ontology.options)
     cmps = []
     cmps.append(cmp.UseTrigger(callbacks=[to_opts]))
     cmps.append(cmp.MainMenu())

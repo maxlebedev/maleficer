@@ -196,7 +196,7 @@ class GameInputEvent(InputEvent):
             input.KEYMAP[input.Input.MOVE_LEFT]: (self.move, [-1, 0]),
             input.KEYMAP[input.Input.MOVE_UP]: (self.move, [0, -1]),
             input.KEYMAP[input.Input.MOVE_RIGHT]: (self.move, [1, 0]),
-            input.KEYMAP[input.Input.ESC]: (phase.to_phase, [phase.Ontology.menu]),
+            input.KEYMAP[input.Input.ESC]: (phase.change_to, [phase.Ontology.menu]),
             input.KEYMAP[input.Input.SPELL1]: (self.handle_slot_key, [1]),
             input.KEYMAP[input.Input.SPELL2]: (self.handle_slot_key, [2]),
             input.KEYMAP[input.Input.SPELL3]: (self.handle_slot_key, [3]),
@@ -213,7 +213,7 @@ class GameInputEvent(InputEvent):
 
         menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
         menu_selection.item = 0
-        phase.to_phase(phase.Ontology.inventory)
+        phase.change_to(phase.Ontology.inventory)
 
     def skip(self):
         event.Tick()
@@ -241,7 +241,7 @@ class GameInputEvent(InputEvent):
                 esper.add_component(scroll, cmp.InInventory())
                 unlearned = True
                 event.Tick()
-                phase.to_phase(phase.Ontology.level, NPCTurn)
+                phase.change_to(phase.Ontology.level, NPCTurn)
         if not unlearned:
             esper.dispatch_event("flash")
             event.Log.append("can't unlearn, spell doesn't exist")
@@ -263,12 +263,11 @@ class GameInputEvent(InputEvent):
         xhair_ent = ecs.Query(cmp.Crosshair, cmp.Position).first()
         location.BOARD.reposition(xhair_ent, *player_pos)
         esper.add_component(casting_spell, cmp.Targeting())
-        phase.to_phase(phase.Ontology.target)
+        phase.change_to(phase.Ontology.target)
 
 
 @dataclass
 class NPCTurn(esper.Processor):
-
     def follow(self, start: cmp.Position, end: cmp.Position):
         cost = location.BOARD.as_move_graph()
         graph = tcod.path.SimpleGraph(cost=cost, cardinal=1, diagonal=0)
@@ -413,9 +412,16 @@ class Render(esper.Processor):
         for i, message in enumerate(event.Log.messages):
             self.console.print(1 + display.R_PANEL_START, 1 + i, message)
 
-    def _inventory(self, inv_map):
-        return [f"{len(ent)}x {name}" for (name, ent) in inv_map]
+    def _left_panel(self, panel_params):
+        self.console.draw_frame(x=0, **panel_params)
+        hp = ecs.Query(cmp.Player, cmp.Health).cmp(cmp.Health)
+        self.render_bar(1, 1, hp.current, hp.max, display.PANEL_WIDTH - 2)
 
+    def _inventory(self):
+        inv_map = create.player.inventory_map()
+        inventory = [f"{len(ent)}x {name}" for (name, ent) in inv_map]
+        inventory += ["" for _ in range(4 - len(inv_map))]
+        return inventory
 
     def _draw_panels(self):
         panel_params = {
@@ -435,23 +441,19 @@ class Render(esper.Processor):
             ),
         }
 
-        # left panel
-        self.console.draw_frame(x=0, **panel_params)
-        hp = ecs.Query(cmp.Player, cmp.Health).cmp(cmp.Health)
-        self.render_bar(1, 1, hp.current, hp.max, display.PANEL_WIDTH - 2)
+        self._left_panel(panel_params)
+        self._right_panel(panel_params)
 
         panel_contents = []
-        # inventory
-        inv_map = create.player.inventory_map()
-        panel_contents += self._inventory(inv_map)
-        panel_contents += ["" for _ in range(4-len(inv_map))]
 
+        panel_contents += self._inventory()
         panel_contents.append(self.dashes)
 
-        panel_contents += [contents for contents in self._spell_section()]
-
+        panel_contents += self._spell_section()
         panel_contents.append(self.dashes)
+
         # if targeting, also print spell info
+
         if targeting := esper.get_component(cmp.Targeting):
             trg_ent, _ = targeting[0]
             panel_contents += self._draw_selection_info(trg_ent)
@@ -469,8 +471,6 @@ class Render(esper.Processor):
                     self.console.print(1, y_idx, content)
                 case tuple():
                     self.console.print(1, y_idx, *content)
-
-        self._right_panel(panel_params)
 
     def _apply_lighting(self, cell_rgbs, in_fov) -> list[list[typ.CELL_RGB]]:
         """display cells in fov with lighting, explored without, and hide the rest"""
@@ -604,7 +604,7 @@ class TargetInputEvent(InputEvent):
     def to_level(self):
         spell_ent = ecs.Query(cmp.Targeting).first()
         esper.remove_component(spell_ent, cmp.Targeting)
-        phase.to_phase(phase.Ontology.level)
+        phase.change_to(phase.Ontology.level)
 
     def move_crosshair(self, x, y):
         crosshair = ecs.Query(cmp.Crosshair, cmp.Position).first()
@@ -631,7 +631,7 @@ class TargetInputEvent(InputEvent):
             event.trigger_all_callbacks(targeting_entity, cmp.UseTrigger)
             esper.remove_component(targeting_entity, cmp.Targeting)
             event.Tick()
-            phase.to_phase(phase.Ontology.level, Damage)  # to FIRST dmg phase
+            phase.change_to(phase.Ontology.level, Damage)  # to FIRST dmg phase
         except typ.InvalidAction as e:
             esper.dispatch_event("flash")
             event.Log.append(str(e))
@@ -692,7 +692,7 @@ class InventoryRender(BoardRender):
 @dataclass
 class InventoryInputEvent(InputEvent):
     def __init__(self):
-        to_level = (phase.to_phase, [phase.Ontology.level])
+        to_level = (phase.change_to, [phase.Ontology.level])
         self.action_map = {
             input.KEYMAP[input.Input.MOVE_DOWN]: (self.move_selection, [1]),
             input.KEYMAP[input.Input.MOVE_UP]: (self.move_selection, [-1]),
@@ -721,14 +721,14 @@ class InventoryInputEvent(InputEvent):
         drop_pos = cmp.Position(x=player_pos.x, y=player_pos.y)
         esper.add_component(selection, drop_pos)
         location.BOARD.entities_at(drop_pos).add(selection)
-        phase.to_phase(phase.Ontology.level, NPCTurn)
+        phase.change_to(phase.Ontology.level, NPCTurn)
 
     def use_item(self, selection):
         try:
             event.trigger_all_callbacks(selection, cmp.UseTrigger)
             esper.remove_component(selection, cmp.InInventory)
             event.Tick()
-            phase.to_phase(phase.Ontology.level, NPCTurn)
+            phase.change_to(phase.Ontology.level, NPCTurn)
         except typ.InvalidAction as e:
             esper.dispatch_event("flash")
             event.Log.append(str(e))
@@ -762,7 +762,7 @@ class OptionsRender(esper.Processor):
 class OptionsInputEvent(InputEvent):
     def __init__(self):
         self.action_map = {
-            input.KEYMAP[input.Input.ESC]: (phase.to_phase, [phase.Ontology.menu]),
+            input.KEYMAP[input.Input.ESC]: (phase.change_to, [phase.Ontology.menu]),
         }
 
 

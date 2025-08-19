@@ -25,6 +25,7 @@ def player_last_position():
     lp = ecs.Query(cmp.Player, cmp.LastPosition).cmp(cmp.LastPosition)
     return lp.pos
 
+
 def can_see(entity: int, target: int, distance: int | None = None) -> bool:
     dest_cell, trace = trace_ray(entity, target)
     if dest_cell != target:  # no LOS
@@ -508,10 +509,11 @@ def maze_dungeon(board: Board):
 
     board.build_entity_cache()
 
+
 def generate_test_dungeon(board):
     """one room, one enemy, one item"""
-    room_x = display.BOARD_WIDTH//2
-    room_y = display.BOARD_HEIGHT//2
+    room_x = display.BOARD_WIDTH // 2
+    room_y = display.BOARD_HEIGHT // 2
     new_room = RectangularRoom(room_x, room_y, 10, 10)
     for cell in board.as_sequence(*new_room.inner):
         pos = esper.component_for_entity(cell, cmp.Position)
