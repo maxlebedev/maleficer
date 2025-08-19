@@ -110,10 +110,12 @@ class Damage(esper.Processor):
                 continue
             if esper.has_component(damage.target, cmp.Cell):
                 pos = esper.component_for_entity(damage.target, cmp.Position)
-                entities = location.BOARD.entities_at(pos)
+                entities = location.BOARD.pieces_at(pos)
                 for ent in entities:
                     if esper.has_component(ent, cmp.Health):
                         event.Damage(damage.source, ent, damage.amount)
+            if not esper.has_component(damage.target, cmp.Health):
+                # damage source hit a wall, or similar
                 continue
 
             math_util.clamp_damage(damage.target, damage.amount)

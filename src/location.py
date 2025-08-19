@@ -348,8 +348,7 @@ def count_neighbors(board, pos: cmp.Position):
     neighbor_walls = 0
     for x, y in indices:
         cell = board.get_cell(x, y)
-        if cell and esper.has_components(cell, cmp.Cell, cmp.Blocking):
-            # This is a proxy for a "wall" type
+        if cell and esper.has_component(cell, cmp.Wall):
             neighbor_walls += 1
     return neighbor_walls
 

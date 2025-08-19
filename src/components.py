@@ -65,6 +65,11 @@ class Cell:  # floor, wall, door, etc
 
 
 @component
+class Wall(Cell):
+    pass
+
+
+@component
 class Enemy:
     speed: int = 1
     perception: int = 4

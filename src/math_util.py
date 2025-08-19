@@ -41,8 +41,7 @@ def get_push_coords(source: tuple[int, int], target: int, steps: int):
 
 
 def bresenham_ray(origin: cmp.Position, dest: cmp.Position):
-    """bresenham also impl but continue past dest to a blocker"""
-    # Note: we really want to continue to a wall
+    """bresenham line, but continue past dest to wall"""
     dx = abs(dest.x - origin.x)
     dy = abs(dest.y - origin.y)
     xsign = 1 if (origin.x < dest.x) else -1
@@ -58,11 +57,10 @@ def bresenham_ray(origin: cmp.Position, dest: cmp.Position):
     y, x = 0, 0
 
     ray = []
-    anchor_pts = (dest.as_tuple, origin.as_tuple)
-    while True:
+    cell = 1
+    while cell and not esper.has_component(cell, cmp.Wall):
         coord = (origin.x + x * xx + y * yx, origin.y + x * xy + y * yy)
-        if coord not in anchor_pts and location.BOARD.has_blocker(*coord):
-            break
+        cell = location.BOARD.get_cell(*coord)
         ray.append(coord)
         if err >= 0:
             y += 1

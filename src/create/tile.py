@@ -17,7 +17,8 @@ def wall(x: int, y: int, breakable: int = False) -> int:
     vis = cmp.Visible(glyph=dis.Glyph.WALL, color=dis.Color.LGREY)
     pos = cmp.Position(x, y)
     blocking = cmp.Blocking()
-    cell = esper.create_entity(cmp.Cell(), pos, vis, blocking)
+    wall = cmp.Wall()
+    cell = esper.create_entity(cmp.Cell(), pos, vis, blocking, wall)
     if breakable:
         esper.add_component(cell, cmp.Health(max=1))
         esper.add_component(cell, cmp.Onymous(name="wall"))
