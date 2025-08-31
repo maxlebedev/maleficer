@@ -135,9 +135,9 @@ class Board:
         esper.delete_entity(self.cells[x][y], immediate=True)
         self.cells[x][y] = cell
 
-    def retile(self, pos: cmp.Position, gen_tile: Callable):
+    def retile(self, x: int, y: int, gen_tile: Callable):
         """create a tile and place it at position"""
-        self.set_cell(pos.x, pos.y, gen_tile(pos.x, pos.y))
+        self.set_cell(x, y, gen_tile(x, y))
 
     def entities_at(self, pos: cmp.Position) -> set:
         return self.entities[pos.x][pos.y]
@@ -227,9 +227,9 @@ def tunnel_between(board, start: cmp.Position, end: cmp.Position):
 
     # Generate the coordinates for this tunnel.
     for x, y in tcod.los.bresenham((start.x, start.y), (corner_x, corner_y)).tolist():
-        board.set_cell(x, y, create.tile.floor(x, y))
+        board.retile(x, y, create.tile.floor)
     for x, y in tcod.los.bresenham((corner_x, corner_y), (end.x, end.y)).tolist():
-        board.set_cell(x, y, create.tile.floor(x, y))
+        board.retile(x, y, create.tile.floor)
 
 
 def intersects(board: Board, src: RectangularRoom, target: RectangularRoom) -> bool:
@@ -273,7 +273,7 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
         centers.append(new_room.center)
         for cell in board.as_sequence(*new_room.inner):
             pos = esper.component_for_entity(cell, cmp.Position)
-            board.set_cell(*pos, create.tile.floor(*pos))
+            board.retile(*pos, create.tile.floor)
 
         if len(rooms) == 0:  # start player in first room
             pos = player_position()
@@ -299,7 +299,7 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
         rooms.append(new_room)
 
     last_center = rooms[-1].center
-    board.retile(last_center, create.tile.stairs)
+    board.retile(*last_center, create.tile.stairs)
 
 
 def new_level():
@@ -365,21 +365,21 @@ def build_perimeter_wall(board):
     boarder |= {(x, display.BOARD_HEIGHT - 1) for x in range(display.BOARD_WIDTH)}
 
     for x, y in boarder:
-        board.set_cell(x, y, create.tile.wall(x, y))
+        board.retile(x, y, create.tile.wall)
 
 
 def cave_dungeon(board):
     for cell in board.as_sequence():
         if not random.randint(0, 1):
             cell_pos = esper.component_for_entity(cell, cmp.Position)
-            board.set_cell(*cell_pos, create.tile.floor(*cell_pos))
+            board.retile(*cell_pos, create.tile.floor)
     # Horizontal Blanking
     x_slice = slice(3, display.BOARD_WIDTH - 3)
     midpoint = display.BOARD_HEIGHT // 2
     y_slice = slice(midpoint - 1, midpoint + 2)
     for cell in board.as_sequence(x_slice, y_slice):
         player_pos = esper.component_for_entity(cell, cmp.Position)
-        board.set_cell(*player_pos, create.tile.floor(*player_pos))
+        board.retile(*player_pos, create.tile.floor)
 
     neighbours = [
         [0 for _ in range(display.BOARD_HEIGHT)] for _ in range(display.BOARD_WIDTH)
@@ -392,12 +392,14 @@ def cave_dungeon(board):
             neighbours[player_pos.x][player_pos.y] = wall_count
     for x, row in enumerate(neighbours):
         for y in range(len(row)):
+            tile = None
             if neighbours[x][y] >= 5:
                 breakable = not random.randint(0, 15)
-                board.set_cell(x, y, create.tile.wall(x, y, breakable=breakable))
+                tile = create.tile.wall(x, y, breakable=breakable)
             elif neighbours[x][y] <= 4:
-                board.set_cell(x, y, create.tile.floor(x, y))
-
+                tile = create.tile.floor(x, y)
+            if tile:
+                board.set_cell(x, y, tile)
     build_perimeter_wall(board)
 
     player_pos = player_position()
@@ -415,7 +417,7 @@ def cave_dungeon(board):
             dist = euclidean_distance(player_pos, pos)
             valid_spawns.append([dist, pos])
     valid_spawns = sorted(valid_spawns, key=lambda x: x[0])
-    board.retile(valid_spawns[-1][1], create.tile.stairs)
+    board.retile(*valid_spawns[-1][1], create.tile.stairs)
 
     spawnables = [
         [create.item.trap, 3],
@@ -474,7 +476,7 @@ def maze_dungeon(board: Board):
         pos2 = esper.component_for_entity(cell2, cmp.Position)
         x = (pos1.x + pos2.x) // 2
         y = (pos1.y + pos2.y) // 2
-        board.set_cell(x, y, create.tile.floor(x, y))
+        board.retile(x, y, create.tile.floor)
 
     for cell in board.as_sequence():
         pos = esper.component_for_entity(cell, cmp.Position)
@@ -506,8 +508,7 @@ def maze_dungeon(board: Board):
             pos = esper.component_for_entity(current, cmp.Position)
             current = backtrack.pop()
 
-    stair_pos = cmp.Position(display.BOARD_WIDTH//2, display.BOARD_HEIGHT//2)
-    board.retile(stair_pos, create.tile.stairs)
+    board.retile(display.BOARD_WIDTH//2, display.BOARD_HEIGHT//2, create.tile.stairs)
 
 
 def generate_test_dungeon(board):
@@ -517,7 +518,7 @@ def generate_test_dungeon(board):
     new_room = RectangularRoom(room_x, room_y, 10, 10)
     for cell in board.as_sequence(*new_room.inner):
         pos = esper.component_for_entity(cell, cmp.Position)
-        board.set_cell(*pos, create.tile.floor(*pos))
+        board.retile(*pos, create.tile.floor)
 
     pos = player_position()
     pos.x, pos.y = new_room.center.x, new_room.center.y

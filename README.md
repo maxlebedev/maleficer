@@ -109,7 +109,5 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - bresenham_ray should *really* be under test
     - Maze changes
         * 2x2 corridors
-        * stairs in center
-    - retile is cool, but needs to take x,y
 # BUGS
     - Found a wall I was able to walk through in the caves.
