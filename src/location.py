@@ -461,14 +461,10 @@ def maze_dungeon(board: Board):
 
         neighbors = []
         for x, y in indices:
-            if x in {0, display.BOARD_WIDTH - 1} or y in {0, display.BOARD_HEIGHT - 1}:
-                continue
-            try:
+            if x > 0 and x < display.BOARD_WIDTH-1 and y > 0 and y < display.BOARD_HEIGHT -1:
                 cell = board.get_cell(x, y)
                 if cell not in seen:
                     neighbors.append(cell)
-            except Exception:
-                continue
         return neighbors
 
     def break_wall_between(cell1: int, cell2: int):

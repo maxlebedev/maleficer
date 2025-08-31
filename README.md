@@ -109,5 +109,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - bresenham_ray should *really* be under test
     - Maze changes
         * 2x2 corridors
+        * consider making a tmp map that is 1/4th size, then translating each of those coords to a 2x2 block on map
 # BUGS
     - Found a wall I was able to walk through in the caves.
