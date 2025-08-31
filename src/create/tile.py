@@ -26,11 +26,12 @@ def wall(x: int, y: int, breakable: int = False) -> int:
     return cell
 
 
-def stairs(pos: cmp.Position) -> int:
+def stairs(x: int, y: int) -> int:
     vis = cmp.Visible(glyph=dis.Glyph.STAIRS, color=dis.Color.LGREY)
 
     os = cmp.OnStep()
     tp = cmp.Transparent()
+    pos = cmp.Position(x, y)
     stairs = esper.create_entity(cmp.Cell(), pos, vis, tp, os)
 
     def descend(_):

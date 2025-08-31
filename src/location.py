@@ -2,6 +2,7 @@
 
 import random
 from dataclasses import dataclass
+from typing import Callable
 
 import esper
 import tcod
@@ -133,6 +134,10 @@ class Board:
             raise IndexError()
         esper.delete_entity(self.cells[x][y], immediate=True)
         self.cells[x][y] = cell
+
+    def retile(self, pos: cmp.Position, gen_tile: Callable):
+        """create a tile and place it at position"""
+        self.set_cell(pos.x, pos.y, gen_tile(pos.x, pos.y))
 
     def entities_at(self, pos: cmp.Position) -> set:
         return self.entities[pos.x][pos.y]
@@ -294,7 +299,7 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
         rooms.append(new_room)
 
     last_center = rooms[-1].center
-    board.set_cell(*last_center.as_tuple, create.tile.stairs(last_center))
+    board.retile(last_center, create.tile.stairs)
 
 
 def new_level():
@@ -410,8 +415,8 @@ def cave_dungeon(board):
             dist = euclidean_distance(player_pos, pos)
             valid_spawns.append([dist, pos])
     valid_spawns = sorted(valid_spawns, key=lambda x: x[0])
-    stairs = create.tile.stairs(valid_spawns[-1][1])
-    board.set_cell(*valid_spawns[-1][1], stairs)
+    board.retile(valid_spawns[-1][1], create.tile.stairs)
+
     spawnables = [
         [create.item.trap, 3],
         [create.item.potion, 2],
@@ -444,10 +449,10 @@ def maze_dungeon(board: Board):
         then pick an unvisited neighbor and repeat
         when there are no neighbors, pop stack and try again for that space
 
-        place stairs in one of the backtrack spots
+        place stairs in the center
     """
 
-    def neighbors(board, seen: set, cell: int):
+    def get_neighbors(board, seen: set, cell: int):
         offsets = [(-2, 0), (0, -2), (0, 2), (2, 0)]
         pos = esper.component_for_entity(cell, cmp.Position)
         indices = [(pos.x + dx, pos.y + dy) for dx, dy in offsets]
@@ -456,9 +461,12 @@ def maze_dungeon(board: Board):
         for x, y in indices:
             if x in {0, display.BOARD_WIDTH - 1} or y in {0, display.BOARD_HEIGHT - 1}:
                 continue
-            cell = board.get_cell(x, y)
-            if cell not in seen:
-                neighbors.append(cell)
+            try:
+                cell = board.get_cell(x, y)
+                if cell not in seen:
+                    neighbors.append(cell)
+            except Exception:
+                continue
         return neighbors
 
     def break_wall_between(cell1: int, cell2: int):
@@ -486,9 +494,8 @@ def maze_dungeon(board: Board):
     current = board.get_cell(start_x, start_y)
     backtrack = [current]
     seen = {current}
-    stair_cells = []
     while backtrack:
-        n = neighbors(board, seen, current)
+        n = get_neighbors(board, seen, current)
         if n:
             next = random.choice(n)
             break_wall_between(current, next)
@@ -497,14 +504,10 @@ def maze_dungeon(board: Board):
             seen.add(current)
         else:
             pos = esper.component_for_entity(current, cmp.Position)
-            wall_count = count_neighbors(board, pos)
-            if wall_count >= 5:
-                stair_cells.append(current)
             current = backtrack.pop()
 
-    stair_cell = random.choice(stair_cells)
-    pos = esper.component_for_entity(stair_cell, cmp.Position)
-    board.set_cell(pos.x, pos.y, create.tile.stairs(pos))
+    stair_pos = cmp.Position(display.BOARD_WIDTH//2, display.BOARD_HEIGHT//2)
+    board.retile(stair_pos, create.tile.stairs)
 
 
 def generate_test_dungeon(board):
