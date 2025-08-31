@@ -4,7 +4,6 @@ import components as cmp
 import display as dis
 import ecs
 import location
-import behavior
 
 
 def floor(x: int, y: int) -> int:

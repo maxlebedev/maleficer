@@ -32,11 +32,11 @@ def get_push_coords(source: tuple[int, int], target: int, steps: int):
     result = unit_direction * steps
     dest_coord = tgt + result
 
-    if dest_cell := location.BOARD.get_cell(*dest_coord):
-        _, trace = location.trace_ray(target, dest_cell)
-        for x, y in trace[::-1]:
-            if not location.BOARD.has_blocker(x, y):
-                return x, y
+    dest_cell = location.BOARD.get_cell(*dest_coord)
+    _, trace = location.trace_ray(target, dest_cell)
+    for x, y in trace[::-1]:
+        if not location.BOARD.has_blocker(x, y):
+            return x, y
     return dest_coord
 
 

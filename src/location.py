@@ -123,10 +123,10 @@ class Board:
             return False
         return True
 
-    def get_cell(self, x: int, y: int) -> typ.CELL | None:
+    def get_cell(self, x: int, y: int) -> typ.CELL:
         if self._in_bounds(x, y):
             return self.cells[x][y]
-        return None
+        raise Exception(f"No such cell {x=} {y=}")
 
     def set_cell(self, x: int, y: int, cell: typ.CELL):
         if not self._in_bounds(x, y):
@@ -295,7 +295,6 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
 
     last_center = rooms[-1].center
     board.set_cell(*last_center.as_tuple, create.tile.stairs(last_center))
-    board.build_entity_cache()
 
 
 def new_level():
@@ -308,6 +307,7 @@ def new_level():
     levels = [generate_dungeon, cave_dungeon]  # , maze_dungeon
     level_func = random.choice(levels)
     level_func(BOARD)
+    BOARD.build_entity_cache()
 
 
 def trace_ray(source: int, dest: int):
@@ -424,7 +424,6 @@ def cave_dungeon(board):
         s_ent, s_weight = zip(*spawnables)
         spawn = random.choices(s_ent, s_weight)[0]
         spawn(pos)
-    board.build_entity_cache()
 
 
 def in_player_perception(pos: cmp.Position):
@@ -458,7 +457,7 @@ def maze_dungeon(board: Board):
             if x in {0, display.BOARD_WIDTH - 1} or y in {0, display.BOARD_HEIGHT - 1}:
                 continue
             cell = board.get_cell(x, y)
-            if cell and cell not in seen:
+            if cell not in seen:
                 neighbors.append(cell)
         return neighbors
 
@@ -472,9 +471,10 @@ def maze_dungeon(board: Board):
     for cell in board.as_sequence():
         pos = esper.component_for_entity(cell, cmp.Position)
         if pos.x % 2 == 1 and pos.y % 2 == 1:
-            board.set_cell(*pos, create.tile.floor(*pos))
+            cell = create.tile.floor(*pos)
         else:
-            board.set_cell(*pos, create.tile.wall(*pos))
+            cell = create.tile.wall(*pos)
+        board.set_cell(pos.x, pos.y, cell)
     build_perimeter_wall(board)
 
     start_x = random.randrange(1, display.BOARD_WIDTH, 2)
@@ -504,9 +504,7 @@ def maze_dungeon(board: Board):
 
     stair_cell = random.choice(stair_cells)
     pos = esper.component_for_entity(stair_cell, cmp.Position)
-    board.set_cell(*pos, create.tile.stairs(pos))
-
-    board.build_entity_cache()
+    board.set_cell(pos.x, pos.y, create.tile.stairs(pos))
 
 
 def generate_test_dungeon(board):

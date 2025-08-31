@@ -52,6 +52,15 @@ def redraw():
     phase.oneshot(processors.BoardRender)
 
 
+
+def initial_map():
+    # location.generate_test_dungeon(location.BOARD)
+    location.generate_dungeon(location.BOARD)
+    # location.cave_dungeon(location.BOARD)
+    # location.maze_dungeon(location.BOARD)
+    location.BOARD.build_entity_cache()
+
+
 def main() -> None:
     tile_atlas = "assets/monochrome-transparent_packed.png"
     tileset = display.load_tileset(tile_atlas, display.TS_WIDTH, display.TS_HEIGHT)
@@ -78,10 +87,8 @@ def main() -> None:
     phase.inventory_phase(context, console)
     phase.options_phase(context, console)
     phase.change_to(phase.Ontology.menu)
-    # location.generate_test_dungeon(location.BOARD)
-    location.generate_dungeon(location.BOARD)
-    # location.cave_dungeon(location.BOARD)
-    # location.maze_dungeon(location.BOARD)
+
+    initial_map()
 
     starting_spells = [
         create.spell.firebolt,

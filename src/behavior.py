@@ -49,20 +49,20 @@ def lob_bomb(source: int):
     indices = location.get_neighbor_coords(player_pos)
     random.shuffle(indices)
     for selection in indices:
-        if target_cell := location.BOARD.get_cell(*selection):
-            if location.BOARD.has_blocker(*selection):
-                continue
-            dest, trace = location.trace_ray(source, target_cell)
-            if dest != target_cell:  # no LOS
-                continue
-            dest_pos = esper.component_for_entity(dest, cmp.Position)
-            dest_pos = cmp.Position(*dest_pos)
-            flash_line(trace, display.Glyph.BOMB, display.Color.RED)
-            create.item.bomb(dest_pos)
+        target_cell = location.BOARD.get_cell(*selection)
+        if location.BOARD.has_blocker(*selection):
+            continue
+        dest, trace = location.trace_ray(source, target_cell)
+        if dest != target_cell:  # no LOS
+            continue
+        dest_pos = esper.component_for_entity(dest, cmp.Position)
+        dest_pos = cmp.Position(*dest_pos)
+        flash_line(trace, display.Glyph.BOMB, display.Color.RED)
+        create.item.bomb(dest_pos)
 
-            location.BOARD.build_entity_cache()
-            apply_cooldown(source)
-            return
+        location.BOARD.build_entity_cache()
+        apply_cooldown(source)
+        return
 
 
 def fire_at_player(source: int):
