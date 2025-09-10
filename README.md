@@ -107,8 +107,18 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - lots of DRY in the NPC proc
     - callbacks are a violation of ECS. consider avoiding them somehow
     - bresenham_ray should *really* be under test
-    - Maze changes
-        * 2x2 corridors
-        * consider making a tmp map that is 1/4th size, then translating each of those coords to a 2x2 block on map
+    - 2x2 enemies
+    - cooldown alternatives like damage taken, steps walked (lotta tracking)
+    - spell burnout (ie how spammable a spell is)
+        * using a spell accumulates one stack of burnout
+        * burnout decreases by one every [max cooldown]+1 turns
+        * when burnout reaches [max cooldown], increase [max cooldown] by 1
+            + but do it in some temp way
+        * [max cooldown] decreases again in like [max coldown]*2 turns
+        * Alternat mechanic?, Burnout is a cap of off-cooldown uses.
+            + If you use off cooldown B times, then you accumulate 1 burnout
+            + and that takes B * CD to clear
+    - make a flow for selecting starting spells
+    - Aegis (spell-based buff) decaying shield
 # BUGS
     - Found a wall I was able to walk through in the caves.

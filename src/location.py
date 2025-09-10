@@ -359,12 +359,12 @@ def count_neighbors(board, pos: cmp.Position):
 
 
 def build_perimeter_wall(board):
-    boarder = {(0, y) for y in range(display.BOARD_HEIGHT)}
-    boarder |= {(display.BOARD_WIDTH - 1, y) for y in range(display.BOARD_HEIGHT)}
-    boarder |= {(x, 0) for x in range(display.BOARD_WIDTH)}
-    boarder |= {(x, display.BOARD_HEIGHT - 1) for x in range(display.BOARD_WIDTH)}
+    border = {(0, y) for y in range(display.BOARD_HEIGHT)}
+    border |= {(display.BOARD_WIDTH - 1, y) for y in range(display.BOARD_HEIGHT)}
+    border |= {(x, 0) for x in range(display.BOARD_WIDTH)}
+    border |= {(x, display.BOARD_HEIGHT - 1) for x in range(display.BOARD_WIDTH)}
 
-    for x, y in boarder:
+    for x, y in border:
         board.retile(x, y, create.tile.wall)
 
 
@@ -441,69 +441,79 @@ def in_player_perception(pos: cmp.Position):
     return dist_to_player < PLAYER_PERCEPTION_RADIUS
 
 
-def maze_dungeon(board: Board):
+def make_maze_blueprint():
     """
-    plan:
-        every even coord is a space. every odd a wall
-        we start at a random location get all neighbor spaces and pick one at random
+        1/4 scale blueprint for maze
+        every every odd coord pair is a wall
+        we start at a random location and pick a neighbor at random
         add current space to backtrack stack
-        break wall between them. Add both to visited set
+        break wall between current and neighbor. Add both to visited set
         then pick an unvisited neighbor and repeat
         when there are no neighbors, pop stack and try again for that space
 
-        place stairs in the center
     """
+    end_x = display.BOARD_WIDTH//2
+    end_y = display.BOARD_HEIGHT//2
+    blueprint = []
+    for _ in range(end_x):
+        blueprint.append([1 for _ in range(end_y+1)])
 
-    def get_neighbors(board, seen: set, cell: int):
+    for x in range(end_x):
+        for y in range(end_y):
+            if x % 2 == 1 and y % 2 == 1:
+                blueprint[x][y] = 0
+
+    start_x = random.randrange(1, end_x, 2)
+    start_y = random.randrange(1, end_y, 2)
+
+    def get_neighbors(seen: list, c_x: int, c_y: int):
         offsets = [(-2, 0), (0, -2), (0, 2), (2, 0)]
-        pos = esper.component_for_entity(cell, cmp.Position)
-        indices = [(pos.x + dx, pos.y + dy) for dx, dy in offsets]
+        indices = [(c_x + dx, c_y + dy) for dx, dy in offsets]
 
         neighbors = []
         for x, y in indices:
-            if x > 0 and x < display.BOARD_WIDTH-1 and y > 0 and y < display.BOARD_HEIGHT -1:
-                cell = board.get_cell(x, y)
-                if cell not in seen:
-                    neighbors.append(cell)
+            if x > 0 and x < end_x-1 and y > 0 and y < end_y:
+                if [x,y] not in seen:
+                    neighbors.append([x,y])
         return neighbors
 
-    def break_wall_between(cell1: int, cell2: int):
-        pos1 = esper.component_for_entity(cell1, cmp.Position)
-        pos2 = esper.component_for_entity(cell2, cmp.Position)
-        x = (pos1.x + pos2.x) // 2
-        y = (pos1.y + pos2.y) // 2
-        board.retile(x, y, create.tile.floor)
+    def break_wall_between(coord1, coord2):
+        x = (coord1[0] + coord2[0]) // 2
+        y = (coord1[1] + coord2[1]) // 2
 
-    for cell in board.as_sequence():
-        pos = esper.component_for_entity(cell, cmp.Position)
-        if pos.x % 2 == 1 and pos.y % 2 == 1:
-            cell = create.tile.floor(*pos)
-        else:
-            cell = create.tile.wall(*pos)
-        board.set_cell(pos.x, pos.y, cell)
-    build_perimeter_wall(board)
+        blueprint[x][y] = 0
 
-    start_x = random.randrange(1, display.BOARD_WIDTH, 2)
-    start_y = random.randrange(1, display.BOARD_HEIGHT, 2)
-
-    player_pos = player_position()
-    player_pos.x, player_pos.y = start_x, start_y
-
-    current = board.get_cell(start_x, start_y)
+    current = [start_x, start_y]
     backtrack = [current]
-    seen = {current}
+    seen = [current]
     while backtrack:
-        n = get_neighbors(board, seen, current)
+        n = get_neighbors(seen, *current)
         if n:
             next = random.choice(n)
             break_wall_between(current, next)
             backtrack.append(next)
             current = next
-            seen.add(current)
+            seen.append(current)
         else:
-            pos = esper.component_for_entity(current, cmp.Position)
             current = backtrack.pop()
+    return blueprint, start_x, start_y
 
+
+def maze_dungeon(board: Board):
+    blueprint, start_x, start_y = make_maze_blueprint()
+    player_pos = player_position()
+    player_pos.x, player_pos.y = start_x*2, start_y*2
+
+    for cell in board.as_sequence():
+        pos = esper.component_for_entity(cell, cmp.Position)
+        bx = pos.x // 2
+        by = pos.y // 2
+        if blueprint[bx][by]:
+            cell = create.tile.wall(*pos)
+        else:
+            cell = create.tile.floor(*pos)
+        board.set_cell(pos.x, pos.y, cell)
+    # TODO: place stairs at closest empty spot
     board.retile(display.BOARD_WIDTH//2, display.BOARD_HEIGHT//2, create.tile.stairs)
 
 
