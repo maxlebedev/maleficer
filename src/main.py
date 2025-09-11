@@ -52,13 +52,28 @@ def redraw():
     phase.oneshot(processors.BoardRender)
 
 
-
 def initial_map():
     # location.generate_test_dungeon(location.BOARD)
     location.generate_dungeon(location.BOARD)
     # location.cave_dungeon(location.BOARD)
     # location.maze_dungeon(location.BOARD)
     location.BOARD.build_entity_cache()
+
+
+def start_game():
+    initial_map()
+
+    starting_spells = [
+        create.spell.firebolt,
+        create.spell.blink,
+        create.spell.bleed,
+    ]
+
+    spells = random.sample(starting_spells, 2)
+    for spell in spells:
+        spell()
+
+    create.player.starting_inventory()
 
 
 def main() -> None:
@@ -81,27 +96,12 @@ def main() -> None:
 
     location.BOARD = location.Board()
 
-    phase.main_menu_phase(context, console)
-    phase.level_phase(context, console)
-    phase.targeting_phase(context, console)
-    phase.inventory_phase(context, console)
-    phase.options_phase(context, console)
+    create.ui.phases(context, console)
+
     phase.change_to(phase.Ontology.menu)
+    create.ui.main_menu_opts()
 
-    initial_map()
-
-    starting_spells = [
-        create.spell.firebolt,
-        create.spell.blink,
-        create.spell.bleed,
-    ]
-
-    spells = random.sample(starting_spells, 2)
-    for spell in spells:
-        spell()
-
-    create.player.main_menu_opts()
-    create.player.starting_inventory()
+    start_game()
 
     flash_callback = lambda: flash(context, console)
     esper.set_handler("redraw", redraw)

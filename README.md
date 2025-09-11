@@ -108,6 +108,8 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - callbacks are a violation of ECS. consider avoiding them somehow
     - bresenham_ray should *really* be under test
     - 2x2 enemies
+        * game currently assumes positions are one cell, pieces have one position
+        * If I have 2x2, then I can make snakes too
     - cooldown alternatives like damage taken, steps walked (lotta tracking)
     - spell burnout (ie how spammable a spell is)
         * using a spell accumulates one stack of burnout

@@ -506,7 +506,7 @@ def maze_dungeon(board: Board):
     blueprint, seen = make_maze_blueprint()
     player_pos = player_position()
 
-    hydrate = lambda x: x*2
+    hydrate = lambda x: x * 2
 
     player_pos.x, player_pos.y = map(hydrate, seen[-1])
     stair_x, stair_y = map(hydrate, seen[0])

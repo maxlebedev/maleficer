@@ -15,6 +15,7 @@ CURRENT = None
 class Ontology(enum.Enum):
     menu = enum.auto()
     options = enum.auto()
+    about = enum.auto()
     level = enum.auto()
     target = enum.auto()
     inventory = enum.auto()
@@ -80,6 +81,22 @@ def options_phase(context, console):
     input = processors.OptionsInputEvent()
 
     ALL[Ontology.options] = [render, input]
+
+
+def about_phase(context, console):
+    render = processors.AboutRender(context, console)
+    input = processors.AboutInputEvent()
+
+    ALL[Ontology.about] = [render, input]
+
+
+def init(context, console):
+    main_menu_phase(context, console)
+    level_phase(context, console)
+    targeting_phase(context, console)
+    inventory_phase(context, console)
+    options_phase(context, console)
+    about_phase(context, console)
 
 
 def change_to(phase: Ontology, start_proc: type[esper.Processor] | None = None):

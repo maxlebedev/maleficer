@@ -2,7 +2,6 @@ import collections
 import esper
 
 import components as cmp
-import phase
 from . import item
 import display as dis
 
@@ -16,24 +15,6 @@ def inventory_map() -> list:
     # then display is just a matter of lookup
     sorted_map = sorted(inventory_map.items())
     return sorted_map
-
-
-def main_menu_opts():
-    to_level = lambda _: phase.change_to(phase.Ontology.level)
-    cmps = []
-    cmps.append(cmp.MainMenu())
-    cmps.append(cmp.Onymous(name="Start Game"))
-    cmps.append(cmp.MenuItem(order=0))
-    cmps.append(cmp.UseTrigger(callbacks=[to_level]))
-    esper.create_entity(*cmps)
-
-    to_opts = lambda _: phase.change_to(phase.Ontology.options)
-    cmps = []
-    cmps.append(cmp.UseTrigger(callbacks=[to_opts]))
-    cmps.append(cmp.MainMenu())
-    cmps.append(cmp.Onymous(name="Options"))
-    cmps.append(cmp.MenuItem(order=1))
-    esper.create_entity(*cmps)
 
 
 def alamar():

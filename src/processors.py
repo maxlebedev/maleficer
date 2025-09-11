@@ -769,6 +769,31 @@ class OptionsInputEvent(InputEvent):
 
 
 @dataclass
+class AboutRender(esper.Processor):
+    context: tcod.context.Context
+    console: tcod.console.Console
+
+    def process(self):
+        self.console.clear()
+        x = display.PANEL_WIDTH + (display.BOARD_WIDTH // 2)
+        y = display.BOARD_HEIGHT // 2 - 10
+        self.console.print(x, y, "ABOUT", alignment=libtcodpy.CENTER)
+
+        about_text = "placeholder text explaining lore and game mechanics"
+        self.console.print(x, y + 1, about_text, alignment=libtcodpy.CENTER)
+
+        self.context.present(self.console)
+
+
+@dataclass
+class AboutInputEvent(InputEvent):
+    def __init__(self):
+        self.action_map = {
+            input.KEYMAP[input.Input.ESC]: (phase.change_to, [phase.Ontology.menu]),
+        }
+
+
+@dataclass
 class Upkeep(esper.Processor):
     """apply and tick down Conditions"""
 
