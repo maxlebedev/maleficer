@@ -352,9 +352,12 @@ def count_neighbors(board, pos: cmp.Position):
     indices = get_neighbor_coords(pos)
     neighbor_walls = 0
     for x, y in indices:
-        cell = board.get_cell(x, y)
-        if cell and esper.has_component(cell, cmp.Wall):
-            neighbor_walls += 1
+        try:
+            cell = board.get_cell(x, y)
+            if esper.has_component(cell, cmp.Wall):
+                neighbor_walls += 1
+        except Exception:
+            pass
     return neighbor_walls
 
 
