@@ -120,5 +120,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
             + and that takes B * CD to clear
     - make a flow for selecting starting spells
     - Aegis (spell-based buff) decaying shield
+    - Some sort of Storm/Combo mechanic would be really cool
 # BUGS
     - Found a wall I was able to walk through in the caves.

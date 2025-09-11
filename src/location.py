@@ -443,21 +443,21 @@ def in_player_perception(pos: cmp.Position):
 
 def make_maze_blueprint():
     """
-        1/4 scale blueprint for maze
-        every every odd coord pair is a wall
-        we start at a random location and pick a neighbor at random
-        add current space to backtrack stack
-        break wall between current and neighbor. Add both to visited set
-        then pick an unvisited neighbor and repeat
-        when there are no neighbors, pop stack and try again for that space
-
+    1/4 scale blueprint for maze
+    every every odd coord pair is a wall
+    we start at a random location and pick a neighbor at random
+    add current space to backtrack stack
+    break wall between current and neighbor. Add both to visited set
+    then pick an unvisited neighbor and repeat
+    when there are no neighbors, pop stack and try again for that space
     """
-    end_x = display.BOARD_WIDTH//2
-    end_y = display.BOARD_HEIGHT//2
+    end_x = display.BOARD_WIDTH // 2
+    end_y = display.BOARD_HEIGHT // 2
     blueprint = []
     for _ in range(end_x):
-        blueprint.append([1 for _ in range(end_y+1)])
+        blueprint.append([1 for _ in range(end_y + 1)])
 
+    # even coord pairs are floor nodes, to be connected
     for x in range(end_x):
         for y in range(end_y):
             if x % 2 == 1 and y % 2 == 1:
@@ -472,9 +472,9 @@ def make_maze_blueprint():
 
         neighbors = []
         for x, y in indices:
-            if x > 0 and x < end_x-1 and y > 0 and y < end_y:
-                if [x,y] not in seen:
-                    neighbors.append([x,y])
+            if x > 0 and x < end_x - 1 and y > 0 and y < end_y:
+                if [x, y] not in seen:
+                    neighbors.append([x, y])
         return neighbors
 
     def break_wall_between(coord1, coord2):
@@ -502,7 +502,7 @@ def make_maze_blueprint():
 def maze_dungeon(board: Board):
     blueprint, start_x, start_y = make_maze_blueprint()
     player_pos = player_position()
-    player_pos.x, player_pos.y = start_x*2, start_y*2
+    player_pos.x, player_pos.y = start_x * 2, start_y * 2
 
     for cell in board.as_sequence():
         pos = esper.component_for_entity(cell, cmp.Position)
@@ -514,7 +514,9 @@ def maze_dungeon(board: Board):
             cell = create.tile.floor(*pos)
         board.set_cell(pos.x, pos.y, cell)
     # TODO: place stairs at closest empty spot
-    board.retile(display.BOARD_WIDTH//2, display.BOARD_HEIGHT//2, create.tile.stairs)
+    stair_x = display.BOARD_WIDTH // 2
+    stair_y = display.BOARD_HEIGHT// 2
+    board.retile(stair_x, stair_y, create.tile.stairs)
 
 
 def generate_test_dungeon(board):
