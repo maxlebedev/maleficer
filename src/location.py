@@ -463,8 +463,8 @@ def make_maze_blueprint():
             if x % 2 == 1 and y % 2 == 1:
                 blueprint[x][y] = 0
 
-    start_x = random.randrange(1, end_x, 2)
-    start_y = random.randrange(1, end_y, 2)
+    start_x = random.choice([15, 17])
+    start_y = random.choice([15, 17])
 
     def get_neighbors(seen: list, c_x: int, c_y: int):
         offsets = [(-2, 0), (0, -2), (0, 2), (2, 0)]
@@ -496,13 +496,17 @@ def make_maze_blueprint():
             seen.append(current)
         else:
             current = backtrack.pop()
-    return blueprint, start_x, start_y
+    return blueprint, seen
 
 
 def maze_dungeon(board: Board):
-    blueprint, start_x, start_y = make_maze_blueprint()
+    blueprint, seen = make_maze_blueprint()
     player_pos = player_position()
-    player_pos.x, player_pos.y = start_x * 2, start_y * 2
+
+    hydrate = lambda x: x*2
+
+    player_pos.x, player_pos.y = map(hydrate, seen[-1])
+    stair_x, stair_y = map(hydrate, seen[0])
 
     for cell in board.as_sequence():
         pos = esper.component_for_entity(cell, cmp.Position)
@@ -513,9 +517,6 @@ def maze_dungeon(board: Board):
         else:
             cell = create.tile.floor(*pos)
         board.set_cell(pos.x, pos.y, cell)
-    # TODO: place stairs at closest empty spot
-    stair_x = display.BOARD_WIDTH // 2
-    stair_y = display.BOARD_HEIGHT// 2
     board.retile(stair_x, stair_y, create.tile.stairs)
 
 
