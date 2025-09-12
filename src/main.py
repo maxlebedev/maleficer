@@ -52,30 +52,6 @@ def redraw():
     phase.oneshot(processors.BoardRender)
 
 
-def initial_map():
-    # location.generate_test_dungeon(location.BOARD)
-    location.generate_dungeon(location.BOARD)
-    # location.cave_dungeon(location.BOARD)
-    # location.maze_dungeon(location.BOARD)
-    location.BOARD.build_entity_cache()
-
-
-def start_game():
-    initial_map()
-
-    starting_spells = [
-        create.spell.firebolt,
-        create.spell.blink,
-        create.spell.bleed,
-    ]
-
-    spells = random.sample(starting_spells, 2)
-    for spell in spells:
-        spell()
-
-    create.player.starting_inventory()
-
-
 def main() -> None:
     tile_atlas = "assets/monochrome-transparent_packed.png"
     tileset = display.load_tileset(tile_atlas, display.TS_WIDTH, display.TS_HEIGHT)
@@ -100,8 +76,6 @@ def main() -> None:
 
     phase.change_to(phase.Ontology.menu)
     create.ui.main_menu_opts()
-
-    start_game()
 
     flash_callback = lambda: flash(context, console)
     esper.set_handler("redraw", redraw)

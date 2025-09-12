@@ -14,7 +14,7 @@ import ecs
 import typ
 
 BOARD: "Board"
-LEVEL = 1
+LEVEL = 0
 
 
 def player_position():
