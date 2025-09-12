@@ -775,12 +775,17 @@ class AboutRender(esper.Processor):
 
     def process(self):
         self.console.clear()
-        x = display.PANEL_WIDTH + (display.BOARD_WIDTH // 2)
-        y = display.BOARD_HEIGHT // 2 - 10
-        self.console.print(x, y, "ABOUT", alignment=libtcodpy.CENTER)
+        center_print = partial(self.console.print, alignment=libtcodpy.CENTER)
 
-        about_text = "placeholder text explaining lore and game mechanics"
-        self.console.print(x, y + 1, about_text, alignment=libtcodpy.CENTER)
+        center_print(display.CENTER_W, display.CENTER_H, "ABOUT")
+
+        about_text = [
+            "placeholder text explaining lore and game mechanics",
+            "second line",
+        ]
+        y_idx = itertools.count(display.CENTER_H + 1)
+        for row in about_text:
+            center_print(display.CENTER_W, next(y_idx), row)
 
         self.context.present(self.console)
 
