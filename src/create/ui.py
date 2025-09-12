@@ -1,9 +1,11 @@
-import phase
-import components as cmp
-import esper
-import location
-import create
 import random
+
+import esper
+
+import components as cmp
+import create
+import location
+import phase
 
 
 def initial_map():

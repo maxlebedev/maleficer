@@ -1,8 +1,8 @@
 import esper
 import numpy as np
-import location
 
 import components as cmp
+import location
 
 
 def clamp(num: int, high: int, low=0):

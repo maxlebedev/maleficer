@@ -1,8 +1,3 @@
-from . import item
-from . import npc
-from . import spell
-from . import tile
-from . import player
-from . import ui
+from . import item, npc, player, spell, tile, ui
 
 __all__ = ["item", "npc", "spell", "tile", "player", "ui"]

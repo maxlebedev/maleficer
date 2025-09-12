@@ -1,9 +1,11 @@
 import collections
+
 import esper
 
 import components as cmp
-from . import item
 import display as dis
+
+from . import item
 
 
 def inventory_map() -> list:

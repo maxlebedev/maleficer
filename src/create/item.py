@@ -1,16 +1,18 @@
-import esper
 from functools import partial
+
+import esper
 
 import behavior
 import components as cmp
+import condition
 import display as dis
 import ecs
 import location
 import phase
-from . import spell as create_spell
-import condition
-import typ
 import processors
+import typ
+
+from . import spell as create_spell
 
 
 def potion(pos: cmp.Position | None = None) -> int:

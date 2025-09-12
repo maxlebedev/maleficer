@@ -8,8 +8,8 @@ import tcod
 import create
 import display
 import location
-import processors
 import phase
+import processors
 
 FLAGS = tcod.context.SDL_WINDOW_RESIZABLE  # | tcod.context.SDL_WINDOW_FULLSCREEN
 

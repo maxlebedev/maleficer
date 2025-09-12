@@ -7,12 +7,12 @@ import esper
 
 import components as cmp
 import condition
+import display
 import ecs
 import event
 import location
 import math_util
 import typ
-import display
 
 
 def wander(entity: int):

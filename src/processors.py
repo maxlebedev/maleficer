@@ -2,11 +2,11 @@ import itertools
 from dataclasses import dataclass
 from functools import partial
 
-import behavior
 import esper
 import tcod
 from tcod import libtcodpy
 
+import behavior
 import components as cmp
 import condition
 import create
