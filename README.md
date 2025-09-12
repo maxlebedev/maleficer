@@ -121,7 +121,13 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
             + If you use off cooldown B times, then you accumulate 1 burnout
             + and that takes B * CD to clear
     - make a flow for selecting starting spells
+        * this means we have to differentiate Start and Continue
+        * Start goes to select spells (etc)
+        * Continue loads the game as is
     - Aegis (spell-based buff) decaying shield
     - Some sort of Storm/Combo mechanic would be really cool
+    - Spawners
+    - "Commander" Enemies that effect their faction
+    - Multiply all the numbers by 10. Health is 100.
 # BUGS
     - Found a wall I was able to walk through in the caves.

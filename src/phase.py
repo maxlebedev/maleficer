@@ -90,15 +90,6 @@ def about_phase(context, console):
     ALL[Ontology.about] = [render, input]
 
 
-def init(context, console):
-    main_menu_phase(context, console)
-    level_phase(context, console)
-    targeting_phase(context, console)
-    inventory_phase(context, console)
-    options_phase(context, console)
-    about_phase(context, console)
-
-
 def change_to(phase: Ontology, start_proc: type[esper.Processor] | None = None):
     """We dynamically add and remove processors when moving between phases. Each phase has its own proc loop."""
     global CURRENT
