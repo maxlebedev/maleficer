@@ -83,6 +83,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - TargetInputEvent returns control to the player's Damage phase. otherwise enemies get a turn before player damage resolves
     - instead of a melee decision tree, we do melee damage via bump func
 # TODO
+    - Save/Load
     - All effects on the targeting entity should get their targets filled in if they haven't already
         * But, only the non-static targets should get cleared, and we don't have a way to store that info
     - effect application restrictions. (mutilate can't hit traps)
@@ -122,6 +123,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
             + and that takes B * CD to clear
     - make a flow for selecting starting spells
         * this means we have to differentiate Start and Continue
+            + mostly can punt this until save/load
         * Start goes to select spells (etc)
         * Continue loads the game as is
     - Aegis (spell-based buff) decaying shield
@@ -129,5 +131,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Spawners
     - "Commander" Enemies that effect their faction
     - Multiply all the numbers by 10. Health is 100.
+    - Should some damge be in ranges?
 # BUGS
     - Found a wall I was able to walk through in the caves.

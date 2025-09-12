@@ -799,6 +799,32 @@ class AboutInputEvent(InputEvent):
 
 
 @dataclass
+class StartRender(esper.Processor):
+    context: tcod.context.Context
+    console: tcod.console.Console
+
+    def process(self):
+        self.console.clear()
+        x = display.PANEL_WIDTH + (display.BOARD_WIDTH // 2)
+        y = display.BOARD_HEIGHT // 2
+        self.console.print(x, y, "Start Screen", alignment=libtcodpy.CENTER)
+
+        menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
+        center_print = partial(self.console.print, alignment=libtcodpy.CENTER)
+
+        menu_elements = ecs.Query(cmp.MenuItem, cmp.StartMenu, cmp.Onymous)
+        sorted_menu = sorted(menu_elements, key=lambda x: x[1][0].order)
+        for i, (_, (mi, _, on)) in enumerate(sorted_menu):
+            fg = display.Color.WHITE
+            bg = display.Color.BLACK
+            if menu_selection.item == mi.order:
+                fg, bg = bg, fg
+            center_print(x=x, y=y + 2 + i, string=on.name, fg=fg, bg=bg)
+
+        self.context.present(self.console)
+
+
+@dataclass
 class Upkeep(esper.Processor):
     """apply and tick down Conditions"""
 

@@ -75,7 +75,6 @@ def main() -> None:
     create.ui.phases(context, console)
 
     phase.change_to(phase.Ontology.menu)
-    create.ui.main_menu_opts()
 
     flash_callback = lambda: flash(context, console)
     esper.set_handler("redraw", redraw)

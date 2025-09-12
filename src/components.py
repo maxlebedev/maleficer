@@ -168,6 +168,13 @@ class MainMenu:
 
 
 @component
+class StartMenu:
+    """Indicates an element of the start menu"""
+
+    pass
+
+
+@component
 class DamageEffect:
     """a spell (or w.e) deals damage"""
 

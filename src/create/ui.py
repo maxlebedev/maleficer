@@ -30,12 +30,14 @@ def start_game():
 
     create.player.starting_inventory()
     location.LEVEL = 1
+    phase.change_to(phase.Ontology.start)
 
 
 def to_level(_):
     if location.LEVEL == 0:
         start_game()
-    phase.change_to(phase.Ontology.level)
+    else:
+        phase.change_to(phase.Ontology.level)
 
 
 def main_menu_opts():
@@ -54,6 +56,19 @@ def main_menu_opts():
     make_menuitem(callback, "About", 2)
 
 
+def start_opts():
+    def make_menuitem(callback, name, order):
+        cmps = []
+        cmps.append(cmp.StartMenu())
+        cmps.append(cmp.Onymous(name=name))
+        cmps.append(cmp.MenuItem(order=order))
+        cmps.append(cmp.UseTrigger(callbacks=[callback]))
+        esper.create_entity(*cmps)
+
+    callback = lambda _: phase.change_to(phase.Ontology.level)
+    make_menuitem(callback, "Start", 0)
+
+
 def phases(context, console):
     phase.main_menu_phase(context, console)
     phase.level_phase(context, console)
@@ -61,3 +76,4 @@ def phases(context, console):
     phase.inventory_phase(context, console)
     phase.options_phase(context, console)
     phase.about_phase(context, console)
+    phase.start_phase(context, console)

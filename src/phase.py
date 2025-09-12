@@ -4,6 +4,7 @@ import enum
 
 import esper
 
+import create
 import components as cmp
 import location
 import processors
@@ -19,6 +20,7 @@ class Ontology(enum.Enum):
     level = enum.auto()
     target = enum.auto()
     inventory = enum.auto()
+    start = enum.auto()
 
 
 def main_menu_phase(context, console):
@@ -26,6 +28,7 @@ def main_menu_phase(context, console):
     input = processors.MenuInputEvent()
 
     ALL[Ontology.menu] = [render, input]
+    create.ui.main_menu_opts()
 
 
 def level_phase(context, console):
@@ -88,6 +91,14 @@ def about_phase(context, console):
     input = processors.AboutInputEvent()
 
     ALL[Ontology.about] = [render, input]
+
+
+def start_phase(context, console):
+    render = processors.StartRender(context, console)
+    input = processors.MenuInputEvent()
+
+    ALL[Ontology.start] = [render, input]
+    create.ui.start_opts()
 
 
 def change_to(phase: Ontology, start_proc: type[esper.Processor] | None = None):
