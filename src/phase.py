@@ -20,7 +20,7 @@ class Ontology(enum.Enum):
     level = enum.auto()
     target = enum.auto()
     inventory = enum.auto()
-    start = enum.auto()
+    char_select = enum.auto()
 
 
 def main_menu_phase(context, console):
@@ -93,12 +93,12 @@ def about_phase(context, console):
     ALL[Ontology.about] = [render, input]
 
 
-def start_phase(context, console):
-    render = processors.StartRender(context, console)
+def char_select_phase(context, console):
+    render = processors.CharSelectRender(context, console)
     input = processors.MenuInputEvent()
 
-    ALL[Ontology.start] = [render, input]
-    create.ui.start_opts()
+    ALL[Ontology.char_select] = [render, input]
+    create.ui.char_select_opts()
 
 
 def change_to(phase: Ontology, start_proc: type[esper.Processor] | None = None):
@@ -123,3 +123,13 @@ def oneshot(proctype: type[esper.Processor]):
     """only works on processors that are already registered"""
     if proc_instance := esper.get_processor(proctype):
         proc_instance.process()
+
+
+def setup(context, console):
+    main_menu_phase(context, console)
+    level_phase(context, console)
+    targeting_phase(context, console)
+    inventory_phase(context, console)
+    options_phase(context, console)
+    about_phase(context, console)
+    char_select_phase(context, console)

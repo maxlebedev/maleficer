@@ -1,4 +1,3 @@
-import random
 import time
 from functools import partial
 
@@ -68,12 +67,13 @@ def main() -> None:
     context = tcod.context.new(**context_params)
     console = context.new_console(order="F")
 
+    # context.sdl_window.fullscreen = 1
+
     create.player.alamar()
 
     location.BOARD = location.Board()
 
-    create.ui.phases(context, console)
-
+    phase.setup(context, console)
     phase.change_to(phase.Ontology.menu)
 
     flash_callback = lambda: flash(context, console)

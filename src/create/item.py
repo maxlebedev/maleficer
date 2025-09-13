@@ -22,7 +22,7 @@ def potion(pos: cmp.Position | None = None) -> int:
     cmps.append(cmp.Health(max=1))
     cmps.append(cmp.Onymous(name="potion"))
 
-    cmps.append(cmp.HealEffect(amount=2))
+    cmps.append(cmp.HealEffect(amount=15))
     cmps.append(cmp.UseTrigger(callbacks=[behavior.apply_healing]))
 
     player = ecs.Query(cmp.Player).first()

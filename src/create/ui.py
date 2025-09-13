@@ -30,7 +30,7 @@ def start_game():
 
     create.player.starting_inventory()
     location.LEVEL = 1
-    phase.change_to(phase.Ontology.start)
+    phase.change_to(phase.Ontology.char_select)
 
 
 def to_level(_):
@@ -56,7 +56,7 @@ def main_menu_opts():
     make_menuitem(callback, "About", 2)
 
 
-def start_opts():
+def char_select_opts():
     def make_menuitem(callback, name, order):
         cmps = []
         cmps.append(cmp.StartMenu())
@@ -66,14 +66,4 @@ def start_opts():
         esper.create_entity(*cmps)
 
     callback = lambda _: phase.change_to(phase.Ontology.level)
-    make_menuitem(callback, "Start", 0)
-
-
-def phases(context, console):
-    phase.main_menu_phase(context, console)
-    phase.level_phase(context, console)
-    phase.targeting_phase(context, console)
-    phase.inventory_phase(context, console)
-    phase.options_phase(context, console)
-    phase.about_phase(context, console)
-    phase.start_phase(context, console)
+    make_menuitem(callback, "Alamar (100/blink/firebolt/mulilate)", 0)

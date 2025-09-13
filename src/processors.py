@@ -799,7 +799,7 @@ class AboutInputEvent(InputEvent):
 
 
 @dataclass
-class StartRender(esper.Processor):
+class CharSelectRender(esper.Processor):
     context: tcod.context.Context
     console: tcod.console.Console
 
@@ -807,7 +807,7 @@ class StartRender(esper.Processor):
         self.console.clear()
         x = display.PANEL_WIDTH + (display.BOARD_WIDTH // 2)
         y = display.BOARD_HEIGHT // 2
-        self.console.print(x, y, "Start Screen", alignment=libtcodpy.CENTER)
+        self.console.print(x, y, "Char Select Screen", alignment=libtcodpy.CENTER)
 
         menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
         center_print = partial(self.console.print, alignment=libtcodpy.CENTER)

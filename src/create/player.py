@@ -30,6 +30,7 @@ def alamar():
     cmps.append(cmp.Blocking())
     cmps.append(cmp.LastPosition(cmp.Position(x=1, y=1)))
     esper.create_entity(*cmps)
+# TODO: add spells to each character. maybe new glyphs per char
 
 
 def starting_inventory():

@@ -130,12 +130,12 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Some sort of Storm/Combo mechanic would be really cool
     - Spawners
     - "Commander" Enemies that effect their faction
-    - Multiply all the numbers by 10. Health is 100.
-        * Maybe double it for now
     - Should some damge be in ranges?
     - Should Position comps be immutable?
         * If there is only one immutable Pos per XY,
-        * we can name them Positon24_49 and then
-        * getattr(cmp,f"Positon{x}_{y}") in queries
+            + we can name them Positon24_49 and then
+            + getattr(cmp,f"Position{x}_{y}") in queries
+        * This does perhaps screw us if we just want to get the pos. 
+            + Do we modify the query func to work on superclasses? can we?
 # BUGS
     - Found a wall I was able to walk through in the caves.
