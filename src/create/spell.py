@@ -19,6 +19,7 @@ def spell_stats(power_budget=10, waste_chance=0.2) -> tuple[int, int, int]:
             stats[stat] += 1
         remaining_points -= 1
     stats["cooldown"] = max(1, 5 - stats["cooldown"])
+    stats["damage"] *= 10
     return stats["damage"], stats["range"], stats["cooldown"]
 
 
@@ -58,7 +59,7 @@ def firebolt() -> int:
     player = ecs.Query(cmp.Player).first()
     cmps.append(cmp.Spell(target_range=5))
     cmps.append(cmp.Cooldown(turns=1))
-    cmps.append(cmp.DamageEffect(amount=1, source=player))
+    cmps.append(cmp.DamageEffect(amount=10, source=player))
     callback = partial(location.coords_within_radius, radius=1)
     cmps.append(cmp.EffectArea(callback))
     cmps.append(cmp.Onymous(name="Firebolt"))
@@ -90,7 +91,7 @@ def bleed() -> int:
     cmps = []
     cmps.append(cmp.Spell(target_range=3))
     cmps.append(cmp.Cooldown(turns=2))
-    cmps.append(cmp.BleedEffect(value=2))
+    cmps.append(cmp.BleedEffect(value=5))
     callbacks = [behavior.apply_cooldown, behavior.apply_bleed]
     cmps.append(cmp.UseTrigger(callbacks=callbacks))
     cmps.append(cmp.Onymous(name="Mutilate"))

@@ -81,7 +81,7 @@ def bomb(pos: cmp.Position) -> int:
     cmps.append(cmp.EnemyTrigger(callbacks=[aura_tick]))
 
     bomb_ent = esper.create_entity(*cmps)
-    dmg = cmp.DamageEffect(source=bomb_ent, amount=1)
+    dmg = cmp.DamageEffect(source=bomb_ent, amount=10)
     esper.add_component(bomb_ent, dmg)
     condition.grant(bomb_ent, typ.Condition.Dying, 2)
 
@@ -98,6 +98,6 @@ def trap(pos: cmp.Position) -> int:
 
     cmps.append(cmp.StepTrigger(callbacks=[behavior.apply_damage]))
     trap_ent = esper.create_entity(*cmps)
-    dmg = cmp.DamageEffect(source=trap_ent, amount=1)
+    dmg = cmp.DamageEffect(source=trap_ent, amount=5)
     esper.add_component(trap_ent, dmg)
     return trap_ent

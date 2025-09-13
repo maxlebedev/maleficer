@@ -25,7 +25,7 @@ def alamar():
     cmps.append(cmp.Player())
     cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.GREEN))
     cmps.append(cmp.Position(x=1, y=1))
-    cmps.append(cmp.Health(max=10))
+    cmps.append(cmp.Health(max=100))
     cmps.append(cmp.Onymous(name="player"))
     cmps.append(cmp.Blocking())
     cmps.append(cmp.LastPosition(cmp.Position(x=1, y=1)))

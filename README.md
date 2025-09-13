@@ -131,6 +131,11 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Spawners
     - "Commander" Enemies that effect their faction
     - Multiply all the numbers by 10. Health is 100.
+        * Maybe double it for now
     - Should some damge be in ranges?
+    - Should Position comps be immutable?
+        * If there is only one immutable Pos per XY,
+        * we can name them Positon24_49 and then
+        * getattr(cmp,f"Positon{x}_{y}") in queries
 # BUGS
     - Found a wall I was able to walk through in the caves.
