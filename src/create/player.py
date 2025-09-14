@@ -6,7 +6,7 @@ import components as cmp
 import display as dis
 
 from . import item
-from . import spell 
+from . import spell
 
 
 def inventory_map() -> list:

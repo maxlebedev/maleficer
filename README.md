@@ -142,6 +142,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - In caves, NPCs shouldn't spawn too close to player
     - "Commander" Enemies that effect their faction
     - Check for more places that benefit from ecs.Query.where
+    - 3rd char, 1 pull+aegis spell, 1 kill spell with min range
 ## UX
     - Should all ranged animations happen simultaneously?
         * animation queue?
@@ -154,3 +155,5 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 # BUGS
     - Found a wall I was able to walk through in the caves.
     - MenuSelection maybe wants to be reset when moving thru menus
+    - Hitting Esc in char select exits game bc we use MenuInputEvent
+        * What's probs most correct is to keep a stack of menus and backtrack

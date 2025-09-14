@@ -8,6 +8,7 @@ import tcod
 
 import typ
 
+
 CONSOLE_WIDTH = 1920
 CONSOLE_HEIGHT = 1080
 TILE_SIZE = 16
@@ -60,6 +61,7 @@ class Glyph(IntEnum):
     WALL = 637
     BWALL = 643
     PLAYER = 73
+    BEATRICE = 75
     FRAME1 = 947
     FRAME2 = 948
     FRAME3 = 949
@@ -82,31 +84,26 @@ class Glyph(IntEnum):
     MAGIC_MISSILE = 618
     FLAME = 505
     CYCLOPS = 465
-    BEATRICE = 75
 
 
 @dataclass
 class BGImage:
-    obj : Image
+    obj: Image
     x: int
     y: int
     scale: float
 
+
 class Background:
     MAIN_MENU = BGImage(
-            obj=Image.from_file("assets/main_menu.png"),
-            x=CENTER_W,
-            y=CENTER_H,
-            scale=0.05
-            )
-    """
+        obj=Image.from_file("assets/main_menu.png"), x=CENTER_W, y=CENTER_H, scale=0.05
+    )
     CHAR_SELECT = BGImage(
-            obj=Image.from_file("assets/char_select.png"),
-            x=CENTER_W,
-            y=CENTER_H,
-            scale=0.08
-            )
-    """
+        obj=Image.from_file("assets/char_select.png"),
+        x=CENTER_W,
+        y=CENTER_H,
+        scale=0.20,
+    )
 
 
 letter_map = {

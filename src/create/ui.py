@@ -37,6 +37,7 @@ def _make_menuitem(menu_cmp, callback, name, order):
     cmps.append(cmp.UseTrigger(callbacks=[callback]))
     esper.create_entity(*cmps)
 
+
 def main_menu_opts():
     callback = lambda _: phase.change_to(phase.Ontology.char_select)
     _make_menuitem(cmp.MainMenu, callback, "Start Game", 0)

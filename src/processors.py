@@ -352,6 +352,16 @@ class Render(esper.Processor):
 
     dashes = "-" * (display.PANEL_WIDTH - 2)
 
+    def left_print(self, *args, **kwargs):
+        self.console.print(alignment=libtcodpy.LEFT, *args, **kwargs)
+
+    def center_print(self, *args, **kwargs):
+        self.console.print(alignment=libtcodpy.CENTER, *args, **kwargs)
+
+    def right_print(self, *args, **kwargs):
+        self.console.print(alignment=libtcodpy.RIGHT, *args, **kwargs)
+
+    # TODO: do these want to be on the boardrender?
     def render_bar(self, x: int, y: int, curr: int, maximum: int, width: int):
         bar_width = int(curr / maximum * width)
         bg = display.Color.BAR_EMPTY
@@ -542,9 +552,9 @@ class BoardRender(Render):
 
 
 @dataclass
-class MenuRender(esper.Processor):
-    context: tcod.context.Context
+class MenuRender(Render):
     console: tcod.console.Console
+    context: tcod.context.Context
     menu_cmp: type
     title: str
     background: display.BGImage | None = None
@@ -556,7 +566,6 @@ class MenuRender(esper.Processor):
         self.console.print(x, y, self.title, alignment=libtcodpy.CENTER)
 
         menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
-        center_print = partial(self.console.print, alignment=libtcodpy.CENTER)
 
         menu_elements = ecs.Query(cmp.MenuItem, self.menu_cmp, cmp.Onymous)
         sorted_menu = sorted(menu_elements, key=lambda x: x[1][0].order)
@@ -565,10 +574,12 @@ class MenuRender(esper.Processor):
             bg = display.Color.BLACK
             if menu_selection.item == mi.order:
                 fg, bg = bg, fg
-            center_print(x=x, y=y + 2 + i, string=on.name, fg=fg, bg=bg)
+            self.center_print(x=x, y=y + 2 + i, string=on.name, fg=fg, bg=bg)
 
         if self.background:
-            display.blit_image(self.console, self.background.obj, scale=self.background.scale)
+            display.blit_image(
+                self.console, self.background.obj, scale=self.background.scale
+            )
 
         self.context.present(self.console)
 
@@ -744,9 +755,9 @@ class InventoryInputEvent(InputEvent):
 
 
 @dataclass
-class OptionsRender(esper.Processor):
-    context: tcod.context.Context
+class OptionsRender(Render):
     console: tcod.console.Console
+    context: tcod.context.Context
 
     def process(self):
         self.console.clear()
@@ -757,12 +768,8 @@ class OptionsRender(esper.Processor):
         y_idx = itertools.count(y + 2)
         for k, v in input.KEYMAP.items():
             height = next(y_idx)
-            self.console.print(
-                x=x, y=height, string=f"{k.name}: ", alignment=libtcodpy.RIGHT
-            )
-            self.console.print(
-                x=x + 1, y=height, string=v.name, alignment=libtcodpy.LEFT
-            )
+            self.right_print(x=x, y=height, string=f"{k.name}: ")
+            self.left_print(x=x + 1, y=height, string=v.name)
 
         self.context.present(self.console)
 
@@ -776,15 +783,14 @@ class OptionsInputEvent(InputEvent):
 
 
 @dataclass
-class AboutRender(esper.Processor):
-    context: tcod.context.Context
+class AboutRender(Render):
     console: tcod.console.Console
+    context: tcod.context.Context
 
     def process(self):
         self.console.clear()
-        center_print = partial(self.console.print, alignment=libtcodpy.CENTER)
 
-        center_print(display.CENTER_W, display.CENTER_H, "ABOUT")
+        self.center_print(display.CENTER_W, display.CENTER_H, "ABOUT")
 
         about_text = [
             "placeholder text explaining lore and game mechanics",
@@ -792,7 +798,7 @@ class AboutRender(esper.Processor):
         ]
         y_idx = itertools.count(display.CENTER_H + 1)
         for row in about_text:
-            center_print(display.CENTER_W, next(y_idx), row)
+            self.center_print(display.CENTER_W, next(y_idx), row)
 
         self.context.present(self.console)
 

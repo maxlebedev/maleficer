@@ -6,7 +6,6 @@ import esper
 
 import create
 import components as cmp
-import location
 import processors
 import display
 
@@ -26,7 +25,9 @@ class Ontology(enum.Enum):
 
 def main_menu_phase(context, console):
     background = display.Background.MAIN_MENU
-    render = processors.MenuRender(context, console, cmp.MainMenu, background=background, title="WELCOME TO MALEFICER")
+    title = "WELCOME TO MALEFICER"
+    args = {"menu_cmp": cmp.MainMenu, "background": background, "title": title}
+    render = processors.MenuRender(console, context, **args)
     input = processors.MenuInputEvent(cmp.MainMenu)
 
     ALL[Ontology.menu] = [render, input]
@@ -80,22 +81,24 @@ def inventory_phase(context, console):
 
 
 def options_phase(context, console):
-    render = processors.OptionsRender(context, console)
+    render = processors.OptionsRender(console, context)
     input = processors.OptionsInputEvent()
 
     ALL[Ontology.options] = [render, input]
 
 
 def about_phase(context, console):
-    render = processors.AboutRender(context, console)
+    render = processors.AboutRender(console, context)
     input = processors.AboutInputEvent()
 
     ALL[Ontology.about] = [render, input]
 
 
 def char_select_phase(context, console):
-    # background = display.Background.CHAR_SELECT
-    render = processors.MenuRender(context, console, cmp.StartMenu, title="Select a Character")
+    background = display.Background.CHAR_SELECT
+    title = "Select a Character"
+    args = {"menu_cmp": cmp.StartMenu, "background": background, "title": title}
+    render = processors.MenuRender(console, context, **args)
     input = processors.MenuInputEvent(cmp.StartMenu)
 
     ALL[Ontology.char_select] = [render, input]
