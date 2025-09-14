@@ -1,6 +1,7 @@
 import itertools
 import string
 from enum import IntEnum
+from tcod.image import Image
 
 import tcod
 
@@ -185,3 +186,9 @@ def remap_glyphs():
     glyph_map = {glyph.name: next(codepath) for glyph in Glyph}
 
     return IntEnum("Glyph", glyph_map)
+
+
+def blit_from_path(console, path, scale):
+    img = Image.from_file(path)
+    args = {"x": CENTER_W, "y": CENTER_H, "bg_blend": 1, "angle": 0}
+    img.blit(console, scale_x=scale, scale_y=scale, **args)

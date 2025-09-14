@@ -564,6 +564,8 @@ class MenuRender(esper.Processor):
                 fg, bg = bg, fg
             center_print(x=x, y=y + 2 + i, string=on.name, fg=fg, bg=bg)
 
+        display.blit_from_path(self.console, "assets/main_menu.png", scale=0.05)
+
         self.context.present(self.console)
 
 
