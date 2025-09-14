@@ -33,6 +33,8 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * These will be: damage, targeting criteria (aoe, range), debuffs
         * Maybe these modify base spells, maybe they are completely separate
         * Each of these would effect the cooldown
+    - Multiple mana bars
+        * Each accumulates and gets spent in a slightly different way
 
 # Design Questions
     - Why explore the level, (vs doing down asap)
@@ -50,7 +52,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - cave levels
     - laberynth levels
         * locked doors
-        * currently 1x1 hallways,  gotta be 2x2
     - set-piece features
 
 # Arch Concerns
@@ -82,35 +83,32 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - currently the enemy move decision tree is one static thing. break up eventually
     - TargetInputEvent returns control to the player's Damage phase. otherwise enemies get a turn before player damage resolves
     - instead of a melee decision tree, we do melee damage via bump func
+
 # TODO
+
+## Core System
     - Save/Load
-    - All effects on the targeting entity should get their targets filled in if they haven't already
-        * But, only the non-static targets should get cleared, and we don't have a way to store that info
-    - effect application restrictions. (mutilate can't hit traps)
-    - spell mods (+1 range, +1 dmg pickups)
-    - In caves, NPCs shouldn't spawn too close to player
-    - break up Arch Concerns into open questions and arch docs
-    - Should all ranged animations happen simultaneously?
-        * animation queue?
     - sqlite db for storing current lvl value, rng seed for lvls, etc
-    - goblins should actually try to be at dist 4 to player
-        * when on cooldown BFS a position with dist 4, then move a step
-    - small chance of "named" scrolls with unique effects
-    - one-turn-per-square moving projectiles
-    - living flames move up to 2 squares to enemy
-        * want an animation for getting there
-        * if only moving 1 square can also attack
-        * if its 2 squares away, player moves into, flame overreaches
-    - an Ephemeral component for Crosshair, Area Effect type stuff
-    - add aoe into the spell power budget calculation
-    - when targeting, valid xhair area should be inicated by aoe
     - the ecs.remove syntax is awkward, but overwriting self.entities state inf ilter necessitates it for now
-    - lots of DRY in the NPC proc
     - callbacks are a violation of ECS. consider avoiding them somehow
+    - lots of DRY in the NPC proc
     - bresenham_ray should *really* be under test
+    - Should Position comps be immutable?
+        * If there is only one immutable Pos per XY,
+            + we can name them Positon24_49 and then
+            + getattr(cmp,f"Position{x}_{y}") in queries
+        * This does perhaps screw us if we just want to get the pos. 
+            + Do we modify the query func to work on superclasses? can we?
     - 2x2 enemies
         * game currently assumes positions are one cell, pieces have one pos
         * If I have 2x2, then I can make snakes too
+    - break up Arch Concerns into open questions and arch docs
+    - All effects on the targeting entity should get their targets filled in if they haven't already
+        * But, only the non-static targets should get cleared, and we don't have a way to store that info
+    - effect application restrictions. (mutilate can't hit traps)
+    - an Ephemeral component for Crosshair, Area Effect type stuff
+## Game Mechanics/Balance
+    - spell mods (+1 range, +1 dmg pickups)
     - cooldown alternatives like damage taken, steps walked (lotta tracking)
     - spell burnout (ie how spammable a spell is)
         * using a spell accumulates one stack of burnout
@@ -121,21 +119,33 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * Alternat mechanic?, Burnout is a cap of off-cooldown uses.
             + If you use off cooldown B times, then you accumulate 1 burnout
             + and that takes B * CD to clear
+    - add aoe into the spell power budget calculation
+    - Aegis (spell-based buff) decaying shield
+    - Some sort of Storm/Combo mechanic would be really cool
+    - Should some damge be in ranges?
+    - small chance of "named" scrolls with unique effects
     - make a flow for selecting starting spells
         * this means we have to differentiate Start and Continue
             + mostly can punt this until save/load
         * Start goes to select spells (etc)
         * Continue loads the game as is
-    - Aegis (spell-based buff) decaying shield
-    - Some sort of Storm/Combo mechanic would be really cool
+    - goblins should actually try to be at dist 4 to player
+        * when on cooldown BFS a position with dist 4, then move a step
+    - living flames move up to 2 squares to enemy
+        * want an animation for getting there
+        * if only moving 1 square can also attack
+        * if its 2 squares away, player moves into, flame overreaches
     - Spawners
+    - In caves, NPCs shouldn't spawn too close to player
     - "Commander" Enemies that effect their faction
-    - Should some damge be in ranges?
-    - Should Position comps be immutable?
-        * If there is only one immutable Pos per XY,
-            + we can name them Positon24_49 and then
-            + getattr(cmp,f"Position{x}_{y}") in queries
-        * This does perhaps screw us if we just want to get the pos. 
-            + Do we modify the query func to work on superclasses? can we?
+## UX
+    - Should all ranged animations happen simultaneously?
+        * animation queue?
+    - one-turn-per-square moving projectiles
+    - when targeting, valid xhair area should be inicated by aoe
+    - use that M icon
+    - other menus probably want backgrounds.
+        * side panels might too
+
 # BUGS
     - Found a wall I was able to walk through in the caves.
