@@ -1,9 +1,8 @@
-import random
-
 import esper
 
 import components as cmp
 import create
+import ecs
 import location
 import phase
 
@@ -18,52 +17,46 @@ def initial_map():
 
 def start_game():
     initial_map()
-    starting_spells = [
-        create.spell.firebolt,
-        create.spell.blink,
-        create.spell.bleed,
-    ]
-
-    spells = random.sample(starting_spells, 2)
-    for spell in spells:
-        spell()
-
     create.player.starting_inventory()
     location.LEVEL = 1
-    phase.change_to(phase.Ontology.char_select)
+
+    order0 = lambda x: x.order == 0
+    all_main_menu_opts = ecs.Query(cmp.MainMenu, cmp.MenuItem)
+    first_main_menu_opt = all_main_menu_opts.where(cmp.MenuItem, order0).first()
+    esper.delete_entity(first_main_menu_opt, True)
+
+    callback = lambda _: phase.change_to(phase.Ontology.level)
+    _make_menuitem(cmp.MainMenu, callback, "Continue", 0)
 
 
-def to_level(_):
-    if location.LEVEL == 0:
-        start_game()
-    else:
-        phase.change_to(phase.Ontology.level)
-
+def _make_menuitem(menu_cmp, callback, name, order):
+    cmps = []
+    cmps.append(menu_cmp())
+    cmps.append(cmp.Onymous(name=name))
+    cmps.append(cmp.MenuItem(order=order))
+    cmps.append(cmp.UseTrigger(callbacks=[callback]))
+    esper.create_entity(*cmps)
 
 def main_menu_opts():
-    def make_menuitem(callback, name, order):
-        cmps = []
-        cmps.append(cmp.MainMenu())
-        cmps.append(cmp.Onymous(name=name))
-        cmps.append(cmp.MenuItem(order=order))
-        cmps.append(cmp.UseTrigger(callbacks=[callback]))
-        esper.create_entity(*cmps)
-
-    make_menuitem(to_level, "Start Game", 0)
+    callback = lambda _: phase.change_to(phase.Ontology.char_select)
+    _make_menuitem(cmp.MainMenu, callback, "Start Game", 0)
     callback = lambda _: phase.change_to(phase.Ontology.options)
-    make_menuitem(callback, "Options", 1)
+    _make_menuitem(cmp.MainMenu, callback, "Options", 1)
     callback = lambda _: phase.change_to(phase.Ontology.about)
-    make_menuitem(callback, "About", 2)
+    _make_menuitem(cmp.MainMenu, callback, "About", 2)
 
 
 def char_select_opts():
-    def make_menuitem(callback, name, order):
-        cmps = []
-        cmps.append(cmp.StartMenu())
-        cmps.append(cmp.Onymous(name=name))
-        cmps.append(cmp.MenuItem(order=order))
-        cmps.append(cmp.UseTrigger(callbacks=[callback]))
-        esper.create_entity(*cmps)
+    # todo, these can probably be consolidated, maybe even into some startgame()
+    def pick_alamar(_):
+        create.player.alamar()
+        start_game()
+        phase.change_to(phase.Ontology.level)
 
-    callback = lambda _: phase.change_to(phase.Ontology.level)
-    make_menuitem(callback, "Alamar (100/blink/firebolt/mulilate)", 0)
+    def pick_beatrice(_):
+        create.player.beatrice()
+        start_game()
+        phase.change_to(phase.Ontology.level)
+
+    _make_menuitem(cmp.StartMenu, pick_alamar, "Alamar (80/blink/firebolt)", 0)
+    _make_menuitem(cmp.StartMenu, pick_beatrice, "Beatrice (100/daze/mulilate)", 1)

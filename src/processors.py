@@ -545,17 +545,20 @@ class BoardRender(Render):
 class MenuRender(esper.Processor):
     context: tcod.context.Context
     console: tcod.console.Console
+    menu_cmp: type
+    title: str
+    background: display.BGImage | None = None
 
     def process(self):
         self.console.clear()
         x = display.PANEL_WIDTH + (display.BOARD_WIDTH // 2)
         y = display.BOARD_HEIGHT // 2
-        self.console.print(x, y, "WELCOME TO MALEFICER", alignment=libtcodpy.CENTER)
+        self.console.print(x, y, self.title, alignment=libtcodpy.CENTER)
 
         menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
         center_print = partial(self.console.print, alignment=libtcodpy.CENTER)
 
-        menu_elements = ecs.Query(cmp.MenuItem, cmp.MainMenu, cmp.Onymous)
+        menu_elements = ecs.Query(cmp.MenuItem, self.menu_cmp, cmp.Onymous)
         sorted_menu = sorted(menu_elements, key=lambda x: x[1][0].order)
         for i, (_, (mi, _, on)) in enumerate(sorted_menu):
             fg = display.Color.WHITE
@@ -564,14 +567,16 @@ class MenuRender(esper.Processor):
                 fg, bg = bg, fg
             center_print(x=x, y=y + 2 + i, string=on.name, fg=fg, bg=bg)
 
-        display.blit_from_path(self.console, "assets/main_menu.png", scale=0.05)
+        if self.background:
+            display.blit_image(self.console, self.background.obj, scale=self.background.scale)
 
         self.context.present(self.console)
 
 
 @dataclass
 class MenuInputEvent(InputEvent):
-    def __init__(self):
+    def __init__(self, menu_cmp):
+        self.menu_cmp = menu_cmp
         self.action_map = {
             input.KEYMAP[input.Input.MOVE_DOWN]: (self.move_selection, [1]),
             input.KEYMAP[input.Input.MOVE_UP]: (self.move_selection, [-1]),
@@ -581,7 +586,7 @@ class MenuInputEvent(InputEvent):
 
     def select(self):
         menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
-        for entity, (mi, _) in ecs.Query(cmp.MenuItem, cmp.MainMenu):
+        for entity, (mi, _) in ecs.Query(cmp.MenuItem, self.menu_cmp):
             if mi.order == menu_selection.item:
                 event.trigger_all_callbacks(entity, cmp.UseTrigger)
 
@@ -589,7 +594,7 @@ class MenuInputEvent(InputEvent):
         menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
         menu_selection.item += diff
 
-        tot_items = len([_ for _ in ecs.Query(cmp.MenuItem, cmp.MainMenu)]) - 1
+        tot_items = len([_ for _ in ecs.Query(cmp.MenuItem, self.menu_cmp)]) - 1
         menu_selection.item = math_util.clamp(menu_selection.item, tot_items)
 
 
@@ -798,32 +803,6 @@ class AboutInputEvent(InputEvent):
         self.action_map = {
             input.KEYMAP[input.Input.ESC]: (phase.change_to, [phase.Ontology.menu]),
         }
-
-
-@dataclass
-class CharSelectRender(esper.Processor):
-    context: tcod.context.Context
-    console: tcod.console.Console
-
-    def process(self):
-        self.console.clear()
-        x = display.PANEL_WIDTH + (display.BOARD_WIDTH // 2)
-        y = display.BOARD_HEIGHT // 2
-        self.console.print(x, y, "Char Select Screen", alignment=libtcodpy.CENTER)
-
-        menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
-        center_print = partial(self.console.print, alignment=libtcodpy.CENTER)
-
-        menu_elements = ecs.Query(cmp.MenuItem, cmp.StartMenu, cmp.Onymous)
-        sorted_menu = sorted(menu_elements, key=lambda x: x[1][0].order)
-        for i, (_, (mi, _, on)) in enumerate(sorted_menu):
-            fg = display.Color.WHITE
-            bg = display.Color.BLACK
-            if menu_selection.item == mi.order:
-                fg, bg = bg, fg
-            center_print(x=x, y=y + 2 + i, string=on.name, fg=fg, bg=bg)
-
-        self.context.present(self.console)
 
 
 @dataclass

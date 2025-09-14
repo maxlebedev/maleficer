@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import itertools
 import string
 from enum import IntEnum
@@ -81,6 +82,31 @@ class Glyph(IntEnum):
     MAGIC_MISSILE = 618
     FLAME = 505
     CYCLOPS = 465
+    BEATRICE = 75
+
+
+@dataclass
+class BGImage:
+    obj : Image
+    x: int
+    y: int
+    scale: float
+
+class Background:
+    MAIN_MENU = BGImage(
+            obj=Image.from_file("assets/main_menu.png"),
+            x=CENTER_W,
+            y=CENTER_H,
+            scale=0.05
+            )
+    """
+    CHAR_SELECT = BGImage(
+            obj=Image.from_file("assets/char_select.png"),
+            x=CENTER_W,
+            y=CENTER_H,
+            scale=0.08
+            )
+    """
 
 
 letter_map = {
@@ -188,7 +214,6 @@ def remap_glyphs():
     return IntEnum("Glyph", glyph_map)
 
 
-def blit_from_path(console, path, scale):
-    img = Image.from_file(path)
+def blit_image(console, img, scale):
     args = {"x": CENTER_W, "y": CENTER_H, "bg_blend": 1, "angle": 0}
     img.blit(console, scale_x=scale, scale_y=scale, **args)

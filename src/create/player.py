@@ -6,6 +6,7 @@ import components as cmp
 import display as dis
 
 from . import item
+from . import spell 
 
 
 def inventory_map() -> list:
@@ -20,17 +21,33 @@ def inventory_map() -> list:
 
 
 def alamar():
-    """default player character"""
     cmps = []
     cmps.append(cmp.Player())
     cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.GREEN))
+    cmps.append(cmp.Position(x=1, y=1))
+    cmps.append(cmp.Health(max=80))
+    cmps.append(cmp.Onymous(name="player"))
+    cmps.append(cmp.Blocking())
+    cmps.append(cmp.LastPosition(cmp.Position(x=1, y=1)))
+    esper.create_entity(*cmps)
+
+    spell.firebolt()
+    spell.blink()
+
+
+def beatrice():
+    cmps = []
+    cmps.append(cmp.Player())
+    cmps.append(cmp.Visible(glyph=dis.Glyph.BEATRICE, color=dis.Color.GREEN))
     cmps.append(cmp.Position(x=1, y=1))
     cmps.append(cmp.Health(max=100))
     cmps.append(cmp.Onymous(name="player"))
     cmps.append(cmp.Blocking())
     cmps.append(cmp.LastPosition(cmp.Position(x=1, y=1)))
     esper.create_entity(*cmps)
-# TODO: add spells to each character. maybe new glyphs per char
+
+    spell.daze()
+    spell.bleed()
 
 
 def starting_inventory():

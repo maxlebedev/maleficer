@@ -107,6 +107,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * But, only the non-static targets should get cleared, and we don't have a way to store that info
     - effect application restrictions. (mutilate can't hit traps)
     - an Ephemeral component for Crosshair, Area Effect type stuff
+    - print player statuses on bottom left
 ## Game Mechanics/Balance
     - spell mods (+1 range, +1 dmg pickups)
     - cooldown alternatives like damage taken, steps walked (lotta tracking)
@@ -121,6 +122,8 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
             + and that takes B * CD to clear
     - add aoe into the spell power budget calculation
     - Aegis (spell-based buff) decaying shield
+        * while you have Aegis N, take N less damage
+        * this can get out of hand, esp if the cooldown on that spell is low
     - Some sort of Storm/Combo mechanic would be really cool
     - Should some damge be in ranges?
     - small chance of "named" scrolls with unique effects
@@ -138,6 +141,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Spawners
     - In caves, NPCs shouldn't spawn too close to player
     - "Commander" Enemies that effect their faction
+    - Check for more places that benefit from ecs.Query.where
 ## UX
     - Should all ranged animations happen simultaneously?
         * animation queue?
@@ -146,6 +150,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - use that M icon
     - other menus probably want backgrounds.
         * side panels might too
-
+    - rework blit_image
 # BUGS
     - Found a wall I was able to walk through in the caves.
+    - MenuSelection maybe wants to be reset when moving thru menus

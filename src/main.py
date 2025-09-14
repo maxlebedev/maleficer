@@ -4,7 +4,6 @@ from functools import partial
 import esper
 import tcod
 
-import create
 import display
 import location
 import phase
@@ -68,8 +67,6 @@ def main() -> None:
     console = context.new_console(order="F")
 
     # context.sdl_window.fullscreen = 1
-
-    create.player.alamar()
 
     location.BOARD = location.Board()
 

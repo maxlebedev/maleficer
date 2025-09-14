@@ -8,6 +8,7 @@ import create
 import components as cmp
 import location
 import processors
+import display
 
 ALL = dict()
 CURRENT = None
@@ -24,8 +25,9 @@ class Ontology(enum.Enum):
 
 
 def main_menu_phase(context, console):
-    render = processors.MenuRender(context, console)
-    input = processors.MenuInputEvent()
+    background = display.Background.MAIN_MENU
+    render = processors.MenuRender(context, console, cmp.MainMenu, background=background, title="WELCOME TO MALEFICER")
+    input = processors.MenuInputEvent(cmp.MainMenu)
 
     ALL[Ontology.menu] = [render, input]
     create.ui.main_menu_opts()
@@ -59,9 +61,7 @@ def level_phase(context, console):
 
 
 def targeting_phase(context, console):
-    pos = location.player_position()
-
-    position_cmp = cmp.Position(x=pos.x, y=pos.y)
+    position_cmp = cmp.Position(x=0, y=0)
     esper.create_entity(cmp.Crosshair(), position_cmp)
 
     input = processors.TargetInputEvent()
@@ -94,8 +94,9 @@ def about_phase(context, console):
 
 
 def char_select_phase(context, console):
-    render = processors.CharSelectRender(context, console)
-    input = processors.MenuInputEvent()
+    # background = display.Background.CHAR_SELECT
+    render = processors.MenuRender(context, console, cmp.StartMenu, title="Select a Character")
+    input = processors.MenuInputEvent(cmp.StartMenu)
 
     ALL[Ontology.char_select] = [render, input]
     create.ui.char_select_opts()

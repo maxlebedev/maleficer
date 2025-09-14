@@ -42,6 +42,13 @@ class Query:
             if cmp_set.issubset(entity_db[entity].keys()):
                 yield entity, [entity_db[entity][cmp] for cmp in include]
 
+    def where(self, cmp, check):
+        entity_db = esper._entities
+        if not self.entities:
+            return self
+        self.entities = [e for e in self.entities if check(entity_db[e][cmp])]
+        return self
+
     def first(self) -> int:
         """get the first entity in the queryset"""
         if self.entities:
