@@ -9,8 +9,6 @@ import location
 import phase
 import processors
 
-FLAGS = tcod.context.SDL_WINDOW_RESIZABLE  # | tcod.context.SDL_WINDOW_FULLSCREEN
-
 
 def flash(context, console):
     """flashes the screen, for use on errors"""
@@ -59,14 +57,15 @@ def main() -> None:
         "width": display.CONSOLE_WIDTH,
         "height": display.CONSOLE_HEIGHT,
         "tileset": tileset,
-        "sdl_window_flags": FLAGS,
         "title": "Maleficer",
         "vsync": True,
     }
+
     context = tcod.context.new(**context_params)
     console = context.new_console(order="F")
+    if context.sdl_window:
+        context.sdl_window.fullscreen = 1
 
-    # context.sdl_window.fullscreen = 1
 
     location.BOARD = location.Board()
 
@@ -78,6 +77,11 @@ def main() -> None:
     esper.set_handler("flash", flash_callback)
     flash_pos_callback = partial(flash_pos, context, console)
     esper.set_handler("flash_pos", flash_pos_callback)
+
+    def fullscreen_toggle(): 
+        if context.sdl_window:
+            context.sdl_window.fullscreen = int(not(context.sdl_window.fullscreen))
+    esper.set_handler("fullscreen_toggle", fullscreen_toggle)
 
     while True:
         esper.process()
