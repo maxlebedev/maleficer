@@ -46,6 +46,7 @@ class Color:
     BROWN = (94, 44, 4)
     INDIGO = (75, 0, 130)
     CHOCOLATE = (210, 105, 30)
+    LEMON = (255,250,205)
 
     CANDLE = (97, 85, 52)
     BAR_FILLED = GREEN

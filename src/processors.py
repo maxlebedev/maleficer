@@ -361,7 +361,18 @@ class Render(esper.Processor):
     def right_print(self, *args, **kwargs):
         self.console.print(alignment=libtcodpy.RIGHT, *args, **kwargs)
 
-    # TODO: do these want to be on the boardrender?
+    def present(self, cell_rgbs):
+        startx, endx = (display.PANEL_WIDTH, display.R_PANEL_START)
+        starty, endy = (0, display.BOARD_HEIGHT)
+        self.console.rgb[startx:endx, starty:endy] = cell_rgbs
+        self.context.present(self.console)
+
+
+@dataclass
+class BoardRender(Render):
+    console: tcod.console.Console
+    context: tcod.context.Context
+
     def render_bar(self, x: int, y: int, curr: int, maximum: int, width: int):
         bar_width = int(curr / maximum * width)
         bg = display.Color.BAR_EMPTY
@@ -501,18 +512,6 @@ class Render(esper.Processor):
                     cell_rgbs[x][y] = (glyph, display.Color.BLACK, display.Color.BLACK)
         return cell_rgbs
 
-    def present(self, cell_rgbs):
-        startx, endx = (display.PANEL_WIDTH, display.R_PANEL_START)
-        starty, endy = (0, display.BOARD_HEIGHT)
-        self.console.rgb[startx:endx, starty:endy] = cell_rgbs
-        self.context.present(self.console)
-
-
-@dataclass
-class BoardRender(Render):
-    console: tcod.console.Console
-    context: tcod.context.Context
-
     def _get_cell_rgbs(self):
         board = location.BOARD
         cell_rgbs = [list(map(board.as_rgb, row)) for row in board.cells]
@@ -570,11 +569,10 @@ class MenuRender(Render):
         menu_elements = ecs.Query(cmp.MenuItem, self.menu_cmp, cmp.Onymous)
         sorted_menu = sorted(menu_elements, key=lambda x: x[1][0].order)
         for i, (_, (mi, _, on)) in enumerate(sorted_menu):
-            fg = display.Color.WHITE
-            bg = display.Color.BLACK
+            fg = display.Color.LGREY
             if menu_selection.item == mi.order:
-                fg, bg = bg, fg
-            self.center_print(x=x, y=y + 2 + i, string=on.name, fg=fg, bg=bg)
+                fg = display.Color.WHITE
+            self.center_print(x=x, y=y + 2 + i, string=on.name, fg=fg)
 
         if self.background:
             display.blit_image(
