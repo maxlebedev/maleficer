@@ -7,7 +7,7 @@ cmps = esper._entities
 
 
 class Query:
-    entities: set|None = None
+    entities: set | None = None
     include = tuple()
 
     def __init__(self, *include):

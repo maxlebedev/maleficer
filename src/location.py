@@ -309,7 +309,7 @@ def new_level():
         esper.delete_entity(to_del, immediate=True)
 
     BOARD = Board()
-    levels = [generate_dungeon, cave_dungeon]  # , maze_dungeon
+    levels = [generate_dungeon, cave_dungeon, maze_dungeon]
     level_func = random.choice(levels)
     level_func(BOARD)
     BOARD.build_entity_cache()
@@ -521,6 +521,21 @@ def maze_dungeon(board: Board):
             cell = create.tile.floor(*pos)
         board.set_cell(pos.x, pos.y, cell)
     board.retile(stair_x, stair_y, create.tile.stairs)
+
+    spawnables = [
+        [create.item.trap, 3],
+        [create.item.potion, 2],
+        [create.item.scroll, 1],
+        [create.npc.bat, 5],
+        [create.npc.goblin, 3],
+        [create.npc.warlock, 1],
+    ]
+
+    for x, y in seen:
+        pos = cmp.Position(x=x * 2, y=y * 2)
+        s_ent, s_weight = zip(*spawnables)
+        spawn = random.choices(s_ent, s_weight)[0]
+        spawn(pos)
 
 
 def generate_test_dungeon(board):

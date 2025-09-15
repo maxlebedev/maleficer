@@ -107,6 +107,14 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * But, only the non-static targets should get cleared, and we don't have a way to store that info
     - effect application restrictions. (mutilate can't hit traps)
     - an Ephemeral component for Crosshair, Area Effect type stuff
+    - We could rework Phases entirely. All systems are called at all times
+        * however, they all have a state guard and return when guard fails
+        * big change, so lots of surface area
+        * the guards also don't have to be phase analogues
+            + this means we can do smaller procs for things like callbacks
+            + buut order mgmt is currently pretty hard. 
+            + this would likely make it harder
+    - A GameMeta to hold globals
 ## Game Mechanics/Balance
     - spell mods (+1 range, +1 dmg pickups)
     - cooldown alternatives like damage taken, steps walked (lotta tracking)
@@ -142,7 +150,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - "Commander" Enemies that effect their faction
     - Check for more places that benefit from ecs.Query.where
     - 3rd char, 1 pull+aegis spell, 1 kill spell with min range
-    - add enemies to maze
 ## UX
     - Should all ranged animations happen simultaneously?
         * animation queue?
@@ -157,3 +164,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - MenuSelection maybe wants to be reset when moving thru menus
     - Hitting Esc in char select exits game bc we use MenuInputEvent
         * What's probs most correct is to keep a stack of menus and backtrack
+    - Bombs dealing damage to each other loop and break game
+        * maybe bombs just can't dmg each other
+        * maybe we don't oneshot proc the damage (so, finish death)

@@ -68,7 +68,6 @@ def main() -> None:
     if context.sdl_window:
         context.sdl_window.fullscreen = tcod.context.SDL_WINDOW_FULLSCREEN_DESKTOP
 
-
     location.BOARD = location.Board()
 
     phase.setup(context, console)
@@ -80,9 +79,11 @@ def main() -> None:
     flash_pos_callback = partial(flash_pos, context, console)
     esper.set_handler("flash_pos", flash_pos_callback)
 
-    def fullscreen_toggle(): 
+    def fullscreen_toggle():
         if context.sdl_window:
-            context.sdl_window.fullscreen = int(not(context.sdl_window.fullscreen))
+            toggle = int(not context.sdl_window.fullscreen)
+            context.sdl_window.fullscreen = toggle
+
     esper.set_handler("fullscreen_toggle", fullscreen_toggle)
 
     while True:

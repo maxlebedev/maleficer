@@ -496,7 +496,7 @@ class BoardRender(Render):
                     self.console.print(1, y_idx, *content)
 
         for i, cnd in enumerate(self.gather_conditions()):
-            y = display.BOARD_HEIGHT-i-2
+            y = display.BOARD_HEIGHT - i - 2
             self.console.print(1, y, cnd, fg=display.Color.LEMON)
 
     def gather_conditions(self):
