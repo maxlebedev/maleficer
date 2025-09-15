@@ -7,7 +7,7 @@ cmps = esper._entities
 
 
 class Query:
-    entities = None
+    entities: set|None = None
     include = tuple()
 
     def __init__(self, *include):
@@ -46,7 +46,7 @@ class Query:
         entity_db = esper._entities
         if not self.entities:
             return self
-        self.entities = [e for e in self.entities if check(entity_db[e][cmp])]
+        self.entities = {e for e in self.entities if check(entity_db[e][cmp])}
         return self
 
     def first(self) -> int:
@@ -68,6 +68,13 @@ class Query:
         if self.entities:
             self.entities.difference_update(entities)
         return self
+
+    @property
+    def val(self):
+        """convenience property for getting a singleton cmp val"""
+        if self.entities:
+            return cmps[next(iter(self.entities))][next(iter(self.include))]
+        raise KeyError
 
 
 def freeze_entity(source: int):

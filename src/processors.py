@@ -23,7 +23,7 @@ import typ
 def get_selected_menuitem():
     # TODO: move somewhere
     inv_map = create.player.inventory_map()
-    menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
+    menu_selection = ecs.Query(cmp.MenuSelection).val
     selection = inv_map[menu_selection.item][1].pop()
     return selection
 
@@ -213,7 +213,7 @@ class GameInputEvent(InputEvent):
         except KeyError:
             raise typ.InvalidAction
 
-        menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
+        menu_selection = ecs.Query(cmp.MenuSelection).val
         menu_selection.item = 0
         phase.change_to(phase.Ontology.inventory)
 
@@ -576,7 +576,7 @@ class MenuRender(Render):
         y = display.BOARD_HEIGHT // 2
         self.console.print(x, y, self.title, alignment=libtcodpy.CENTER)
 
-        menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
+        menu_selection = ecs.Query(cmp.MenuSelection).val
 
         menu_elements = ecs.Query(cmp.MenuItem, self.menu_cmp, cmp.Onymous)
         sorted_menu = sorted(menu_elements, key=lambda x: x[1][0].order)
@@ -606,13 +606,13 @@ class MenuInputEvent(InputEvent):
         }
 
     def select(self):
-        menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
+        menu_selection = ecs.Query(cmp.MenuSelection).val
         for entity, (mi, _) in ecs.Query(cmp.MenuItem, self.menu_cmp):
             if mi.order == menu_selection.item:
                 event.trigger_all_callbacks(entity, cmp.UseTrigger)
 
     def move_selection(self, diff: int):
-        menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
+        menu_selection = ecs.Query(cmp.MenuSelection).val
         menu_selection.item += diff
 
         tot_items = len([_ for _ in ecs.Query(cmp.MenuItem, self.menu_cmp)]) - 1
@@ -698,7 +698,7 @@ class InventoryRender(BoardRender):
     context: tcod.context.Context
 
     def display_inventory(self):
-        menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
+        menu_selection = ecs.Query(cmp.MenuSelection).val
 
         inv_map = create.player.inventory_map()
         for i, (name, entities) in enumerate(inv_map):
@@ -731,7 +731,7 @@ class InventoryInputEvent(InputEvent):
         }
 
     def move_selection(self, diff: int):
-        menu_selection = ecs.Query(cmp.MenuSelection).cmp(cmp.MenuSelection)
+        menu_selection = ecs.Query(cmp.MenuSelection).val
         inventory_size = len(create.player.inventory_map()) - 1
         menu_selection.item += diff
         menu_selection.item = math_util.clamp(menu_selection.item, inventory_size)

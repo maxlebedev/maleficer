@@ -18,12 +18,12 @@ LEVEL = 0
 
 
 def player_position():
-    pos = ecs.Query(cmp.Player, cmp.Position).cmp(cmp.Position)
+    pos = ecs.Query(cmp.Player).cmp(cmp.Position)
     return pos
 
 
 def player_last_position():
-    lp = ecs.Query(cmp.Player, cmp.LastPosition).cmp(cmp.LastPosition)
+    lp = ecs.Query(cmp.Player).cmp(cmp.LastPosition)
     return lp.pos
 
 

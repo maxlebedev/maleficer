@@ -107,7 +107,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * But, only the non-static targets should get cleared, and we don't have a way to store that info
     - effect application restrictions. (mutilate can't hit traps)
     - an Ephemeral component for Crosshair, Area Effect type stuff
-    - print player statuses on bottom left
 ## Game Mechanics/Balance
     - spell mods (+1 range, +1 dmg pickups)
     - cooldown alternatives like damage taken, steps walked (lotta tracking)
@@ -143,6 +142,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - "Commander" Enemies that effect their faction
     - Check for more places that benefit from ecs.Query.where
     - 3rd char, 1 pull+aegis spell, 1 kill spell with min range
+    - add enemies to maze
 ## UX
     - Should all ranged animations happen simultaneously?
         * animation queue?
