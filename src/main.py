@@ -63,8 +63,10 @@ def main() -> None:
 
     context = tcod.context.new(**context_params)
     console = context.new_console(order="F")
+
+    context.present = partial(context.present, keep_aspect=True)
     if context.sdl_window:
-        context.sdl_window.fullscreen = 1
+        context.sdl_window.fullscreen = tcod.context.SDL_WINDOW_FULLSCREEN_DESKTOP
 
 
     location.BOARD = location.Board()

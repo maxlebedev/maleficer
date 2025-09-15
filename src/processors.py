@@ -495,6 +495,18 @@ class BoardRender(Render):
                 case tuple():
                     self.console.print(1, y_idx, *content)
 
+        for i, cnd in enumerate(self.gather_conditions()):
+            y = display.BOARD_HEIGHT-i-2
+            self.console.print(1, y, cnd, fg=display.Color.LEMON)
+
+    def gather_conditions(self):
+        ret = []
+        for _, (cnd_state, _) in ecs.Query(cmp.State, cmp.Player):
+            for status_effect, duration in cnd_state.map.items():
+                # triggers 3x/turn for some reason?
+                ret.append(f"{status_effect} {duration}")
+        return ret
+
     def _apply_lighting(self, cell_rgbs, in_fov) -> list[list[typ.CELL_RGB]]:
         """display cells in fov with lighting, explored without, and hide the rest"""
         for x, col in enumerate(cell_rgbs):
