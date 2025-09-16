@@ -164,14 +164,15 @@ class MenuItem:
 class MainMenu:
     """Indicates an element of the main menu"""
 
-    pass
+    prev = None
 
 
 @component
 class StartMenu:
     """Indicates an element of the start menu"""
+    import phase
 
-    pass
+    prev = phase.Ontology.main_menu
 
 
 @component

@@ -90,6 +90,7 @@ def trigger_all_callbacks(entity, trigger_cmp):
             if not esper.entity_exists(entity):
                 return
             func(entity)
+            # TODO: the main callback that needs a ref to source is lob_bomb
             # TypeError
 
     # I don't remember why these are here.

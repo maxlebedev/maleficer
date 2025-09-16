@@ -44,7 +44,8 @@ class Movement(esper.Processor):
             event.Log.append("can't move there")
             esper.dispatch_event("flash")
 
-    def collect(self, target):
+    def pick_up(self, target):
+        """pick up an item"""
         location.BOARD.remove(target)
         esper.add_component(target, cmp.InInventory())
         create.player.inventory_map()
@@ -87,7 +88,7 @@ class Movement(esper.Processor):
                     self.bump(mover, target)
 
                 if has(mover, cmp.Player) and has(target, cmp.Collectable):
-                    self.collect(target)
+                    self.pick_up(target)
 
                 ent_flies = esper.has_component(mover, cmp.Flying)
                 if not ent_flies and has(target, cmp.OnStep):
@@ -198,7 +199,7 @@ class GameInputEvent(InputEvent):
             input.KEYMAP[input.Input.MOVE_LEFT]: (self.move, [-1, 0]),
             input.KEYMAP[input.Input.MOVE_UP]: (self.move, [0, -1]),
             input.KEYMAP[input.Input.MOVE_RIGHT]: (self.move, [1, 0]),
-            input.KEYMAP[input.Input.ESC]: (phase.change_to, [phase.Ontology.menu]),
+            input.KEYMAP[input.Input.ESC]: (phase.change_to, [phase.Ontology.main_menu]),
             input.KEYMAP[input.Input.SPELL1]: (self.handle_slot_key, [1]),
             input.KEYMAP[input.Input.SPELL2]: (self.handle_slot_key, [2]),
             input.KEYMAP[input.Input.SPELL3]: (self.handle_slot_key, [3]),
@@ -601,9 +602,14 @@ class MenuInputEvent(InputEvent):
         self.action_map = {
             input.KEYMAP[input.Input.MOVE_DOWN]: (self.move_selection, [1]),
             input.KEYMAP[input.Input.MOVE_UP]: (self.move_selection, [-1]),
-            input.KEYMAP[input.Input.ESC]: self.exit,
+            # input.KEYMAP[input.Input.ESC]: self.exit,
+            input.KEYMAP[input.Input.ESC]: self.back,
             input.KEYMAP[input.Input.SELECT]: self.select,
         }
+
+    def back(self):
+        if self.menu_cmp.prev:
+            phase.change_to(self.menu_cmp.prev)
 
     def select(self):
         menu_selection = ecs.Query(cmp.MenuSelection).val
@@ -788,7 +794,7 @@ class OptionsRender(Render):
 class OptionsInputEvent(InputEvent):
     def __init__(self):
         self.action_map = {
-            input.KEYMAP[input.Input.ESC]: (phase.change_to, [phase.Ontology.menu]),
+            input.KEYMAP[input.Input.ESC]: (phase.change_to, [phase.Ontology.main_menu]),
         }
 
 
@@ -817,7 +823,7 @@ class AboutRender(Render):
 class AboutInputEvent(InputEvent):
     def __init__(self):
         self.action_map = {
-            input.KEYMAP[input.Input.ESC]: (phase.change_to, [phase.Ontology.menu]),
+            input.KEYMAP[input.Input.ESC]: (phase.change_to, [phase.Ontology.main_menu]),
         }
 
 

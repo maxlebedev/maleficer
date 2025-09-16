@@ -45,6 +45,9 @@ def main_menu_opts():
     _make_menuitem(cmp.MainMenu, callback, "Options", 1)
     callback = lambda _: phase.change_to(phase.Ontology.about)
     _make_menuitem(cmp.MainMenu, callback, "About", 2)
+    def exit(_):
+        raise SystemExit()
+    _make_menuitem(cmp.MainMenu, exit, "Quit", 3)
 
 
 def char_select_opts():

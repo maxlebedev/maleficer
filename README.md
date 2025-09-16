@@ -109,6 +109,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * But, only the non-static targets should get cleared, and we don't have a way to store that info
     - effect application restrictions. (mutilate can't hit traps)
     - an Ephemeral component for Crosshair, Area Effect type stuff
+    - Entity templates: cmp collections for easy entity creation
     - We could rework Phases entirely. All systems are called at all times
         * however, they all have a state guard and return when guard fails
         * big change, so lots of surface area
@@ -116,7 +117,16 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
             + this means we can do smaller procs for things like callbacks
             + buut order mgmt is currently pretty hard. 
             + this would likely make it harder
+        * Get can be *much* more dynamic about what runs where 
+            + a state machine for various turn flows
+            + single exec via a simple queue_proc() func 
     - A GameMeta to hold globals
+        * console, context at minimum. those are annoying to pass around
+        * level, board are globals now, so this would be an improvement
+    - The main callback that needs a ref to source is lob_bomb
+        * It sure would be nice if it didn't need that
+        * We could rewrite lob_bomb as a proc. LobberNPC or something
+            + This also paves the way for every npc to have their own proc
 ## Game Mechanics/Balance
     - spell mods (+1 range, +1 dmg pickups)
     - cooldown alternatives like damage taken, steps walked (lotta tracking)
@@ -152,6 +162,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - "Commander" Enemies that effect their faction
     - Check for more places that benefit from ecs.Query.where
     - 3rd char, 1 pull+aegis spell, 1 kill spell with min range
+    - Doors via conditional blocking
 ## UX
     - Should all ranged animations happen simultaneously?
         * animation queue?
@@ -164,8 +175,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 # BUGS
     - Found a wall I was able to walk through in the caves.
     - MenuSelection maybe wants to be reset when moving thru menus
-    - Hitting Esc in char select exits game bc we use MenuInputEvent
-        * What's probs most correct is to keep a stack of menus and backtrack
     - Bombs dealing damage to each other loop and break game
         * maybe bombs just can't dmg each other
         * maybe we don't oneshot proc the damage (so, finish death)

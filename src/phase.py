@@ -14,7 +14,7 @@ CURRENT = None
 
 
 class Ontology(enum.Enum):
-    menu = enum.auto()
+    main_menu = enum.auto()
     options = enum.auto()
     about = enum.auto()
     level = enum.auto()
@@ -30,7 +30,7 @@ def main_menu_phase(context, console):
     render = processors.MenuRender(console, context, **args)
     input = processors.MenuInputEvent(cmp.MainMenu)
 
-    ALL[Ontology.menu] = [render, input]
+    ALL[Ontology.main_menu] = [render, input]
     create.ui.main_menu_opts()
 
 

@@ -71,7 +71,7 @@ def main() -> None:
     location.BOARD = location.Board()
 
     phase.setup(context, console)
-    phase.change_to(phase.Ontology.menu)
+    phase.change_to(phase.Ontology.main_menu)
 
     flash_callback = lambda: flash(context, console)
     esper.set_handler("redraw", redraw)
