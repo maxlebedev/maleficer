@@ -602,7 +602,6 @@ class MenuInputEvent(InputEvent):
         self.action_map = {
             input.KEYMAP[input.Input.MOVE_DOWN]: (self.move_selection, [1]),
             input.KEYMAP[input.Input.MOVE_UP]: (self.move_selection, [-1]),
-            # input.KEYMAP[input.Input.ESC]: self.exit,
             input.KEYMAP[input.Input.ESC]: self.back,
             input.KEYMAP[input.Input.SELECT]: self.select,
         }

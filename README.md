@@ -71,6 +71,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Crosshair is a big exception to how movement works. might be worth its own function
     - When I take a step, ranged enemies shoot me before step completes. feels correct for melee but unintuitive for range.
     - MenuItem is used for actual menus, but not for inventory (not 1:1 with entities)
+        * MenuSelection, however, IS reused to inventory
     - Right now levels are limited to the board size. We could decouple those and have the board "scroll"
     - should we always place the stairs as far back as we can?
     - wet status from water tiles? are we that sort of game?
@@ -85,6 +86,10 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - currently the enemy move decision tree is one static thing. break up eventually
     - TargetInputEvent returns control to the player's Damage phase. otherwise enemies get a turn before player damage resolves
     - instead of a melee decision tree, we do melee damage via bump func
+    - Small Procs
+        * A proposed refactor where we have much more procs, many with guards
+        * each npc type, gets its own for example
+        * this would hopefully replace Phases and callbacks
 
 # TODO
 
@@ -93,6 +98,10 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - sqlite db for storing current lvl value, rng seed for lvls, etc
     - the ecs.remove syntax is awkward, but overwriting self.entities state inf ilter necessitates it for now
     - callbacks are a violation of ECS. consider avoiding them somehow
+        * the things that are now callbacks can be Small Procs, with a guard
+        * for nav menu items, a NavButton cmponent with a *to* arg for phase
+            + these having to coexist with current buttons might be too complex?
+            + the car select buttons are both
     - lots of DRY in the NPC proc
     - bresenham_ray should *really* be under test
     - Should Position comps be immutable?
@@ -146,11 +155,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Some sort of Storm/Combo mechanic would be really cool
     - Should some damge be in ranges?
     - small chance of "named" scrolls with unique effects
-    - make a flow for selecting starting spells
-        * this means we have to differentiate Start and Continue
-            + mostly can punt this until save/load
-        * Start goes to select spells (etc)
-        * Continue loads the game as is
     - goblins should actually try to be at dist 4 to player
         * when on cooldown BFS a position with dist 4, then move a step
     - living flames move up to 2 squares to enemy

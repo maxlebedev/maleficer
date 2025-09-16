@@ -51,7 +51,7 @@ def main_menu_opts():
 
 
 def char_select_opts():
-    # todo, these can probably be consolidated, maybe even into some startgame()
+    # TODO: these can probably be consolidated, maybe even into some startgame()
     def pick_alamar(_):
         create.player.alamar()
         start_game()
