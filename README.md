@@ -1,7 +1,9 @@
-Maleficer is a classic roguelike with focus on tactical combat.
+# Maleficer 
+This is a classic roguelike with focus on tactical combat.
 The baseline combat of many rogulikes boils down to walking into enemies until they die, and I'm aiming to replace that with a more rich experiance.
 I also take inspiration from modern TTRPGs like Trespassor, especially in terms of mechanical clarity. 
 (and a vehicle for teaching myself game dev, ecs pattern, etc)
+<img width="1935" height="1079" alt="maleficer_mmenu_screenshot" src="https://github.com/user-attachments/assets/58c3c0bb-0a3b-4e94-b47b-a948fa17355c" />
 
 # Inspiration
     - classic roguelikes
