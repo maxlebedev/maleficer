@@ -530,8 +530,8 @@ def maze_dungeon(board: Board):
     }
 
     for x, y in seen[1:-1]:
-        if not random.randint(0, 1):
-            return
+        if not random.randint(0, 2):
+            continue
 
         offset = random.choice([(0, 0), (1, 0), (0, 1), (1, 1)])
         spawn_x = 2*x + offset[0]
