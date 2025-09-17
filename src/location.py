@@ -422,18 +422,16 @@ def cave_dungeon(board):
     valid_spawns = sorted(valid_spawns, key=lambda x: x[0])
     board.retile(*valid_spawns[-1][1], create.tile.stairs)
 
-    spawnables = [
-        [create.item.trap, 3],
-        [create.item.potion, 2],
-        [create.item.scroll, 1],
-        [create.npc.bat, 5],
-        [create.npc.goblin, 3],
-        [create.npc.warlock, 1],
-    ]
+    spawn_table = {
+         create.item.trap: 3,
+         create.item.potion: 2,
+         create.item.scroll: 1,
+         create.npc.bat: 5,
+         create.npc.goblin: 3,
+         create.npc.warlock: 1,
+    }
     for _, pos in valid_spawns[:-1]:
-        s_ent, s_weight = zip(*spawnables)
-        spawn = random.choices(s_ent, s_weight)[0]
-        spawn(pos)
+        spawn_at(spawn_table, pos)
 
 
 def in_player_perception(pos: cmp.Position):
@@ -522,20 +520,31 @@ def maze_dungeon(board: Board):
         board.set_cell(pos.x, pos.y, cell)
     board.retile(stair_x, stair_y, create.tile.stairs)
 
-    spawnables = [
-        [create.item.trap, 3],
-        [create.item.potion, 2],
-        [create.item.scroll, 1],
-        [create.npc.bat, 5],
-        [create.npc.goblin, 3],
-        [create.npc.warlock, 1],
-    ]
+    spawn_table = {
+        create.item.trap: 3,
+        create.item.potion: 2,
+        create.item.scroll: 1,
+        create.npc.bat: 5,
+        create.npc.goblin: 3,
+        create.npc.warlock: 1,
+    }
 
-    for x, y in seen:
-        pos = cmp.Position(x=x * 2, y=y * 2)
-        s_ent, s_weight = zip(*spawnables)
-        spawn = random.choices(s_ent, s_weight)[0]
-        spawn(pos)
+    for x, y in seen[1:-1]:
+        if not random.randint(0, 1):
+            return
+
+        offset = random.choice([(0, 0), (1, 0), (0, 1), (1, 1)])
+        spawn_x = 2*x + offset[0]
+        spawn_y = 2*y + offset[1]
+        pos = cmp.Position(x=spawn_x, y=spawn_y)
+
+        spawn_at(spawn_table, pos)
+
+def spawn_at(spawn_table: dict, pos: cmp.Position):
+    pop = list(spawn_table.keys())
+    weights = list(spawn_table.values())
+    spawn = random.choices(pop, weights)[0]
+    spawn(pos)
 
 
 def generate_test_dungeon(board):
