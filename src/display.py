@@ -197,6 +197,10 @@ def load_tileset(atlas_path: str, width: int, height: int) -> tcod.tileset.Tiles
         tile = font_ts.get_tile(ord(letter))
         tileset.set_tile(ord(letter), tile)
 
+    for char in "┌─┐│ └─┘":
+        tile = font_ts.get_tile(ord(char))
+        tileset.set_tile(ord(char), tile)
+
     codepath = itertools.count(ord("z") + 1)
     for glyph in Glyph:
         xx, yy = _idx_to_point(glyph.value, width)

@@ -452,17 +452,6 @@ class BoardRender(Render):
             "y": 0,
             "width": display.PANEL_WIDTH,
             "height": display.PANEL_HEIGHT,
-            "decoration": (
-                display.Glyph.FRAME1,
-                display.Glyph.FRAME2,
-                display.Glyph.FRAME3,
-                display.Glyph.FRAME4,
-                display.Glyph.NONE,
-                display.Glyph.FRAME6,
-                display.Glyph.FRAME7,
-                display.Glyph.FRAME8,
-                display.Glyph.FRAME9,
-            ),
         }
 
         self._left_panel(panel_params)

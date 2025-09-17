@@ -136,6 +136,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * It sure would be nice if it didn't need that
         * We could rewrite lob_bomb as a proc. LobberNPC or something
             + This also paves the way for every npc to have their own proc
+    + board currently is 66*67. I could make it 64*64. Leave room for a border
 ## Game Mechanics/Balance
     - spell mods (+1 range, +1 dmg pickups)
     - cooldown alternatives like damage taken, steps walked (lotta tracking)
@@ -167,6 +168,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Check for more places that benefit from ecs.Query.where
     - 3rd char, 1 pull+aegis spell, 1 kill spell with min range
     - Doors via conditional blocking
+    - basic lighting attack that uses the ray func I made
 ## UX
     - Should all ranged animations happen simultaneously?
         * animation queue?
