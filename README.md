@@ -13,6 +13,7 @@ I also take inspiration from modern TTRPGs like Trespassor, especially in terms 
     - Modern TTPGS like Trespassor
     - Rift Wizard
     - Tactics games
+<img width="1925" height="1071" alt="image" src="https://github.com/user-attachments/assets/e7b5cac2-d8bd-4b07-87f1-8c9fc95e3ee7" />
 
 # Dependancies
     - libsdl2-dev
