@@ -27,7 +27,7 @@ def main_menu_phase(context, console):
     background = display.Background.MAIN_MENU
     title = "WELCOME TO MALEFICER"
     args = {"menu_cmp": cmp.MainMenu, "background": background, "title": title}
-    render = processors.MenuRender(console, context, **args)
+    render = processors.MenuRender(context, console, **args)
     input = processors.MenuInputEvent(cmp.MainMenu)
 
     ALL[Ontology.main_menu] = [render, input]
@@ -37,7 +37,7 @@ def main_menu_phase(context, console):
 def level_phase(context, console):
     upkeep = processors.Upkeep()
 
-    render = processors.BoardRender(console, context)
+    render = processors.BoardRender(context, console)
     input = processors.GameInputEvent()
     npc = processors.NPCTurn()
 
@@ -66,7 +66,7 @@ def targeting_phase(context, console):
     esper.create_entity(cmp.Crosshair(), position_cmp)
 
     input = processors.TargetInputEvent()
-    target_render = processors.TargetRender(console, context)
+    target_render = processors.TargetRender(context, console)
     movement = processors.Movement()
     ALL[Ontology.target] = [target_render, input, movement]
 
@@ -75,20 +75,20 @@ def inventory_phase(context, console):
     esper.create_entity(cmp.MenuSelection())
 
     input = processors.InventoryInputEvent()
-    render = processors.InventoryRender(console, context)
+    render = processors.InventoryRender(context, console)
 
     ALL[Ontology.inventory] = [render, input]
 
 
 def options_phase(context, console):
-    render = processors.OptionsRender(console, context)
+    render = processors.OptionsRender(context, console)
     input = processors.OptionsInputEvent()
 
     ALL[Ontology.options] = [render, input]
 
 
 def about_phase(context, console):
-    render = processors.AboutRender(console, context)
+    render = processors.AboutRender(context, console)
     input = processors.AboutInputEvent()
 
     ALL[Ontology.about] = [render, input]
@@ -98,7 +98,7 @@ def char_select_phase(context, console):
     background = display.Background.CHAR_SELECT
     title = "Select a Character"
     args = {"menu_cmp": cmp.StartMenu, "background": background, "title": title}
-    render = processors.MenuRender(console, context, **args)
+    render = processors.MenuRender(context, console, **args)
     input = processors.MenuInputEvent(cmp.StartMenu)
 
     ALL[Ontology.char_select] = [render, input]

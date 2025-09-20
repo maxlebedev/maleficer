@@ -351,8 +351,8 @@ class NPCTurn(esper.Processor):
 
 @dataclass
 class Render(esper.Processor):
-    console: tcod.console.Console
     context: tcod.context.Context
+    console: tcod.console.Console
 
     dashes = "─" * (display.PANEL_WIDTH - 2)
 
@@ -374,8 +374,8 @@ class Render(esper.Processor):
 
 @dataclass
 class BoardRender(Render):
-    console: tcod.console.Console
     context: tcod.context.Context
+    console: tcod.console.Console
 
     def render_bar(self, x: int, y: int, curr: int, maximum: int, width: int):
         bar_width = int(curr / maximum * width)
@@ -560,8 +560,8 @@ class BoardRender(Render):
 
 @dataclass
 class MenuRender(Render):
-    console: tcod.console.Console
     context: tcod.context.Context
+    console: tcod.console.Console
     menu_cmp: type
     title: str
     background: display.BGImage | None = None
@@ -669,8 +669,8 @@ class TargetInputEvent(InputEvent):
 
 @dataclass
 class TargetRender(BoardRender):
-    console: tcod.console.Console
     context: tcod.context.Context
+    console: tcod.console.Console
 
     def process(self) -> None:
         self.console.clear()
@@ -694,8 +694,8 @@ class TargetRender(BoardRender):
 
 @dataclass
 class InventoryRender(BoardRender):
-    console: tcod.console.Console
     context: tcod.context.Context
+    console: tcod.console.Console
 
     def display_inventory(self):
         menu_selection = ecs.Query(cmp.MenuSelection).val
@@ -766,8 +766,8 @@ class InventoryInputEvent(InputEvent):
 
 @dataclass
 class OptionsRender(Render):
-    console: tcod.console.Console
     context: tcod.context.Context
+    console: tcod.console.Console
 
     def process(self):
         self.console.clear()
@@ -797,8 +797,8 @@ class OptionsInputEvent(InputEvent):
 
 @dataclass
 class AboutRender(Render):
-    console: tcod.console.Console
     context: tcod.context.Context
+    console: tcod.console.Console
 
     def process(self):
         self.console.clear()
