@@ -134,16 +134,22 @@ class Damage(esper.Processor):
             ):
                 event.Log.append(message)
 
+            """
             hp = esper.component_for_entity(damage.target, cmp.Health)
             if hp.current <= 0:
                 event.Death(damage.target)
                 phase.oneshot(Death)
+            """
 
 
 @dataclass
 class Death(esper.Processor):
     def process(self):
         board = location.get_board()
+        for ent, (hp,) in ecs.Query(cmp.Health):
+            if hp.current <= 0 and ent not in event.Queues.death:
+                event.Death(ent)
+
         while event.Queues.death:
             killable = event.Queues.death.popleft().entity
             if not esper.entity_exists(killable):

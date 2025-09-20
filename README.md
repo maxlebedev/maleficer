@@ -138,6 +138,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * We could rewrite lob_bomb as a proc. LobberNPC or something
             + This also paves the way for every npc to have their own proc
     - board currently is 66*67. I could make it 64*64. Leave room for a border
+    - OnDeath/DeathTrigger OnStep/StepTriger redundancy. The 'On's could be more ECS-compliant
 ## Game Mechanics/Balance
     - spell mods (+1 range, +1 dmg pickups)
     - cooldown alternatives like damage taken, steps walked (lotta tracking)
@@ -194,6 +195,3 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * those walls can be walked through
         * I think this is bc enemies spawn *in* the wall with same pos
     - MenuSelection maybe wants to be reset when moving thru menus
-    - Bombs dealing damage to each other loop and break game
-        * maybe bombs just can't dmg each other
-        * maybe we don't oneshot proc the damage (so, finish death)
