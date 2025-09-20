@@ -23,23 +23,25 @@ def wander(entity: int):
 
 
 def collect_all_affected_entities(source: int, target: int) -> list[int]:
+    board = location.get_board()
     if not esper.has_component(target, cmp.Cell):
         return [target]
     pos = esper.component_for_entity(target, cmp.Position)
     if not esper.has_component(source, cmp.EffectArea):
-        entities = [e for e in location.BOARD.pieces_at(pos)]
+        entities = [e for e in board.pieces_at(pos)]
         return entities
     aoe = esper.component_for_entity(source, cmp.EffectArea)
 
     entities = []
 
     for x, y in aoe.callback(pos):
-        entities += [e for e in location.BOARD.entities[x][y] if e != source]
+        entities += [e for e in board.entities[x][y] if e != source]
     return entities
 
 
 def lob_bomb(source: int):
     import create
+    board = location.get_board()
 
     player = ecs.Query(cmp.Player).first()
     if not location.can_see(source, player):
@@ -49,8 +51,8 @@ def lob_bomb(source: int):
     indices = location.get_neighbor_coords(player_pos)
     random.shuffle(indices)
     for selection in indices:
-        target_cell = location.BOARD.get_cell(*selection)
-        if location.BOARD.has_blocker(*selection):
+        target_cell = board.get_cell(*selection)
+        if board.has_blocker(*selection):
             continue
         dest, trace = location.trace_ray(source, target_cell)
         if dest != target_cell:  # no LOS
@@ -60,7 +62,7 @@ def lob_bomb(source: int):
         flash_line(trace, display.Glyph.BOMB, display.Color.RED)
         create.item.bomb(dest_pos)
 
-        location.BOARD.build_entity_cache()
+        board.build_entity_cache()
         apply_cooldown(source)
         return
 
@@ -185,8 +187,9 @@ def cyclops_attack_pattern(source: int):
         src_frz = ecs.freeze_entity(source)
         dmg_effect = esper.component_for_entity(source, cmp.DamageEffect)
         locus = esper.component_for_entity(source, cmp.Locus)
+        board = location.get_board()
         for x, y in locus.coords:
-            if cell := location.BOARD.get_cell(x, y):
+            if cell := board.get_cell(x, y):
                 event.Damage(src_frz, cell, dmg_effect.amount)
         esper.remove_component(source, cmp.Locus)
         esper.remove_component(source, cmp.Aura)

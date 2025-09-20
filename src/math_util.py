@@ -19,6 +19,7 @@ def clamp_damage(entity: int, value: int):
 
 def get_push_coords(source: tuple[int, int], target: int, steps: int):
     """note that diagonals are allowed for pushes"""
+    board = location.get_board()
     # Convert tuples to numpy arrays for easier vector math
     trg_pos = esper.component_for_entity(target, cmp.Position)
     src = np.array(source)
@@ -33,16 +34,18 @@ def get_push_coords(source: tuple[int, int], target: int, steps: int):
     result = unit_direction * steps
     dest_coord = tgt + result
 
-    dest_cell = location.BOARD.get_cell(*dest_coord)
+    dest_cell = board.get_cell(*dest_coord)
     _, trace = location.trace_ray(target, dest_cell)
     for x, y in trace[::-1]:
-        if not location.BOARD.has_blocker(x, y):
+        if not board.has_blocker(x, y):
             return x, y
     return dest_coord
 
 
 def bresenham_ray(origin: cmp.Position, dest: cmp.Position):
     """bresenham line, but continue past dest to wall"""
+    board = location.get_board()
+
     dx = abs(dest.x - origin.x)
     dy = abs(dest.y - origin.y)
     xsign = 1 if (origin.x < dest.x) else -1
@@ -61,7 +64,7 @@ def bresenham_ray(origin: cmp.Position, dest: cmp.Position):
     cell = 1
     while cell and not esper.has_component(cell, cmp.Wall):
         coord = (origin.x + x * xx + y * yx, origin.y + x * xy + y * yy)
-        cell = location.BOARD.get_cell(*coord)
+        cell = board.get_cell(*coord)
         ray.append(coord)
         if err >= 0:
             y += 1

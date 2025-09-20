@@ -8,11 +8,12 @@ import phase
 
 
 def initial_map():
-    # location.generate_test_dungeon(location.BOARD)
-    location.generate_dungeon(location.BOARD)
-    # location.cave_dungeon(location.BOARD)
-    # location.maze_dungeon(location.BOARD)
-    location.BOARD.build_entity_cache()
+    board = location.get_board()
+    # location.generate_test_dungeon(board)
+    # location.generate_dungeon(board)
+    # location.cave_dungeon(board)
+    location.maze_dungeon(board)
+    board.build_entity_cache()
 
 
 def start_game():

@@ -14,8 +14,6 @@ import ecs
 import math_util
 import typ
 
-BOARD: "Board"
-
 
 def player_position():
     pos = ecs.Query(cmp.Player).cmp(cmp.Position)
@@ -25,6 +23,10 @@ def player_position():
 def player_last_position():
     lp = ecs.Query(cmp.Player).cmp(cmp.LastPosition)
     return lp.pos
+
+def get_board():
+    game_meta = ecs.Query(cmp.GameMeta).val
+    return game_meta.board
 
 
 def can_see(entity: int, target: int, distance: int | None = None) -> bool:
@@ -305,30 +307,29 @@ def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
 
 
 def new_level():
-    global BOARD
     old_level = ecs.Query(cmp.Position).exclude(cmp.Player, cmp.Crosshair)
     for to_del, _ in old_level:
         esper.delete_entity(to_del, immediate=True)
 
     game_meta = ecs.Query(cmp.GameMeta).val
     game_meta.mood = display.Mood.shuffle()
-    BOARD = Board()
+    game_meta.board = Board()
     levels = [generate_dungeon, cave_dungeon, maze_dungeon]
     level_func = random.choice(levels)
-    level_func(BOARD)
-    BOARD.build_entity_cache()
+    level_func(game_meta.board)
+    game_meta.board.build_entity_cache()
 
 
 def trace_ray(source: int, dest: int):
     """trace a line between source  dest,
     return first blocker & inclusive path"""
-    global BOARD
+    board = get_board()
     source_pos = esper.component_for_entity(source, cmp.Position)
     dest_pos = esper.component_for_entity(dest, cmp.Position)
 
     trace = list(tcod.los.bresenham(source_pos.as_tuple, dest_pos.as_tuple))
     for i, (x, y) in enumerate(trace):
-        entities = BOARD.entities[x][y]
+        entities = board.entities[x][y]
         for entity in entities:
             if esper.has_component(entity, cmp.Blocking):
                 if entity not in (source, dest):
@@ -338,8 +339,8 @@ def trace_ray(source: int, dest: int):
 
 
 def get_fov():
-    global BOARD
-    transparency = BOARD.as_transparency()
+    board = get_board()
+    transparency = board.as_transparency()
     pos = player_position()
     algo = tcod.libtcodpy.FOV_SHADOW
     fov = tcod.map.compute_fov(transparency, pos.as_tuple, radius=4, algorithm=algo)
@@ -409,6 +410,7 @@ def cave_dungeon(board):
             if tile:
                 board.set_cell(x, y, tile)
     build_perimeter_wall(board)
+    #TODO: the 3 cells closes to corner should be wall too
 
     player_pos = player_position()
     player_pos.x = display.BOARD_WIDTH // 2

@@ -46,7 +46,8 @@ class Movement(esper.Processor):
 
     def pick_up(self, target):
         """pick up an item"""
-        location.BOARD.remove(target)
+        board = location.get_board()
+        board.remove(target)
         esper.add_component(target, cmp.InInventory())
         create.player.inventory_map()
         name = esper.component_for_entity(target, cmp.Onymous).name
@@ -54,7 +55,7 @@ class Movement(esper.Processor):
         # oneshot call some collectable processor?
 
     def process(self):
-        board = location.BOARD
+        board = location.get_board()
         while event.Queues.movement:
             movement = event.Queues.movement.popleft()  # left so player first
             mover = movement.source
@@ -104,6 +105,7 @@ class Damage(esper.Processor):
         return f"{source} heals {-1 * amount} to {target}"
 
     def process(self):
+        board = location.get_board()
         while event.Queues.damage:
             damage = event.Queues.damage.popleft()
             if not esper.entity_exists(damage.target):
@@ -111,7 +113,7 @@ class Damage(esper.Processor):
                 continue
             if esper.has_component(damage.target, cmp.Cell):
                 pos = esper.component_for_entity(damage.target, cmp.Position)
-                entities = location.BOARD.pieces_at(pos)
+                entities = board.pieces_at(pos)
                 for ent in entities:
                     if esper.has_component(ent, cmp.Health):
                         event.Damage(damage.source, ent, damage.amount)
@@ -141,6 +143,7 @@ class Damage(esper.Processor):
 @dataclass
 class Death(esper.Processor):
     def process(self):
+        board = location.get_board()
         while event.Queues.death:
             killable = event.Queues.death.popleft().entity
             if not esper.entity_exists(killable):
@@ -148,7 +151,7 @@ class Death(esper.Processor):
             named = esper.component_for_entity(killable, cmp.Onymous)
 
             pos = esper.component_for_entity(killable, cmp.Position)
-            if killable_cell := location.BOARD.get_cell(*pos):
+            if killable_cell := board.get_cell(*pos):
                 esper.add_component(killable, cmp.Target(target=killable_cell))
                 event.trigger_all_callbacks(killable, cmp.DeathTrigger)
             if location.in_player_perception(pos):
@@ -156,10 +159,10 @@ class Death(esper.Processor):
                 event.Log.append(message)
             if esper.has_component(killable, cmp.Cell):
                 floor = create.tile.floor(pos.x, pos.y)
-                location.BOARD.set_cell(pos.x, pos.y, floor)
-                location.BOARD.build_entity_cache()
+                board.set_cell(pos.x, pos.y, floor)
+                board.build_entity_cache()
             else:
-                location.BOARD.remove(killable)
+                board.remove(killable)
                 esper.delete_entity(killable, immediate=True)
 
 
@@ -254,6 +257,7 @@ class GameInputEvent(InputEvent):
 
     def to_target(self, slot: int):
         # TODO: This probably wants to take spell_ent and not slot num
+        board = location.get_board()
 
         casting_spell = None
         for spell_ent, (known) in esper.get_component(cmp.Known):
@@ -267,7 +271,7 @@ class GameInputEvent(InputEvent):
 
         player_pos = location.player_position()
         xhair_ent = ecs.Query(cmp.Crosshair, cmp.Position).first()
-        location.BOARD.reposition(xhair_ent, *player_pos)
+        board.reposition(xhair_ent, *player_pos)
         esper.add_component(casting_spell, cmp.Targeting())
         phase.change_to(phase.Ontology.target)
 
@@ -275,7 +279,8 @@ class GameInputEvent(InputEvent):
 @dataclass
 class NPCTurn(esper.Processor):
     def follow(self, start: cmp.Position, end: cmp.Position):
-        cost = location.BOARD.as_move_graph()
+        board = location.get_board()
+        cost = board.as_move_graph()
         graph = tcod.path.SimpleGraph(cost=cost, cardinal=1, diagonal=0)
         pf = tcod.path.Pathfinder(graph)
         pf.add_root(start.as_tuple)
@@ -369,6 +374,7 @@ class Render(esper.Processor):
         startx, endx = (display.PANEL_WIDTH, display.R_PANEL_START)
         starty, endy = (0, display.BOARD_HEIGHT)
         self.console.rgb[startx:endx, starty:endy] = cell_rgbs
+        # TODO if the magnification changes, the above line breaks
         self.context.present(self.console)
 
 
@@ -502,26 +508,28 @@ class BoardRender(Render):
 
     def _apply_lighting(self, cell_rgbs, in_fov) -> list[list[typ.CELL_RGB]]:
         """display cells in fov with lighting, explored without, and hide the rest"""
+        board = location.get_board()
         # for screenshots, debugging
-        # for cell in location.BOARD.as_sequence():
+        # for cell in board.as_sequence():
         # location.Board.explored.add(cell)
         for x, col in enumerate(cell_rgbs):
             for y, (glyph, fgcolor, _) in enumerate(col):
-                cell = location.BOARD.get_cell(x, y)
+                cell = board.get_cell(x, y)
                 if not cell:
                     continue
                 if in_fov[x][y]:
-                    location.BOARD.explored.add(cell)
+                    board.explored.add(cell)
                     brighter = display.brighter(fgcolor, scale=100)
                     cell_rgbs[x][y] = (glyph, brighter, display.Color.CANDLE)
-                elif cell in location.BOARD.explored:
+                elif cell in board.explored:
                     cell_rgbs[x][y] = (glyph, fgcolor, display.Color.BLACK)
                 else:
                     cell_rgbs[x][y] = (display.Glyph.NONE, display.Color.BLACK, display.Color.BLACK)
         return cell_rgbs
 
     def _get_cell_rgbs(self):
-        board = location.BOARD
+        board = location.get_board()
+
         cell_rgbs = [list(map(board.as_rgb, row)) for row in board.cells]
 
         in_fov = location.get_fov()
@@ -652,8 +660,10 @@ class TargetInputEvent(InputEvent):
     def select(self):
         xhair_pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(cmp.Position)
         targeting_entity = ecs.Query(cmp.Targeting).first()
+        board = location.get_board()
+
         if not esper.has_component(targeting_entity, cmp.Target):
-            cell = xhair_pos.lookup_in(location.BOARD.cells)
+            cell = xhair_pos.lookup_in(board.cells)
             trg = cmp.Target(target=cell)
             esper.add_component(targeting_entity, trg)
 
@@ -750,7 +760,9 @@ class InventoryInputEvent(InputEvent):
         player_pos = location.player_position()
         drop_pos = cmp.Position(x=player_pos.x, y=player_pos.y)
         esper.add_component(selection, drop_pos)
-        location.BOARD.entities_at(drop_pos).add(selection)
+
+        board = location.get_board()
+        board.entities_at(drop_pos).add(selection)
         phase.change_to(phase.Ontology.level, NPCTurn)
 
     def use_item(self, selection):

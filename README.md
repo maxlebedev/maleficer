@@ -156,6 +156,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * this can get out of hand, esp if the cooldown on that spell is low
     - Some sort of Storm/Combo mechanic would be really cool
     - Should some damge be in ranges?
+        * If they are, I'm always a fan of dice pools
     - small chance of "named" scrolls with unique effects
     - goblins should actually try to be at dist 4 to player
         * when on cooldown BFS a position with dist 4, then move a step
@@ -175,6 +176,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * escalates in damage
     - do I want hidden/invisible elements? (traps, assasins)
     - items in maze should be in dead-ends only
+    - binary(ish) space partitioning, plus prefabs of that size
 ## UX
     - Should all ranged animations happen simultaneously?
         * animation queue?
@@ -188,13 +190,10 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * since that assumes a starting X coord
 # BUGS
     - Found a wall I was able to walk through in the caves.
+        * Sometimes enemies turn into walls when they die
+        * those walls can be walked through
+        * I think this is bc enemies spawn *in* the wall with same pos
     - MenuSelection maybe wants to be reset when moving thru menus
     - Bombs dealing damage to each other loop and break game
         * maybe bombs just can't dmg each other
         * maybe we don't oneshot proc the damage (so, finish death)
-    - Went down from maze to cave lvl, killed a bat
-        * KeyError: 20554
-        * self.entities_at(pos).remove(entity)
-        * this doesn't happen every time
-            + the next time death failed on lvl2 it was
-            + if esper.has_component(killable, cmp.Cell):
