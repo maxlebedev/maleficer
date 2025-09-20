@@ -130,9 +130,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * Get can be *much* more dynamic about what runs where 
             + a state machine for various turn flows
             + single exec via a simple queue_proc() func 
-    - A GameMeta to hold globals
-        * console, context at minimum. those are annoying to pass around
-        * level, board are globals now, so this would be an improvement
     - The main callback that needs a ref to source is lob_bomb
         * It sure would be nice if it didn't need that
         * We could rewrite lob_bomb as a proc. LobberNPC or something
