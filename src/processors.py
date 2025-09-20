@@ -517,7 +517,7 @@ class BoardRender(Render):
                 elif cell in location.BOARD.explored:
                     cell_rgbs[x][y] = (glyph, fgcolor, display.Color.BLACK)
                 else:
-                    cell_rgbs[x][y] = (glyph, display.Color.BLACK, display.Color.BLACK)
+                    cell_rgbs[x][y] = (display.Glyph.NONE, display.Color.BLACK, display.Color.BLACK)
         return cell_rgbs
 
     def _get_cell_rgbs(self):
