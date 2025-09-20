@@ -144,12 +144,18 @@ class Damage(esper.Processor):
 
 @dataclass
 class Death(esper.Processor):
-    def process(self):
-        board = location.get_board()
+
+    def queue_zero_health(self):
         for ent, (hp,) in ecs.Query(cmp.Health):
-            if hp.current <= 0 and ent not in event.Queues.death:
+            if hp.current <= 0:
+                cmps = esper.components_for_entity(ent)
+                print(f"{ent=} {cmps}")
                 event.Death(ent)
 
+    def process(self):
+        board = location.get_board()
+
+        self.queue_zero_health()
         while event.Queues.death:
             killable = event.Queues.death.popleft().entity
             if not esper.entity_exists(killable):
@@ -170,6 +176,7 @@ class Death(esper.Processor):
             else:
                 board.remove(killable)
                 esper.delete_entity(killable, immediate=True)
+            self.queue_zero_health()
 
 
 @dataclass

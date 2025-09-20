@@ -505,12 +505,23 @@ def make_maze_blueprint():
             seen.append(current)
         else:
             current = backtrack.pop()
-    return blueprint, seen
+
+    dead_ends = []
+    for x in range(end_x):
+        for y in range(end_y):
+            if x % 2 == 1 and y % 2 == 1:
+                walls = 0
+                for ox, oy in [(-1, 0), (1, 0), (0, 1), (0, -1)]:
+                    walls += blueprint[x+ox][y+oy]
+                if walls == 3:
+                    dead_ends.append([x,y])
+
+    return blueprint, seen, dead_ends
 
 
 def maze_dungeon(board: Board):
     board.fill()
-    blueprint, seen = make_maze_blueprint()
+    blueprint, seen, dead_ends = make_maze_blueprint()
     player_pos = player_position()
 
     hydrate = lambda x: x * 2
@@ -531,24 +542,29 @@ def maze_dungeon(board: Board):
 
     spawn_table = {
         create.item.trap: 3,
-        create.item.potion: 2,
-        create.item.scroll: 1,
         create.npc.bat: 5,
         create.npc.goblin: 3,
         create.npc.warlock: 1,
     }
 
-    for x, y in seen[1:-1]:
-        if not random.randint(0, 2):
-            continue
+    def place_from_table(spawn_table, coords, odds):
+        for x, y in coords:
+            if not random.randint(0, odds):
+                continue
 
-        offset = random.choice([(0, 0), (1, 0), (0, 1), (1, 1)])
-        spawn_x = 2 * x + offset[0]
-        spawn_y = 2 * y + offset[1]
-        pos = cmp.Position(x=spawn_x, y=spawn_y)
+            offset = random.choice([(0, 0), (1, 0), (0, 1), (1, 1)])
+            spawn_x = 2 * x + offset[0]
+            spawn_y = 2 * y + offset[1]
+            pos = cmp.Position(x=spawn_x, y=spawn_y)
 
-        spawn = math_util.from_table(spawn_table)
-        spawn(pos)
+            spawn = math_util.from_table(spawn_table)
+            spawn(pos)
+    place_from_table(spawn_table, seen[1:-1], 2)
+    spawn_table = {
+        create.item.potion: 2,
+        create.item.scroll: 1,
+    }
+    place_from_table(spawn_table, dead_ends, 2)
 
 
 def generate_test_dungeon(board):
