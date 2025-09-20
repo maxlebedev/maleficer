@@ -1,16 +1,25 @@
 from collections.abc import Callable
 from dataclasses import dataclass as component
-from typing import TypeVar
+
+import typing
 
 import display
 import typ
 
-T = TypeVar("T")
+T = typing.TypeVar("T")
 
 
 @component
 class Player:
     pass
+
+
+@component
+class GameMeta:
+    board: object  # location.Board
+    mood: dict
+    level: int = 0
+    menu_selection: int = 0
 
 
 @component
@@ -170,6 +179,7 @@ class MainMenu:
 @component
 class StartMenu:
     """Indicates an element of the start menu"""
+
     import phase
 
     prev = phase.Ontology.main_menu

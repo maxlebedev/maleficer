@@ -4,6 +4,7 @@ from functools import partial
 import esper
 import tcod
 
+import components as cmp
 import display
 import location
 import phase
@@ -69,6 +70,9 @@ def main() -> None:
         context.sdl_window.fullscreen = tcod.context.SDL_WINDOW_FULLSCREEN_DESKTOP
 
     location.BOARD = location.Board()
+    color_mood = display.Mood.shuffle()
+    game_meta = cmp.GameMeta(board=location.BOARD, mood=color_mood)
+    esper.create_entity(game_meta)
 
     phase.setup(context, console)
     phase.change_to(phase.Ontology.main_menu)

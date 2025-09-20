@@ -4,6 +4,7 @@ import components as cmp
 import display as dis
 import ecs
 import location
+import math_util
 
 
 def floor(x: int, y: int) -> int:
@@ -13,7 +14,9 @@ def floor(x: int, y: int) -> int:
 
 
 def wall(x: int, y: int, breakable: int = False) -> int:
-    vis = cmp.Visible(glyph=dis.Glyph.WALL, color=dis.Color.LGREY)
+    mood = ecs.Query(cmp.GameMeta).val.mood
+    color = math_util.from_table(mood)
+    vis = cmp.Visible(glyph=dis.Glyph.WALL, color=color)
     pos = cmp.Position(x, y)
     blocking = cmp.Blocking()
     wall = cmp.Wall()
@@ -36,9 +39,10 @@ def stairs(x: int, y: int) -> int:
 
     def descend(_):
         player = ecs.Query(cmp.Player).first()
+        game_meta = ecs.Query(cmp.GameMeta).val
         if target_cmp := esper.try_component(stairs, cmp.Target):
             if target_cmp.target == player:
-                location.LEVEL += 1
+                game_meta.level += 1
                 location.new_level()
 
     st = cmp.StepTrigger(callbacks=[descend])

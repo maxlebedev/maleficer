@@ -18,7 +18,9 @@ def initial_map():
 def start_game():
     initial_map()
     create.player.starting_inventory()
-    location.LEVEL = 1
+
+    game_meta = ecs.Query(cmp.GameMeta).val
+    game_meta.level = 1
 
     order0 = lambda x: x.order == 0
     all_main_menu_opts = ecs.Query(cmp.MainMenu, cmp.MenuItem)
@@ -45,8 +47,10 @@ def main_menu_opts():
     _make_menuitem(cmp.MainMenu, callback, "Options", 1)
     callback = lambda _: phase.change_to(phase.Ontology.about)
     _make_menuitem(cmp.MainMenu, callback, "About", 2)
+
     def exit(_):
         raise SystemExit()
+
     _make_menuitem(cmp.MainMenu, exit, "Quit", 3)
 
 

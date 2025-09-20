@@ -170,6 +170,11 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - 3rd char, 1 pull+aegis spell, 1 kill spell with min range
     - Doors via conditional blocking
     - basic lighting attack that uses the ray func I made
+    - mageblight: a curse that harms player when they don't progress the game
+        * probably when they spend N turns without killing an enemy
+        * escalates in damage
+    - do I want hidden/invisible elements? (traps, assasins)
+    - items in maze should be in dead-ends only
 ## UX
     - Should all ranged animations happen simultaneously?
         * animation queue?
@@ -179,9 +184,17 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - other menus probably want backgrounds.
         * side panels might too
     - rework blit_image
+    - add ├ and ┤ to dashes, but not just via panel_contents list
+        * since that assumes a starting X coord
 # BUGS
     - Found a wall I was able to walk through in the caves.
     - MenuSelection maybe wants to be reset when moving thru menus
     - Bombs dealing damage to each other loop and break game
         * maybe bombs just can't dmg each other
         * maybe we don't oneshot proc the damage (so, finish death)
+    - Went down from maze to cave lvl, killed a bat
+        * KeyError: 20554
+        * self.entities_at(pos).remove(entity)
+        * this doesn't happen every time
+            + the next time death failed on lvl2 it was
+            + if esper.has_component(killable, cmp.Cell):

@@ -11,10 +11,10 @@ import components as cmp
 import create
 import display
 import ecs
+import math_util
 import typ
 
 BOARD: "Board"
-LEVEL = 0
 
 
 def player_position():
@@ -70,6 +70,7 @@ class Board:
         self.cells = []
         self.board_size = display.BOARD_WIDTH * display.BOARD_HEIGHT
 
+    def fill(self):
         def make_wall(x, y):
             if x in (0, display.BOARD_WIDTH - 1):
                 return create.tile.wall(x, y)
@@ -257,6 +258,7 @@ def closest_position(start: cmp.Position, options: list[cmp.Position]) -> cmp.Po
 
 
 def generate_dungeon(board, max_rooms=30, max_rm_siz=10, min_rm_siz=6):
+    board.fill()
     rooms: list[RectangularRoom] = []
     centers: list[cmp.Position] = []
     for _ in range(max_rooms):
@@ -308,6 +310,8 @@ def new_level():
     for to_del, _ in old_level:
         esper.delete_entity(to_del, immediate=True)
 
+    game_meta = ecs.Query(cmp.GameMeta).val
+    game_meta.mood = display.Mood.shuffle()
     BOARD = Board()
     levels = [generate_dungeon, cave_dungeon, maze_dungeon]
     level_func = random.choice(levels)
@@ -372,6 +376,7 @@ def build_perimeter_wall(board):
 
 
 def cave_dungeon(board):
+    board.fill()
     for cell in board.as_sequence():
         if not random.randint(0, 1):
             cell_pos = esper.component_for_entity(cell, cmp.Position)
@@ -423,15 +428,16 @@ def cave_dungeon(board):
     board.retile(*valid_spawns[-1][1], create.tile.stairs)
 
     spawn_table = {
-         create.item.trap: 3,
-         create.item.potion: 2,
-         create.item.scroll: 1,
-         create.npc.bat: 5,
-         create.npc.goblin: 3,
-         create.npc.warlock: 1,
+        create.item.trap: 3,
+        create.item.potion: 2,
+        create.item.scroll: 1,
+        create.npc.bat: 5,
+        create.npc.goblin: 3,
+        create.npc.warlock: 1,
     }
     for _, pos in valid_spawns[:-1]:
-        spawn_at(spawn_table, pos)
+        spawn = math_util.from_table(spawn_table)
+        spawn(pos)
 
 
 def in_player_perception(pos: cmp.Position):
@@ -501,6 +507,7 @@ def make_maze_blueprint():
 
 
 def maze_dungeon(board: Board):
+    board.fill()
     blueprint, seen = make_maze_blueprint()
     player_pos = player_position()
 
@@ -534,21 +541,17 @@ def maze_dungeon(board: Board):
             continue
 
         offset = random.choice([(0, 0), (1, 0), (0, 1), (1, 1)])
-        spawn_x = 2*x + offset[0]
-        spawn_y = 2*y + offset[1]
+        spawn_x = 2 * x + offset[0]
+        spawn_y = 2 * y + offset[1]
         pos = cmp.Position(x=spawn_x, y=spawn_y)
 
-        spawn_at(spawn_table, pos)
-
-def spawn_at(spawn_table: dict, pos: cmp.Position):
-    pop = list(spawn_table.keys())
-    weights = list(spawn_table.values())
-    spawn = random.choices(pop, weights)[0]
-    spawn(pos)
+        spawn = math_util.from_table(spawn_table)
+        spawn(pos)
 
 
 def generate_test_dungeon(board):
     """one room, one enemy, one item"""
+    board.fill()
     room_x = display.BOARD_WIDTH // 2
     room_y = display.BOARD_HEIGHT // 2
     new_room = RectangularRoom(room_x, room_y, 10, 10)

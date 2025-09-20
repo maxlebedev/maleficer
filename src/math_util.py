@@ -1,4 +1,5 @@
 import esper
+import random
 import numpy as np
 
 import components as cmp
@@ -69,3 +70,10 @@ def bresenham_ray(origin: cmp.Position, dest: cmp.Position):
         x += 1
     # excluding origin
     return ray[1:]
+
+
+def from_table(table: dict):
+    pop = list(table.keys())
+    weights = list(table.values())
+    selection = random.choices(pop, weights)
+    return selection[0]

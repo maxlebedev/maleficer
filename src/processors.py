@@ -199,7 +199,10 @@ class GameInputEvent(InputEvent):
             input.KEYMAP[input.Input.MOVE_LEFT]: (self.move, [-1, 0]),
             input.KEYMAP[input.Input.MOVE_UP]: (self.move, [0, -1]),
             input.KEYMAP[input.Input.MOVE_RIGHT]: (self.move, [1, 0]),
-            input.KEYMAP[input.Input.ESC]: (phase.change_to, [phase.Ontology.main_menu]),
+            input.KEYMAP[input.Input.ESC]: (
+                phase.change_to,
+                [phase.Ontology.main_menu],
+            ),
             input.KEYMAP[input.Input.SPELL1]: (self.handle_slot_key, [1]),
             input.KEYMAP[input.Input.SPELL2]: (self.handle_slot_key, [2]),
             input.KEYMAP[input.Input.SPELL3]: (self.handle_slot_key, [3]),
@@ -351,7 +354,7 @@ class Render(esper.Processor):
     console: tcod.console.Console
     context: tcod.context.Context
 
-    dashes = "-" * (display.PANEL_WIDTH - 2)
+    dashes = "─" * (display.PANEL_WIDTH - 2)
 
     def left_print(self, *args, **kwargs):
         self.console.print(alignment=libtcodpy.LEFT, *args, **kwargs)
@@ -499,6 +502,9 @@ class BoardRender(Render):
 
     def _apply_lighting(self, cell_rgbs, in_fov) -> list[list[typ.CELL_RGB]]:
         """display cells in fov with lighting, explored without, and hide the rest"""
+        # for screenshots, debugging
+        # for cell in location.BOARD.as_sequence():
+        # location.Board.explored.add(cell)
         for x, col in enumerate(cell_rgbs):
             for y, (glyph, fgcolor, _) in enumerate(col):
                 cell = location.BOARD.get_cell(x, y)
@@ -782,7 +788,10 @@ class OptionsRender(Render):
 class OptionsInputEvent(InputEvent):
     def __init__(self):
         self.action_map = {
-            input.KEYMAP[input.Input.ESC]: (phase.change_to, [phase.Ontology.main_menu]),
+            input.KEYMAP[input.Input.ESC]: (
+                phase.change_to,
+                [phase.Ontology.main_menu],
+            ),
         }
 
 
@@ -811,7 +820,10 @@ class AboutRender(Render):
 class AboutInputEvent(InputEvent):
     def __init__(self):
         self.action_map = {
-            input.KEYMAP[input.Input.ESC]: (phase.change_to, [phase.Ontology.main_menu]),
+            input.KEYMAP[input.Input.ESC]: (
+                phase.change_to,
+                [phase.Ontology.main_menu],
+            ),
         }
 
 

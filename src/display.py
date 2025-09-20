@@ -5,6 +5,7 @@ from enum import IntEnum
 from tcod.image import Image
 
 import tcod
+import random
 
 import typ
 
@@ -53,6 +54,43 @@ class Color:
     BAR_EMPTY = RED
     TARGET = (205, 198, 170)  # might change the color later
     FLOOR = (70, 70, 70)
+
+
+class Mood:
+    """mood colors, to differentiate the vibes of different levels"""
+    blue = {
+        (166, 92, 250): 1,
+        (114, 92, 250): 2,
+        (92, 121, 250): 3,
+        (92, 171, 250): 2,
+        (92, 221, 250): 1,
+    }
+    orange = {
+        (237, 203, 97): 1,
+        (237, 186, 97): 2,
+        (237, 165, 97): 3,
+        (237, 140, 97): 2,
+        (237, 116, 97): 1,
+    }
+    green = {
+        (96, 240, 106): 1,
+        (97, 237, 155): 2,
+        (97, 237, 202): 3,
+        (97, 225, 237): 2,
+        (100, 181, 240): 1,
+    }
+    purple = {
+        (164, 96, 240): 1,
+        (209, 97, 237): 2,
+        (237, 97, 205): 3,
+        (237, 97, 121): 2,
+        (240, 118, 101): 1,
+    }
+
+    @classmethod
+    def shuffle(cls):
+        choices = [cls.blue, cls.orange, cls.green, cls.purple]
+        return random.choice(choices)
 
 
 class Glyph(IntEnum):
@@ -197,7 +235,7 @@ def load_tileset(atlas_path: str, width: int, height: int) -> tcod.tileset.Tiles
         tile = font_ts.get_tile(ord(letter))
         tileset.set_tile(ord(letter), tile)
 
-    for char in "┌─┐│ └─┘":
+    for char in "┌─┐│ └─┘├┤":
         tile = font_ts.get_tile(ord(char))
         tileset.set_tile(ord(char), tile)
 
