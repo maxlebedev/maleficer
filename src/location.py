@@ -24,6 +24,7 @@ def player_last_position():
     lp = ecs.Query(cmp.Player).cmp(cmp.LastPosition)
     return lp.pos
 
+
 def get_board():
     game_meta = ecs.Query(cmp.GameMeta).val
     return game_meta.board
@@ -38,7 +39,7 @@ def can_see(entity: int, target: int, distance: int | None = None) -> bool:
     return True
 
 
-def coords_within_radius(pos: cmp.Position, radius: int):
+def coords_within_radius(pos: cmp.Position, radius: int) -> list[typ.COORD]:
     min_x = max(0, pos.x - radius)
     max_x = min(display.BOARD_WIDTH, pos.x + radius + 1)
     min_y = max(0, pos.y - radius)
@@ -410,7 +411,7 @@ def cave_dungeon(board):
             if tile:
                 board.set_cell(x, y, tile)
     build_perimeter_wall(board)
-    #TODO: the 3 cells closes to corner should be wall too
+    # TODO: the 3 cells closes to corner should be wall too
 
     player_pos = player_position()
     player_pos.x = display.BOARD_WIDTH // 2
@@ -512,9 +513,9 @@ def make_maze_blueprint():
             if x % 2 == 1 and y % 2 == 1:
                 walls = 0
                 for ox, oy in [(-1, 0), (1, 0), (0, 1), (0, -1)]:
-                    walls += blueprint[x+ox][y+oy]
+                    walls += blueprint[x + ox][y + oy]
                 if walls == 3:
-                    dead_ends.append([x,y])
+                    dead_ends.append([x, y])
 
     return blueprint, seen, dead_ends
 
@@ -559,6 +560,7 @@ def maze_dungeon(board: Board):
 
             spawn = math_util.from_table(spawn_table)
             spawn(pos)
+
     place_from_table(spawn_table, seen[1:-1], 2)
     spawn_table = {
         create.item.potion: 2,

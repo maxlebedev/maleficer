@@ -144,7 +144,6 @@ class Damage(esper.Processor):
 
 @dataclass
 class Death(esper.Processor):
-
     def queue_zero_health(self):
         for ent, (hp,) in ecs.Query(cmp.Health):
             if hp.current <= 0:
@@ -532,12 +531,18 @@ class BoardRender(Render):
                     continue
                 if in_fov[x][y]:
                     board.explored.add(cell)
-                    brighter = display.brighter(fgcolor, scale=100)
-                    cell_rgbs[x][y] = (glyph, brighter, display.Color.CANDLE)
+
+                    if phase.CURRENT != phase.Ontology.target:
+                        brighter = display.brighter(fgcolor, scale=100)
+                        cell_rgbs[x][y] = (glyph, brighter, display.Color.CANDLE)
                 elif cell in board.explored:
                     cell_rgbs[x][y] = (glyph, fgcolor, display.Color.BLACK)
                 else:
-                    cell_rgbs[x][y] = (display.Glyph.NONE, display.Color.BLACK, display.Color.BLACK)
+                    cell_rgbs[x][y] = (
+                        display.Glyph.NONE,
+                        display.Color.BLACK,
+                        display.Color.BLACK,
+                    )
         return cell_rgbs
 
     def _get_cell_rgbs(self):
@@ -708,9 +713,31 @@ class TargetRender(BoardRender):
         if aoe := esper.try_component(targeting_ent, cmp.EffectArea):
             highlighted += aoe.callback(pos)
 
+        if spell := esper.try_component(targeting_ent, cmp.Spell):
+            source = location.player_position()
+            range_aoe = location.coords_within_radius(source, spell.target_range)
+            for x, y in range_aoe:
+                cell = cell_rgbs[x][y]
+                glyph, fg, bg = cell[0], cell[1], cell[2]
+
+                bg = display.Color.CANDLE
+                fg = display.brighter(fg, scale=100)
+                repaintable = (
+                    display.Glyph.FLOOR,
+                    display.Glyph.WALL,
+                    display.Glyph.BWALL,
+                )
+                if cell[0] in repaintable:
+                    fg = display.Color.BEIGE
+                if cell[0] == display.Glyph.NONE:
+                    bg = display.brighter(bg, scale=25)
+
+                cell_rgbs[x][y] = glyph, fg, bg
+
         for x, y in highlighted:
             cell = cell_rgbs[x][y]
-            cell_rgbs[x][y] = cell[0], cell[1], display.Color.TARGET
+            xhair = display.darker(display.Color.LCYAN, 50)
+            cell_rgbs[x][y] = cell[0], cell[1], xhair
 
         self.present(cell_rgbs)
 

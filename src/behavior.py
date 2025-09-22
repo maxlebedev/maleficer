@@ -41,6 +41,7 @@ def collect_all_affected_entities(source: int, target: int) -> list[int]:
 
 def lob_bomb(source: int):
     import create
+
     board = location.get_board()
 
     player = ecs.Query(cmp.Player).first()

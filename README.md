@@ -179,13 +179,13 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Should all ranged animations happen simultaneously?
         * animation queue?
     - one-turn-per-square moving projectiles
-    - when targeting, valid xhair area should be inicated by aoe
     - use that M icon
     - other menus probably want backgrounds.
         * side panels might too
     - rework blit_image
     - add ├ and ┤ to dashes, but not just via panel_contents list
         * since that assumes a starting X coord
+    - TargetRender.render and _apply_lighting need a DRY pass/refactor
 # BUGS
     - Found a wall I was able to walk through in the caves.
         * Sometimes enemies turn into walls when they die

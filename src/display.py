@@ -39,25 +39,30 @@ class Color:
     BLOOD_RED = (187, 10, 30)
     BLUE = (0, 0, 255)
     CYAN = (0, 255, 255)
+    LCYAN = (186, 225, 255)
     LGREY = (100, 100, 100)
     DGREY = (50, 50, 50)
     YELLOW = (55, 55, 37)
     ORANGE = (255, 128, 0)
+    LORANGE = (255, 223, 186)
     MAGENTA = (253, 61, 181)
     BROWN = (94, 44, 4)
     INDIGO = (75, 0, 130)
     CHOCOLATE = (210, 105, 30)
     LEMON = (255, 250, 205)
+    BEIGE = (245, 245, 220)
 
     CANDLE = (97, 85, 52)
     BAR_FILLED = GREEN
     BAR_EMPTY = RED
-    TARGET = (205, 198, 170)  # might change the color later
+    # TARGET = (205, 198, 170)  # off-white
+    TARGET = (136, 175, 205)  # light cyan
     FLOOR = (70, 70, 70)
 
 
 class Mood:
     """mood colors, to differentiate the vibes of different levels"""
+
     blue = {
         (166, 92, 250): 1,
         (114, 92, 250): 2,
