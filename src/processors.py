@@ -736,8 +736,7 @@ class TargetRender(BoardRender):
 
         for x, y in highlighted:
             cell = cell_rgbs[x][y]
-            xhair = display.darker(display.Color.LCYAN, 50)
-            cell_rgbs[x][y] = cell[0], cell[1], xhair
+            cell_rgbs[x][y] = cell[0], cell[1], display.Color.TARGET
 
         self.present(cell_rgbs)
 
