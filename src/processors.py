@@ -729,8 +729,6 @@ class TargetRender(BoardRender):
                 )
                 if cell[0] in repaintable:
                     fg = display.Color.BEIGE
-                if cell[0] == display.Glyph.NONE:
-                    bg = display.brighter(bg, scale=25)
 
                 cell_rgbs[x][y] = glyph, fg, bg
 

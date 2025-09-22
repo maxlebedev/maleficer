@@ -91,6 +91,8 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * A proposed refactor where we have much more procs, many with guards
         * each npc type, gets its own for example
         * this would hopefully replace Phases and callbacks
+    - The color scheme is.. color balanced for backing candle light
+        - at least for NPCs
 
 # TODO
 
@@ -135,7 +137,8 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * We could rewrite lob_bomb as a proc. LobberNPC or something
             + This also paves the way for every npc to have their own proc
     - board currently is 66*67. I could make it 64*64. Leave room for a border
-    - OnDeath/DeathTrigger OnStep/StepTriger redundancy. The 'On's could be more ECS-compliant
+    - OnDeath/DeathTrigger OnStep/StepTriger redundancy.
+        * The 'On's could be more ECS-compliant
 ## Game Mechanics/Balance
     - spell mods (+1 range, +1 dmg pickups)
     - cooldown alternatives like damage taken, steps walked (lotta tracking)
