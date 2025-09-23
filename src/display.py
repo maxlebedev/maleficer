@@ -273,5 +273,55 @@ def blit_image(console, img, scale):
 def write_rgbs(console, cell_rgbs):
     startx, endx = (BOARD_STARTX, BOARD_ENDX)
     starty, endy = (BOARD_STARTY, BOARD_ENDY)
+
+    cell_rgbs = coords_for_cam(cell_rgbs)
+
     console.rgb[startx:endx, starty:endy] = cell_rgbs
     # TODO if the magnification changes, the above line breaks
+
+def get_board_rgb(console, x, y):
+    cx = x // 2
+    cy = y // 2
+    return console.rgb[BOARD_STARTX + cx, cy]
+
+
+def set_board_rgb(console, x, y, val):
+    cx = x // 2
+    cy = y // 2
+    console.rgb[BOARD_STARTX + cx, cy] = val
+
+
+def coords_for_cam(cell_rgbs):
+    import location
+    """cam is 32x32 for now"""
+    cam_l = 32
+    cam_w = 32
+    player_pos = location.player_position()
+    board = location.get_board()
+
+    max_x = player_pos.x + (cam_w // 2)
+    min_x = player_pos.x - (cam_w // 2)
+    if min_x < 0:
+        max_x = cam_w
+        min_x = 0
+    if max_x > len(board.cells):
+        max_x = len(board.cells)
+        min_x = max_x - cam_w
+
+    max_y = player_pos.y + (cam_l // 2)
+    min_y = player_pos.y - (cam_l // 2)
+    if min_y < 0:
+        max_y = cam_l
+        min_y = 0
+    if max_y > len(board.cells):
+        max_y = len(board.cells[0])
+        min_y = max_y - cam_l
+
+    ret = []
+    for x in range(min_x, max_x):
+        row = []
+        for y in range(min_y, max_y):
+            row.append(cell_rgbs[x][y])
+        ret.append(row)
+
+    return ret

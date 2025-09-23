@@ -26,7 +26,7 @@ def flash(context, console):
 def flash_pos(context, console, position, *args):
     """change glyph of a position"""
     esper.dispatch_event("redraw")
-    cell = console.rgb[display.BOARD_STARTX + position.x, position.y]
+    cell = display.get_board_rgb(console, *position)
     glyph, color, bg = cell
     for arg in args:
         if isinstance(arg, tuple):
@@ -38,7 +38,7 @@ def flash_pos(context, console, position, *args):
     if in_fov[position.x][position.y]:
         bg = display.Color.CANDLE
     cell = (glyph, color, bg)
-    console.rgb[display.BOARD_STARTX + position.x, position.y] = cell
+    display.set_board_rgb(console, position.x, position.y, cell)
     context.present(console)
     time.sleep(0.05)  # display long enough to be seen
 
@@ -61,7 +61,7 @@ def main() -> None:
     }
 
     context = tcod.context.new(**context_params)
-    console = context.new_console(order="F")
+    console = context.new_console(order="F", magnification=2)
 
     context.present = partial(context.present, keep_aspect=True)
     if context.sdl_window:
