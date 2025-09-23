@@ -147,8 +147,6 @@ class Death(esper.Processor):
     def queue_zero_health(self):
         for ent, (hp,) in ecs.Query(cmp.Health):
             if hp.current <= 0:
-                cmps = esper.components_for_entity(ent)
-                print(f"{ent=} {cmps}")
                 event.Death(ent)
 
     def process(self):
@@ -383,10 +381,7 @@ class Render(esper.Processor):
         self.console.print(alignment=libtcodpy.RIGHT, *args, **kwargs)
 
     def present(self, cell_rgbs):
-        startx, endx = (display.PANEL_WIDTH, display.R_PANEL_START)
-        starty, endy = (0, display.BOARD_HEIGHT)
-        self.console.rgb[startx:endx, starty:endy] = cell_rgbs
-        # TODO if the magnification changes, the above line breaks
+        display.write_rgbs(self.console, cell_rgbs)
         self.context.present(self.console)
 
 

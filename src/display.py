@@ -17,16 +17,22 @@ TS_WIDTH = 49
 TS_HEIGHT = 22
 
 
-PANEL_WIDTH = 27  # 42
+PANEL_WIDTH = 28
 # display.BOARD_WIDTH=66 display.BOARD_HEIGHT=67
 PANEL_HEIGHT = CONSOLE_HEIGHT // TILE_SIZE
 
-BOARD_HEIGHT = CONSOLE_HEIGHT // TILE_SIZE
-BOARD_WIDTH = (CONSOLE_WIDTH // TILE_SIZE) - PANEL_WIDTH - PANEL_WIDTH
+BOARD_HEIGHT = 64
+BOARD_WIDTH = 64
 
-R_PANEL_START = PANEL_WIDTH + BOARD_WIDTH
+
+R_PANEL_START = (CONSOLE_WIDTH // TILE_SIZE) - PANEL_WIDTH
 CENTER_W = PANEL_WIDTH + (BOARD_WIDTH // 2)
 CENTER_H = BOARD_HEIGHT // 2
+
+BOARD_STARTX = PANEL_WIDTH
+BOARD_ENDX = R_PANEL_START
+BOARD_STARTY = 1
+BOARD_ENDY = BOARD_STARTY + BOARD_HEIGHT
 
 
 class Color:
@@ -262,3 +268,10 @@ def remap_glyphs():
 def blit_image(console, img, scale):
     args = {"x": CENTER_W, "y": CENTER_H, "bg_blend": 1, "angle": 0}
     img.blit(console, scale_x=scale, scale_y=scale, **args)
+
+
+def write_rgbs(console, cell_rgbs):
+    startx, endx = (BOARD_STARTX, BOARD_ENDX)
+    starty, endy = (BOARD_STARTY, BOARD_ENDY)
+    console.rgb[startx:endx, starty:endy] = cell_rgbs
+    # TODO if the magnification changes, the above line breaks

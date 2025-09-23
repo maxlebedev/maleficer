@@ -461,11 +461,11 @@ def make_maze_blueprint():
     then pick an unvisited neighbor and repeat
     when there are no neighbors, pop stack and try again for that space
     """
-    end_x = display.BOARD_WIDTH // 2
-    end_y = display.BOARD_HEIGHT // 2
+    end_x = (display.BOARD_WIDTH // 2) +1
+    end_y = (display.BOARD_HEIGHT // 2) +1
     blueprint = []
     for _ in range(end_x):
-        blueprint.append([1 for _ in range(end_y + 1)])
+        blueprint.append([1 for _ in range(end_y)])
 
     # even coord pairs are floor nodes, to be connected
     for x in range(end_x):
@@ -482,7 +482,7 @@ def make_maze_blueprint():
 
         neighbors = []
         for x, y in indices:
-            if x > 0 and x < end_x - 1 and y > 0 and y < end_y:
+            if x > 0 and x < end_x and y > 0 and y < end_y:
                 if [x, y] not in seen:
                     neighbors.append([x, y])
         return neighbors
@@ -510,6 +510,8 @@ def make_maze_blueprint():
     dead_ends = []
     for x in range(end_x):
         for y in range(end_y):
+            if [x,y] in (seen[-1], seen[0]):
+                continue
             if x % 2 == 1 and y % 2 == 1:
                 walls = 0
                 for ox, oy in [(-1, 0), (1, 0), (0, 1), (0, -1)]:
@@ -525,15 +527,15 @@ def maze_dungeon(board: Board):
     blueprint, seen, dead_ends = make_maze_blueprint()
     player_pos = player_position()
 
-    hydrate = lambda x: x * 2
+    hydrate = lambda x: (x * 2) -1
+    dehydrate = lambda x: (x + 1) // 2
 
     player_pos.x, player_pos.y = map(hydrate, seen[-1])
     stair_x, stair_y = map(hydrate, seen[0])
 
     for cell in board.as_sequence():
         pos = esper.component_for_entity(cell, cmp.Position)
-        bx = pos.x // 2
-        by = pos.y // 2
+        bx, by = map(dehydrate, pos.as_tuple)
         if blueprint[bx][by]:
             cell = create.tile.wall(*pos)
         else:
@@ -554,8 +556,8 @@ def maze_dungeon(board: Board):
                 continue
 
             offset = random.choice([(0, 0), (1, 0), (0, 1), (1, 1)])
-            spawn_x = 2 * x + offset[0]
-            spawn_y = 2 * y + offset[1]
+            spawn_x = hydrate(x) + offset[0]
+            spawn_y = hydrate(y) + offset[1]
             pos = cmp.Position(x=spawn_x, y=spawn_y)
 
             spawn = math_util.from_table(spawn_table)
