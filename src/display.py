@@ -279,6 +279,19 @@ def write_rgbs(console, cell_rgbs):
     console.rgb[startx:endx, starty:endy] = cell_rgbs
     # TODO if the magnification changes, the above line breaks
 
+def write_rgbs_blit(context, console, cell_rgbs):
+
+    cell_rgbs = coords_for_cam(cell_rgbs)
+    board_console = context.new_console(order="F", magnification=2)
+    board_console.rgb[0:32, 0:32] = cell_rgbs
+    board_console.blit(
+        console, 
+        dest_x=BOARD_STARTX,
+        dest_y=BOARD_STARTY,
+        width=64,
+        height=64,
+    )
+
 def get_board_rgb(console, x, y):
     cx = x // 2
     cy = y // 2
