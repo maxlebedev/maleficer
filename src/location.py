@@ -30,6 +30,10 @@ def get_board():
     return game_meta.board
 
 
+def matrix(x: int, y: int, val: int):
+    return [[val for _ in range(x)] for _ in range(y)]
+
+
 def can_see(entity: int, target: int, distance: int | None = None) -> bool:
     dest_cell, trace = trace_ray(entity, target)
     if dest_cell != target:  # no LOS
@@ -91,10 +95,7 @@ class Board:
         return (vis.glyph, vis.color, vis.bg_color)
 
     def as_transparency(self) -> list[typ.COORD]:
-        transparency = []
-        for _ in range(display.BOARD_WIDTH):
-            col = [None for _ in range(display.BOARD_HEIGHT)]
-            transparency.append(col)
+        transparency = matrix(display.BOARD_WIDTH, display.BOARD_HEIGHT, 1)
 
         for x, col in enumerate(self.cells):
             for y, cell in enumerate(col):
@@ -102,10 +103,7 @@ class Board:
         return transparency
 
     def as_move_graph(self) -> list[typ.COORD]:
-        graph = []
-        for _ in range(display.BOARD_WIDTH):
-            col = [None for _ in range(display.BOARD_HEIGHT)]
-            graph.append(col)
+        graph = matrix(display.BOARD_WIDTH, display.BOARD_HEIGHT, 1)
 
         for x, col in enumerate(self.cells):
             for y, _ in enumerate(col):
@@ -385,15 +383,13 @@ def cave_dungeon(board):
             board.retile(*cell_pos, create.tile.floor)
     # Horizontal Blanking
     x_slice = slice(3, display.BOARD_WIDTH - 3)
-    midpoint = display.BOARD_HEIGHT // 2
+    midpoint = display.CENTER_H
     y_slice = slice(midpoint - 1, midpoint + 2)
     for cell in board.as_sequence(x_slice, y_slice):
         player_pos = esper.component_for_entity(cell, cmp.Position)
         board.retile(*player_pos, create.tile.floor)
 
-    neighbours = [
-        [0 for _ in range(display.BOARD_HEIGHT)] for _ in range(display.BOARD_WIDTH)
-    ]
+    neighbours = matrix(display.BOARD_WIDTH, display.BOARD_HEIGHT, 0)
     celL_autamata_passes = 4
     for _ in range(celL_autamata_passes):
         for cell in board.as_sequence():
@@ -445,10 +441,11 @@ def cave_dungeon(board):
 
 def in_player_perception(pos: cmp.Position):
     """true if the source is close enough for player to hear"""
-    PLAYER_PERCEPTION_RADIUS = 10
+    player_cmp = ecs.Query(cmp.Player).val
+
     player_pos = player_position()
     dist_to_player = euclidean_distance(player_pos, pos)
-    return dist_to_player < PLAYER_PERCEPTION_RADIUS
+    return dist_to_player < player_cmp.perception_radius
 
 
 def make_maze_blueprint():
@@ -461,11 +458,9 @@ def make_maze_blueprint():
     then pick an unvisited neighbor and repeat
     when there are no neighbors, pop stack and try again for that space
     """
-    end_x = (display.BOARD_WIDTH // 2) +1
-    end_y = (display.BOARD_HEIGHT // 2) +1
-    blueprint = []
-    for _ in range(end_x):
-        blueprint.append([1 for _ in range(end_y)])
+    end_x = (display.BOARD_WIDTH // 2) + 1
+    end_y = (display.BOARD_HEIGHT // 2) + 1
+    blueprint = matrix(end_x, end_y, 1)
 
     # even coord pairs are floor nodes, to be connected
     for x in range(end_x):
@@ -510,7 +505,7 @@ def make_maze_blueprint():
     dead_ends = []
     for x in range(end_x):
         for y in range(end_y):
-            if [x,y] in (seen[-1], seen[0]):
+            if [x, y] in (seen[-1], seen[0]):
                 continue
             if x % 2 == 1 and y % 2 == 1:
                 walls = 0
@@ -527,7 +522,7 @@ def maze_dungeon(board: Board):
     blueprint, seen, dead_ends = make_maze_blueprint()
     player_pos = player_position()
 
-    hydrate = lambda x: (x * 2) -1
+    hydrate = lambda x: (x * 2) - 1
     dehydrate = lambda x: (x + 1) // 2
 
     player_pos.x, player_pos.y = map(hydrate, seen[-1])

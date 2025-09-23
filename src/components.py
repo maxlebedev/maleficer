@@ -11,7 +11,7 @@ T = typing.TypeVar("T")
 
 @component
 class Player:
-    pass
+    perception_radius: int = 10
 
 
 @component
