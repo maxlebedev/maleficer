@@ -191,6 +191,8 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * since that assumes a starting X coord
     - TargetRender.render and _apply_lighting need a DRY pass/refactor
     - Decoupling board from screen size
+        * I can't change tile size, and 8x8 is good for side panels
+        * Given that I can't change tile size, I might not want to do this
 # BUGS
     - Found a wall I was able to walk through in the caves.
         * Sometimes enemies turn into walls when they die

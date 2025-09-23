@@ -1,16 +1,11 @@
 import collections
-import random
-import textwrap
 from dataclasses import dataclass
+import libtcodpy
 
 import esper
 
 import components as cmp
-import condition
 import display
-import ecs
-import location
-import typ
 
 # an event is somethig that happens
 # an action is somthing someone did
@@ -25,10 +20,19 @@ class Log:
     log_len = display.PANEL_HEIGHT - 2
 
     @classmethod
+    def color_fmt(cls, message: str, entity: int):
+        """take a string, and an entity, recolor string with entity fg"""
+        vis = esper.component_for_entity(entity, cmp.Visible)
+        fg = vis.color
+
+        change_fg = f"{libtcodpy.COLCTRL_FORE_RGB:c}{fg[0]:c}{fg[1]:c}{fg[2]:c}"
+        return f"{change_fg}{message}{libtcodpy.COLCTRL_STOP:c}"
+
+    @classmethod
     def append(cls, text: str):
         print(text)
-        for line in textwrap.wrap(text, display.PANEL_WIDTH - 2):
-            cls.messages.append(line)
+
+        cls.messages.append(text)
 
         cls.messages = cls.messages[-cls.log_len :]
         esper.dispatch_event("redraw")

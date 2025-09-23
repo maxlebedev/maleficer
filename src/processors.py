@@ -1,6 +1,5 @@
 import itertools
 from dataclasses import dataclass
-from functools import partial
 
 import esper
 import tcod
@@ -51,7 +50,8 @@ class Movement(esper.Processor):
         esper.add_component(target, cmp.InInventory())
         create.player.inventory_map()
         name = esper.component_for_entity(target, cmp.Onymous).name
-        event.Log.append(f"player picked up {name}")
+        name = event.Log.color_fmt(name, target)
+        event.Log.append(f"picked up {name}")
         # oneshot call some collectable processor?
 
     def process(self):
@@ -449,8 +449,14 @@ class BoardRender(Render):
 
     def _right_panel(self, panel_params):
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
-        for i, message in enumerate(event.Log.messages):
-            self.console.print(1 + display.R_PANEL_START, 1 + i, message)
+        panel_params["x"] = display.R_PANEL_START + 1
+        panel_params["width"] -= 2
+        panel_params["height"] -= 2
+
+        offset = 1
+        for message in event.Log.messages:
+            panel_params["y"] = offset
+            offset += self.console.print_box(string=message,  **panel_params)
 
     def _left_panel(self, panel_params):
         self.console.draw_frame(x=0, **panel_params)
