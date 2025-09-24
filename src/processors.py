@@ -49,8 +49,7 @@ class Movement(esper.Processor):
         board.remove(target)
         esper.add_component(target, cmp.InInventory())
         create.player.inventory_map()
-        name = esper.component_for_entity(target, cmp.Onymous).name
-        name = event.Log.color_fmt(name, target)
+        name = event.Log.color_fmt(target)
         event.Log.append(f"picked up {name}")
         # oneshot call some collectable processor?
 
@@ -99,10 +98,18 @@ class Movement(esper.Processor):
 
 @dataclass
 class Damage(esper.Processor):
-    def _make_message(self, source: str, target: str, amount: int):
-        if amount > 0:
-            return f"{source} deals {amount} to {target}"
-        return f"{source} heals {-1 * amount} to {target}"
+    def _make_message(self, damage):
+        source_name = damage.source[cmp.Onymous].name
+        if cmp.Visible in damage.source:
+            src_color = damage.source[cmp.Visible].color
+            source_name = display.colored_text(source_name, src_color)
+        target_name = event.Log.color_fmt(damage.target)
+        target_name = f"{target_name}#{damage.target}"
+
+        amount = display.colored_text(damage.amount, display.Color.RED)
+        if damage.amount > 0:
+            return f"{source_name} deals {amount} damage to {target_name}"
+        return f"{source_name} heals {target_name} for {-1 * amount}"
 
     def process(self):
         board = location.get_board()
@@ -123,23 +130,12 @@ class Damage(esper.Processor):
 
             math_util.clamp_damage(damage.target, damage.amount)
 
-            to_name = lambda x: esper.component_for_entity(x, cmp.Onymous).name
-            src_name = damage.source[cmp.Onymous].name
-            target_name = f"{to_name(damage.target)}#{damage.target}"
-
-            message = self._make_message(src_name, target_name, damage.amount)
+            message = self._make_message(damage)
 
             if cmp.Position not in damage.source or location.in_player_perception(
                 damage.source[cmp.Position]
             ):
                 event.Log.append(message)
-
-            """
-            hp = esper.component_for_entity(damage.target, cmp.Health)
-            if hp.current <= 0:
-                event.Death(damage.target)
-                phase.oneshot(Death)
-            """
 
 
 @dataclass
@@ -456,7 +452,7 @@ class BoardRender(Render):
         offset = 1
         for message in event.Log.messages:
             panel_params["y"] = offset
-            offset += self.console.print_box(string=message,  **panel_params)
+            offset += self.console.print_box(string=message, **panel_params)
 
     def _left_panel(self, panel_params):
         self.console.draw_frame(x=0, **panel_params)

@@ -5,6 +5,7 @@ from enum import IntEnum
 from tcod.image import Image
 
 import tcod
+import libtcodpy
 import random
 
 import typ
@@ -275,3 +276,9 @@ def write_rgbs(console, cell_rgbs):
     starty, endy = (BOARD_STARTY, BOARD_ENDY)
     console.rgb[startx:endx, starty:endy] = cell_rgbs
     # TODO if the magnification changes, the above line breaks
+
+
+def colored_text(text: str, color: typ.RGB) -> str:
+    fg = color
+    change_fg = f"{libtcodpy.COLCTRL_FORE_RGB:c}{fg[0]:c}{fg[1]:c}{fg[2]:c}"
+    return f"{change_fg}{text}{libtcodpy.COLCTRL_STOP:c}"

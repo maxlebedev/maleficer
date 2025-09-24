@@ -20,13 +20,12 @@ class Log:
     log_len = display.PANEL_HEIGHT - 2
 
     @classmethod
-    def color_fmt(cls, message: str, entity: int):
+    def color_fmt(cls, entity: int):
         """take a string, and an entity, recolor string with entity fg"""
+        message = esper.component_for_entity(entity, cmp.Onymous).name
         vis = esper.component_for_entity(entity, cmp.Visible)
         fg = vis.color
-
-        change_fg = f"{libtcodpy.COLCTRL_FORE_RGB:c}{fg[0]:c}{fg[1]:c}{fg[2]:c}"
-        return f"{change_fg}{message}{libtcodpy.COLCTRL_STOP:c}"
+        return display.colored_text(message, fg)
 
     @classmethod
     def append(cls, text: str):
