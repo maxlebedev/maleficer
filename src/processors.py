@@ -153,14 +153,14 @@ class Death(esper.Processor):
             killable = event.Queues.death.popleft().entity
             if not esper.entity_exists(killable):
                 continue
-            named = esper.component_for_entity(killable, cmp.Onymous)
 
             pos = esper.component_for_entity(killable, cmp.Position)
             if killable_cell := board.get_cell(*pos):
                 esper.add_component(killable, cmp.Target(target=killable_cell))
                 event.trigger_all_callbacks(killable, cmp.DeathTrigger)
             if location.in_player_perception(pos):
-                message = f"{named.name}#{killable} is no more"
+                name = event.Log.color_fmt(killable)
+                message = f"{name}#{killable} is no more"
                 event.Log.append(message)
             if esper.has_component(killable, cmp.Cell):
                 floor = create.tile.floor(pos.x, pos.y)
