@@ -520,7 +520,7 @@ class BoardRender(Render):
         board = location.get_board()
         # for screenshots, debugging
         # for cell in board.as_sequence():
-        # location.Board.explored.add(cell)
+        #     location.Board.explored.add(cell)
         for x, col in enumerate(cell_rgbs):
             for y, (glyph, fgcolor, _) in enumerate(col):
                 cell = board.get_cell(x, y)

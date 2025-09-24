@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import libtcodpy
 
 import esper
+import re
 
 import components as cmp
 import display
@@ -11,6 +12,18 @@ import display
 # an action is somthing someone did
 # event conflicts with input events, and they do overlap
 # am I okay with calling something an action if it doesn't have a sentient origin?
+
+RE_COLOR_CODES = re.compile(
+    rf"{libtcodpy.COLCTRL_1:c}"
+    rf"|{libtcodpy.COLCTRL_2:c}"
+    rf"|{libtcodpy.COLCTRL_3:c}"
+    rf"|{libtcodpy.COLCTRL_4:c}"
+    rf"|{libtcodpy.COLCTRL_5:c}"
+    rf"|{libtcodpy.COLCTRL_FORE_RGB:c}..."
+    rf"|{libtcodpy.COLCTRL_BACK_RGB:c}..."
+    rf"|{libtcodpy.COLCTRL_STOP:c}",
+    flags=re.DOTALL,
+)
 
 
 class Log:
@@ -29,7 +42,8 @@ class Log:
 
     @classmethod
     def append(cls, text: str):
-        print(text)
+        clean_text = RE_COLOR_CODES.sub(repl="", string=text)
+        print(clean_text)
 
         cls.messages.append(text)
 
