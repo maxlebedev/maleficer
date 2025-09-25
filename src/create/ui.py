@@ -67,5 +67,7 @@ def char_select_opts():
         start_game()
         phase.change_to(phase.Ontology.level)
 
-    _make_menuitem(cmp.StartMenu, pick_alamar, "Alamar (80/blink/firebolt)", 0)
-    _make_menuitem(cmp.StartMenu, pick_beatrice, "Beatrice (100/daze/mulilate)", 1)
+    alamar_text = "Alamar (80hp/blink/firebolt)"
+    _make_menuitem(cmp.StartMenu, pick_alamar, alamar_text, 0)
+    beatrice_text = "Beatrice (100hp/daze/mutilate)"
+    _make_menuitem(cmp.StartMenu, pick_beatrice, beatrice_text, 1)

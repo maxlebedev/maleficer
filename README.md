@@ -139,6 +139,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - board currently is 66*67. I could make it 64*64. Leave room for a border
     - OnDeath/DeathTrigger OnStep/StepTriger redundancy.
         * The 'On's could be more ECS-compliant
+    - flash_pos needs to be rewritten
 ## Game Mechanics/Balance
     - spell mods (+1 range, +1 dmg pickups)
     - cooldown alternatives like damage taken, steps walked (lotta tracking)
@@ -200,3 +201,5 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * those walls can be walked through
         * I think this is bc enemies spawn *in* the wall with same pos
     - MenuSelection maybe wants to be reset when moving thru menus
+    - In target mode, enemy aoe over walls is still red
+    - Right panel can go out of bounds if the last(?) message is split

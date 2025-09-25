@@ -504,15 +504,14 @@ class BoardRender(Render):
                     self.console.print(1, y_idx, *content)
 
         for i, cnd in enumerate(self.gather_conditions()):
-            y = display.BOARD_HEIGHT - i - 2
+            y = display.PANEL_HEIGHT - i - 2
             self.console.print(1, y, cnd, fg=display.Color.LEMON)
 
     def gather_conditions(self):
         ret = []
         for _, (cnd_state, _) in ecs.Query(cmp.State, cmp.Player):
             for status_effect, duration in cnd_state.map.items():
-                # triggers 3x/turn for some reason?
-                ret.append(f"{status_effect} {duration}")
+                ret.append(f"{status_effect.name} {duration}")
         return ret
 
     def _apply_lighting(self, cell_rgbs, in_fov) -> list[list[typ.CELL_RGB]]:
@@ -717,7 +716,6 @@ class TargetRender(BoardRender):
                 cell = cell_rgbs[x][y]
                 glyph, fg, bg = cell[0], cell[1], cell[2]
 
-                bg = display.Color.CANDLE
                 fg = display.brighter(fg, scale=100)
                 repaintable = (
                     display.Glyph.FLOOR,
@@ -726,6 +724,9 @@ class TargetRender(BoardRender):
                 )
                 if cell[0] in repaintable:
                     fg = display.Color.BEIGE
+                if bg not in (display.Color.LIGHT_RED, display.Color.BLOOD_RED):
+                    # a poor subtitute for an "is there an aoe here" check
+                    bg = display.Color.CANDLE
 
                 cell_rgbs[x][y] = glyph, fg, bg
 

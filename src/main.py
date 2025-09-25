@@ -26,7 +26,9 @@ def flash(context, console):
 def flash_pos(context, console, position, *args):
     """change glyph of a position"""
     esper.dispatch_event("redraw")
-    cell = console.rgb[display.BOARD_STARTX + position.x, position.y]
+    x = display.BOARD_STARTX + position.x
+    y = display.BOARD_STARTY + position.y
+    cell = console.rgb[x, y]
     glyph, color, bg = cell
     for arg in args:
         if isinstance(arg, tuple):
@@ -37,8 +39,8 @@ def flash_pos(context, console, position, *args):
     in_fov = location.get_fov()
     if in_fov[position.x][position.y]:
         bg = display.Color.CANDLE
-    cell = (glyph, color, bg)
-    console.rgb[display.BOARD_STARTX + position.x, position.y] = cell
+
+    console.rgb[x, y] = (glyph, color, bg)
     context.present(console)
     time.sleep(0.05)  # display long enough to be seen
 
