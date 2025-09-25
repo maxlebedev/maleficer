@@ -4,10 +4,9 @@ import enum
 
 import esper
 
-import create
 import components as cmp
+import create
 import processors
-import display
 
 ALL = dict()
 CURRENT = None
@@ -24,7 +23,7 @@ class Ontology(enum.Enum):
 
 
 def main_menu_phase(context, console):
-    background = display.Background.MAIN_MENU
+    background = "assets/main_menu.xp"
     title = "WELCOME TO MALEFICER"
     args = {"menu_cmp": cmp.MainMenu, "background": background, "title": title}
     render = processors.MenuRender(context, console, **args)
@@ -95,7 +94,7 @@ def about_phase(context, console):
 
 
 def char_select_phase(context, console):
-    background = display.Background.CHAR_SELECT
+    background = "assets/char_select.xp"
     title = "Select a Character"
     args = {"menu_cmp": cmp.StartMenu, "background": background, "title": title}
     render = processors.MenuRender(context, console, **args)

@@ -1,9 +1,9 @@
 import collections
+import re
 from dataclasses import dataclass
-import tcod
 
 import esper
-import re
+import tcod
 
 import components as cmp
 import display

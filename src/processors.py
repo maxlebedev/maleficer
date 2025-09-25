@@ -586,12 +586,16 @@ class MenuRender(Render):
     console: tcod.console.Console
     menu_cmp: type
     title: str
-    background: display.BGImage | None = None
+    background: str
 
     def process(self):
         self.console.clear()
         x = display.PANEL_WIDTH + (display.BOARD_WIDTH // 2)
         y = display.BOARD_HEIGHT // 2
+
+        if self.background:
+            self.console, = tcod.console.load_xp(self.background, order="F")
+
         self.console.print(x, y, self.title, alignment=libtcodpy.CENTER)
 
         menu_selection = ecs.Query(cmp.MenuSelection).val
@@ -603,11 +607,6 @@ class MenuRender(Render):
             if menu_selection.item == mi.order:
                 fg = display.Color.WHITE
             self.center_print(x=x, y=y + 2 + i, string=on.name, fg=fg)
-
-        if self.background:
-            display.blit_image(
-                self.console, self.background.obj, scale=self.background.scale
-            )
 
         self.context.present(self.console)
 

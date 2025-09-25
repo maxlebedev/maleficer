@@ -1,14 +1,13 @@
-from dataclasses import dataclass
 import itertools
+import random
 import string
+from dataclasses import dataclass
 from enum import IntEnum
-from tcod.image import Image
 
 import tcod
-import random
+from tcod.image import Image
 
 import typ
-
 
 CONSOLE_WIDTH = 1920
 CONSOLE_HEIGHT = 1080
@@ -145,17 +144,8 @@ class BGImage:
     y: int
     scale: float
 
-
-class Background:
-    MAIN_MENU = BGImage(
-        obj=Image.from_file("assets/main_menu.png"), x=CENTER_W, y=CENTER_H, scale=0.05
-    )
-    CHAR_SELECT = BGImage(
-        obj=Image.from_file("assets/char_select.png"),
-        x=CENTER_W,
-        y=CENTER_H,
-        scale=0.20,
-    )
+# main_menu scale: 0.05
+# charselect scale: 0.20
 
 
 letter_map = {

@@ -1,5 +1,6 @@
-import esper
 import random
+
+import esper
 import numpy as np
 
 import components as cmp

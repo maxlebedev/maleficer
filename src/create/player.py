@@ -5,8 +5,7 @@ import esper
 import components as cmp
 import display as dis
 
-from . import item
-from . import spell
+from . import item, spell
 
 
 def inventory_map() -> list:

@@ -1,7 +1,6 @@
+import typing
 from collections.abc import Callable
 from dataclasses import dataclass as component
-
-import typing
 
 import display
 import typ
