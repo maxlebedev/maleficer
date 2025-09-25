@@ -178,7 +178,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * probably when they spend N turns without killing an enemy
         * escalates in damage
     - do I want hidden/invisible elements? (traps, assasins)
-    - items in maze should be in dead-ends only
     - binary(ish) space partitioning, plus prefabs of that size
     - A way to get info about enemies
 ## UX
@@ -202,5 +201,3 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * those walls can be walked through
         * I think this is bc enemies spawn *in* the wall with same pos
     - MenuSelection maybe wants to be reset when moving thru menus
-    - In target mode, enemy aoe over walls is still red
-    - Right panel can go out of bounds if the last(?) message is split

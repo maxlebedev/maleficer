@@ -109,7 +109,7 @@ class Damage(esper.Processor):
         if damage.amount > 0:
             amount = display.colored_text(damage.amount, display.Color.RED)
             return f"{source_name} deals {amount} damage to {target_name}"
-        amount = display.colored_text(-1*damage.amount, display.Color.GREEN)
+        amount = display.colored_text(-1 * damage.amount, display.Color.GREEN)
         return f"{source_name} heals {target_name} for {amount}"
 
     def process(self):
@@ -594,7 +594,7 @@ class MenuRender(Render):
         y = display.BOARD_HEIGHT // 2
 
         if self.background:
-            self.console, = tcod.console.load_xp(self.background, order="F")
+            (self.console,) = tcod.console.load_xp(self.background, order="F")
 
         self.console.print(x, y, self.title, alignment=libtcodpy.CENTER)
 

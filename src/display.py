@@ -144,9 +144,9 @@ class BGImage:
     y: int
     scale: float
 
+
 # main_menu scale: 0.05
 # charselect scale: 0.20
-
 
 letter_map = {
     "0": 868,
@@ -270,7 +270,7 @@ def write_rgbs(console, cell_rgbs):
 
 
 def colored_text(text: str, color: typ.RGB) -> str:
-    to_color =chr(tcod.libtcodpy.COLCTRL_FORE_RGB)
-    fg = ''.join([chr(c) for c in color])
+    to_color = chr(tcod.libtcodpy.COLCTRL_FORE_RGB)
+    fg = "".join([chr(c) for c in color])
     from_color = chr(tcod.libtcodpy.COLCTRL_STOP)
     return f"{to_color}{fg}{text}{from_color}"
