@@ -1,6 +1,6 @@
 import collections
 from dataclasses import dataclass
-import libtcodpy
+import tcod
 
 import esper
 import re
@@ -14,14 +14,14 @@ import display
 # am I okay with calling something an action if it doesn't have a sentient origin?
 
 RE_COLOR_CODES = re.compile(
-    rf"{libtcodpy.COLCTRL_1:c}"
-    rf"|{libtcodpy.COLCTRL_2:c}"
-    rf"|{libtcodpy.COLCTRL_3:c}"
-    rf"|{libtcodpy.COLCTRL_4:c}"
-    rf"|{libtcodpy.COLCTRL_5:c}"
-    rf"|{libtcodpy.COLCTRL_FORE_RGB:c}..."
-    rf"|{libtcodpy.COLCTRL_BACK_RGB:c}..."
-    rf"|{libtcodpy.COLCTRL_STOP:c}",
+    rf"{tcod.libtcodpy.COLCTRL_1:c}"
+    rf"|{tcod.libtcodpy.COLCTRL_2:c}"
+    rf"|{tcod.libtcodpy.COLCTRL_3:c}"
+    rf"|{tcod.libtcodpy.COLCTRL_4:c}"
+    rf"|{tcod.libtcodpy.COLCTRL_5:c}"
+    rf"|{tcod.libtcodpy.COLCTRL_FORE_RGB:c}..."
+    rf"|{tcod.libtcodpy.COLCTRL_BACK_RGB:c}..."
+    rf"|{tcod.libtcodpy.COLCTRL_STOP:c}",
     flags=re.DOTALL,
 )
 
@@ -30,7 +30,8 @@ class Log:
     """Messages to be displayed in in-game log"""
 
     messages: list = []
-    log_len = display.PANEL_HEIGHT - 2
+    max_len = display.PANEL_IHEIGHT
+    curr_len = 0
 
     @classmethod
     def color_fmt(cls, entity: int):
@@ -45,10 +46,15 @@ class Log:
         clean_text = RE_COLOR_CODES.sub(repl="", string=text)
         print(clean_text)
 
-        cls.messages.append(text)
+        ghr = tcod.console.get_height_rect
+        lines = ghr(width=display.PANEL_IWIDTH, string=clean_text)
 
-        cls.messages = cls.messages[-cls.log_len :]
-        esper.dispatch_event("redraw")
+        cls.curr_len += lines
+
+        cls.messages.append((text, lines))
+        while cls.curr_len > cls.max_len:
+            cls.curr_len -= cls.messages[0][1]
+            cls.messages = cls.messages[1:]
 
 
 class Queues:

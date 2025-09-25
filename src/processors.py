@@ -106,10 +106,11 @@ class Damage(esper.Processor):
         target_name = event.Log.color_fmt(damage.target)
         target_name = f"{target_name}#{damage.target}"
 
-        amount = display.colored_text(damage.amount, display.Color.RED)
         if damage.amount > 0:
+            amount = display.colored_text(damage.amount, display.Color.RED)
             return f"{source_name} deals {amount} damage to {target_name}"
-        return f"{source_name} heals {target_name} for {-1 * amount}"
+        amount = display.colored_text(-1*damage.amount, display.Color.GREEN)
+        return f"{source_name} heals {target_name} for {amount}"
 
     def process(self):
         board = location.get_board()
@@ -365,7 +366,7 @@ class Render(esper.Processor):
     context: tcod.context.Context
     console: tcod.console.Console
 
-    dashes = "─" * (display.PANEL_WIDTH - 2)
+    dashes = "─" * (display.PANEL_IWIDTH)
 
     def left_print(self, *args, **kwargs):
         self.console.print(alignment=libtcodpy.LEFT, *args, **kwargs)
@@ -448,16 +449,22 @@ class BoardRender(Render):
         panel_params["x"] = display.R_PANEL_START + 1
         panel_params["width"] -= 2
         panel_params["height"] -= 2
+        panel_params["y"] = 1
+        # might as well rewrite panel_params
 
+        """
         offset = 1
         for message in event.Log.messages:
             panel_params["y"] = offset
             offset += self.console.print_box(string=message, **panel_params)
+        """
+        message = "\n".join([m[0] for m in event.Log.messages])
+        self.console.print_box(string=message, **panel_params)
 
     def _left_panel(self, panel_params):
         self.console.draw_frame(x=0, **panel_params)
         hp = ecs.Query(cmp.Player, cmp.Health).cmp(cmp.Health)
-        self.render_bar(1, 1, hp.current, hp.max, display.PANEL_WIDTH - 2)
+        self.render_bar(1, 1, hp.current, hp.max, display.PANEL_IWIDTH)
 
     def _inventory(self):
         inv_map = create.player.inventory_map()
@@ -504,7 +511,7 @@ class BoardRender(Render):
                     self.console.print(1, y_idx, *content)
 
         for i, cnd in enumerate(self.gather_conditions()):
-            y = display.PANEL_HEIGHT - i - 2
+            y = display.PANEL_IHEIGHT - i
             self.console.print(1, y, cnd, fg=display.Color.LEMON)
 
     def gather_conditions(self):

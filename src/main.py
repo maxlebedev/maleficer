@@ -41,6 +41,7 @@ def flash_pos(context, console, position, *args):
         bg = display.Color.CANDLE
 
     console.rgb[x, y] = (glyph, color, bg)
+    # tcod.libtcodpy.console_put_char_ex
     context.present(console)
     time.sleep(0.05)  # display long enough to be seen
 

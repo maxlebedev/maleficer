@@ -5,7 +5,6 @@ from enum import IntEnum
 from tcod.image import Image
 
 import tcod
-import libtcodpy
 import random
 
 import typ
@@ -19,8 +18,10 @@ TS_HEIGHT = 22
 
 
 PANEL_WIDTH = 28
+PANEL_IWIDTH = PANEL_WIDTH - 2
 # display.BOARD_WIDTH=66 display.BOARD_HEIGHT=67
 PANEL_HEIGHT = CONSOLE_HEIGHT // TILE_SIZE
+PANEL_IHEIGHT = PANEL_HEIGHT - 2
 
 BOARD_HEIGHT = 64
 BOARD_WIDTH = 64
@@ -279,6 +280,7 @@ def write_rgbs(console, cell_rgbs):
 
 
 def colored_text(text: str, color: typ.RGB) -> str:
-    fg = color
-    change_fg = f"{libtcodpy.COLCTRL_FORE_RGB:c}{fg[0]:c}{fg[1]:c}{fg[2]:c}"
-    return f"{change_fg}{text}{libtcodpy.COLCTRL_STOP:c}"
+    to_color =chr(tcod.libtcodpy.COLCTRL_FORE_RGB)
+    fg = ''.join([chr(c) for c in color])
+    from_color = chr(tcod.libtcodpy.COLCTRL_STOP)
+    return f"{to_color}{fg}{text}{from_color}"
