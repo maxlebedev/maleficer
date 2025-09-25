@@ -447,17 +447,10 @@ class BoardRender(Render):
     def _right_panel(self, panel_params):
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
         panel_params["x"] = display.R_PANEL_START + 1
-        panel_params["width"] -= 2
-        panel_params["height"] -= 2
+        panel_params["width"] = display.PANEL_IWIDTH,
+        panel_params["height"] = display.PANEL_IHEIGHT
         panel_params["y"] = 1
-        # might as well rewrite panel_params
 
-        """
-        offset = 1
-        for message in event.Log.messages:
-            panel_params["y"] = offset
-            offset += self.console.print_box(string=message, **panel_params)
-        """
         message = "\n".join([m[0] for m in event.Log.messages])
         self.console.print_box(string=message, **panel_params)
 
