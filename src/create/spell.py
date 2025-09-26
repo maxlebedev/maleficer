@@ -130,3 +130,19 @@ def daze() -> int:
     cmps.append(cmp.Known(slot=slot_num))
     daze = esper.create_entity(*cmps)
     return daze
+
+
+def shield() -> int:
+    cmps = []
+    cmps.append(cmp.Spell(target_range=0))
+    cmps.append(cmp.Cooldown(turns=6))
+    callbacks = [behavior.apply_cooldown, behavior.apply_aegis]
+    cmps.append(cmp.UseTrigger(callbacks=callbacks))
+    cmps.append(cmp.Onymous(name="Shield"))
+    cmps.append(cmp.AegisEffect(value=10))
+
+    slot_num = len(esper.get_component(cmp.Known)) + 1
+    cmps.append(cmp.Known(slot=slot_num))
+
+    shield = esper.create_entity(*cmps)
+    return shield

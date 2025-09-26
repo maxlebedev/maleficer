@@ -158,6 +158,16 @@ def apply_learn(source: int):
                 )
 
 
+def apply_aegis(source: int):
+    if target_cmp := esper.try_component(source, cmp.Target):
+        target = target_cmp.target
+        if aegis_effect := esper.try_component(source, cmp.AegisEffect):
+            entities = collect_all_affected_entities(source, target)
+            for ent in entities:
+                if esper.has_component(ent, cmp.Health):
+                    condition.grant(ent, typ.Condition.Aegis, aegis_effect.value)
+
+
 def flash_line(line: list, *args):
     for x, y in line:
         pos = cmp.Position(x=x, y=y)

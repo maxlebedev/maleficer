@@ -106,7 +106,7 @@ class Damage(esper.Processor):
         target_name = event.Log.color_fmt(damage.target)
         target_name = f"{target_name}#{damage.target}"
 
-        if damage.amount > 0:
+        if damage.amount >= 0:
             amount = display.colored_text(damage.amount, display.Color.RED)
             return f"{source_name} deals {amount} damage to {target_name}"
         amount = display.colored_text(-1 * damage.amount, display.Color.GREEN)
@@ -128,6 +128,16 @@ class Damage(esper.Processor):
             if not esper.has_component(damage.target, cmp.Health):
                 # damage source hit a wall, or similar
                 continue
+
+            if aegis := condition.get_val(damage.target, typ.Condition.Aegis):
+                absorbed = min(aegis, damage.amount)
+                damage.amount -= absorbed
+                aegis -= absorbed
+                condition.grant(damage.target, typ.Condition.Aegis, aegis)
+
+                dmg = display.colored_text(str(absorbed), display.Color.CYAN)
+                aegis = display.colored_text("Aegis", display.Color.CYAN)
+                event.Log.append(f"{aegis} absorbs {dmg} damage")
 
             math_util.clamp_damage(damage.target, damage.amount)
 

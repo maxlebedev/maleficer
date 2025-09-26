@@ -517,6 +517,9 @@ def make_maze_blueprint():
     return blueprint, seen, dead_ends
 
 
+# TODO: make this into its own class
+
+
 def maze_dungeon(board: Board):
     board.fill()
     blueprint, seen, dead_ends = make_maze_blueprint()

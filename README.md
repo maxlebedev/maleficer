@@ -93,6 +93,9 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * this would hopefully replace Phases and callbacks
     - The color scheme is.. color balanced for backing candle light
         - at least for NPCs
+    - Conditions live in a State cmp, in a single dict
+        * we could have them all be children of a StatusEffect parent class 
+        * and a bunch of separate cmps
 
 # TODO
 
@@ -154,11 +157,8 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
             + If you use off cooldown B times, then you accumulate 1 burnout
             + and that takes B * CD to clear
     - add aoe into the spell power budget calculation
-    - Aegis (spell-based buff) decaying shield
-        * while you have Aegis N, take N less damage
-        * this can get out of hand, esp if the cooldown on that spell is low
     - Some sort of Storm/Combo mechanic would be really cool
-    - Should some damge be in ranges?
+    - Should some damage be randomized?
         * If they are, I'm always a fan of dice pools
     - small chance of "named" scrolls with unique effects
     - goblins should actually try to be at dist 4 to player

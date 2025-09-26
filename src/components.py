@@ -225,6 +225,11 @@ class StunEffect:
 
 
 @component
+class AegisEffect:
+    value: int
+
+
+@component
 class State:
     """all of the conditions that an entity have"""
 

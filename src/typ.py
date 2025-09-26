@@ -18,6 +18,7 @@ class Condition(enum.Enum):
     Bleed = enum.auto()
     Dying = enum.auto()
     Stun = enum.auto()
+    Aegis = enum.auto()
 
 
 class InvalidAction(Exception):
