@@ -18,6 +18,7 @@ import input
 import location
 import math_util
 import typ
+import phase
 
 
 PROC_QUEUE = collections.deque()
@@ -31,33 +32,36 @@ def get_selected_menuitem():
     return selection
 
 
-def proc_guard(func):
-    @functools.wraps(func)
-    def should_run(self):
-        game_meta = ecs.Query(cmp.GameMeta).val
-        if game_meta.process and isinstance(self, game_meta):
-            func(self)
-    return should_run
+class Processor(esper.Processor):
 
-
-# repurposing CURRENT to have ref to the current proc
-
-@proc_guard
-@dataclass
-class Enqueue(esper.Processor):
-    import phase
-    _phase: phase.Ontology
+    def _process(self):
+        pass
 
     def process(self):
-        import phase
+        global PROC_QUEUE
+        print(f"{PROC_QUEUE=}, {self=}")
+        game_meta = ecs.Query(cmp.GameMeta).val
+        if not game_meta.process or isinstance(self, type(game_meta.process)):
+            self._process()
+            print(f"then {PROC_QUEUE=}")
+            game_meta.process = PROC_QUEUE.popleft()
+
+
+@dataclass
+class Enqueue(Processor):
+    _phase: "phase.Ontology"
+
+    def _process(self):
+        global PROC_QUEUE
         PROC_QUEUE.append(phase.ALL[self._phase])
         game_meta = ecs.Query(cmp.GameMeta).val
-        game_meta.process = PROC_QUEUE.popleft()
+        print(f"mid {PROC_QUEUE=}")
+        # game_meta.process = PROC_QUEUE.popleft()
+        # TODO: adding this means we pop too much?
 
 
-@proc_guard
 @dataclass
-class Movement(esper.Processor):
+class Movement(Processor):
     def bump(self, source, target):
         """one entity bumps into another"""
         src_is_enemy = esper.has_components(source, cmp.Enemy, cmp.Melee)
@@ -82,7 +86,7 @@ class Movement(esper.Processor):
         event.Log.append(f"picked up {name}")
         # oneshot call some collectable processor?
 
-    def process(self):
+    def _process(self):
         board = location.get_board()
         while event.Queues.movement:
             movement = event.Queues.movement.popleft()  # left so player first
@@ -125,9 +129,8 @@ class Movement(esper.Processor):
                     event.trigger_all_callbacks(target, cmp.StepTrigger)
 
 
-@proc_guard
 @dataclass
-class Damage(esper.Processor):
+class Damage(Processor):
     def _make_message(self, damage):
         source_name = damage.source[cmp.Onymous].name
         if cmp.Visible in damage.source:
@@ -142,7 +145,7 @@ class Damage(esper.Processor):
         amount = display.colored_text(-1 * damage.amount, display.Color.GREEN)
         return f"{source_name} heals {target_name} for {amount}"
 
-    def process(self):
+    def _process(self):
         board = location.get_board()
         while event.Queues.damage:
             damage = event.Queues.damage.popleft()
@@ -179,15 +182,14 @@ class Damage(esper.Processor):
                 event.Log.append(message)
 
 
-@proc_guard
 @dataclass
-class Death(esper.Processor):
+class Death(Processor):
     def queue_zero_health(self):
         for ent, (hp,) in ecs.Query(cmp.Health):
             if hp.current <= 0:
                 event.Death(ent)
 
-    def process(self):
+    def _process(self):
         board = location.get_board()
 
         self.queue_zero_health()
@@ -214,15 +216,14 @@ class Death(esper.Processor):
             self.queue_zero_health()
 
 
-@proc_guard
 @dataclass
-class InputEvent(esper.Processor):
+class InputEvent(Processor):
     action_map = {}
 
     def exit(self):
         raise SystemExit()
 
-    def process(self):
+    def _process(self):
         listen = True
         while listen:
             for input_event in tcod.event.wait():
@@ -243,11 +244,9 @@ class InputEvent(esper.Processor):
                         listen = False
 
 
-@proc_guard
 @dataclass
 class GameInputEvent(InputEvent):
     def __init__(self):
-        import phase
         self.action_map = {
             input.KEYMAP[input.Input.MOVE_DOWN]: (self.move, [0, 1]),
             input.KEYMAP[input.Input.MOVE_LEFT]: (self.move, [-1, 0]),
@@ -273,7 +272,6 @@ class GameInputEvent(InputEvent):
 
         menu_selection = ecs.Query(cmp.MenuSelection).val
         menu_selection.item = 0
-        import phase
         phase.change_to(phase.Ontology.inventory)
 
     def skip(self):
@@ -302,7 +300,6 @@ class GameInputEvent(InputEvent):
                 esper.add_component(scroll, cmp.InInventory())
                 unlearned = True
                 event.Tick()
-                import phase
                 phase.change_to(phase.Ontology.level, NPCTurn)
         if not unlearned:
             esper.dispatch_event("flash")
@@ -329,9 +326,8 @@ class GameInputEvent(InputEvent):
         # phase.change_to(phase.Ontology.target)
 
 
-@proc_guard
 @dataclass
-class NPCTurn(esper.Processor):
+class NPCTurn(Processor):
     def follow(self, start: cmp.Position, end: cmp.Position):
         board = location.get_board()
         cost = board.as_move_graph()
@@ -373,7 +369,7 @@ class NPCTurn(esper.Processor):
             if move := self.follow(epos, player_pos):
                 event.Movement(entity, x=move[0], y=move[1])
 
-    def process(self):
+    def _process(self):
         # some of this probably want so live in behavior.py
         stunned = set()
 
@@ -408,9 +404,8 @@ class NPCTurn(esper.Processor):
             event.trigger_all_callbacks(entity, cmp.EnemyTrigger)
 
 
-@proc_guard
 @dataclass
-class Render(esper.Processor):
+class Render(Processor):
     context: tcod.context.Context
     console: tcod.console.Console
 
@@ -430,7 +425,6 @@ class Render(esper.Processor):
         self.context.present(self.console)
 
 
-@proc_guard
 @dataclass
 class BoardRender(Render):
     context: tcod.context.Context
@@ -623,14 +617,13 @@ class BoardRender(Render):
 
         return cell_rgbs
 
-    def process(self):
+    def _process(self):
         self.console.clear()
         self._draw_panels()
         cell_rgbs = self._get_cell_rgbs()
         self.present(cell_rgbs)
 
 
-@proc_guard
 @dataclass
 class MenuRender(Render):
     context: tcod.context.Context
@@ -639,7 +632,7 @@ class MenuRender(Render):
     title: str
     background: str
 
-    def process(self):
+    def _process(self):
         self.console.clear()
         x = display.PANEL_WIDTH + (display.BOARD_WIDTH // 2)
         y = display.BOARD_HEIGHT // 2
@@ -662,7 +655,6 @@ class MenuRender(Render):
         self.context.present(self.console)
 
 
-@proc_guard
 @dataclass
 class MenuInputEvent(InputEvent):
     def __init__(self, menu_cmp):
@@ -693,7 +685,6 @@ class MenuInputEvent(InputEvent):
         menu_selection.item = math_util.clamp(menu_selection.item, tot_items)
 
 
-@proc_guard
 @dataclass
 class TargetInputEvent(InputEvent):
     def __init__(self):
@@ -744,13 +735,12 @@ class TargetInputEvent(InputEvent):
             event.Log.append(str(e))
 
 
-@proc_guard
 @dataclass
 class TargetRender(BoardRender):
     context: tcod.context.Context
     console: tcod.console.Console
 
-    def process(self) -> None:
+    def _process(self) -> None:
         self.console.clear()
         self._draw_panels()
 
@@ -791,7 +781,6 @@ class TargetRender(BoardRender):
         self.present(cell_rgbs)
 
 
-@proc_guard
 @dataclass
 class InventoryRender(BoardRender):
     context: tcod.context.Context
@@ -809,7 +798,7 @@ class InventoryRender(BoardRender):
                 fg, bg = bg, fg
             self.console.print(1, 3 + i, string=text, fg=fg, bg=bg)
 
-    def process(self) -> None:
+    def _process(self) -> None:
         self.console.clear()
         self._draw_panels()
 
@@ -819,7 +808,6 @@ class InventoryRender(BoardRender):
         self.present(cell_rgbs)
 
 
-@proc_guard
 @dataclass
 class InventoryInputEvent(InputEvent):
     def __init__(self):
@@ -867,13 +855,12 @@ class InventoryInputEvent(InputEvent):
             event.Log.append(str(e))
 
 
-@proc_guard
 @dataclass
 class OptionsRender(Render):
     context: tcod.context.Context
     console: tcod.console.Console
 
-    def process(self):
+    def _process(self):
         self.console.clear()
         x = display.PANEL_WIDTH + (display.BOARD_WIDTH // 2)
         y = display.BOARD_HEIGHT // 2
@@ -888,7 +875,6 @@ class OptionsRender(Render):
         self.context.present(self.console)
 
 
-@proc_guard
 @dataclass
 class OptionsInputEvent(InputEvent):
     def __init__(self):
@@ -900,13 +886,12 @@ class OptionsInputEvent(InputEvent):
         }
 
 
-@proc_guard
 @dataclass
 class AboutRender(Render):
     context: tcod.context.Context
     console: tcod.console.Console
 
-    def process(self):
+    def _process(self):
         self.console.clear()
 
         self.center_print(display.CENTER_W, display.CENTER_H, "ABOUT")
@@ -922,11 +907,9 @@ class AboutRender(Render):
         self.context.present(self.console)
 
 
-@proc_guard
 @dataclass
 class AboutInputEvent(InputEvent):
     def __init__(self):
-        import phase
         self.action_map = {
             input.KEYMAP[input.Input.ESC]: (
                 phase.change_to,
@@ -936,10 +919,10 @@ class AboutInputEvent(InputEvent):
 
 
 @dataclass
-class Upkeep(esper.Processor):
+class Upkeep(Processor):
     """apply and tick down Conditions"""
 
-    def process(self) -> None:
+    def _process(self) -> None:
         if not event.Queues.tick:
             return
         event.Queues.tick.clear()
