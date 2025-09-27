@@ -19,6 +19,7 @@ class GameMeta:
     mood: dict
     level: int = 0
     menu_selection: int = 0
+    process: None = None
 
 
 @component
