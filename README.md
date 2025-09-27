@@ -7,12 +7,12 @@ I also take inspiration from modern TTRPGs like Trespassor, especially in terms 
 
 # Inspiration
     - classic roguelikes
-        * Nethack
+        * Pixel Dungeon
         * Shattered Pixed Dungeon
         * Dungeons of Dredmor
     - Modern TTPGS like Trespassor
     - Rift Wizard
-    - Tactics games
+    - Tactics games, Survivorslikes
 <img width="1925" height="1071" alt="image" src="https://github.com/user-attachments/assets/e7b5cac2-d8bd-4b07-87f1-8c9fc95e3ee7" />
 
 # Dependancies
@@ -79,7 +79,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - We have two damage process steps, one for player damage, and one for everything else. This means enemies the player would kill don't attack back
     - Bleed damage feels like it takes an extra turn. this is intentional. it only takes effect on the start of the turn after it is applied
     - StepTrigger callbacks get their targets from the movement proc, in the OnStep case
-    - Should there be a death event queue?
     - Because we allow already dead entities to resolve their queued damage, enemies get one final retaliation
     - reusing Position components breaks things
     - DeathTriggers with dmg need to have oneshot(Dmg) called after
@@ -125,6 +124,16 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - effect application restrictions. (mutilate can't hit traps)
     - an Ephemeral component for Crosshair, Area Effect type stuff
     - Entity templates: cmp collections for easy entity creation
+    - The main callback that needs a ref to source is lob_bomb
+        * It sure would be nice if it didn't need that
+        * We could rewrite lob_bomb as a proc. LobberNPC or something
+            + This also paves the way for every npc to have their own proc
+    - board currently is 66*67. I could make it 64*64. Leave room for a border
+    - OnDeath/DeathTrigger OnStep/StepTriger redundancy.
+        * The 'On's could be more ECS-compliant
+    - flash_pos needs to be rewritten
+    - put phase.CURRENT into GameMeta
+
     - We could rework Phases entirely. All systems are called at all times
         * however, they all have a state guard and return when guard fails
         * big change, so lots of surface area
@@ -135,6 +144,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * Get can be *much* more dynamic about what runs where 
             + a state machine for various turn flows
             + single exec via a simple queue_proc() func 
+        + current phase logic can happen via queue-ing procs
     - The main callback that needs a ref to source is lob_bomb
         * It sure would be nice if it didn't need that
         * We could rewrite lob_bomb as a proc. LobberNPC or something
@@ -145,6 +155,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - flash_pos needs to be rewritten
     - put phase.CURRENT into GameMeta
     - global tracking of targeted squares, with enemy ai to avoid them
+    - an effect:color mapping? "stun": Cyan, "force_move": Orange
 ## Game Mechanics/Balance
     - spell mods (+1 range, +1 dmg pickups)
     - cooldown alternatives like damage taken, steps walked (lotta tracking)
