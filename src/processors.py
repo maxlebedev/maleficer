@@ -1,4 +1,6 @@
+import collections
 import itertools
+import functools
 from dataclasses import dataclass
 
 import esper
@@ -15,8 +17,10 @@ import event
 import input
 import location
 import math_util
-import phase
 import typ
+
+
+PROC_QUEUE = collections.deque()
 
 
 def get_selected_menuitem():
@@ -27,6 +31,31 @@ def get_selected_menuitem():
     return selection
 
 
+def proc_guard(func):
+    @functools.wraps(func)
+    def should_run(self):
+        game_meta = ecs.Query(cmp.GameMeta).val
+        if game_meta.process and isinstance(self, game_meta):
+            func(self)
+    return should_run
+
+
+# repurposing CURRENT to have ref to the current proc
+
+@proc_guard
+@dataclass
+class Enqueue(esper.Processor):
+    import phase
+    _phase: phase.Ontology
+
+    def process(self):
+        import phase
+        PROC_QUEUE.append(phase.ALL[self._phase])
+        game_meta = ecs.Query(cmp.GameMeta).val
+        game_meta.process = PROC_QUEUE.popleft()
+
+
+@proc_guard
 @dataclass
 class Movement(esper.Processor):
     def bump(self, source, target):
@@ -96,6 +125,7 @@ class Movement(esper.Processor):
                     event.trigger_all_callbacks(target, cmp.StepTrigger)
 
 
+@proc_guard
 @dataclass
 class Damage(esper.Processor):
     def _make_message(self, damage):
@@ -149,6 +179,7 @@ class Damage(esper.Processor):
                 event.Log.append(message)
 
 
+@proc_guard
 @dataclass
 class Death(esper.Processor):
     def queue_zero_health(self):
@@ -183,6 +214,7 @@ class Death(esper.Processor):
             self.queue_zero_health()
 
 
+@proc_guard
 @dataclass
 class InputEvent(esper.Processor):
     action_map = {}
@@ -211,9 +243,11 @@ class InputEvent(esper.Processor):
                         listen = False
 
 
+@proc_guard
 @dataclass
 class GameInputEvent(InputEvent):
     def __init__(self):
+        import phase
         self.action_map = {
             input.KEYMAP[input.Input.MOVE_DOWN]: (self.move, [0, 1]),
             input.KEYMAP[input.Input.MOVE_LEFT]: (self.move, [-1, 0]),
@@ -239,6 +273,7 @@ class GameInputEvent(InputEvent):
 
         menu_selection = ecs.Query(cmp.MenuSelection).val
         menu_selection.item = 0
+        import phase
         phase.change_to(phase.Ontology.inventory)
 
     def skip(self):
@@ -267,6 +302,7 @@ class GameInputEvent(InputEvent):
                 esper.add_component(scroll, cmp.InInventory())
                 unlearned = True
                 event.Tick()
+                import phase
                 phase.change_to(phase.Ontology.level, NPCTurn)
         if not unlearned:
             esper.dispatch_event("flash")
@@ -290,9 +326,10 @@ class GameInputEvent(InputEvent):
         xhair_ent = ecs.Query(cmp.Crosshair, cmp.Position).first()
         board.reposition(xhair_ent, *player_pos)
         esper.add_component(casting_spell, cmp.Targeting())
-        phase.change_to(phase.Ontology.target)
+        # phase.change_to(phase.Ontology.target)
 
 
+@proc_guard
 @dataclass
 class NPCTurn(esper.Processor):
     def follow(self, start: cmp.Position, end: cmp.Position):
@@ -357,7 +394,7 @@ class NPCTurn(esper.Processor):
             enemy = esper.component_for_entity(entity, cmp.Enemy)
             self.process_melee(entity, epos)
             for _ in range(1, enemy.speed):
-                phase.oneshot(Movement)
+                # phase.oneshot(Movement)
                 self.process_melee(entity, epos)
 
         archers = enemies.filter(cmp.Ranged, cmp.Position).remove(stunned)
@@ -371,6 +408,7 @@ class NPCTurn(esper.Processor):
             event.trigger_all_callbacks(entity, cmp.EnemyTrigger)
 
 
+@proc_guard
 @dataclass
 class Render(esper.Processor):
     context: tcod.context.Context
@@ -392,6 +430,7 @@ class Render(esper.Processor):
         self.context.present(self.console)
 
 
+@proc_guard
 @dataclass
 class BoardRender(Render):
     context: tcod.context.Context
@@ -499,12 +538,13 @@ class BoardRender(Render):
             trg_ent, _ = targeting[0]
             panel_contents += self._draw_selection_info(trg_ent)
         else:
-            if phase.CURRENT == phase.Ontology.inventory:
-                selection = get_selected_menuitem()
-                if learnable := esper.try_component(selection, cmp.Learnable):
-                    panel_contents += self._draw_selection_info(learnable.spell)
-                else:
-                    panel_contents += self._draw_selection_info(selection)
+            # TODO: okay, here we are asking if we are in iventory. we probs actually want to do this vis subclass
+            # if phase.CURRENT == phase.Ontology.inventory:
+            selection = get_selected_menuitem()
+            if learnable := esper.try_component(selection, cmp.Learnable):
+                panel_contents += self._draw_selection_info(learnable.spell)
+            else:
+                panel_contents += self._draw_selection_info(selection)
 
         for y_idx, content in enumerate(panel_contents, start=3):
             match content:
@@ -538,7 +578,7 @@ class BoardRender(Render):
                 if in_fov[x][y]:
                     board.explored.add(cell)
 
-                    if phase.CURRENT != phase.Ontology.target:
+                    if esper.get_component(cmp.Targeting):
                         brighter = display.brighter(fgcolor, scale=100)
                         cell_rgbs[x][y] = (glyph, brighter, display.Color.CANDLE)
                 elif cell in board.explored:
@@ -590,6 +630,7 @@ class BoardRender(Render):
         self.present(cell_rgbs)
 
 
+@proc_guard
 @dataclass
 class MenuRender(Render):
     context: tcod.context.Context
@@ -621,6 +662,7 @@ class MenuRender(Render):
         self.context.present(self.console)
 
 
+@proc_guard
 @dataclass
 class MenuInputEvent(InputEvent):
     def __init__(self, menu_cmp):
@@ -634,7 +676,8 @@ class MenuInputEvent(InputEvent):
 
     def back(self):
         if self.menu_cmp.prev:
-            phase.change_to(self.menu_cmp.prev)
+            # phase.change_to(self.menu_cmp.prev)
+            pass
 
     def select(self):
         menu_selection = ecs.Query(cmp.MenuSelection).val
@@ -650,6 +693,7 @@ class MenuInputEvent(InputEvent):
         menu_selection.item = math_util.clamp(menu_selection.item, tot_items)
 
 
+@proc_guard
 @dataclass
 class TargetInputEvent(InputEvent):
     def __init__(self):
@@ -665,7 +709,7 @@ class TargetInputEvent(InputEvent):
     def to_level(self):
         spell_ent = ecs.Query(cmp.Targeting).first()
         esper.remove_component(spell_ent, cmp.Targeting)
-        phase.change_to(phase.Ontology.level)
+        # phase.change_to(phase.Ontology.level)
 
     def move_crosshair(self, x, y):
         crosshair = ecs.Query(cmp.Crosshair, cmp.Position).first()
@@ -694,12 +738,13 @@ class TargetInputEvent(InputEvent):
             event.trigger_all_callbacks(targeting_entity, cmp.UseTrigger)
             esper.remove_component(targeting_entity, cmp.Targeting)
             event.Tick()
-            phase.change_to(phase.Ontology.level, Damage)  # to FIRST dmg phase
+            # phase.change_to(phase.Ontology.level, Damage)  # to FIRST dmg phase
         except typ.InvalidAction as e:
             esper.dispatch_event("flash")
             event.Log.append(str(e))
 
 
+@proc_guard
 @dataclass
 class TargetRender(BoardRender):
     context: tcod.context.Context
@@ -746,6 +791,7 @@ class TargetRender(BoardRender):
         self.present(cell_rgbs)
 
 
+@proc_guard
 @dataclass
 class InventoryRender(BoardRender):
     context: tcod.context.Context
@@ -773,6 +819,7 @@ class InventoryRender(BoardRender):
         self.present(cell_rgbs)
 
 
+@proc_guard
 @dataclass
 class InventoryInputEvent(InputEvent):
     def __init__(self):
@@ -820,6 +867,7 @@ class InventoryInputEvent(InputEvent):
             event.Log.append(str(e))
 
 
+@proc_guard
 @dataclass
 class OptionsRender(Render):
     context: tcod.context.Context
@@ -840,6 +888,7 @@ class OptionsRender(Render):
         self.context.present(self.console)
 
 
+@proc_guard
 @dataclass
 class OptionsInputEvent(InputEvent):
     def __init__(self):
@@ -851,6 +900,7 @@ class OptionsInputEvent(InputEvent):
         }
 
 
+@proc_guard
 @dataclass
 class AboutRender(Render):
     context: tcod.context.Context
@@ -872,9 +922,11 @@ class AboutRender(Render):
         self.context.present(self.console)
 
 
+@proc_guard
 @dataclass
 class AboutInputEvent(InputEvent):
     def __init__(self):
+        import phase
         self.action_map = {
             input.KEYMAP[input.Input.ESC]: (
                 phase.change_to,

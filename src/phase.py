@@ -1,15 +1,15 @@
 # game loops
-import copy
 import enum
+import collections
 
 import esper
 
 import components as cmp
 import create
 import processors
+import ecs
 
 ALL = dict()
-CURRENT = None
 
 
 class Ontology(enum.Enum):
@@ -28,8 +28,9 @@ def main_menu_phase(context, console):
     args = {"menu_cmp": cmp.MainMenu, "background": background, "title": title}
     render = processors.MenuRender(context, console, **args)
     input = processors.MenuInputEvent(cmp.MainMenu)
+    enqueue = processors.Enqueue(_phase=Ontology.main_menu)
 
-    ALL[Ontology.main_menu] = [render, input]
+    ALL[Ontology.main_menu] = [render, input, enqueue]
     create.ui.main_menu_opts()
 
 
@@ -45,6 +46,7 @@ def level_phase(context, console):
     player_dmg = processors.Damage()
     npc_dmg = processors.Damage()
     death = processors.Death()
+    enqueue = processors.Enqueue(_phase=Ontology.level)
 
     level_procs = [
         upkeep,
@@ -56,6 +58,7 @@ def level_phase(context, console):
         movement,
         npc_dmg,
         death,
+        enqueue
     ]
     ALL[Ontology.level] = level_procs
 
@@ -67,7 +70,8 @@ def targeting_phase(context, console):
     input = processors.TargetInputEvent()
     target_render = processors.TargetRender(context, console)
     movement = processors.Movement()
-    ALL[Ontology.target] = [target_render, input, movement]
+    enqueue = processors.Enqueue(_phase=Ontology.target)
+    ALL[Ontology.target] = [target_render, input, movement, enqueue]
 
 
 def inventory_phase(context, console):
@@ -75,22 +79,25 @@ def inventory_phase(context, console):
 
     input = processors.InventoryInputEvent()
     render = processors.InventoryRender(context, console)
+    enqueue = processors.Enqueue(_phase=Ontology.inventory)
 
-    ALL[Ontology.inventory] = [render, input]
+    ALL[Ontology.inventory] = [render, input, enqueue]
 
 
 def options_phase(context, console):
     render = processors.OptionsRender(context, console)
     input = processors.OptionsInputEvent()
+    enqueue = processors.Enqueue(_phase=Ontology.options)
 
-    ALL[Ontology.options] = [render, input]
+    ALL[Ontology.options] = [render, input, enqueue]
 
 
 def about_phase(context, console):
     render = processors.AboutRender(context, console)
     input = processors.AboutInputEvent()
+    enqueue = processors.Enqueue(_phase=Ontology.options)
 
-    ALL[Ontology.about] = [render, input]
+    ALL[Ontology.about] = [render, input, enqueue]
 
 
 def char_select_phase(context, console):
@@ -100,26 +107,15 @@ def char_select_phase(context, console):
     render = processors.MenuRender(context, console, **args)
     input = processors.MenuInputEvent(cmp.StartMenu)
 
-    ALL[Ontology.char_select] = [render, input]
+    enqueue = processors.Enqueue(_phase=Ontology.options)
+
+    ALL[Ontology.char_select] = [render, input, enqueue]
     create.ui.char_select_opts()
 
 
-def change_to(phase: Ontology, start_proc: type[esper.Processor] | None = None):
-    """We dynamically add and remove processors when moving between phases. Each phase has its own proc loop."""
-    global CURRENT
-    for proc in esper._processors:
-        esper.remove_processor(type(proc))
-    esper._processors = []
-
-    proc_list = copy.copy(ALL[phase])  # copy to prevent mutation of original
-    if start_proc:
-        while start_proc and not isinstance(proc_list[0], start_proc):
-            proc_list.append(proc_list.pop(0))
-
-    tot_procs = len(proc_list)
-    for i, proc in enumerate(proc_list):
-        esper.add_processor(proc, priority=tot_procs - i)
-    CURRENT = phase
+def change_to(next_phase: Ontology, start_proc: type[esper.Processor] | None = None):
+    game_meta = ecs.Query(cmp.GameMeta).val
+    game_meta.process = ALL[next_phase][-1]
 
 
 def oneshot(proctype: type[esper.Processor]):
@@ -136,3 +132,7 @@ def setup(context, console):
     options_phase(context, console)
     about_phase(context, console)
     char_select_phase(context, console)
+
+    for procs in ALL.values():
+        for proc in procs:
+            esper.add_processor(proc)
