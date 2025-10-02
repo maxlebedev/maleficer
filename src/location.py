@@ -436,6 +436,7 @@ def cave_dungeon(board):
     }
     for _, pos in valid_spawns[:-1]:
         spawn = math_util.from_table(spawn_table)
+        board.retile(*pos, create.tile.floor)
         spawn(pos)
 
 

@@ -171,7 +171,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - In caves, NPCs shouldn't spawn too close to player
     - "Commander" Enemies that effect their faction
     - Check for more places that benefit from ecs.Query.where
-    - 3rd char, 1 pull+aegis spell, 1 kill spell with min range
+    - 3rd char, a pull+aegis spell, a kill spell with 1 range (corwin)
     - Doors via conditional blocking
     - basic lighting attack that uses the ray func I made
     - mageblight: a curse that harms player when they don't progress the game
