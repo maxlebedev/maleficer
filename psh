@@ -26,4 +26,4 @@ while [[ "$1" == -* ]]; do
  shift
 done
 
-powershell.exe -Command "$@"
+powershell.exe -executionpolicy bypass -Command "$@"

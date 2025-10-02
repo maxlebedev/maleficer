@@ -180,6 +180,11 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - do I want hidden/invisible elements? (traps, assasins)
     - binary(ish) space partitioning, plus prefabs of that size
     - A way to get info about enemies
+        * tab-targeting, info in right panel
+            + tab cycles thru pieces, from closest out. 
+            + works for target phase too
+    - damage types. Not sure if elemental or what, but weaknesses, resistances
+    - missile-launcher structure, checker pattern aoe
 ## UX
     - Should all ranged animations happen simultaneously?
         * animation queue?
@@ -194,7 +199,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Decoupling board from screen size
         * I can't change tile size, and 8x8 is good for side panels
         * Given that I can't change tile size, I might not want to do this
-    - tcod.console.save_xp on the images I have
 # BUGS
     - Found a wall I was able to walk through in the caves.
         * Sometimes enemies turn into walls when they die
