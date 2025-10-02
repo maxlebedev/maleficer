@@ -1,6 +1,5 @@
 import collections
 import itertools
-import functools
 from dataclasses import dataclass
 
 import esper
@@ -35,15 +34,13 @@ def get_selected_menuitem():
 class Processor(esper.Processor):
 
     def _process(self):
-        pass
+        raise NotImplementedError
 
     def process(self):
-        global PROC_QUEUE
-        print(f"{PROC_QUEUE=}, {self=}")
         game_meta = ecs.Query(cmp.GameMeta).val
-        if not game_meta.process or isinstance(self, type(game_meta.process)):
+        if self == game_meta.process:
+            # print(f"running {self.__class__}")
             self._process()
-            print(f"then {PROC_QUEUE=}")
             game_meta.process = PROC_QUEUE.popleft()
 
 
@@ -52,12 +49,9 @@ class Enqueue(Processor):
     _phase: "phase.Ontology"
 
     def _process(self):
-        global PROC_QUEUE
-        PROC_QUEUE.append(phase.ALL[self._phase])
-        game_meta = ecs.Query(cmp.GameMeta).val
-        print(f"mid {PROC_QUEUE=}")
-        # game_meta.process = PROC_QUEUE.popleft()
-        # TODO: adding this means we pop too much?
+        PROC_QUEUE.clear()
+        for procs in phase.ALL[self._phase]:
+            PROC_QUEUE.append(procs)
 
 
 @dataclass
@@ -323,7 +317,7 @@ class GameInputEvent(InputEvent):
         xhair_ent = ecs.Query(cmp.Crosshair, cmp.Position).first()
         board.reposition(xhair_ent, *player_pos)
         esper.add_component(casting_spell, cmp.Targeting())
-        # phase.change_to(phase.Ontology.target)
+        phase.change_to(phase.Ontology.target)
 
 
 @dataclass
@@ -527,13 +521,12 @@ class BoardRender(Render):
         panel_contents.append(self.dashes)
 
         # if targeting, also print spell info
+        game_meta = ecs.Query(cmp.GameMeta).val
 
         if targeting := esper.get_component(cmp.Targeting):
             trg_ent, _ = targeting[0]
             panel_contents += self._draw_selection_info(trg_ent)
-        else:
-            # TODO: okay, here we are asking if we are in iventory. we probs actually want to do this vis subclass
-            # if phase.CURRENT == phase.Ontology.inventory:
+        elif game_meta.process == InventoryRender:
             selection = get_selected_menuitem()
             if learnable := esper.try_component(selection, cmp.Learnable):
                 panel_contents += self._draw_selection_info(learnable.spell)
@@ -572,7 +565,8 @@ class BoardRender(Render):
                 if in_fov[x][y]:
                     board.explored.add(cell)
 
-                    if esper.get_component(cmp.Targeting):
+                    if not esper.get_component(cmp.Targeting):
+                    # TODO: or if not TargetRender:
                         brighter = display.brighter(fgcolor, scale=100)
                         cell_rgbs[x][y] = (glyph, brighter, display.Color.CANDLE)
                 elif cell in board.explored:
@@ -668,8 +662,7 @@ class MenuInputEvent(InputEvent):
 
     def back(self):
         if self.menu_cmp.prev:
-            # phase.change_to(self.menu_cmp.prev)
-            pass
+            phase.change_to(self.menu_cmp.prev)
 
     def select(self):
         menu_selection = ecs.Query(cmp.MenuSelection).val
@@ -700,7 +693,7 @@ class TargetInputEvent(InputEvent):
     def to_level(self):
         spell_ent = ecs.Query(cmp.Targeting).first()
         esper.remove_component(spell_ent, cmp.Targeting)
-        # phase.change_to(phase.Ontology.level)
+        phase.change_to(phase.Ontology.level)
 
     def move_crosshair(self, x, y):
         crosshair = ecs.Query(cmp.Crosshair, cmp.Position).first()
@@ -729,7 +722,8 @@ class TargetInputEvent(InputEvent):
             event.trigger_all_callbacks(targeting_entity, cmp.UseTrigger)
             esper.remove_component(targeting_entity, cmp.Targeting)
             event.Tick()
-            # phase.change_to(phase.Ontology.level, Damage)  # to FIRST dmg phase
+            phase.change_to(phase.Ontology.level, Damage)  # to FIRST dmg phase
+            # TODO: this is probs still broken
         except typ.InvalidAction as e:
             esper.dispatch_event("flash")
             event.Log.append(str(e))

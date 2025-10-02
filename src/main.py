@@ -20,6 +20,7 @@ def flash(context, console):
 
     display.write_rgbs(console, cell_rgbs)
     context.present(console)
+
     esper.dispatch_event("redraw")
 
 

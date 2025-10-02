@@ -1,6 +1,5 @@
 # game loops
 import enum
-import collections
 
 import esper
 
@@ -95,7 +94,7 @@ def options_phase(context, console):
 def about_phase(context, console):
     render = processors.AboutRender(context, console)
     input = processors.AboutInputEvent()
-    enqueue = processors.Enqueue(_phase=Ontology.options)
+    enqueue = processors.Enqueue(_phase=Ontology.about)
 
     ALL[Ontology.about] = [render, input, enqueue]
 
@@ -107,21 +106,30 @@ def char_select_phase(context, console):
     render = processors.MenuRender(context, console, **args)
     input = processors.MenuInputEvent(cmp.StartMenu)
 
-    enqueue = processors.Enqueue(_phase=Ontology.options)
+    enqueue = processors.Enqueue(_phase=Ontology.char_select)
 
     ALL[Ontology.char_select] = [render, input, enqueue]
     create.ui.char_select_opts()
 
 
 def change_to(next_phase: Ontology, start_proc: type[esper.Processor] | None = None):
+    processors.PROC_QUEUE.clear()
+    processors.PROC_QUEUE.append(ALL[next_phase][-1])
+
     game_meta = ecs.Query(cmp.GameMeta).val
-    game_meta.process = ALL[next_phase][-1]
+    if not game_meta.process: 
+        game_meta.process = ALL[next_phase][-1]
+
+    if start_proc:
+        ALL[next_phase][-1]._process()
+        while not isinstance(processors.PROC_QUEUE[0], start_proc):
+            processors.PROC_QUEUE.popleft()
 
 
 def oneshot(proctype: type[esper.Processor]):
-    """only works on processors that are already registered"""
+    """immidiately run the process, since we are still in another proc"""
     if proc_instance := esper.get_processor(proctype):
-        proc_instance.process()
+        proc_instance._process()
 
 
 def setup(context, console):
