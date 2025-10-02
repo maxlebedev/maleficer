@@ -181,10 +181,13 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - binary(ish) space partitioning, plus prefabs of that size
     - A way to get info about enemies
         * tab-targeting, info in right panel
-            + tab cycles thru pieces, from closest out. 
+            + tab cycles thru pieces, from closest out.
             + works for target phase too
+        * tab is currently inentory, change that to i or something
     - damage types. Not sure if elemental or what, but weaknesses, resistances
     - missile-launcher structure, checker pattern aoe
+    - it would be cool to use scrolls as materials for something
+        * if you roll a bad spell, it shouldn't just be trash
 ## UX
     - Should all ranged animations happen simultaneously?
         * animation queue?

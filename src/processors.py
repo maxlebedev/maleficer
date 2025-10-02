@@ -600,13 +600,13 @@ class MenuRender(Render):
 
     def process(self):
         self.console.clear()
-        x = display.PANEL_WIDTH + (display.BOARD_WIDTH // 2)
-        y = display.BOARD_HEIGHT // 2
+        x = display.CENTER_W
+        y = display.CENTER_H
 
         if self.background:
             (self.console,) = tcod.console.load_xp(self.background, order="F")
 
-        self.console.print(x, y, self.title, alignment=libtcodpy.CENTER)
+        self.center_print(x, y, self.title)
 
         menu_selection = ecs.Query(cmp.MenuSelection).val
 
@@ -827,9 +827,9 @@ class OptionsRender(Render):
 
     def process(self):
         self.console.clear()
-        x = display.PANEL_WIDTH + (display.BOARD_WIDTH // 2)
-        y = display.BOARD_HEIGHT // 2
-        self.console.print(x, y, "OPTIONS", alignment=libtcodpy.CENTER)
+        x = display.CENTER_W
+        y = display.CENTER_H
+        self.center_print(x, y, "OPTIONS")
 
         y_idx = itertools.count(y + 2)
         for k, v in input.KEYMAP.items():
