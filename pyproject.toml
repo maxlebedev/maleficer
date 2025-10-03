@@ -16,5 +16,4 @@ ignore = [
   'E731',
 ]
 
-[tool.uv.workspace]
-members = ["maleficer"]
+

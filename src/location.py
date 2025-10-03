@@ -258,6 +258,85 @@ def closest_position(start: cmp.Position, options: list[cmp.Position]) -> cmp.Po
     return closest_coord or start
 
 
+def trace_ray(source: int, dest: int):
+    """trace a line between source  dest,
+    return first blocker & inclusive path"""
+    board = get_board()
+    source_pos = esper.component_for_entity(source, cmp.Position)
+    dest_pos = esper.component_for_entity(dest, cmp.Position)
+
+    trace = list(tcod.los.bresenham(source_pos.as_tuple, dest_pos.as_tuple))
+    for i, (x, y) in enumerate(trace):
+        entities = board.entities[x][y]
+        for entity in entities:
+            if esper.has_component(entity, cmp.Blocking):
+                if entity not in (source, dest):
+                    return entity, trace[: i + 1]
+
+    return dest, trace
+
+
+def get_fov():
+    board = get_board()
+    transparency = board.as_transparency()
+    pos = player_position()
+    algo = tcod.libtcodpy.FOV_SHADOW
+    fov = tcod.map.compute_fov(transparency, pos.as_tuple, radius=4, algorithm=algo)
+    return fov
+
+
+def get_neighbor_coords(pos: cmp.Position):
+    offsets = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+    indices = [(pos.x + dx, pos.y + dy) for dx, dy in offsets]
+    return indices
+
+
+def count_neighbors(board, pos: cmp.Position):
+    indices = get_neighbor_coords(pos)
+    neighbor_walls = 0
+    for x, y in indices:
+        try:
+            cell = board.get_cell(x, y)
+            if esper.has_component(cell, cmp.Wall):
+                neighbor_walls += 1
+        except Exception:
+            pass
+    return neighbor_walls
+
+
+def build_perimeter_wall(board):
+    border = {(0, y) for y in range(display.BOARD_HEIGHT)}
+    border |= {(display.BOARD_WIDTH - 1, y) for y in range(display.BOARD_HEIGHT)}
+    border |= {(x, 0) for x in range(display.BOARD_WIDTH)}
+    border |= {(x, display.BOARD_HEIGHT - 1) for x in range(display.BOARD_WIDTH)}
+
+    for x, y in border:
+        board.retile(x, y, create.tile.wall)
+
+
+def in_player_perception(pos: cmp.Position):
+    """true if the source is close enough for player to hear"""
+    player_cmp = ecs.Query(cmp.Player).val
+
+    player_pos = player_position()
+    dist_to_player = euclidean_distance(player_pos, pos)
+    return dist_to_player < player_cmp.perception_radius
+
+
+def new_level():
+    old_level = ecs.Query(cmp.Position).exclude(cmp.Player, cmp.Crosshair)
+    for to_del, _ in old_level:
+        esper.delete_entity(to_del, immediate=True)
+
+    game_meta = ecs.Query(cmp.GameMeta).val
+    game_meta.mood = display.Mood.shuffle()
+    game_meta.board = Board()
+    levels = [Dungeon, Cave, Maze]
+    level_func = random.choice(levels)
+    level_func(game_meta.board)
+    game_meta.board.build_entity_cache()
+
+
 class Dungeon:
     board : Board
     rooms: list[RectangularRoom]
@@ -319,77 +398,6 @@ class Dungeon:
             [create.item.trap, create.item.potion, create.item.scroll]
         )
         item(room.get_random_pos())
-
-
-
-def new_level():
-    old_level = ecs.Query(cmp.Position).exclude(cmp.Player, cmp.Crosshair)
-    for to_del, _ in old_level:
-        esper.delete_entity(to_del, immediate=True)
-
-    game_meta = ecs.Query(cmp.GameMeta).val
-    game_meta.mood = display.Mood.shuffle()
-    game_meta.board = Board()
-    levels = [Dungeon, Cave, Maze]
-    level_func = random.choice(levels)
-    level_func(game_meta.board)
-    game_meta.board.build_entity_cache()
-
-
-def trace_ray(source: int, dest: int):
-    """trace a line between source  dest,
-    return first blocker & inclusive path"""
-    board = get_board()
-    source_pos = esper.component_for_entity(source, cmp.Position)
-    dest_pos = esper.component_for_entity(dest, cmp.Position)
-
-    trace = list(tcod.los.bresenham(source_pos.as_tuple, dest_pos.as_tuple))
-    for i, (x, y) in enumerate(trace):
-        entities = board.entities[x][y]
-        for entity in entities:
-            if esper.has_component(entity, cmp.Blocking):
-                if entity not in (source, dest):
-                    return entity, trace[: i + 1]
-
-    return dest, trace
-
-
-def get_fov():
-    board = get_board()
-    transparency = board.as_transparency()
-    pos = player_position()
-    algo = tcod.libtcodpy.FOV_SHADOW
-    fov = tcod.map.compute_fov(transparency, pos.as_tuple, radius=4, algorithm=algo)
-    return fov
-
-
-def get_neighbor_coords(pos: cmp.Position):
-    offsets = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
-    indices = [(pos.x + dx, pos.y + dy) for dx, dy in offsets]
-    return indices
-
-
-def count_neighbors(board, pos: cmp.Position):
-    indices = get_neighbor_coords(pos)
-    neighbor_walls = 0
-    for x, y in indices:
-        try:
-            cell = board.get_cell(x, y)
-            if esper.has_component(cell, cmp.Wall):
-                neighbor_walls += 1
-        except Exception:
-            pass
-    return neighbor_walls
-
-
-def build_perimeter_wall(board):
-    border = {(0, y) for y in range(display.BOARD_HEIGHT)}
-    border |= {(display.BOARD_WIDTH - 1, y) for y in range(display.BOARD_HEIGHT)}
-    border |= {(x, 0) for x in range(display.BOARD_WIDTH)}
-    border |= {(x, display.BOARD_HEIGHT - 1) for x in range(display.BOARD_WIDTH)}
-
-    for x, y in border:
-        board.retile(x, y, create.tile.wall)
 
 
 class Cave:
@@ -478,16 +486,6 @@ class Cave:
         player_pos.y = display.BOARD_HEIGHT // 2
 
         self.populate()
-
-
-
-def in_player_perception(pos: cmp.Position):
-    """true if the source is close enough for player to hear"""
-    player_cmp = ecs.Query(cmp.Player).val
-
-    player_pos = player_position()
-    dist_to_player = euclidean_distance(player_pos, pos)
-    return dist_to_player < player_cmp.perception_radius
 
 
 class Maze:
@@ -618,19 +616,26 @@ class Maze:
         self.place_from_table(spawn_table, dead_ends, 2)
 
 
-def generate_test_dungeon(board):
-    """one room, one enemy, one item"""
-    board.fill()
-    room_x = display.BOARD_WIDTH // 2
-    room_y = display.BOARD_HEIGHT // 2
-    new_room = RectangularRoom(room_x, room_y, 10, 10)
-    for cell in board.as_sequence(*new_room.inner):
-        pos = esper.component_for_entity(cell, cmp.Position)
-        board.retile(*pos, create.tile.floor)
+class TestDungeon:
+    board: Board
 
-    pos = player_position()
-    pos.x, pos.y = new_room.center.x, new_room.center.y
-    create.npc.cyclops(new_room.get_random_pos())
-    create.item.potion(new_room.get_random_pos())
-    create.item.scroll(new_room.get_random_pos())
-    board.build_entity_cache()
+    def __init__(self, board: Board):
+        self.board = board
+        self.build()
+
+    def build(self):
+        """one room, one enemy, one item"""
+        self.board.fill()
+        room_x = display.BOARD_WIDTH // 2
+        room_y = display.BOARD_HEIGHT // 2
+        new_room = RectangularRoom(room_x, room_y, 10, 10)
+        for cell in self.board.as_sequence(*new_room.inner):
+            pos = esper.component_for_entity(cell, cmp.Position)
+            self.board.retile(pos.x, pos.y, create.tile.floor)
+
+        pos = player_position()
+        pos.x, pos.y = new_room.center.x, new_room.center.y
+        create.npc.cyclops(new_room.get_random_pos())
+        create.item.potion(new_room.get_random_pos())
+        create.item.scroll(new_room.get_random_pos())
+        self.board.build_entity_cache()
