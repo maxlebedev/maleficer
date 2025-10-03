@@ -202,6 +202,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Decoupling board from screen size
         * I can't change tile size, and 8x8 is good for side panels
         * Given that I can't change tile size, I might not want to do this
+    - Make the candle light weaken at edges
 # BUGS
     - Found a wall I was able to walk through in the caves.
         * Sometimes enemies turn into walls when they die
