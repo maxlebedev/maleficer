@@ -144,6 +144,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * The 'On's could be more ECS-compliant
     - flash_pos needs to be rewritten
     - put phase.CURRENT into GameMeta
+    - global tracking of targeted squares, with enemy ai to avoid them
 ## Game Mechanics/Balance
     - spell mods (+1 range, +1 dmg pickups)
     - cooldown alternatives like damage taken, steps walked (lotta tracking)
