@@ -526,12 +526,11 @@ class BoardRender(Render):
         if targeting := esper.get_component(cmp.Targeting):
             trg_ent, _ = targeting[0]
             panel_contents += self._draw_selection_info(trg_ent)
-        elif game_meta.process == InventoryRender:
+        elif isinstance(game_meta.process, InventoryRender):
             selection = get_selected_menuitem()
             if learnable := esper.try_component(selection, cmp.Learnable):
-                panel_contents += self._draw_selection_info(learnable.spell)
-            else:
-                panel_contents += self._draw_selection_info(selection)
+                selection = learnable.spell
+            panel_contents += self._draw_selection_info(selection)
 
         for y_idx, content in enumerate(panel_contents, start=3):
             match content:
