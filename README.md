@@ -66,8 +66,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - I like context from breadcrumbs, but there is now a search issue with multiple apply functions, multiple Damage things, etc
     - look into integer_scaling for context.present(console)
     - Queries that return nothing can crash sometimes :(
-    - flash_pos redraws screen first, so the flash and glyph aren't desynced
-        * this is the opposite of what flash does. maybe a bad idea?
     - Should it be possible to ascend to a previous level (def not for now)
     - Crosshair is a big exception to how movement works. might be worth its own function
     - When I take a step, ranged enemies shoot me before step completes. feels correct for melee but unintuitive for range.
@@ -130,8 +128,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
             + This also paves the way for every npc to have their own proc
     - OnDeath/DeathTrigger OnStep/StepTriger redundancy.
         * The 'On's could be more ECS-compliant
-    - flash_pos needs to be rewritten
-    - put phase.CURRENT into GameMeta
     - The main callback that needs a ref to source is lob_bomb
         * It sure would be nice if it didn't need that
         * We could rewrite lob_bomb as a proc. LobberNPC or something
@@ -139,7 +135,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - board currently is 66*67. I could make it 64*64. Leave room for a border
     - OnDeath/DeathTrigger OnStep/StepTriger redundancy.
         * The 'On's could be more ECS-compliant
-    - flash_pos needs to be rewritten
     - put phase.CURRENT into GameMeta
     - global tracking of targeted squares, with enemy ai to avoid them
     - an effect:color mapping? "stun": Cyan, "force_move": Orange
@@ -166,15 +161,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Should some damage be randomized?
         * If they are, I'm always a fan of dice pools
     - small chance of "named" scrolls with unique effects
-    - goblins should actually try to be at dist 4 to player
-        * when on cooldown BFS a position with dist 4, then move a step
-    - living flames move up to 2 squares to enemy
-        * want an animation for getting there
-        * if only moving 1 square can also attack
-        * if its 2 squares away, player moves into, flame overreaches
-    - Spawners
     - In caves, NPCs shouldn't spawn too close to player
-    - "Commander" Enemies that effect their faction
     - Check for more places that benefit from ecs.Query.where
     - 3rd char, a pull+aegis spell, a kill spell with 1 range (corwin)
     - Doors via conditional blocking
@@ -182,7 +169,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - mageblight: a curse that harms player when they don't progress the game
         * probably when they spend N turns without killing an enemy
         * escalates in damage
-    - do I want hidden/invisible elements? (traps, assasins)
     - binary(ish) space partitioning, plus prefabs of that size
         * drunken walk as well
     - A way to get info about enemies
@@ -191,9 +177,19 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
             + works for target phase too
         * tab is currently inentory, change that to i or something
     - damage types. Not sure if elemental or what, but weaknesses, resistances
-    - missile-launcher structure, checker pattern aoe
     - it would be cool to use scrolls as materials for something
         * if you roll a bad spell, it shouldn't just be trash
+### Enemies
+    - Spawners
+    - "Commander" Enemies that effect their faction
+    - do I want hidden/invisible elements? (traps, assasins)
+    - missile-launcher structure, checker pattern aoe
+    - goblins should actually try to be at dist 4 to player
+        * when on cooldown BFS a position with dist 4, then move a step
+    - living flames move up to 2 squares to enemy
+        * want an animation for getting there
+        * if only moving 1 square can also attack
+        * if its 2 squares away, player moves into, flame overreaches
 ## UX
     - one-turn-per-square moving projectiles
     - use that M icon
@@ -206,7 +202,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Decoupling board from screen size
         * I can't change tile size, and 8x8 is good for side panels
         * Given that I can't change tile size, I might not want to do this
-    - Make the candle light weaken at edges
 # BUGS
     - Found a wall I was able to walk through in the caves.
         * Sometimes enemies turn into walls when they die
