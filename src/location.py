@@ -297,6 +297,7 @@ def get_fov():
     player_cmp = ecs.Query(cmp.Player).val
     radius = player_cmp.sight_radius
     algo = tcod.libtcodpy.FOV_SHADOW
+
     fov = tcod.map.compute_fov(
         transparency, pos.as_tuple, radius=radius, algorithm=algo
     )
