@@ -942,10 +942,10 @@ class Animation(Processor):
     def flash_pos(self, coord, event):
         """change glyph at a position"""
         x, y = coord
-        bx = display.BOARD_STARTX + x
-        by = display.BOARD_STARTY + y
-        cell = self.console.rgb[bx, by]
-        glyph, fg, bg = cell
+        board_x = display.BOARD_STARTX + x
+        board_y = display.BOARD_STARTY + y
+
+        glyph, fg, bg = self.console.rgb[board_x, board_y]
 
         glyph = event.glyph or glyph
         fg = event.fg or fg
@@ -955,21 +955,18 @@ class Animation(Processor):
         if in_fov[x][y]:
             bg = display.Color.CANDLE
 
-        self.console.rgb[bx, by] = (glyph, fg, bg)
-        # tcod.libtcodpy.console_put_char_ex
+        self.console.rgb[board_x, board_y] = (glyph, fg, bg)
 
     def _process(self):
-        done = False
-        idx = 0
-        while not done:
-            done = True
+        max_len = max(len(anim.locs) for anim in event.Queues.animation)
+        for idx in range(max_len):
             for anim in event.Queues.animation:
                 if idx < len(anim.locs):
                     coord = anim.locs[idx]
                     self.flash_pos(coord, anim)
-                    done = False
-            idx += 1
+
             self.context.present(self.console)
-            time.sleep(0.10)  # display long enough to be seen
+            time.sleep(0.07)  # display long enough to be seen
             esper.dispatch_event("redraw")
+
         event.Queues.animation.clear()
