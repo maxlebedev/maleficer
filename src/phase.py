@@ -59,7 +59,7 @@ def level_phase(context, console):
         movement,
         npc_dmg,
         death,
-        enqueue
+        enqueue,
     ]
     ALL[Ontology.level] = level_procs
 
@@ -119,7 +119,7 @@ def change_to(next_phase: Ontology, start_proc: type[esper.Processor] | None = N
     processors.PROC_QUEUE.append(ALL[next_phase][-1])
 
     game_meta = ecs.Query(cmp.GameMeta).val
-    if not game_meta.process: 
+    if not game_meta.process:
         game_meta.process = ALL[next_phase][-1]
 
     if start_proc:

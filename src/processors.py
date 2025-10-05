@@ -31,6 +31,7 @@ def get_selected_menuitem():
     selection = inv_map[menu_selection.item][1].pop()
     return selection
 
+
 def queue_proc(proctype: type[esper.Processor]):
     if proc_instance := esper.get_processor(proctype):
         if PROC_QUEUE[0] == proc_instance:
@@ -572,7 +573,7 @@ class BoardRender(Render):
                     board.explored.add(cell)
 
                     if not esper.get_component(cmp.Targeting):
-                    # TODO: or if not TargetRender:
+                        # TODO: or if not TargetRender:
                         brighter = display.brighter(fgcolor, scale=100)
                         cell_rgbs[x][y] = (glyph, brighter, display.Color.CANDLE)
                 elif cell in board.explored:
@@ -931,6 +932,7 @@ class Upkeep(Processor):
                 status.map[status_effect] = max(0, duration - 1)
                 if status.map[status_effect] == 0:
                     del status.map[status_effect]
+
 
 @dataclass
 class Animation(Processor):

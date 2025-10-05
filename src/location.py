@@ -338,7 +338,7 @@ def new_level():
 
 
 class Dungeon:
-    board : Board
+    board: Board
     rooms: list[RectangularRoom]
     centers: list[cmp.Position]
 
@@ -354,7 +354,7 @@ class Dungeon:
             room_width = random.randint(min_rm_siz, max_rm_siz)
             room_height = random.randint(min_rm_siz, max_rm_siz)
 
-            if room:= self.make_room(room_width, room_height):
+            if room := self.make_room(room_width, room_height):
                 self.rooms.append(room)
 
         last_center = self.rooms[-1].center
@@ -366,7 +366,7 @@ class Dungeon:
 
         room = RectangularRoom(x, y, width, height)
         if any(intersects(self.board, room, r) for r in self.rooms):
-            return # This room intersects, so go to the next attempt
+            return  # This room intersects, so go to the next attempt
 
         self.centers.append(room.center)
         for cell in self.board.as_sequence(*room.inner):
@@ -394,9 +394,7 @@ class Dungeon:
             weights = [3, 2, 1]
             npc_gen = random.choices(npcs, weights)[0]
             npc_gen(room.get_random_pos())
-        item = random.choice(
-            [create.item.trap, create.item.potion, create.item.scroll]
-        )
+        item = random.choice([create.item.trap, create.item.potion, create.item.scroll])
         item(room.get_random_pos())
 
 
@@ -606,7 +604,6 @@ class Maze:
             create.npc.goblin: 3,
             create.npc.warlock: 1,
         }
-
 
         self.place_from_table(spawn_table, seen[1:-1], 2)
         spawn_table = {
