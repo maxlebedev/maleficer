@@ -9,7 +9,7 @@ import phase
 
 def initial_map():
     board = location.get_board()
-    # location.generate_test_dungeon(board)
+    # location.TestDungeon(board)
     # location.Dungeon(board)
     # location.Cave(board)
     location.Maze(board)

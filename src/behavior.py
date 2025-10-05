@@ -60,7 +60,7 @@ def lob_bomb(source: int):
             continue
         dest_pos = esper.component_for_entity(dest, cmp.Position)
         dest_pos = cmp.Position(*dest_pos)
-        flash_line(trace, display.Glyph.BOMB, display.Color.RED)
+        event.Animation(locs=trace, glyph=display.Glyph.BOMB, fg=display.Color.RED)
         create.item.bomb(dest_pos)
 
         board.build_entity_cache()
@@ -71,7 +71,7 @@ def lob_bomb(source: int):
 def fire_at_player(source: int):
     player = ecs.Query(cmp.Player).first()
     dest, trace = location.trace_ray(source, player)
-    flash_line(trace, display.Color.BLUE, display.Glyph.MAGIC_MISSILE)
+    event.Animation(locs=trace, glyph=display.Glyph.MAGIC_MISSILE, fg=display.Color.BLUE)
     trg = cmp.Target(target=dest)
     esper.add_component(source, trg)
     apply_cooldown(source)
@@ -139,8 +139,7 @@ def apply_push(source: int):
                 source_pos.as_tuple, entity, push_effect.distance
             )
             event.Movement(entity, x, y)
-            flash_pos = cmp.Position(x, y)
-            esper.dispatch_event("flash_pos", flash_pos, display.Color.ORANGE)
+            event.Animation(locs=[[x, y]], fg=display.Color.ORANGE)
 
 
 def apply_learn(source: int):
@@ -166,12 +165,6 @@ def apply_aegis(source: int):
             for ent in entities:
                 if esper.has_component(ent, cmp.Health):
                     condition.grant(ent, typ.Condition.Aegis, aegis_effect.value)
-
-
-def flash_line(line: list, *args):
-    for x, y in line:
-        pos = cmp.Position(x=x, y=y)
-        esper.dispatch_event("flash_pos", pos, *args)
 
 
 # This is perhaps the new template of "complex" enemies

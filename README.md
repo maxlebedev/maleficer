@@ -156,6 +156,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - put phase.CURRENT into GameMeta
     - global tracking of targeted squares, with enemy ai to avoid them
     - an effect:color mapping? "stun": Cyan, "force_move": Orange
+    - does damage want to be an un-scheduled event-driven proc?
 ## Game Mechanics/Balance
     - spell mods (+1 range, +1 dmg pickups)
     - cooldown alternatives like damage taken, steps walked (lotta tracking)
@@ -221,3 +222,4 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * those walls can be walked through
         * I think this is bc enemies spawn *in* the wall with same pos
     - MenuSelection maybe wants to be reset when moving thru menus
+    - Stunning self doesn't lock out movement

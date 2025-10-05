@@ -4,9 +4,12 @@ from dataclasses import dataclass
 
 import esper
 import tcod
+import typ
 
 import components as cmp
 import display
+import processors
+import phase
 
 # an event is somethig that happens
 # an action is somthing someone did
@@ -65,6 +68,7 @@ class Queues:
     damage = collections.deque()
     tick = collections.deque()
     death = collections.deque()
+    animation = collections.deque()
 
 
 class Event:
@@ -80,6 +84,10 @@ class Damage(Event):
     source: dict
     target: int
     amount: int
+
+    def __post_init__(self):
+        super().__post_init__()
+        phase.oneshot(processors.Damage)
 
 
 @dataclass
@@ -106,6 +114,19 @@ class Death(Event):
     def __post_init__(self):
         if self.entity not in [e.entity for e in self._queue]:
             self._queue.append(self)
+
+
+@dataclass
+class Animation(Event):
+    _queue = Queues.animation
+    locs: list[typ.COORD]
+    glyph: int | None = None
+    fg: typ.RGB | None = None
+    bg: typ.RGB | None = None
+
+    def __post_init__(self):
+        super().__post_init__()
+        processors.queue_proc(processors.Animation)
 
 
 def trigger_all_callbacks(entity, trigger_cmp):

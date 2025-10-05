@@ -2,6 +2,7 @@ import collections
 import itertools
 from dataclasses import dataclass
 
+import time
 import esper
 import tcod
 from tcod import libtcodpy
@@ -30,6 +31,12 @@ def get_selected_menuitem():
     selection = inv_map[menu_selection.item][1].pop()
     return selection
 
+def queue_proc(proctype: type[esper.Processor]):
+    if proc_instance := esper.get_processor(proctype):
+        if PROC_QUEUE[0] == proc_instance:
+            return
+
+        PROC_QUEUE.appendleft(proc_instance)
 
 class Processor(esper.Processor):
 
@@ -722,7 +729,6 @@ class TargetInputEvent(InputEvent):
             esper.remove_component(targeting_entity, cmp.Targeting)
             event.Tick()
             phase.change_to(phase.Ontology.level, Damage)  # to FIRST dmg phase
-            # TODO: this is probs still broken
         except typ.InvalidAction as e:
             esper.dispatch_event("flash")
             event.Log.append(str(e))
@@ -741,7 +747,7 @@ class TargetRender(BoardRender):
 
         targeting_ent = ecs.Query(cmp.Targeting).first()
         pos = ecs.Query(cmp.Crosshair).cmp(cmp.Position)
-        highlighted = [[pos.x, pos.y]]
+        highlighted = [pos.as_list]
 
         if aoe := esper.try_component(targeting_ent, cmp.EffectArea):
             highlighted += aoe.callback(pos)
@@ -925,3 +931,43 @@ class Upkeep(Processor):
                 status.map[status_effect] = max(0, duration - 1)
                 if status.map[status_effect] == 0:
                     del status.map[status_effect]
+
+@dataclass
+class Animation(Processor):
+    context: tcod.context.Context
+    console: tcod.console.Console
+
+    def flash_pos(self, coord, event):
+        """change glyph at a position"""
+        x, y = coord
+        bx = display.BOARD_STARTX + x
+        by = display.BOARD_STARTY + y
+        cell = self.console.rgb[bx, by]
+        glyph, fg, bg = cell
+
+        glyph = event.glyph or glyph
+        fg = event.fg or fg
+        bg = event.bg or bg
+
+        in_fov = location.get_fov()
+        if in_fov[x][y]:
+            bg = display.Color.CANDLE
+
+        self.console.rgb[bx, by] = (glyph, fg, bg)
+        # tcod.libtcodpy.console_put_char_ex
+
+    def _process(self):
+        done = False
+        idx = 0
+        while not done:
+            done = True
+            for anim in event.Queues.animation:
+                if idx < len(anim.locs):
+                    coord = anim.locs[idx]
+                    self.flash_pos(coord, anim)
+                    done = False
+            idx += 1
+            self.context.present(self.console)
+            time.sleep(0.10)  # display long enough to be seen
+            esper.dispatch_event("redraw")
+        event.Queues.animation.clear()

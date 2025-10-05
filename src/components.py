@@ -38,6 +38,10 @@ class Position:
     def as_tuple(self):
         return (self.x, self.y)
 
+    @property
+    def as_list(self):
+        return [self.x, self.y]
+
 
 @component
 class LastPosition:

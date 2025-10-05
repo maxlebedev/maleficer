@@ -24,30 +24,6 @@ def flash(context, console):
     esper.dispatch_event("redraw")
 
 
-def flash_pos(context, console, position, *args):
-    """change glyph of a position"""
-    esper.dispatch_event("redraw")
-    x = display.BOARD_STARTX + position.x
-    y = display.BOARD_STARTY + position.y
-    cell = console.rgb[x, y]
-    glyph, color, bg = cell
-    for arg in args:
-        if isinstance(arg, tuple):
-            color = arg
-        if isinstance(arg, display.Glyph):
-            glyph = arg
-
-    in_fov = location.get_fov()
-    if in_fov[position.x][position.y]:
-        bg = display.Color.CANDLE
-
-    console.rgb[x, y] = (glyph, color, bg)
-    # tcod.libtcodpy.console_put_char_ex
-
-    context.present(console)
-    time.sleep(0.05)  # display long enough to be seen
-
-
 def redraw():
     phase.oneshot(processors.BoardRender)
 
@@ -82,8 +58,6 @@ def main() -> None:
     flash_callback = lambda: flash(context, console)
     esper.set_handler("redraw", redraw)
     esper.set_handler("flash", flash_callback)
-    flash_pos_callback = partial(flash_pos, context, console)
-    esper.set_handler("flash_pos", flash_pos_callback)
 
     def fullscreen_toggle():
         if context.sdl_window:

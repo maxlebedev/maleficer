@@ -39,6 +39,8 @@ def level_phase(context, console):
     render = processors.BoardRender(context, console)
     input = processors.GameInputEvent()
     npc = processors.NPCTurn()
+    animation = processors.Animation(context, console)
+    esper.add_processor(animation)
 
     player_movement = processors.Movement()
     movement = processors.Movement()

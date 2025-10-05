@@ -33,14 +33,15 @@ def apply(entity: int, condition: typ.Condition, value: int):
     match condition:
         case typ.Condition.Bleed:
             pos = esper.component_for_entity(entity, cmp.Position)
-            esper.dispatch_event("flash_pos", pos, display.Color.BLOOD_RED)
+            event.Animation([pos.as_list], fg=display.Color.BLOOD_RED)
+            esper.dispatch_event("redraw") # update screen before we apply anims
+
             bleed_src = {cmp.Onymous: cmp.Onymous(name="bleed")}
             # TODO: maybe a single global "bleed" entity
             event.Damage(bleed_src, entity, value)
-            phase.oneshot(processors.Damage)
         case typ.Condition.Stun:
             pos = esper.component_for_entity(entity, cmp.Position)
-            esper.dispatch_event("flash_pos", pos, display.Color.CYAN)
+            event.Animation([pos.as_list], fg=display.Color.CYAN)
 
         case typ.Condition.Dying:
             if value == 1:
