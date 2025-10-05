@@ -575,7 +575,7 @@ class BoardRender(Render):
                     if not esper.get_component(cmp.Targeting):
                         # TODO: or if not TargetRender:
                         brighter = display.brighter(fgcolor, scale=100)
-                        cell_rgbs[x][y] = (glyph, brighter, display.Color.CANDLE)
+                        cell_rgbs[x][y] = (glyph, brighter, location.backlight(x, y))
                 elif cell in board.explored:
                     cell_rgbs[x][y] = (glyph, fgcolor, display.Color.BLACK)
                 else:
@@ -953,7 +953,7 @@ class Animation(Processor):
 
         in_fov = location.get_fov()
         if in_fov[x][y]:
-            bg = display.Color.CANDLE
+            bg = location.backlight(board_x, board_y)
 
         self.console.rgb[board_x, board_y] = (glyph, fg, bg)
 

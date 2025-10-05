@@ -15,12 +15,12 @@ import math_util
 import typ
 
 
-def player_position():
+def player_position() -> cmp.Position:
     pos = ecs.Query(cmp.Player).cmp(cmp.Position)
     return pos
 
 
-def player_last_position():
+def player_last_position() -> cmp.Position:
     lp = ecs.Query(cmp.Player).cmp(cmp.LastPosition)
     return lp.pos
 
@@ -58,6 +58,20 @@ def coords_within_radius(pos: cmp.Position, radius: int) -> list[typ.COORD]:
             if dist <= radius:
                 ret_coords.append([x, y])
     return ret_coords
+
+
+def backlight(x, y):
+    """add a fading candle-colored illumination of the player's sight radius"""
+    player_pos = player_position()
+    pos = cmp.Position(x=x, y=y)
+    dist_to_player = euclidean_distance(player_pos, pos)
+    player_cmp = ecs.Query(cmp.Player).val
+
+    normalized_dist = dist_to_player / player_cmp.sight_radius
+    interpolation_coef = 0.85  # higher is faster dropoff
+    factor = 1.0 - (normalized_dist * normalized_dist * interpolation_coef)
+    bg = display.darker(display.Color.CANDLE, factor=factor)
+    return bg
 
 
 class Board:
@@ -280,8 +294,12 @@ def get_fov():
     board = get_board()
     transparency = board.as_transparency()
     pos = player_position()
+    player_cmp = ecs.Query(cmp.Player).val
+    radius = player_cmp.sight_radius
     algo = tcod.libtcodpy.FOV_SHADOW
-    fov = tcod.map.compute_fov(transparency, pos.as_tuple, radius=4, algorithm=algo)
+    fov = tcod.map.compute_fov(
+        transparency, pos.as_tuple, radius=radius, algorithm=algo
+    )
     return fov
 
 

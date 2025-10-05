@@ -128,23 +128,10 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * It sure would be nice if it didn't need that
         * We could rewrite lob_bomb as a proc. LobberNPC or something
             + This also paves the way for every npc to have their own proc
-    - board currently is 66*67. I could make it 64*64. Leave room for a border
     - OnDeath/DeathTrigger OnStep/StepTriger redundancy.
         * The 'On's could be more ECS-compliant
     - flash_pos needs to be rewritten
     - put phase.CURRENT into GameMeta
-
-    - We could rework Phases entirely. All systems are called at all times
-        * however, they all have a state guard and return when guard fails
-        * big change, so lots of surface area
-        * the guards also don't have to be phase analogues
-            + this means we can do smaller procs for things like callbacks
-            + buut order mgmt is currently pretty hard. 
-            + this would likely make it harder
-        * Get can be *much* more dynamic about what runs where 
-            + a state machine for various turn flows
-            + single exec via a simple queue_proc() func 
-        + current phase logic can happen via queue-ing procs
     - The main callback that needs a ref to source is lob_bomb
         * It sure would be nice if it didn't need that
         * We could rewrite lob_bomb as a proc. LobberNPC or something
@@ -156,7 +143,12 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - put phase.CURRENT into GameMeta
     - global tracking of targeted squares, with enemy ai to avoid them
     - an effect:color mapping? "stun": Cyan, "force_move": Orange
-    - does damage want to be an un-scheduled event-driven proc?
+    - We replaced first-class phases with Proc queues
+        * replace the big phase dict, and have that live in the Enqueue procs
+        * make small "unscheduled" procs like animation
+            + use these to replace some callbacks
+            + does Damage want to be an un-scheduled event-driven proc?
+        * OnDeath/DeathTrigger could be solved via the unscheduled procs
 ## Game Mechanics/Balance
     - spell mods (+1 range, +1 dmg pickups)
     - cooldown alternatives like damage taken, steps walked (lotta tracking)
@@ -186,12 +178,13 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Check for more places that benefit from ecs.Query.where
     - 3rd char, a pull+aegis spell, a kill spell with 1 range (corwin)
     - Doors via conditional blocking
-    - basic lighting attack that uses the ray func I made
+    - basic lightning attack that uses the ray func I made
     - mageblight: a curse that harms player when they don't progress the game
         * probably when they spend N turns without killing an enemy
         * escalates in damage
     - do I want hidden/invisible elements? (traps, assasins)
     - binary(ish) space partitioning, plus prefabs of that size
+        * drunken walk as well
     - A way to get info about enemies
         * tab-targeting, info in right panel
             + tab cycles thru pieces, from closest out.
@@ -202,8 +195,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - it would be cool to use scrolls as materials for something
         * if you roll a bad spell, it shouldn't just be trash
 ## UX
-    - Should all ranged animations happen simultaneously?
-        * animation queue?
     - one-turn-per-square moving projectiles
     - use that M icon
     - other menus probably want backgrounds.

@@ -11,6 +11,7 @@ T = typing.TypeVar("T")
 @component
 class Player:
     perception_radius: int = 10
+    sight_radius: int = 4
 
 
 @component
