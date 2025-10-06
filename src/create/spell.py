@@ -59,7 +59,7 @@ def firebolt() -> int:
     player = ecs.Query(cmp.Player).first()
     cmps.append(cmp.Spell(target_range=5))
     cmps.append(cmp.Cooldown(turns=1))
-    cmps.append(cmp.DamageEffect(amount=10, source=player))
+    cmps.append(cmp.DamageEffect(amount=2, die_type=6, source=player))
     callback = partial(location.coords_within_radius, radius=1)
     cmps.append(cmp.EffectArea(callback))
     cmps.append(cmp.Onymous(name="Firebolt"))

@@ -158,8 +158,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
             + and that takes B * CD to clear
     - add aoe into the spell power budget calculation
     - Some sort of Storm/Combo mechanic would be really cool
-    - Should some damage be randomized?
-        * If they are, I'm always a fan of dice pools
     - small chance of "named" scrolls with unique effects
     - In caves, NPCs shouldn't spawn too close to player
     - Check for more places that benefit from ecs.Query.where

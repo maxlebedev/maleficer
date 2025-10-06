@@ -196,6 +196,19 @@ class DamageEffect:
 
     source: int
     amount: int
+    die_type: int | None = None
+
+    @property
+    def desc(self) -> str:
+        if self.die_type:
+            return f"{self.amount}d{self.die_type}"
+        return str(self.amount)
+
+    def calculate(self):
+        import math_util
+        if self.die_type:
+            return math_util.roll(self.amount, self.die_type)
+        return self.amount
 
 
 @component

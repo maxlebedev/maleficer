@@ -39,8 +39,8 @@ def queue_proc(proctype: type[esper.Processor]):
 
         PROC_QUEUE.appendleft(proc_instance)
 
-class Processor(esper.Processor):
 
+class Processor(esper.Processor):
     def _process(self):
         raise NotImplementedError
 
@@ -174,7 +174,7 @@ class Damage(Processor):
                 aegis = display.colored_text("Aegis", display.Color.CYAN)
                 event.Log.append(f"{aegis} absorbs {dmg} damage")
 
-            math_util.clamp_damage(damage.target, damage.amount)
+            math_util.apply_damage(damage.target, damage.amount)
 
             message = self._make_message(damage)
 
@@ -449,7 +449,7 @@ class BoardRender(Render):
     def _draw_selection_info(self, entity: int):
         selection_info = []
         spell_component_details = [
-            ("Damage", cmp.DamageEffect, "amount"),
+            ("Damage", cmp.DamageEffect, "desc"),
             ("Heal", cmp.HealEffect, "amount"),
             ("Range", cmp.Spell, "target_range"),
             ("Cooldown", cmp.Cooldown, "turns"),

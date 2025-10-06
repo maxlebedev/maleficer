@@ -12,7 +12,8 @@ def clamp(num: int, high: int, low=0):
     return min(high, max(low, num))
 
 
-def clamp_damage(entity: int, value: int):
+def apply_damage(entity: int, value: int):
+    # TODO: maybe move onto cmp.Health
     hp = esper.component_for_entity(entity, cmp.Health)
     hp.current -= value
     hp.current = clamp(hp.current, hp.max)
@@ -81,3 +82,7 @@ def from_table(table: dict):
     weights = list(table.values())
     selection = random.choices(pop, weights)
     return selection[0]
+
+
+def roll(num_dice, sides):
+    return sum(random.randint(1, sides) for _ in range(num_dice))

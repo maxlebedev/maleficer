@@ -118,7 +118,8 @@ def apply_damage(source: int):
             entities = collect_all_affected_entities(source, target)
             for ent in entities:
                 if esper.has_component(ent, cmp.Health):
-                    event.Damage(src_frz, ent, dmg_effect.amount)
+                    dmg_val = dmg_effect.calculate()
+                    event.Damage(src_frz, ent, dmg_val)
 
 
 def apply_move(source: int):
