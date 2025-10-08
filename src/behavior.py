@@ -144,19 +144,26 @@ def apply_push(source: int):
             event.Animation(locs=[[x, y]], fg=display.Color.ORANGE)
 
 
+def _learn(spell: int):
+    # TODO: probably wants to live elsewhere
+    known_spells = esper.get_component(cmp.Known)
+    if len(known_spells) == 4:
+        event.Log.append("Max spells learned")
+        raise typ.InvalidAction("learning failed")
+
+    min_slotnum = min({1, 2, 3, 4} - {k[1].slot for k in known_spells})
+    esper.add_component(spell, cmp.Known(min_slotnum))
+
 def apply_learn(source: int):
     if learnable := esper.try_component(source, cmp.Learnable):
-        known_spells = esper.get_component(cmp.Known)
-        if len(known_spells) == 4:
-            event.Log.append("Max spells learned")
-            raise typ.InvalidAction("learning failed")
-        else:
-            min_slotnum = min({1, 2, 3, 4} - {k[1].slot for k in known_spells})
-            esper.add_component(learnable.spell, cmp.Known(min_slotnum))
-            if cd_effect := esper.try_component(learnable.spell, cmp.Cooldown):
-                condition.grant(
-                    learnable.spell, typ.Condition.Cooldown, cd_effect.turns
-                )
+        spell = learnable.spell
+    else:
+        raise typ.InvalidAction("learning failed")
+
+    _learn(spell)
+
+    if cd_effect := esper.try_component(spell, cmp.Cooldown):
+        condition.grant(spell, typ.Condition.Cooldown, cd_effect.turns)
 
 
 def apply_aegis(source: int):

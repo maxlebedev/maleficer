@@ -144,6 +144,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
             + use these to replace some callbacks
             + does Damage want to be an un-scheduled event-driven proc?
         * OnDeath/DeathTrigger could be solved via the unscheduled procs
+        * Spell resolution should def be its own (unscheduled) Proc
 ## Game Mechanics/Balance
     - spell mods (+1 range, +1 dmg pickups)
     - cooldown alternatives like damage taken, steps walked (lotta tracking)

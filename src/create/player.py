@@ -2,6 +2,7 @@ import collections
 
 import esper
 
+import behavior
 import components as cmp
 import display as dis
 
@@ -30,8 +31,8 @@ def alamar():
     cmps.append(cmp.LastPosition(cmp.Position(x=1, y=1)))
     esper.create_entity(*cmps)
 
-    spell.firebolt()
-    spell.blink()
+    behavior._learn(spell.firebolt())
+    behavior._learn(spell.blink())
 
 
 def beatrice():
@@ -45,8 +46,8 @@ def beatrice():
     cmps.append(cmp.LastPosition(cmp.Position(x=1, y=1)))
     esper.create_entity(*cmps)
 
-    spell.daze()
-    spell.bleed()
+    behavior._learn(spell.daze())
+    behavior._learn(spell.bleed())
 
 
 def starting_inventory():

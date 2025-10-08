@@ -147,39 +147,46 @@ class Damage(Processor):
         amount = display.colored_text(-1 * damage.amount, display.Color.GREEN)
         return f"{source_name} heals {target_name} for {amount}"
 
-    def _process(self):
+    def _resolve_cell_damage(self, damage_event):
         board = location.get_board()
+        pos = esper.component_for_entity(damage_event.target, cmp.Position)
+        entities = board.pieces_at(pos)
+        for ent in entities:
+            if esper.has_component(ent, cmp.Health):
+                event.Damage(damage_event.source, ent, damage_event.amount)
+
+    def _resolve_aegis(self, damage_event):
+        aegis = condition.get_val(damage_event.target, typ.Condition.Aegis)
+        absorbed = min(aegis, damage_event.amount)
+        damage_event.amount -= absorbed
+        aegis -= absorbed
+        condition.grant(damage_event.target, typ.Condition.Aegis, aegis)
+
+        dmg = display.colored_text(str(absorbed), display.Color.CYAN)
+        aegis = display.colored_text("Aegis", display.Color.CYAN)
+        event.Log.append(f"{aegis} absorbs {dmg} damage")
+
+    def _process(self):
         while event.Queues.damage:
-            damage = event.Queues.damage.popleft()
-            if not esper.entity_exists(damage.target):
+            damage_event = event.Queues.damage.popleft()
+            if not esper.entity_exists(damage_event.target):
                 # if entity doesn't exist anymore, damage fizzles
                 continue
-            if esper.has_component(damage.target, cmp.Cell):
-                pos = esper.component_for_entity(damage.target, cmp.Position)
-                entities = board.pieces_at(pos)
-                for ent in entities:
-                    if esper.has_component(ent, cmp.Health):
-                        event.Damage(damage.source, ent, damage.amount)
-            if not esper.has_component(damage.target, cmp.Health):
+            if esper.has_component(damage_event.target, cmp.Cell):
+                self._resolve_cell_damage(damage_event)
+            if not esper.has_component(damage_event.target, cmp.Health):
                 # damage source hit a wall, or similar
                 continue
 
-            if aegis := condition.get_val(damage.target, typ.Condition.Aegis):
-                absorbed = min(aegis, damage.amount)
-                damage.amount -= absorbed
-                aegis -= absorbed
-                condition.grant(damage.target, typ.Condition.Aegis, aegis)
+            if condition.has(damage_event.target, typ.Condition.Aegis):
+                self._resolve_aegis(damage_event, )
 
-                dmg = display.colored_text(str(absorbed), display.Color.CYAN)
-                aegis = display.colored_text("Aegis", display.Color.CYAN)
-                event.Log.append(f"{aegis} absorbs {dmg} damage")
+            math_util.apply_damage(damage_event.target, damage_event.amount)
 
-            math_util.apply_damage(damage.target, damage.amount)
+            message = self._make_message(damage_event)
 
-            message = self._make_message(damage)
-
-            if cmp.Position not in damage.source or location.in_player_perception(
-                damage.source[cmp.Position]
+            if cmp.Position not in damage_event.source or location.in_player_perception(
+                damage_event.source[cmp.Position]
             ):
                 event.Log.append(message)
 

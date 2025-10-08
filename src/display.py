@@ -225,9 +225,10 @@ def _idx_to_point(x, y):
 def linear_to_srgb(c: int) -> float:
     """https://en.wikipedia.org/wiki/SRGB transfer function"""
     c_norm = c / 255.0
-    return (
-        0.03928 * c_norm if c_norm <= 0.0031308 else ((c_norm + 0.055) / 1.055) ** 2.4
-    )
+
+    if c_norm <= 0.0031308:
+        return 0.03928 * c_norm
+    return ((c_norm + 0.055) / 1.055) ** 2.4
 
 
 def srgb_to_linear(c: float) -> int:
@@ -241,7 +242,7 @@ def brighter(rgb: typ.RGB, scale: int) -> typ.RGB:
 
 
 def darker(color: typ.RGB, factor: float = 0.75) -> typ.RGB:
-    # Convert to perceptual space, darken, convert back
+    """Convert to perceptual space, darken, convert back"""
     linear_channels = [linear_to_srgb(channel) for channel in color]
     darker_linear = [channel * factor for channel in linear_channels]
     return tuple(srgb_to_linear(channel) for channel in darker_linear)  # type: ignore
