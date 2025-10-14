@@ -42,7 +42,8 @@ def scroll(pos: cmp.Position | None = None, spell: int | None = None) -> int:
     game_meta = ecs.Query(cmp.GameMeta).val
 
     if not spell:
-        spell = create_spell.ProcGen.new(power_budget=5 + (game_meta.level * 5))
+        power_budget = 10 + (game_meta.level * 5)
+        spell = create_spell.ProcGen.new(power_budget=power_budget)
     cmps.append(cmp.Learnable(spell=spell))
     cmps.append(cmp.UseTrigger(callbacks=[behavior.apply_learn]))
 

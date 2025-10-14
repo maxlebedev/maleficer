@@ -4,7 +4,6 @@ from functools import partial
 
 import esper
 
-import behavior
 import components as cmp
 import ecs
 import location
@@ -12,57 +11,104 @@ import location
 
 # TODO: maybe it takes a level as well as power budget
 # some effects may only be available at some levels
-# big refactor time
 class ProcGen():
+    # power_budget: 10, 15, 20, 25
 
     @classmethod
-    def _spell_stats(cls, power_budget=10, waste_chance=0.2) -> tuple[int, int, int]:
-        stats = {"damage": 1, "range": 2, "cooldown": 1}
-        remaining_points = power_budget - sum(stats.values())
-        while remaining_points > 0:
-            if random.random() > waste_chance:
-                stat = random.choice(list(stats.keys()))
-                stats[stat] += 1
-            remaining_points -= 1
-        stats["cooldown"] = max(1, 5 - stats["cooldown"])
-        stats["damage"] *= 10
-        return stats["damage"], stats["range"], stats["cooldown"]
+    def named_spell(cls, power_budget: int) -> int:
+        """generate a named spell of a lvl-appropriate rank"""
+        spell_rank = 1 + power_budget//10
+        foo = [firebolt, lacerate, daze, blink, push, shield]
+        spell = random.choice(foo)
+        return spell(spell_rank, name=f"{foo[0].__name__.title()} {spell_rank}")
 
     @classmethod
-    def new(cls, power_budget) -> int:
-        waste_chance = 0.2
-        match random.randint(0, 3):
-            case 0:
-                waste_chance = 0.4
-        damage, target_range, cooldown = cls._spell_stats(power_budget, waste_chance)
-
+    def make_damage_effect(cls, power_budget: int):
         player = ecs.Query(cmp.Player).first()
+        amount = max(2, power_budget//5)
+        return cmp.DamageEffect(amount=amount, die_type=6, source=player)
+
+    @classmethod
+    def make_push_effect(cls, power_budget: int):
+        player = ecs.Query(cmp.Player).first()
+        distance = max(1, power_budget//5)
+        return cmp.PushEffect(distance=distance, source=player)
+
+    @classmethod
+    def make_stun_effect(cls, power_budget: int):
+        value = max(1, power_budget//5)
+        return cmp.StunEffect(value=value)
+
+    @classmethod
+    def make_bleed_effect(cls, power_budget: int):
+        return cmp.BleedEffect(value=power_budget)
+
+    @classmethod
+    def make_area_effect(cls, power_budget: int):
+        radius = max(1, power_budget//5)
+        callback = partial(location.coords_within_radius, radius=radius)
+        return cmp.EffectArea(callback)
+
+    # TODO: utility spell func as well, with Aegis, Move, etc
+    @classmethod
+    def combat(cls, power_budget: int) -> int:
+        """a spell that effects enemies"""
+        rank = power_budget // 5
+
+        remaining_budget = power_budget
+        effect_pool = [
+                (cls.make_stun_effect),
+                (cls.make_bleed_effect),
+                (cls.make_damage_effect),
+                (cls.make_push_effect),
+        ]
+        effects = []
+        # okay, so I don't want to have damage alone, or mostly range
+        for _ in range(round(random.triangular(1, 3, 2))):
+            idx = random.randint(0, len(effect_pool)-1)
+            effect = effect_pool.pop(idx)
+            # TODO: we want more variance than always rank here
+            value = remaining_budget//2
+            effects.append(effect(power_budget=value))
+            remaining_budget -= value
+
+            if len(effects) == 1: 
+                effect_pool.append(cls.make_area_effect)
+
+        target_range = max(2, remaining_budget)
+        cooldown = max(3, rank + random.randint(-3, 3))
+
+        spell = cls._effects_to_spell(effects, target_range, cooldown)
+        return spell
+
+    @classmethod
+    def _effects_to_spell(cls, effects: list, target_range: int, cooldown: int):
         spell_cmp = cmp.Spell(target_range=target_range)
-        cooldown = cmp.Cooldown(turns=cooldown)
-        ut = cmp.UseTrigger(callbacks=[behavior.apply_cooldown])
-        if waste_chance == 0.4:
-            harm_effect = cmp.BleedEffect(value=damage)
-            ut.callbacks.append(behavior.apply_bleed)
-        else:
-            harm_effect = cmp.DamageEffect(amount=damage, source=player)
-            ut.callbacks.append(behavior.apply_damage)
+        cooldown_cmp = cmp.Cooldown(turns=cooldown)
         name = "".join(random.choices(string.ascii_lowercase, k=5))
         named = cmp.Onymous(name=name)
-        spell = esper.create_entity(spell_cmp, harm_effect, named, cooldown, ut)
-
-        match random.randint(0, 6):
-            # TODO: pull this into the power budget calculation
-            case 0:
-                radius = random.randint(1, target_range - 1)
-
-                callback = partial(location.coords_within_radius, radius=radius)
-                esper.add_component(spell, cmp.EffectArea(callback))
+        spell = esper.create_entity(spell_cmp, named, cooldown_cmp, *effects)
         return spell
 
 
-# all these prefab spells need a power input
 
-def firebolt(level=1) -> int:
+    @classmethod
+    def new(cls, power_budget: int) -> int:
+
+        game_meta = ecs.Query(cmp.GameMeta).val
+        if game_meta.level > 1 and not random.randint(0, 5):
+            return cls.named_spell(power_budget)
+
+        # Some properties go together, some don't. Damage/Bleed and EffectArea, for example
+        # Plan:
+        # there is a property/cost dict that we reference a few times
+        # the remaining points get put into stats like range and cooldown
+
+        spell = cls.combat(power_budget)
+        return spell
+
+
+def firebolt(level=1, name="Firebolt") -> int:
     cmps = []
     player = ecs.Query(cmp.Player).first()
     cmps.append(cmp.Spell(target_range=5))
@@ -70,45 +116,37 @@ def firebolt(level=1) -> int:
     cmps.append(cmp.DamageEffect(amount=1+level, die_type=6, source=player))
     callback = partial(location.coords_within_radius, radius=1)
     cmps.append(cmp.EffectArea(callback))
-    cmps.append(cmp.Onymous(name="Firebolt"))
-    callbacks = [behavior.apply_cooldown, behavior.apply_damage]
-    cmps.append(cmp.UseTrigger(callbacks=callbacks))
+    cmps.append(cmp.Onymous(name=name))
 
     return esper.create_entity(*cmps)
 
 
-def blink(level=1) -> int:
+def blink(level=1, name="Blink") -> int:
     cmps = []
     player = ecs.Query(cmp.Player).first()
     cmps.append(cmp.Spell(target_range=3+level))
     cmps.append(cmp.Cooldown(turns=5))
-    callbacks = [behavior.apply_cooldown, behavior.apply_move]
-    cmps.append(cmp.UseTrigger(callbacks=callbacks))
     cmps.append(cmp.MoveEffect(target=player))
-    cmps.append(cmp.Onymous(name="Blink"))
+    cmps.append(cmp.Onymous(name=name))
 
     return esper.create_entity(*cmps)
 
 
-def bleed(level=1) -> int:
+def lacerate(level=1, name="Lacerate") -> int:
     cmps = []
     cmps.append(cmp.Spell(target_range=3))
     cmps.append(cmp.Cooldown(turns=2))
     cmps.append(cmp.BleedEffect(value=4+level))
-    callbacks = [behavior.apply_cooldown, behavior.apply_bleed]
-    cmps.append(cmp.UseTrigger(callbacks=callbacks))
-    cmps.append(cmp.Onymous(name="Lacerate"))
+    cmps.append(cmp.Onymous(name=name))
 
     return esper.create_entity(*cmps)
 
 
-def push(level=1) -> int:
+def push(level=1, name="Push") -> int:
     cmps = []
     cmps.append(cmp.Spell(target_range=3+level))
     cmps.append(cmp.Cooldown(turns=2))
-    callbacks = [behavior.apply_cooldown, behavior.apply_push]
-    cmps.append(cmp.UseTrigger(callbacks=callbacks))
-    cmps.append(cmp.Onymous(name="Push"))
+    cmps.append(cmp.Onymous(name=name))
 
     player = ecs.Query(cmp.Player).first()
     cmps.append(cmp.PushEffect(source=player, distance=2))
@@ -116,25 +154,21 @@ def push(level=1) -> int:
     return esper.create_entity(*cmps)
 
 
-def daze(level=1) -> int:
+def daze(level=1, name="Daze") -> int:
     cmps = []
     cmps.append(cmp.Spell(target_range=2))
     cmps.append(cmp.Cooldown(turns=6))
-    callbacks = [behavior.apply_cooldown, behavior.apply_stun]
-    cmps.append(cmp.UseTrigger(callbacks=callbacks))
-    cmps.append(cmp.Onymous(name="Daze"))
+    cmps.append(cmp.Onymous(name=name))
     cmps.append(cmp.StunEffect(value=1+level))
 
     return esper.create_entity(*cmps)
 
 
-def shield(level=1) -> int:
+def shield(level=1, name="Shield") -> int:
     cmps = []
     cmps.append(cmp.Spell(target_range=0))
     cmps.append(cmp.Cooldown(turns=6))
-    callbacks = [behavior.apply_cooldown, behavior.apply_aegis]
-    cmps.append(cmp.UseTrigger(callbacks=callbacks))
-    cmps.append(cmp.Onymous(name="Shield"))
+    cmps.append(cmp.Onymous(name=name))
     cmps.append(cmp.AegisEffect(value=9 + level))
 
     return esper.create_entity(*cmps)

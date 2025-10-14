@@ -388,8 +388,9 @@ class NPCTurn(Processor):
                 stunned.add(entity)
 
         for entity in stunned:
-            name = esper.component_for_entity(entity, cmp.Onymous).name
-            event.Log.append(f"{name} is stunned")
+            name = event.Log.color_fmt(entity)
+            stunned_txt = display.colored_text("stunned", display.Color.CYAN)
+            event.Log.append(f"{name} is {stunned_txt}")
 
         for entity, _ in enemies.filter(cmp.Wander).remove(stunned):
             behavior.wander(entity)
@@ -733,7 +734,7 @@ class TargetInputEvent(InputEvent):
             esper.add_component(targeting_entity, trg)
 
         try:
-            event.trigger_all_callbacks(targeting_entity, cmp.UseTrigger)
+            event.trigger_effect_callbacks(targeting_entity)
             esper.remove_component(targeting_entity, cmp.Targeting)
             event.Tick()
             phase.change_to(phase.Ontology.level, Damage)  # to FIRST dmg phase

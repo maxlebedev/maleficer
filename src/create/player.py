@@ -47,7 +47,7 @@ def beatrice():
     esper.create_entity(*cmps)
 
     behavior._learn(spell.daze())
-    behavior._learn(spell.bleed())
+    behavior._learn(spell.lacerate())
 
 
 def starting_inventory():

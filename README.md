@@ -43,19 +43,20 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Why explore the level, (vs doing down asap)
         * Better Spell scrolls
     - What is the progression system?
-        * Between Games
-            + Horizontal power scaling.
+        * Between Games: Horizontal power scaling
             + New starting spells
             + New characters that mix up the gameplay a bit
         * In game
-            + Better scrolls
-            + power ups of some other kind?
+            + Better spells
+            + Stat bumps
 
 # Map Plans
     - cave levels
     - laberynth levels
         * locked doors
     - set-piece features
+    - BSP level
+    - Some Wave Function collapse?
 
 # Arch Concerns
     - The Targeting phase and associated components are coupled to spell casting, if we have other things that target that'll need to change
@@ -157,7 +158,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * Alternat mechanic?, Burnout is a cap of off-cooldown uses.
             + If you use off cooldown B times, then you accumulate 1 burnout
             + and that takes B * CD to clear
-    - add aoe into the spell power budget calculation
     - Some sort of Storm/Combo mechanic would be really cool
     - small chance of "named" scrolls with unique effects
     - In caves, NPCs shouldn't spawn too close to player
@@ -201,6 +201,10 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Decoupling board from screen size
         * I can't change tile size, and 8x8 is good for side panels
         * Given that I can't change tile size, I might not want to do this
+    - consider renaming "level" to "depth" or something"
+    - black fg plus grey/green bg could look rly cool
+    - Push 1 is an easy effect to miss, as the enemies move right back
+        * Maybe all Push 1 comes with Stun 1
 # BUGS
     - Found a wall I was able to walk through in the caves.
         * Sometimes enemies turn into walls when they die
@@ -209,3 +213,4 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - MenuSelection maybe wants to be reset when moving thru menus
     - Stunning self doesn't lock out movement
     - Bombs appear before their animation finishes
+        * We could fix this with a summon proc+queue. that gets ran after anims

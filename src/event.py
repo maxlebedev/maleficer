@@ -10,6 +10,7 @@ import components as cmp
 import display
 import processors
 import phase
+import behavior
 
 # an event is somethig that happens
 # an action is somthing someone did
@@ -137,6 +138,27 @@ def trigger_all_callbacks(entity, trigger_cmp):
             func(entity)
             # TODO: the main callback that needs a ref to source is lob_bomb
             # TypeError
+
+    # I don't remember why these are here.
+    # item use and spells have their own. so perhaps enemy/death
+    if esper.entity_exists(entity) and esper.has_component(entity, cmp.Target):
+        esper.remove_component(entity, cmp.Target)
+
+
+def trigger_effect_callbacks(entity):
+    effect_map = {
+        cmp.Spell: behavior.apply_cooldown,
+        cmp.MoveEffect: behavior.apply_move,
+        cmp.PushEffect: behavior.apply_push,
+        cmp.AegisEffect: behavior.apply_aegis,
+        cmp.StunEffect: behavior.apply_stun,
+        cmp.BleedEffect: behavior.apply_bleed,
+        cmp.HealEffect: behavior.apply_healing,
+        cmp.DamageEffect: behavior.apply_damage,
+    }
+    for k, func in effect_map.items():
+        if esper.has_component(entity, k):
+            func(entity)
 
     # I don't remember why these are here.
     # item use and spells have their own. so perhaps enemy/death
