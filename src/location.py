@@ -342,17 +342,17 @@ def in_player_perception(pos: cmp.Position):
     return dist_to_player < player_cmp.perception_radius
 
 
-def new_level():
-    old_level = ecs.Query(cmp.Position).exclude(cmp.Player, cmp.Crosshair)
-    for to_del, _ in old_level:
+def new_map():
+    old_map = ecs.Query(cmp.Position).exclude(cmp.Player, cmp.Crosshair)
+    for to_del, _ in old_map:
         esper.delete_entity(to_del, immediate=True)
 
     game_meta = ecs.Query(cmp.GameMeta).val
     game_meta.mood = display.Mood.shuffle()
     game_meta.board = Board()
-    levels = [Dungeon, Cave, Maze]
-    level_func = random.choice(levels)
-    level_func(game_meta.board)
+    maps = [Dungeon, Cave, Maze]
+    mapgen_func = random.choice(maps)
+    mapgen_func(game_meta.board)
     game_meta.board.build_entity_cache()
 
 

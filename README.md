@@ -201,7 +201,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Decoupling board from screen size
         * I can't change tile size, and 8x8 is good for side panels
         * Given that I can't change tile size, I might not want to do this
-    - consider renaming "level" to "depth" or something"
     - black fg plus grey/green bg could look rly cool
     - Push 1 is an easy effect to miss, as the enemies move right back
         * Maybe all Push 1 comes with Stun 1

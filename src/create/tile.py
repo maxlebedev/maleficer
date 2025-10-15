@@ -42,8 +42,8 @@ def stairs(x: int, y: int) -> int:
         game_meta = ecs.Query(cmp.GameMeta).val
         if target_cmp := esper.try_component(stairs, cmp.Target):
             if target_cmp.target == player:
-                game_meta.level += 1
-                location.new_level()
+                game_meta.depth += 1
+                location.new_map()
 
     st = cmp.StepTrigger(callbacks=[descend])
     esper.add_component(stairs, st)

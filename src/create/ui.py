@@ -21,7 +21,7 @@ def start_game():
     create.player.starting_inventory()
 
     game_meta = ecs.Query(cmp.GameMeta).val
-    game_meta.level = 1
+    game_meta.depth = 1
 
     order0 = lambda x: x.order == 0
     all_main_menu_opts = ecs.Query(cmp.MainMenu, cmp.MenuItem)

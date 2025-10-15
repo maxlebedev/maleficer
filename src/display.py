@@ -68,7 +68,7 @@ class Color:
 
 
 class Mood:
-    """mood colors, to differentiate the vibes of different levels"""
+    """mood colors, to differentiate the vibes of different maps"""
 
     blue = {
         (166, 92, 250): 1,

@@ -96,7 +96,7 @@ class ProcGen():
     def new(cls, power_budget: int) -> int:
 
         game_meta = ecs.Query(cmp.GameMeta).val
-        if game_meta.level > 1 and not random.randint(0, 5):
+        if game_meta.depth > 1 and not random.randint(0, 5):
             return cls.named_spell(power_budget)
 
         # Some properties go together, some don't. Damage/Bleed and EffectArea, for example

@@ -18,7 +18,7 @@ class Player:
 class GameMeta:
     board: object  # location.Board
     mood: dict
-    level: int = 0
+    depth: int = 0
     menu_selection: int = 0
     process: None = None
 
