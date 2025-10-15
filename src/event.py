@@ -99,6 +99,10 @@ class Movement(Event):
     y: int
     relative: bool = False
 
+    def __post_init__(self):
+        super().__post_init__()
+        processors.queue_proc(processors.Movement)
+
 
 @dataclass
 class Tick(Event):

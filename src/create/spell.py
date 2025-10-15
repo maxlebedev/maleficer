@@ -49,7 +49,6 @@ class ProcGen():
         callback = partial(location.coords_within_radius, radius=radius)
         return cmp.EffectArea(callback)
 
-    # TODO: utility spell func as well, with Aegis, Move, etc
     @classmethod
     def combat(cls, power_budget: int) -> int:
         """a spell that effects enemies"""
@@ -99,12 +98,8 @@ class ProcGen():
         if game_meta.depth > 1 and not random.randint(0, 5):
             return cls.named_spell(power_budget)
 
-        # Some properties go together, some don't. Damage/Bleed and EffectArea, for example
-        # Plan:
-        # there is a property/cost dict that we reference a few times
-        # the remaining points get put into stats like range and cooldown
-
         spell = cls.combat(power_budget)
+        # TODO: utility spell func as well, with Aegis, Move, etc
         return spell
 
 

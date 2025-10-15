@@ -204,6 +204,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - black fg plus grey/green bg could look rly cool
     - Push 1 is an easy effect to miss, as the enemies move right back
         * Maybe all Push 1 comes with Stun 1
+    - Weaken X. Deals -X damage
 # BUGS
     - Found a wall I was able to walk through in the caves.
         * Sometimes enemies turn into walls when they die

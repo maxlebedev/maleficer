@@ -40,8 +40,6 @@ def level_phase(context, console):
     input = processors.GameInputEvent()
     npc = processors.NPCTurn()
 
-    player_movement = processors.Movement()
-    movement = processors.Movement()
     player_dmg = processors.Damage()
     npc_dmg = processors.Damage()
     death = processors.Death()
@@ -52,9 +50,7 @@ def level_phase(context, console):
         render,
         input,
         player_dmg,
-        player_movement,
         npc,
-        movement,
         npc_dmg,
         death,
         enqueue,
@@ -143,6 +139,8 @@ def setup(context, console):
 
     animation = processors.Animation(context, console)
     esper.add_processor(animation)
+    movement = processors.Movement()
+    esper.add_processor(movement)
 
     for procs in ALL.values():
         for proc in procs:
