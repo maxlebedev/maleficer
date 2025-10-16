@@ -11,13 +11,13 @@ import location
 
 # TODO: maybe it takes a level as well as power budget
 # some effects may only be available at some levels
-class ProcGen():
+class ProcGen:
     # power_budget: 10, 15, 20, 25
 
     @classmethod
     def named_spell(cls, power_budget: int) -> int:
         """generate a named spell of a lvl-appropriate rank"""
-        spell_rank = 1 + power_budget//10
+        spell_rank = 1 + power_budget // 10
         foo = [firebolt, lacerate, daze, blink, push, shield]
         spell = random.choice(foo)
         return spell(spell_rank, name=f"{foo[0].__name__.title()} {spell_rank}")
@@ -25,18 +25,18 @@ class ProcGen():
     @classmethod
     def make_damage_effect(cls, power_budget: int):
         player = ecs.Query(cmp.Player).first()
-        amount = max(2, power_budget//5)
+        amount = max(2, power_budget // 5)
         return cmp.DamageEffect(amount=amount, die_type=6, source=player)
 
     @classmethod
     def make_push_effect(cls, power_budget: int):
         player = ecs.Query(cmp.Player).first()
-        distance = max(1, power_budget//5)
+        distance = max(1, power_budget // 5)
         return cmp.PushEffect(distance=distance, source=player)
 
     @classmethod
     def make_stun_effect(cls, power_budget: int):
-        value = max(1, power_budget//5)
+        value = max(1, power_budget // 5)
         return cmp.StunEffect(value=value)
 
     @classmethod
@@ -45,7 +45,7 @@ class ProcGen():
 
     @classmethod
     def make_area_effect(cls, power_budget: int):
-        radius = max(1, power_budget//5)
+        radius = max(1, power_budget // 5)
         callback = partial(location.coords_within_radius, radius=radius)
         return cmp.EffectArea(callback)
 
@@ -56,22 +56,22 @@ class ProcGen():
 
         remaining_budget = power_budget
         effect_pool = [
-                (cls.make_stun_effect),
-                (cls.make_bleed_effect),
-                (cls.make_damage_effect),
-                (cls.make_push_effect),
+            (cls.make_stun_effect),
+            (cls.make_bleed_effect),
+            (cls.make_damage_effect),
+            (cls.make_push_effect),
         ]
         effects = []
         # okay, so I don't want to have damage alone, or mostly range
         for _ in range(round(random.triangular(1, 3, 2))):
-            idx = random.randint(0, len(effect_pool)-1)
+            idx = random.randint(0, len(effect_pool) - 1)
             effect = effect_pool.pop(idx)
             # TODO: we want more variance than always rank here
-            value = remaining_budget//2
+            value = remaining_budget // 2
             effects.append(effect(power_budget=value))
             remaining_budget -= value
 
-            if len(effects) == 1: 
+            if len(effects) == 1:
                 effect_pool.append(cls.make_area_effect)
 
         target_range = max(2, remaining_budget)
@@ -89,11 +89,8 @@ class ProcGen():
         spell = esper.create_entity(spell_cmp, named, cooldown_cmp, *effects)
         return spell
 
-
-
     @classmethod
     def new(cls, power_budget: int) -> int:
-
         game_meta = ecs.Query(cmp.GameMeta).val
         if game_meta.depth > 1 and not random.randint(0, 5):
             return cls.named_spell(power_budget)
@@ -108,7 +105,7 @@ def firebolt(level=1, name="Firebolt") -> int:
     player = ecs.Query(cmp.Player).first()
     cmps.append(cmp.Spell(target_range=5))
     cmps.append(cmp.Cooldown(turns=1))
-    cmps.append(cmp.DamageEffect(amount=1+level, die_type=6, source=player))
+    cmps.append(cmp.DamageEffect(amount=1 + level, die_type=6, source=player))
     callback = partial(location.coords_within_radius, radius=1)
     cmps.append(cmp.EffectArea(callback))
     cmps.append(cmp.Onymous(name=name))
@@ -119,7 +116,7 @@ def firebolt(level=1, name="Firebolt") -> int:
 def blink(level=1, name="Blink") -> int:
     cmps = []
     player = ecs.Query(cmp.Player).first()
-    cmps.append(cmp.Spell(target_range=3+level))
+    cmps.append(cmp.Spell(target_range=3 + level))
     cmps.append(cmp.Cooldown(turns=5))
     cmps.append(cmp.MoveEffect(target=player))
     cmps.append(cmp.Onymous(name=name))
@@ -131,7 +128,7 @@ def lacerate(level=1, name="Lacerate") -> int:
     cmps = []
     cmps.append(cmp.Spell(target_range=3))
     cmps.append(cmp.Cooldown(turns=2))
-    cmps.append(cmp.BleedEffect(value=4+level))
+    cmps.append(cmp.BleedEffect(value=4 + level))
     cmps.append(cmp.Onymous(name=name))
 
     return esper.create_entity(*cmps)
@@ -139,7 +136,7 @@ def lacerate(level=1, name="Lacerate") -> int:
 
 def push(level=1, name="Push") -> int:
     cmps = []
-    cmps.append(cmp.Spell(target_range=3+level))
+    cmps.append(cmp.Spell(target_range=3 + level))
     cmps.append(cmp.Cooldown(turns=2))
     cmps.append(cmp.Onymous(name=name))
 
@@ -154,7 +151,7 @@ def daze(level=1, name="Daze") -> int:
     cmps.append(cmp.Spell(target_range=2))
     cmps.append(cmp.Cooldown(turns=6))
     cmps.append(cmp.Onymous(name=name))
-    cmps.append(cmp.StunEffect(value=1+level))
+    cmps.append(cmp.StunEffect(value=1 + level))
 
     return esper.create_entity(*cmps)
 

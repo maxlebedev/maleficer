@@ -139,8 +139,8 @@ def setup(context, console):
 
     animation = processors.Animation(context, console)
     esper.add_processor(animation)
-    movement = processors.Movement()
-    esper.add_processor(movement)
+    esper.add_processor(processors.Movement())
+    esper.add_processor(processors.Spawn())
 
     for procs in ALL.values():
         for proc in procs:

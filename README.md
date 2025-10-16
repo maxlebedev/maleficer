@@ -212,5 +212,3 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * I think this is bc enemies spawn *in* the wall with same pos
     - MenuSelection maybe wants to be reset when moving thru menus
     - Stunning self doesn't lock out movement
-    - Bombs appear before their animation finishes
-        * We could fix this with a summon proc+queue. that gets ran after anims

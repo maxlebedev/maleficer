@@ -58,12 +58,9 @@ def lob_bomb(source: int):
         dest, trace = location.trace_ray(source, target_cell)
         if dest != target_cell:  # no LOS
             continue
-        dest_pos = esper.component_for_entity(dest, cmp.Position)
-        dest_pos = cmp.Position(*dest_pos)
+        dest_pos = cmp.Position(*trace[-1])
+        event.Spawn(func=partial(create.item.bomb, dest_pos))
         event.Animation(locs=trace, glyph=display.Glyph.BOMB, fg=display.Color.RED)
-        create.item.bomb(dest_pos)
-
-        board.build_entity_cache()
         apply_cooldown(source)
         return
 
@@ -153,6 +150,7 @@ def _learn(spell: int):
 
     min_slotnum = min({1, 2, 3, 4} - {k[1].slot for k in known_spells})
     esper.add_component(spell, cmp.Known(min_slotnum))
+
 
 def apply_learn(source: int):
     if learnable := esper.try_component(source, cmp.Learnable):

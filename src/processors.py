@@ -34,7 +34,7 @@ def get_selected_menuitem():
 
 def queue_proc(proctype: type[esper.Processor]):
     if proc_instance := esper.get_processor(proctype):
-        if PROC_QUEUE[0] == proc_instance:
+        if proc_instance in PROC_QUEUE:
             return
 
         PROC_QUEUE.appendleft(proc_instance)
@@ -179,7 +179,7 @@ class Damage(Processor):
                 continue
 
             if condition.has(damage_event.target, typ.Condition.Aegis):
-                self._resolve_aegis(damage_event, )
+                self._resolve_aegis(damage_event)
 
             math_util.apply_damage(damage_event.target, damage_event.amount)
 
@@ -978,3 +978,14 @@ class Animation(Processor):
             esper.dispatch_event("redraw")
 
         event.Queues.animation.clear()
+
+
+@dataclass
+class Spawn(Processor):
+    def _process(self):
+        while event.Queues.spawn:
+            spawn_event = event.Queues.spawn.popleft()
+            spawn_event.func()
+
+        board = location.get_board()
+        board.build_entity_cache()

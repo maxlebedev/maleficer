@@ -206,6 +206,7 @@ class DamageEffect:
 
     def calculate(self):
         import math_util
+
         if self.die_type:
             return math_util.roll(self.amount, self.die_type)
         return self.amount

@@ -1,6 +1,7 @@
 import collections
 import re
 from dataclasses import dataclass
+import typing
 
 import esper
 import tcod
@@ -70,6 +71,7 @@ class Queues:
     tick = collections.deque()
     death = collections.deque()
     animation = collections.deque()
+    spawn = collections.deque()
 
 
 class Event:
@@ -132,6 +134,16 @@ class Animation(Event):
     def __post_init__(self):
         super().__post_init__()
         processors.queue_proc(processors.Animation)
+
+
+@dataclass
+class Spawn(Event):
+    _queue = Queues.spawn
+    func: typing.Callable
+
+    def __post_init__(self):
+        super().__post_init__()
+        processors.queue_proc(processors.Spawn)
 
 
 def trigger_all_callbacks(entity, trigger_cmp):

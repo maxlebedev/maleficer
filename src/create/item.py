@@ -68,18 +68,15 @@ def bomb(pos: cmp.Position) -> int:
     callback = partial(location.coords_within_radius, radius=1)
     cmps.append(cmp.EffectArea(callback))
 
-    cmps.append(cmp.Aura(callback=callback, color=dis.Color.WHITE))
+    cmps.append(cmp.Aura(callback=callback, color=dis.Color.LIGHT_RED))
 
     dmg_proc = lambda _: phase.oneshot(processors.Damage)
     cmps.append(cmp.DeathTrigger(callbacks=[behavior.apply_damage, dmg_proc]))
 
     def aura_tick(entity: int):
         aura = esper.component_for_entity(entity, cmp.Aura)
-        match aura.color:
-            case dis.Color.WHITE:
-                aura.color = dis.Color.LIGHT_RED
-            case dis.Color.LIGHT_RED:
-                aura.color = dis.Color.BLOOD_RED
+        if aura == dis.Color.LIGHT_RED:
+            aura.color = dis.Color.BLOOD_RED
 
     cmps.append(cmp.EnemyTrigger(callbacks=[aura_tick]))
 
