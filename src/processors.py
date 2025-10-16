@@ -185,7 +185,7 @@ class Damage(Processor):
 
             message = self._make_message(damage_event)
 
-            if cmp.Position not in damage_event.source or location.in_player_perception(
+            if cmp.Position not in damage_event.source or location.player_hears(
                 damage_event.source[cmp.Position]
             ):
                 event.Log.append(message)
@@ -211,7 +211,7 @@ class Death(Processor):
             if killable_cell := board.get_cell(*pos):
                 esper.add_component(killable, cmp.Target(target=killable_cell))
                 event.trigger_all_callbacks(killable, cmp.DeathTrigger)
-            if location.in_player_perception(pos):
+            if location.player_hears(pos):
                 name = event.Log.color_fmt(killable)
                 message = f"{name}#{killable} is no more"
                 event.Log.append(message)

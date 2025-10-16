@@ -333,7 +333,7 @@ def build_perimeter_wall(board):
         board.retile(x, y, create.tile.wall)
 
 
-def in_player_perception(pos: cmp.Position):
+def player_hears(pos: cmp.Position):
     """true if the source is close enough for player to hear"""
     player_cmp = ecs.Query(cmp.Player).val
 
