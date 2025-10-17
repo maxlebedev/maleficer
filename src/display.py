@@ -36,72 +36,81 @@ BOARD_STARTY = 1
 BOARD_ENDY = BOARD_STARTY + BOARD_HEIGHT
 
 
+def hex_to_rgb(hex: str) -> tuple:
+    return tuple(int(hex[i : i + 2], 16) for i in (0, 2, 4))
+
+
 class Color:
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
-    GREEN = (0, 255, 0)
-    DARK_GREEN = (95, 172, 36)
-    RED = (255, 0, 0)
-    LIGHT_RED = (223, 80, 80)
-    BLOOD_RED = (187, 10, 30)
-    BLUE = (0, 0, 255)
-    CYAN = (0, 255, 255)
-    LCYAN = (186, 225, 255)
-    LGREY = (100, 100, 100)
-    DGREY = (50, 50, 50)
-    YELLOW = (55, 55, 37)
-    ORANGE = (255, 128, 0)
-    LORANGE = (255, 223, 186)
-    MAGENTA = (253, 61, 181)
-    BROWN = (94, 44, 4)
-    INDIGO = (75, 0, 130)
-    CHOCOLATE = (210, 105, 30)
-    LEMON = (255, 250, 205)
-    BEIGE = (245, 245, 220)
+    GREEN = hex_to_rgb("55b33b")  # (0, 255, 0)
+    DARK_GREEN = hex_to_rgb("179c43")  # (95, 172, 36)
+    RED = hex_to_rgb("f53141")  # (255, 0 0)
+    LIGHT_RED = hex_to_rgb("ff7070")  # (223, 80, 80)
+    BLOOD_RED = hex_to_rgb("c40c2e")  # (187, 10, 30)
+    BLUE = hex_to_rgb("1c75bd")  # (0, 0, 255)
+    LCYAN = hex_to_rgb("49c2f2")  # (0, 255, 255)
+    CYAN = hex_to_rgb("25acf5")  # (186, 225, 255)
+    LGREY = hex_to_rgb("a69a9c")  # (100, 100, 100)
+    DGREY = hex_to_rgb("807980")  # (50, 50, 50)
+    YELLOW = hex_to_rgb("fad937")  # (55, 55, 37)
+    ORANGE = hex_to_rgb("f58122")  # (255, 128, 0)
+    MAGENTA = hex_to_rgb("773bbf")  # (253, 61, 181)
+    INDIGO = hex_to_rgb("4e278c")  # (75, 0, 130)
+    BROWN = hex_to_rgb("7a5e37")  # (94, 44, 4)
+    CHOCOLATE = hex_to_rgb("ad6a45")  # (210, 105, 30)
+    BEIGE = hex_to_rgb("f2f2da")  # (245, 245, 220)
 
     CANDLE = (97, 85, 52)
+    FLOOR = (70, 70, 70)
     BAR_FILLED = GREEN
     BAR_EMPTY = RED
     # TARGET = (205, 198, 170)  # off-white
-    TARGET = (136, 175, 205)  # light cyan
-    FLOOR = (70, 70, 70)
+    TARGET = LCYAN  # (136, 175, 205)  # light cyan
 
 
 class Mood:
     """mood colors, to differentiate the vibes of different maps"""
 
     blue = {
-        (166, 92, 250): 1,
-        (114, 92, 250): 2,
-        (92, 121, 250): 3,
-        (92, 171, 250): 2,
-        (92, 221, 250): 1,
+        hex_to_rgb("49c2f2"): 1,
+        hex_to_rgb("25acf5"): 2,
+        hex_to_rgb("1793e6"): 3,
+        hex_to_rgb("1c75bd"): 2,
+        hex_to_rgb("195ba6"): 1,
     }
     orange = {
-        (237, 203, 97): 1,
-        (237, 186, 97): 2,
-        (237, 165, 97): 3,
-        (237, 140, 97): 2,
-        (237, 116, 97): 1,
+        hex_to_rgb("faa032"): 1,
+        hex_to_rgb("f58122"): 2,
+        hex_to_rgb("f2621f"): 3,
+        hex_to_rgb("db4b16"): 2,
+        hex_to_rgb("9e4c4c"): 1,
     }
     green = {
-        (96, 240, 106): 1,
-        (97, 237, 155): 2,
-        (97, 237, 202): 3,
-        (97, 225, 237): 2,
-        (100, 181, 240): 1,
+        hex_to_rgb("94bf30"): 1,
+        hex_to_rgb("55b33b"): 2,
+        hex_to_rgb("179c43"): 3,
+        hex_to_rgb("068051"): 2,
+        hex_to_rgb("116061"): 1,
     }
     purple = {
-        (164, 96, 240): 1,
-        (209, 97, 237): 2,
-        (237, 97, 205): 3,
-        (237, 97, 121): 2,
-        (240, 118, 101): 1,
+        hex_to_rgb("e29bfa"): 1,
+        hex_to_rgb("ca7ef2"): 2,
+        hex_to_rgb("a35dd9"): 3,
+        hex_to_rgb("773bbf"): 2,
+        hex_to_rgb("4e278c"): 1,
+    }
+    earthy = {
+        hex_to_rgb("b58c7f"): 1,
+        hex_to_rgb("9e7767"): 2,
+        hex_to_rgb("875d58"): 3,
+        hex_to_rgb("6e4250"): 2,
+        hex_to_rgb("472e3e"): 1,
     }
 
     @classmethod
     def shuffle(cls):
-        choices = [cls.blue, cls.orange, cls.green, cls.purple]
+        choices = [cls.blue, cls.orange, cls.green, cls.purple, cls.earthy]
         return random.choice(choices)
 
 

@@ -91,6 +91,7 @@ class Damage(Event):
     def __post_init__(self):
         super().__post_init__()
         phase.oneshot(processors.Damage)
+        # TODO: oneshot, or queue_proc?
 
 
 @dataclass

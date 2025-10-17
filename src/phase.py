@@ -40,8 +40,7 @@ def level_phase(context, console):
     input = processors.GameInputEvent()
     npc = processors.NPCTurn()
 
-    player_dmg = processors.Damage()
-    npc_dmg = processors.Damage()
+    dmg = processors.Damage()
     death = processors.Death()
     enqueue = processors.Enqueue(_phase=Ontology.level)
 
@@ -49,9 +48,8 @@ def level_phase(context, console):
         upkeep,
         render,
         input,
-        player_dmg,
+        dmg,
         npc,
-        npc_dmg,
         death,
         enqueue,
     ]

@@ -348,7 +348,7 @@ class NPCTurn(Processor):
             return None
         return path[1]
 
-    def process_ranged(self, entity: int, epos: cmp.Position):
+    def process_ranged_enemy(self, entity: int, epos: cmp.Position):
         player_pos = location.player_last_position()
         enemy_cmp = esper.component_for_entity(entity, cmp.Enemy)
         # TODO: ranged units should also sometimes follow
@@ -366,7 +366,7 @@ class NPCTurn(Processor):
             else:
                 behavior.wander(entity)
 
-    def process_melee(self, entity: int, epos: cmp.Position):
+    def process_melee_enemy(self, entity: int, epos: cmp.Position):
         player_pos = location.player_last_position()
         if player_pos.as_tuple == epos.as_tuple:
             player_pos = location.player_position()
@@ -398,14 +398,14 @@ class NPCTurn(Processor):
         melee_enemies = enemies.filter(cmp.Melee, cmp.Position).remove(stunned)
         for entity, (_, epos) in melee_enemies:
             enemy = esper.component_for_entity(entity, cmp.Enemy)
-            self.process_melee(entity, epos)
+            self.process_melee_enemy(entity, epos)
             for _ in range(1, enemy.speed):
                 # phase.oneshot(Movement)
-                self.process_melee(entity, epos)
+                self.process_melee_enemy(entity, epos)
 
         archers = enemies.filter(cmp.Ranged, cmp.Position).remove(stunned)
         for entity, (_, epos) in archers:
-            self.process_ranged(entity, epos)
+            self.process_ranged_enemy(entity, epos)
 
         set_behavior = (cmp.Ranged, cmp.Melee, cmp.Wander)
         enemies = ecs.Query(cmp.Enemy)
@@ -452,7 +452,7 @@ class BoardRender(Render):
             self.console.draw_rect(width=bar_width, **bar_args)
 
         text = f"HP: {curr}/{maximum}"
-        self.console.print(x=x, y=y, string=text, fg=display.Color.DGREY)
+        self.console.print(x=x, y=y, string=text, fg=display.Color.BLACK)
 
     def _draw_selection_info(self, entity: int):
         selection_info = []
@@ -491,7 +491,7 @@ class BoardRender(Render):
             text = f"Slot{known.slot}:{named.name}"
             if cd := condition.get_val(spell_ent, typ.Condition.Cooldown):
                 text = f"{text}:{typ.Condition.Cooldown.name} {cd}"
-            fg = display.Color.WHITE
+            fg = display.Color.BEIGE
             bg = display.Color.BLACK
             if esper.has_component(spell_ent, cmp.Targeting):
                 fg, bg = bg, fg
@@ -557,7 +557,7 @@ class BoardRender(Render):
 
         for i, cnd in enumerate(self.gather_conditions()):
             y = display.PANEL_IHEIGHT - i
-            self.console.print(1, y, cnd, fg=display.Color.LEMON)
+            self.console.print(1, y, cnd, fg=display.Color.YELLOW)
 
     def gather_conditions(self):
         ret = []
