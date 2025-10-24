@@ -631,6 +631,84 @@ class Maze:
         }
         self.place_from_table(spawn_table, dead_ends, 2)
 
+class BSPDungeon:
+    board: Board
+
+    def __init__(self, board: Board):
+        self.board = board
+        self.build()
+
+    def connect(self, tree, bsp, node):
+        node1, node2 = node.children
+        leaf1 = tree[bsp.find_node(node1.x, node1.y)]
+        leaf2 = tree[bsp.find_node(node2.x, node2.y)]
+        source = leaf1.get_random_pos()
+        dest = leaf2.get_random_pos()
+
+        # TODO: tunnel could be better. we want to only connect adjacent rooms
+        tunnel_between(self.board, source, dest)
+
+    def room_from_node(self, node):
+        min_size = 5  # Minimum size for both width and height
+        max_x = node.width - min_size  # Maximum valid x-coordinate
+        max_y = node.height - min_size  # Maximum valid y-coordinate
+
+        # Generate random values within bounds
+        start_x = random.randint(0, max_x)
+        start_y = random.randint(0, max_y)
+        width = math_util.biased_randint(node.width-start_x, min_size)
+        height = math_util.biased_randint(node.height-start_y, min_size)
+        print(node.x + start_x, node.y + start_y, width, height)
+        room = RectangularRoom(node.x+start_x, node.y+start_y, width, height)
+        return room
+
+    def build(self):
+        self.board.fill()
+        bsp = tcod.bsp.BSP(x=0, y=0, width=63, height=63)
+        bsp.split_recursive(
+            depth=5,
+            min_width=5,
+            min_height=5,
+            max_horizontal_ratio=1.5,
+            max_vertical_ratio=1.5,
+        )
+
+        tree = {}
+        # In pre order, leaf nodes are visited before
+        # the nodes that connect them.
+        for node in bsp.post_order():
+            if node.children:
+                self.connect(tree, bsp, node)
+            else:
+                print('Dig a room for %s.' % node)
+                room = self.room_from_node(node)
+
+                tree[node] = room
+                for cell in self.board.as_sequence(*room.inner):
+                    pos = esper.component_for_entity(cell, cmp.Position)
+                    self.board.retile(pos.x, pos.y, create.tile.floor)
+
+        ppos = player_position()
+        room = random.choice(list(tree.values()))
+        ppos.x, ppos.y = room.center.x, room.center.y
+
+        for room in tree.values():
+            self.populate(room)
+
+    def populate(self, room: RectangularRoom):
+        """fill a room with pieces"""
+        for _ in range(random.randint(1, 3)):
+            npcs = [
+                create.npc.bat,
+                create.npc.skeleton,
+                create.npc.warlock,
+            ]
+            weights = [3, 2, 1]
+            npc_gen = random.choices(npcs, weights)[0]
+            npc_gen(room.get_random_pos())
+        item = random.choice([create.item.trap, create.item.potion, create.item.scroll])
+        item(room.get_random_pos())
+
 
 class TestDungeon:
     board: Board

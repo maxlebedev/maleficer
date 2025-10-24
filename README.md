@@ -213,3 +213,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * I think this is bc enemies spawn *in* the wall with same pos
     - MenuSelection maybe wants to be reset when moving thru menus
     - Stunning self doesn't lock out movement
+    - Living flame needs a rework. doesn't acutally move twice
+        * We probably block this on NPC rework
+    - If a map is unpopulated, using blink doesn't refresh the screen

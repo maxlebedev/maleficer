@@ -1,4 +1,5 @@
 import random
+import math
 
 import esper
 import numpy as np
@@ -86,3 +87,14 @@ def from_table(table: dict):
 
 def roll(num_dice, sides):
     return sum(random.randint(1, sides) for _ in range(num_dice))
+
+
+def biased_randint(a, b, lam=5.0):
+    """
+    Exponentially biases values toward a.
+    Higher lam -> stronger bias.
+    """
+    u = random.random()
+    x = -math.log(1 - u) / lam  # exponential(λ)
+    x = min(x, 1.0)             # cap to [0,1]
+    return a + int(x * (b - a))
