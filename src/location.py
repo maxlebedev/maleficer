@@ -658,7 +658,6 @@ class BSPDungeon:
         start_y = random.randint(0, max_y)
         width = math_util.biased_randint(node.width-start_x, min_size)
         height = math_util.biased_randint(node.height-start_y, min_size)
-        print(node.x + start_x, node.y + start_y, width, height)
         room = RectangularRoom(node.x+start_x, node.y+start_y, width, height)
         return room
 
@@ -680,7 +679,6 @@ class BSPDungeon:
             if node.children:
                 self.connect(tree, bsp, node)
             else:
-                print('Dig a room for %s.' % node)
                 room = self.room_from_node(node)
 
                 tree[node] = room
