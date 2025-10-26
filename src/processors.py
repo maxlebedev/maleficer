@@ -559,7 +559,7 @@ class BoardRender(Render):
         self.console.print(1, display.PANEL_IHEIGHT, f"Depth: {map_info.depth}")
 
         for i, cnd in enumerate(self.gather_conditions()):
-            y = display.PANEL_IHEIGHT - i-1
+            y = display.PANEL_IHEIGHT - i - 1
             self.console.print(1, y, cnd, fg=display.Color.YELLOW)
 
     def gather_conditions(self):

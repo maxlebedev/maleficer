@@ -700,13 +700,18 @@ class BSPDungeon:
                 for cell in self.board.as_sequence(*room.inner):
                     pos = esper.component_for_entity(cell, cmp.Position)
                     self.board.retile(pos.x, pos.y, create.tile.floor)
+        rooms = list(tree.values())
 
+        start_room = random.choice(rooms)
         ppos = player_position()
-        room = random.choice(list(tree.values()))
-        ppos.x, ppos.y = room.center.x, room.center.y
+        ppos.x, ppos.y = start_room.center.x, start_room.center.y
 
         for room in tree.values():
             self.populate(room)
+
+        stair_pos = random.choice(rooms).get_random_pos()
+        # do we wanna make sure start and stair rooms are further?
+        self.board.retile(stair_pos.x, stair_pos.y, create.tile.stairs)
 
     def populate(self, room: RectangularRoom):
         """fill a room with pieces"""
