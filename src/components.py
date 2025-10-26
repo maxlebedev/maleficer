@@ -17,10 +17,16 @@ class Player:
 @component
 class GameMeta:
     board: object  # location.Board
-    mood: dict
-    depth: int = 0
     menu_selection: int = 0
     process: None = None
+
+
+@component
+class MapInfo:
+    mood: dict
+    depth: int
+    wall_glyph: int
+    bwall_glyph: int
 
 
 @component

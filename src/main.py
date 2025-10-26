@@ -47,8 +47,7 @@ def main() -> None:
     if context.sdl_window:
         context.sdl_window.fullscreen = tcod.context.SDL_WINDOW_FULLSCREEN_DESKTOP
 
-    color_mood = display.Mood.shuffle()
-    game_meta = cmp.GameMeta(board=location.Board(), mood=color_mood)
+    game_meta = cmp.GameMeta(board=location.Board())
     esper.create_entity(game_meta)
 
     phase.setup(context, console)

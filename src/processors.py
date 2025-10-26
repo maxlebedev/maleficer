@@ -555,8 +555,11 @@ class BoardRender(Render):
                 case tuple():
                     self.console.print(1, y_idx, *content)
 
+        map_info = ecs.Query(cmp.GameMeta).cmp(cmp.MapInfo)
+        self.console.print(1, display.PANEL_IHEIGHT, f"Depth: {map_info.depth}")
+
         for i, cnd in enumerate(self.gather_conditions()):
-            y = display.PANEL_IHEIGHT - i
+            y = display.PANEL_IHEIGHT - i-1
             self.console.print(1, y, cnd, fg=display.Color.YELLOW)
 
     def gather_conditions(self):
@@ -769,12 +772,7 @@ class TargetRender(BoardRender):
                 glyph, fg, bg = cell[0], cell[1], cell[2]
 
                 fg = display.brighter(fg, scale=100)
-                repaintable = (
-                    display.Glyph.FLOOR,
-                    display.Glyph.WALL,
-                    display.Glyph.BWALL,
-                )
-                if cell[0] in repaintable:
+                if cell[0] in display.get_tile_glyphs():
                     fg = display.Color.BEIGE
                 if bg not in (display.Color.LIGHT_RED, display.Color.BLOOD_RED):
                     # a poor subtitute for an "is there an aoe here" check

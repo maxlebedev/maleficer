@@ -14,9 +14,9 @@ def floor(x: int, y: int) -> int:
 
 
 def wall(x: int, y: int, breakable: int = False) -> int:
-    mood = ecs.Query(cmp.GameMeta).val.mood
-    color = math_util.from_table(mood)
-    vis = cmp.Visible(glyph=dis.Glyph.WALL, color=color)
+    map_info = ecs.Query(cmp.GameMeta).cmp(cmp.MapInfo)
+    color = math_util.from_table(map_info.mood)
+    vis = cmp.Visible(glyph=map_info.wall_glyph, color=color)
     pos = cmp.Position(x, y)
     blocking = cmp.Blocking()
     wall = cmp.Wall()
@@ -24,7 +24,7 @@ def wall(x: int, y: int, breakable: int = False) -> int:
     if breakable:
         esper.add_component(cell, cmp.Health(max=1))
         esper.add_component(cell, cmp.Onymous(name="wall"))
-        vis.glyph = dis.Glyph.BWALL
+        vis.glyph = map_info.bwall_glyph
 
     return cell
 
@@ -39,10 +39,8 @@ def stairs(x: int, y: int) -> int:
 
     def descend(_):
         player = ecs.Query(cmp.Player).first()
-        game_meta = ecs.Query(cmp.GameMeta).val
         if target_cmp := esper.try_component(stairs, cmp.Target):
             if target_cmp.target == player:
-                game_meta.depth += 1
                 location.new_map()
 
     st = cmp.StepTrigger(callbacks=[descend])

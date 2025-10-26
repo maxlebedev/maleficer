@@ -118,8 +118,10 @@ class Glyph(IntEnum):
     # ints are all overwritten at asset load time, so import-time uses are discouraged
     NONE = 0
     FLOOR = 3
-    WALL = 637
-    BWALL = 643
+    WALL1 = 637
+    WALL2 = 843
+    BWALL1 = 643
+    BWALL2 = 893
     PLAYER = 73
     BEATRICE = 75
     FRAME1 = 947
@@ -146,16 +148,9 @@ class Glyph(IntEnum):
     CYCLOPS = 465
 
 
-@dataclass
-class BGImage:
-    obj: Image
-    x: int
-    y: int
-    scale: float
+def get_tile_glyphs():
+    return [Glyph.FLOOR, Glyph.WALL1, Glyph.WALL2, Glyph.BWALL1, Glyph.BWALL2]
 
-
-# main_menu scale: 0.05
-# charselect scale: 0.20
 
 letter_map = {
     "0": 868,

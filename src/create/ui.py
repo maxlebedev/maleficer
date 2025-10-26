@@ -7,21 +7,9 @@ import location
 import phase
 
 
-def initial_map():
-    board = location.get_board()
-    # location.TestDungeon(board)
-    # location.Dungeon(board)
-    # location.Cave(board)
-    location.Maze(board)
-    board.build_entity_cache()
-
-
 def start_game():
-    initial_map()
+    location.new_map()
     create.player.starting_inventory()
-
-    game_meta = ecs.Query(cmp.GameMeta).val
-    game_meta.depth = 1
 
     order0 = lambda x: x.order == 0
     all_main_menu_opts = ecs.Query(cmp.MainMenu, cmp.MenuItem)

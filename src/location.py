@@ -347,13 +347,27 @@ def new_map():
     for to_del, _ in old_map:
         esper.delete_entity(to_del, immediate=True)
 
-    game_meta = ecs.Query(cmp.GameMeta).val
-    game_meta.mood = display.Mood.shuffle()
-    game_meta.board = Board()
-    maps = [Dungeon, Cave, Maze]
+    game_meta = ecs.Query(cmp.GameMeta).first()
+
+    def new_map_info():
+        depth = 0
+        if esper.has_component(game_meta, cmp.MapInfo):
+            depth = esper.component_for_entity(game_meta, cmp.MapInfo).depth
+            esper.remove_component(game_meta, cmp.MapInfo)
+        mood = display.Mood.shuffle()
+        wall = random.choice([display.Glyph.WALL1, display.Glyph.WALL2])
+        bwall = random.choice([display.Glyph.BWALL1]) # , display.Glyph.BWALL2
+        mi = cmp.MapInfo(mood=mood, wall_glyph=wall, bwall_glyph=bwall, depth=depth + 1)
+        esper.add_component(game_meta, mi)
+
+    new_map_info()
+
+    game_meta_cmp = esper.component_for_entity(game_meta, cmp.GameMeta)
+    game_meta_cmp.board = Board()
+    maps = [Dungeon, Cave, Maze]  # BSPDungeon, TestDungeon
     mapgen_func = random.choice(maps)
-    mapgen_func(game_meta.board)
-    game_meta.board.build_entity_cache()
+    mapgen_func(game_meta_cmp.board)
+    game_meta_cmp.board.build_entity_cache()
 
 
 class Dungeon:
@@ -631,6 +645,7 @@ class Maze:
         }
         self.place_from_table(spawn_table, dead_ends, 2)
 
+
 class BSPDungeon:
     board: Board
 
@@ -648,7 +663,7 @@ class BSPDungeon:
         # TODO: tunnel could be better. we want to only connect adjacent rooms
         tunnel_between(self.board, source, dest)
 
-    def room_from_node(self, node):
+    def room_from_node(self, node) -> RectangularRoom:
         min_size = 5  # Minimum size for both width and height
         max_x = node.width - min_size  # Maximum valid x-coordinate
         max_y = node.height - min_size  # Maximum valid y-coordinate
@@ -656,9 +671,9 @@ class BSPDungeon:
         # Generate random values within bounds
         start_x = random.randint(0, max_x)
         start_y = random.randint(0, max_y)
-        width = math_util.biased_randint(node.width-start_x, min_size)
-        height = math_util.biased_randint(node.height-start_y, min_size)
-        room = RectangularRoom(node.x+start_x, node.y+start_y, width, height)
+        width = math_util.biased_randint(node.width - start_x, min_size)
+        height = math_util.biased_randint(node.height - start_y, min_size)
+        room = RectangularRoom(node.x + start_x, node.y + start_y, width, height)
         return room
 
     def build(self):
