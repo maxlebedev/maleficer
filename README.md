@@ -105,7 +105,8 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * the things that are now callbacks can be Small Procs, with a guard
         * for nav menu items, a NavButton cmponent with a *to* arg for phase
             + these having to coexist with current buttons might be too complex?
-            + the car select buttons are both
+            + the char select buttons are both
+        + there's probably a way to make the menu button handler via small_proc
     - lots of DRY in the NPC proc
     - bresenham_ray should *really* be under test
     - Should Position comps be immutable?
@@ -211,8 +212,8 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * Sometimes enemies turn into walls when they die
         * those walls can be walked through
         * I think this is bc enemies spawn *in* the wall with same pos
-    - MenuSelection maybe wants to be reset when moving thru menus
     - Stunning self doesn't lock out movement
+    - Actual menuselection is on cmp.MenuSelection. not the GameMeta
     - Living flame needs a rework. doesn't acutally move twice
         * We probably block this on NPC rework
     - If a map is unpopulated, using blink doesn't refresh the screen

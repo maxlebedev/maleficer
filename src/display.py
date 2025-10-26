@@ -1,11 +1,9 @@
 import itertools
 import random
 import string
-from dataclasses import dataclass
 from enum import IntEnum
 
 import tcod
-from tcod.image import Image
 
 import typ
 
@@ -152,76 +150,6 @@ def get_tile_glyphs():
     return [Glyph.FLOOR, Glyph.WALL1, Glyph.WALL2, Glyph.BWALL1, Glyph.BWALL2]
 
 
-letter_map = {
-    "0": 868,
-    "1": 869,
-    "2": 870,
-    "3": 871,
-    "4": 872,
-    "5": 873,
-    "6": 874,
-    "7": 875,
-    "8": 876,
-    "9": 877,
-    ":": 878,
-    ".": 879,
-    "A": 917,
-    "B": 918,
-    "C": 919,
-    "D": 920,
-    "E": 921,
-    "F": 922,
-    "G": 923,
-    "H": 924,
-    "I": 925,
-    "J": 926,
-    "K": 927,
-    "L": 928,
-    "M": 929,
-    "N": 966,
-    "O": 967,
-    "P": 968,
-    "Q": 969,
-    "R": 970,
-    "S": 971,
-    "T": 972,
-    "U": 973,
-    "V": 974,
-    "W": 975,
-    "X": 976,
-    "Y": 977,
-    "Z": 978,
-    "a": 917,
-    "b": 918,
-    "c": 919,
-    "d": 920,
-    "e": 921,
-    "f": 922,
-    "g": 923,
-    "h": 924,
-    "i": 925,
-    "j": 926,
-    "k": 927,
-    "l": 928,
-    "m": 929,
-    "n": 966,
-    "o": 967,
-    "p": 968,
-    "q": 969,
-    "r": 970,
-    "s": 971,
-    "t": 972,
-    "u": 973,
-    "v": 974,
-    "w": 975,
-    "x": 976,
-    "y": 977,
-    "z": 978,
-    "/": 1013,
-    "-": 1017,
-}
-
-
 def _idx_to_point(x, y):
     return (x % y, x // y)
 
@@ -280,11 +208,6 @@ def remap_glyphs():
     glyph_map = {glyph.name: next(codepath) for glyph in Glyph}
 
     return IntEnum("Glyph", glyph_map)
-
-
-def blit_image(console, img, scale):
-    args = {"x": CENTER_W, "y": CENTER_H, "bg_blend": 1, "angle": 0}
-    img.blit(console, scale_x=scale, scale_y=scale, **args)
 
 
 def write_rgbs(console, cell_rgbs):

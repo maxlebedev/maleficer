@@ -60,6 +60,7 @@ def warlock(pos: cmp.Position) -> int:
     return warlock
 
 
+# TODO: add move animations
 def living_flame(pos: cmp.Position) -> int:
     """melee unit, with a dash"""
     cmps = []

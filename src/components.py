@@ -56,12 +56,6 @@ class LastPosition:
 
 
 @component
-class Moving:
-    x: int
-    y: int
-
-
-@component
 class Visible:
     glyph: int
     color: typ.RGB = display.Color.WHITE
@@ -119,7 +113,6 @@ class Onymous:
 @component
 class Health:  # Destroyable, harmable?
     max: int
-    armor: int = 0
 
     def __post_init__(self):
         self.current = self.max

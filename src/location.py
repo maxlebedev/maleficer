@@ -89,7 +89,6 @@ class Board:
             for _ in range(display.BOARD_WIDTH)
         ]
         self.cells = []
-        self.board_size = display.BOARD_WIDTH * display.BOARD_HEIGHT
 
     def fill(self):
         def make_wall(x, y):
@@ -169,10 +168,6 @@ class Board:
         if pos := esper.component_for_entity(entity, cmp.Position):
             esper.remove_component(entity, cmp.Position)
             self.entities_at(pos).remove(entity)
-
-    def set_glyph(self, cell: typ.CELL, glyph: int):
-        vis = esper.component_for_entity(cell, cmp.Visible)
-        vis.glyph = glyph
 
     def as_sequence(self, x: slice = slice(None), y: slice = slice(None)):
         for col in self.cells[x]:
@@ -356,7 +351,7 @@ def new_map():
             esper.remove_component(game_meta, cmp.MapInfo)
         mood = display.Mood.shuffle()
         wall = random.choice([display.Glyph.WALL1, display.Glyph.WALL2])
-        bwall = random.choice([display.Glyph.BWALL1]) # , display.Glyph.BWALL2
+        bwall = random.choice([display.Glyph.BWALL1])  # , display.Glyph.BWALL2
         mi = cmp.MapInfo(mood=mood, wall_glyph=wall, bwall_glyph=bwall, depth=depth + 1)
         esper.add_component(game_meta, mi)
 

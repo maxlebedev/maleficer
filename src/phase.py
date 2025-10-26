@@ -110,7 +110,11 @@ def change_to(next_phase: Ontology, start_proc: type[esper.Processor] | None = N
     processors.PROC_QUEUE.clear()
     processors.PROC_QUEUE.append(ALL[next_phase][-1])
 
+    menu_selection = ecs.Query(cmp.MenuSelection).val
+    menu_selection.item = 0
+
     game_meta = ecs.Query(cmp.GameMeta).val
+
     if not game_meta.process:
         game_meta.process = ALL[next_phase][-1]
 
