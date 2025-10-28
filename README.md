@@ -63,7 +63,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * Each effect component should have its own target, in case we have dmg+heal on one spell, for exampe
         * In the above case, there can be ambiguity about what the target phase actually sets
     - Processors have verbose names, which include phases. Good hint to break them out to phase-based files. Some procs are shared tho
-    - AI behavior probably doesn't *all* want to live in the NPC proc
     - I like context from breadcrumbs, but there is now a search issue with multiple apply functions, multiple Damage things, etc
     - look into integer_scaling for context.present(console)
     - Queries that return nothing can crash sometimes :(
@@ -147,6 +146,9 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
             + does Damage want to be an un-scheduled event-driven proc?
         * OnDeath/DeathTrigger could be solved via the unscheduled procs
         * Spell resolution should def be its own (unscheduled) Proc
+    - AI behavior probably doesn't *all* want to live in the NPC proc
+        * Behavior trees, or state machine, or other?
+            + maybe pytress, maybe that's overkill
 ## Game Mechanics/Balance
     - spell mods (+1 range, +1 dmg pickups)
     - cooldown alternatives like damage taken, steps walked (lotta tracking)
@@ -169,13 +171,13 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - mageblight: a curse that harms player when they don't progress the game
         * probably when they spend N turns without killing an enemy
         * escalates in damage
-    - binary(ish) space partitioning, plus prefabs of that size
-        * drunken walk as well
+    - plus prefabs for BDP map
+    - drunken walk map for caves
     - A way to get info about enemies
-        * tab-targeting, info in right panel
-            + tab cycles thru pieces, from closest out.
-            + works for target phase too
-        * tab is currently inentory, change that to i or something
+        * info in right panel during targeting phase
+        * X to examine, target mode without casting spell
+    - tab-targeting (for target phase)
+        * tab cycles thru pieces, from closest out.
     - damage types. Not sure if elemental or what, but weaknesses, resistances
     - it would be cool to use scrolls as materials for something
         * if you roll a bad spell, it shouldn't just be trash

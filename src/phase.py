@@ -57,9 +57,6 @@ def level_phase(context, console):
 
 
 def targeting_phase(context, console):
-    position_cmp = cmp.Position(x=0, y=0)
-    esper.create_entity(cmp.Crosshair(), position_cmp)
-
     input = processors.TargetInputEvent()
     target_render = processors.TargetRender(context, console)
     movement = processors.Movement()

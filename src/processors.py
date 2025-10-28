@@ -419,7 +419,8 @@ class Render(Processor):
     context: tcod.context.Context
     console: tcod.console.Console
 
-    dashes = "─" * (display.PANEL_IWIDTH)
+    dashes = "├" + "─" * (display.PANEL_IWIDTH) + "┤"
+
 
     def left_print(self, *args, **kwargs):
         self.console.print(alignment=libtcodpy.LEFT, *args, **kwargs)
@@ -512,29 +513,13 @@ class BoardRender(Render):
         hp = ecs.Query(cmp.Player, cmp.Health).cmp(cmp.Health)
         self.render_bar(1, 1, hp.current, hp.max, display.PANEL_IWIDTH)
 
-    def _inventory(self):
-        inv_map = create.player.inventory_map()
-        inventory = [f"{len(ent)}x {name}" for (name, ent) in inv_map]
-        inventory += ["" for _ in range(4 - len(inv_map))]
-        return inventory
-
-    def _draw_panels(self):
-        panel_params = {
-            "y": 0,
-            "width": display.PANEL_WIDTH,
-            "height": display.PANEL_HEIGHT,
-        }
-
-        self._left_panel(panel_params)
-        self._right_panel(panel_params)
-
         panel_contents = []
 
         panel_contents += self._inventory()
-        panel_contents.append(self.dashes)
+        panel_contents.append(None)
 
         panel_contents += self._spell_section()
-        panel_contents.append(self.dashes)
+        panel_contents.append(None)
 
         # if targeting, also print spell info
         game_meta = ecs.Query(cmp.GameMeta).val
@@ -554,6 +539,8 @@ class BoardRender(Render):
                     self.console.print(1, y_idx, content)
                 case tuple():
                     self.console.print(1, y_idx, *content)
+                case None:
+                    self.console.print(0, y_idx, self.dashes)
 
         map_info = ecs.Query(cmp.GameMeta).cmp(cmp.MapInfo)
         self.console.print(1, display.PANEL_IHEIGHT, f"Depth: {map_info.depth}")
@@ -561,6 +548,22 @@ class BoardRender(Render):
         for i, cnd in enumerate(self.gather_conditions()):
             y = display.PANEL_IHEIGHT - i - 1
             self.console.print(1, y, cnd, fg=display.Color.YELLOW)
+
+    def _inventory(self):
+        inv_map = create.player.inventory_map()
+        inventory = [f"{len(ent)}x {name}" for (name, ent) in inv_map]
+        inventory += ["" for _ in range(4 - len(inv_map))]
+        return inventory
+
+    def _draw_panels(self):
+        panel_params = {
+            "y": 0,
+            "width": display.PANEL_WIDTH,
+            "height": display.PANEL_HEIGHT,
+        }
+
+        self._left_panel(panel_params)
+        self._right_panel(panel_params)
 
     def gather_conditions(self):
         ret = []
@@ -750,6 +753,32 @@ class TargetInputEvent(InputEvent):
 class TargetRender(BoardRender):
     context: tcod.context.Context
     console: tcod.console.Console
+
+    def _right_panel(self, panel_params):
+        self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
+        panel_params["x"] = display.R_PANEL_START + 1
+        panel_params["y"] = 1
+        panel_params["width"] = display.PANEL_IWIDTH
+        panel_params["height"] = display.PANEL_IHEIGHT
+
+        xhair_pos = ecs.Query(cmp.Crosshair).cmp(cmp.Position)
+        board = location.get_board()
+        pieces = board.pieces_at(xhair_pos)
+
+        panel_contents = []
+        for piece in pieces:
+            name_cmp = esper.component_for_entity(piece, cmp.Onymous)
+            panel_contents.append(f"Name: {name_cmp.name}")
+            panel_contents.append(None)
+        # here we process an enemy into a description?
+
+        x = display.R_PANEL_START
+        for y_idx, content in enumerate(panel_contents, start=1):
+            match content:
+                case str():
+                    self.console.print(x+1, y_idx, content)
+                case None:
+                    self.console.print(x, y_idx, self.dashes)
 
     def _process(self) -> None:
         self.console.clear()

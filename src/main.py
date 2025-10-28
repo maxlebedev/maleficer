@@ -50,6 +50,9 @@ def main() -> None:
     game_meta = cmp.GameMeta(board=location.Board())
     esper.create_entity(game_meta)
 
+    position_cmp = cmp.Position(x=0, y=0)
+    esper.create_entity(cmp.Crosshair(), position_cmp)
+
     phase.setup(context, console)
     phase.change_to(phase.Ontology.main_menu)
 
