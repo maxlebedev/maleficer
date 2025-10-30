@@ -28,7 +28,7 @@ def collect_all_affected_entities(source: int, target: int) -> list[int]:
         return [target]
     pos = esper.component_for_entity(target, cmp.Position)
     if not esper.has_component(source, cmp.EffectArea):
-        entities = [e for e in board.pieces_at(pos)]
+        entities = [e for e in board.pieces_at(*pos)]
         return entities
     aoe = esper.component_for_entity(source, cmp.EffectArea)
 

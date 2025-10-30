@@ -157,10 +157,10 @@ class Board:
     def entities_at(self, pos: cmp.Position) -> set:
         return self.entities[pos.x][pos.y]
 
-    def pieces_at(self, pos: cmp.Position) -> set:
+    def pieces_at(self, x: int, y: int) -> set:
         """entities, but without cells, crosshair, etc"""
-        entities = self.entities[pos.x][pos.y]
-        cell = self.cells[pos.x][pos.y]
+        entities = self.entities[x][y]
+        cell = self.cells[x][y]
         xhair = ecs.Query(cmp.Crosshair).first()
         return {e for e in entities if e not in [cell, xhair]}
 

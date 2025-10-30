@@ -150,7 +150,7 @@ class Damage(Processor):
     def _resolve_cell_damage(self, damage_event):
         board = location.get_board()
         pos = esper.component_for_entity(damage_event.target, cmp.Position)
-        entities = board.pieces_at(pos)
+        entities = board.pieces_at(*pos)
         for ent in entities:
             if esper.has_component(ent, cmp.Health):
                 event.Damage(damage_event.source, ent, damage_event.amount)
@@ -701,6 +701,8 @@ class MenuInputEvent(InputEvent):
 
 @dataclass
 class TargetInputEvent(InputEvent):
+    piece_coords = []
+
     def __init__(self):
         self.action_map = {
             input.KEYMAP[input.Input.MOVE_DOWN]: (self.move_crosshair, [0, 1]),
@@ -709,9 +711,11 @@ class TargetInputEvent(InputEvent):
             input.KEYMAP[input.Input.MOVE_RIGHT]: (self.move_crosshair, [1, 0]),
             input.KEYMAP[input.Input.ESC]: self.to_level,
             input.KEYMAP[input.Input.SELECT]: self.select,
+            input.KEYMAP[input.Input.TARGET]: self.tab_target,
         }
 
     def to_level(self):
+        self.piece_coords = []
         spell_ent = ecs.Query(cmp.Targeting).first()
         esper.remove_component(spell_ent, cmp.Targeting)
         phase.change_to(phase.Ontology.level)
@@ -729,7 +733,29 @@ class TargetInputEvent(InputEvent):
         if not spell_cmp or dist_to_player <= spell_cmp.target_range:
             event.Movement(crosshair, x, y, relative=True)
 
+
+    def tab_target(self):
+        """build piece_coord list, jump xhair along list, flush cache on exit"""
+        # TODO: make sure that player isn't the first item in the list
+
+        if not self.piece_coords:
+            player_pos = location.player_position()
+            sight_radius = ecs.Query(cmp.Player).val.sight_radius
+            coords = location.coords_within_radius(player_pos, sight_radius)
+            board = location.get_board()
+            for x, y in coords:
+                if board.pieces_at(x, y):
+                    self.piece_coords.append((x,y))
+
+        target = self.piece_coords.pop(0)
+        xhair_pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(cmp.Position)
+        xhair_pos.x, xhair_pos.y = target
+        self.piece_coords.append(target)
+
+
+
     def select(self):
+        self.piece_coords = []
         xhair_pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(cmp.Position)
         targeting_entity = ecs.Query(cmp.Targeting).first()
         board = location.get_board()
@@ -754,6 +780,16 @@ class TargetRender(BoardRender):
     context: tcod.context.Context
     console: tcod.console.Console
 
+    def piece_to_description(self, piece):
+        desc = []
+        name_cmp = esper.component_for_entity(piece, cmp.Onymous)
+        desc.append(f"Name: {name_cmp.name}")
+        if health_cmp := esper.try_component(piece, cmp.Health):
+            desc.append(f"HP: {health_cmp.current}")
+        if enemy_cmp := esper.try_component(piece, cmp.Enemy):
+            desc.append(f"Speed: {enemy_cmp.speed}")
+        return desc
+
     def _right_panel(self, panel_params):
         self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
         panel_params["x"] = display.R_PANEL_START + 1
@@ -763,14 +799,12 @@ class TargetRender(BoardRender):
 
         xhair_pos = ecs.Query(cmp.Crosshair).cmp(cmp.Position)
         board = location.get_board()
-        pieces = board.pieces_at(xhair_pos)
+        pieces = board.pieces_at(*xhair_pos)
 
         panel_contents = []
         for piece in pieces:
-            name_cmp = esper.component_for_entity(piece, cmp.Onymous)
-            panel_contents.append(f"Name: {name_cmp.name}")
+            panel_contents = self.piece_to_description(piece)
             panel_contents.append(None)
-        # here we process an enemy into a description?
 
         x = display.R_PANEL_START
         for y_idx, content in enumerate(panel_contents, start=1):

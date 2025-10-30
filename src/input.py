@@ -27,6 +27,7 @@ class Input(enum.Enum):
     SPELL3 = enum.auto()
     SPELL4 = enum.auto()
     INVENTORY = enum.auto()
+    TARGET = enum.auto()
     SKIP = enum.auto()
     ALTERNATE = enum.auto()
 

@@ -173,11 +173,9 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * escalates in damage
     - plus prefabs for BDP map
     - drunken walk map for caves
-    - A way to get info about enemies
-        * info in right panel during targeting phase
-        * X to examine, target mode without casting spell
-    - tab-targeting (for target phase)
-        * tab cycles thru pieces, from closest out.
+    - X/TAB to examine, target mode without casting spell
+        * This gives us a good reason to decouple target from spell
+        * Are we fine printing only one desc if the spell's aoe covers more?
     - damage types. Not sure if elemental or what, but weaknesses, resistances
     - it would be cool to use scrolls as materials for something
         * if you roll a bad spell, it shouldn't just be trash
@@ -194,6 +192,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * if its 2 squares away, player moves into, flame overreaches
         * might want to wait onthe NPC rework
     - Weaken X. Deals -X damage
+    - Giant spider thing that leaps at you, with an AOE dmg on land
 ## UX
     - one-turn-per-square moving projectiles
     - use that M icon
