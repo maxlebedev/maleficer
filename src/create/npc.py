@@ -26,7 +26,7 @@ def bat(pos: cmp.Position) -> int:
 def skeleton(pos: cmp.Position) -> int:
     cmps = []
     cmps.append(pos)
-    cmps.append(cmp.Visible(glyph=dis.Glyph.SKELETON, color=dis.Color.BROWN))
+    cmps.append(cmp.Visible(glyph=dis.Glyph.SKELETON, color=dis.Color.BEIGE))
     cmps.append(cmp.Health(max=25))
     cmps.append(cmp.Onymous(name="skeleton"))
     cmps.append(cmp.Melee())

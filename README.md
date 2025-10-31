@@ -193,14 +193,11 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * might want to wait onthe NPC rework
     - Weaken X. Deals -X damage
     - Giant spider thing that leaps at you, with an AOE dmg on land
-## UX
     - one-turn-per-square moving projectiles
+## UX
     - use that M icon
     - other menus probably want backgrounds.
         * side panels might too
-    - rework blit_image
-    - add ├ and ┤ to dashes, but not just via panel_contents list
-        * since that assumes a starting X coord
     - TargetRender.render and _apply_lighting need a DRY pass/refactor
     - Decoupling board from screen size
         * I can't change tile size, and 8x8 is good for side panels

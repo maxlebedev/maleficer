@@ -41,30 +41,29 @@ def hex_to_rgb(hex: str) -> tuple:
 class Color:
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
-    GREEN = hex_to_rgb("55b33b")  # (0, 255, 0)
-    DARK_GREEN = hex_to_rgb("179c43")  # (95, 172, 36)
-    RED = hex_to_rgb("f53141")  # (255, 0 0)
-    LIGHT_RED = hex_to_rgb("ff7070")  # (223, 80, 80)
-    BLOOD_RED = hex_to_rgb("c40c2e")  # (187, 10, 30)
-    BLUE = hex_to_rgb("1c75bd")  # (0, 0, 255)
-    LCYAN = hex_to_rgb("49c2f2")  # (0, 255, 255)
-    CYAN = hex_to_rgb("25acf5")  # (186, 225, 255)
-    LGREY = hex_to_rgb("a69a9c")  # (100, 100, 100)
-    DGREY = hex_to_rgb("807980")  # (50, 50, 50)
-    YELLOW = hex_to_rgb("fad937")  # (55, 55, 37)
-    ORANGE = hex_to_rgb("f58122")  # (255, 128, 0)
-    MAGENTA = hex_to_rgb("773bbf")  # (253, 61, 181)
-    INDIGO = hex_to_rgb("4e278c")  # (75, 0, 130)
-    BROWN = hex_to_rgb("7a5e37")  # (94, 44, 4)
-    CHOCOLATE = hex_to_rgb("ad6a45")  # (210, 105, 30)
-    BEIGE = hex_to_rgb("f2f2da")  # (245, 245, 220)
+    GREEN = hex_to_rgb("55b33b")
+    DARK_GREEN = hex_to_rgb("179c43")
+    RED = hex_to_rgb("f53141")
+    LIGHT_RED = hex_to_rgb("ff7070")
+    BLOOD_RED = hex_to_rgb("c40c2e")
+    BLUE = hex_to_rgb("1c75bd")
+    LCYAN = hex_to_rgb("49c2f2")
+    CYAN = hex_to_rgb("25acf5")
+    LGREY = hex_to_rgb("a69a9c")
+    DGREY = hex_to_rgb("807980")
+    YELLOW = hex_to_rgb("fad937")
+    ORANGE = hex_to_rgb("f58122")
+    MAGENTA = hex_to_rgb("773bbf")
+    INDIGO = hex_to_rgb("4e278c")
+    BROWN = hex_to_rgb("7a5e37")
+    CHOCOLATE = hex_to_rgb("ad6a45")
+    BEIGE = hex_to_rgb("f2f2da")
 
     CANDLE = (97, 85, 52)
     FLOOR = (70, 70, 70)
     BAR_FILLED = GREEN
     BAR_EMPTY = RED
-    # TARGET = (205, 198, 170)  # off-white
-    TARGET = LCYAN  # (136, 175, 205)  # light cyan
+    TARGET = LCYAN
 
 
 class Mood:

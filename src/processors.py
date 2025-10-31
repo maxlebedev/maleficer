@@ -421,7 +421,6 @@ class Render(Processor):
 
     dashes = "├" + "─" * (display.PANEL_IWIDTH) + "┤"
 
-
     def left_print(self, *args, **kwargs):
         self.console.print(alignment=libtcodpy.LEFT, *args, **kwargs)
 
@@ -733,7 +732,6 @@ class TargetInputEvent(InputEvent):
         if not spell_cmp or dist_to_player <= spell_cmp.target_range:
             event.Movement(crosshair, x, y, relative=True)
 
-
     def tab_target(self):
         """build piece_coord list, jump xhair along list, flush cache on exit"""
         # TODO: make sure that player isn't the first item in the list
@@ -745,14 +743,12 @@ class TargetInputEvent(InputEvent):
             board = location.get_board()
             for x, y in coords:
                 if board.pieces_at(x, y):
-                    self.piece_coords.append((x,y))
+                    self.piece_coords.append((x, y))
 
         target = self.piece_coords.pop(0)
         xhair_pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(cmp.Position)
         xhair_pos.x, xhair_pos.y = target
         self.piece_coords.append(target)
-
-
 
     def select(self):
         self.piece_coords = []
@@ -810,7 +806,7 @@ class TargetRender(BoardRender):
         for y_idx, content in enumerate(panel_contents, start=1):
             match content:
                 case str():
-                    self.console.print(x+1, y_idx, content)
+                    self.console.print(x + 1, y_idx, content)
                 case None:
                     self.console.print(x, y_idx, self.dashes)
 
