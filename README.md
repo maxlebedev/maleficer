@@ -167,11 +167,10 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Check for more places that benefit from ecs.Query.where
     - 3rd char, a pull+aegis spell, a kill spell with 1 range (corwin)
     - Doors via conditional blocking
-    - basic lightning attack that uses the ray func I made
     - mageblight: a curse that harms player when they don't progress the game
         * probably when they spend N turns without killing an enemy
         * escalates in damage
-    - plus prefabs for BDP map
+    - prefabs for BDP map
     - drunken walk map for caves
     - X/TAB to examine, target mode without casting spell
         * This gives us a good reason to decouple target from spell
@@ -184,6 +183,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - "Commander" Enemies that effect their faction
     - do I want hidden/invisible elements? (traps, assasins)
     - missile-launcher structure, checker pattern aoe
+    - one-turn-per-square moving projectiles
     - goblins should actually try to be at dist 4 to player
         * when on cooldown BFS a position with dist 4, then move a step
     - living flames move up to 2 squares to enemy
@@ -193,7 +193,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * might want to wait onthe NPC rework
     - Weaken X. Deals -X damage
     - Giant spider thing that leaps at you, with an AOE dmg on land
-    - one-turn-per-square moving projectiles
 ## UX
     - use that M icon
     - other menus probably want backgrounds.

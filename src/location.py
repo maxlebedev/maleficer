@@ -60,6 +60,12 @@ def coords_within_radius(pos: cmp.Position, radius: int) -> list[typ.COORD]:
     return ret_coords
 
 
+def coords_line_to_point(source: cmp.Position, dest: cmp.Position) -> list[typ.COORD]:
+    """exclude source"""
+    coords = tcod.los.bresenham((source.x, source.y), (dest.x, dest.y)).tolist()
+    return list(coords)[1:]
+
+
 def backlight(x, y):
     """add a fading candle-colored illumination of the player's sight radius"""
     player_pos = player_position()
