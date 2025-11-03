@@ -45,6 +45,7 @@ def main_menu_opts():
 
 def char_select_opts():
     # TODO: these can probably be consolidated, maybe even into some startgame()
+    # at minimum, make a func to generate the string
     def pick_alamar(_):
         create.player.alamar()
         start_game()

@@ -2,7 +2,7 @@
 
 import enum
 
-ENTITY = int
+Entity = int
 
 RGB = tuple[int, int, int]
 CELL_RGB = tuple[int, RGB, RGB]

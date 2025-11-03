@@ -40,7 +40,7 @@ class Log:
     curr_len = 0
 
     @classmethod
-    def color_fmt(cls, entity: int):
+    def color_fmt(cls, entity: typ.Entity):
         """take a string, and an entity, recolor string with entity fg"""
         message = esper.component_for_entity(entity, cmp.Onymous).name
         vis = esper.component_for_entity(entity, cmp.Visible)
@@ -117,7 +117,7 @@ class Tick(Event):
 @dataclass
 class Death(Event):
     _queue = Queues.death
-    entity: int
+    entity: typ.Entity
 
     def __post_init__(self):
         if self.entity not in [e.entity for e in self._queue]:
@@ -147,22 +147,22 @@ class Spawn(Event):
         processors.queue_proc(processors.Spawn)
 
 
-def trigger_all_callbacks(entity, trigger_cmp):
-    if trigger := esper.try_component(entity, trigger_cmp):
+def trigger_all_callbacks(source: typ.Entity, trigger_cmp):
+    if trigger := esper.try_component(source, trigger_cmp):
         for func in trigger.callbacks:
-            if not esper.entity_exists(entity):
+            if not esper.entity_exists(source):
                 return
-            func(entity)
+            func(source)
             # TODO: the main callback that needs a ref to source is lob_bomb
             # TypeError
 
     # I don't remember why these are here.
     # item use and spells have their own. so perhaps enemy/death
-    if esper.entity_exists(entity) and esper.has_component(entity, cmp.Target):
-        esper.remove_component(entity, cmp.Target)
+    if esper.entity_exists(source) and esper.has_component(source, cmp.Target):
+        esper.remove_component(source, cmp.Target)
 
 
-def trigger_effect_callbacks(entity):
+def trigger_effect_callbacks(source: typ.Entity):
     effect_map = {
         cmp.Spell: behavior.apply_cooldown,
         cmp.MoveEffect: behavior.apply_move,
@@ -174,10 +174,10 @@ def trigger_effect_callbacks(entity):
         cmp.DamageEffect: behavior.apply_damage,
     }
     for k, func in effect_map.items():
-        if esper.has_component(entity, k):
-            func(entity)
+        if esper.has_component(source, k):
+            func(source)
 
     # I don't remember why these are here.
     # item use and spells have their own. so perhaps enemy/death
-    if esper.entity_exists(entity) and esper.has_component(entity, cmp.Target):
-        esper.remove_component(entity, cmp.Target)
+    if esper.entity_exists(source) and esper.has_component(source, cmp.Target):
+        esper.remove_component(source, cmp.Target)

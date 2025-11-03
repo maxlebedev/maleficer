@@ -6,6 +6,7 @@ import numpy as np
 
 import components as cmp
 import location
+import typ
 
 
 def clamp(num: int, high: int, low=0):
@@ -13,14 +14,14 @@ def clamp(num: int, high: int, low=0):
     return min(high, max(low, num))
 
 
-def apply_damage(entity: int, value: int):
+def apply_damage(target: typ.Entity, value: int):
     # TODO: maybe move onto cmp.Health
-    hp = esper.component_for_entity(entity, cmp.Health)
+    hp = esper.component_for_entity(target, cmp.Health)
     hp.current -= value
     hp.current = clamp(hp.current, hp.max)
 
 
-def get_push_coords(source: tuple[int, int], target: int, steps: int):
+def get_push_coords(source: tuple[int, int], target: typ.Entity, steps: int):
     """note that diagonals are allowed for pushes"""
     board = location.get_board()
     # Convert tuples to numpy arrays for easier vector math

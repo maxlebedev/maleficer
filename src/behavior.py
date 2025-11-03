@@ -65,7 +65,7 @@ def lob_bomb(source: int):
         return
 
 
-def fire_at_player(source: int):
+def fire_at_player(source: typ.Entity):
     player = ecs.Query(cmp.Player).first()
     dest, trace = location.trace_ray(source, player)
     glyph = display.Glyph.MAGIC_MISSILE
@@ -75,19 +75,19 @@ def fire_at_player(source: int):
     apply_cooldown(source)
 
 
-def apply_cooldown(source: int):
+def apply_cooldown(source: typ.Entity):
     if cd_effect := esper.try_component(source, cmp.Cooldown):
         condition.grant(source, typ.Condition.Cooldown, cd_effect.turns)
 
 
-def apply_healing(source: int):
+def apply_healing(source: typ.Entity):
     if target_cmp := esper.try_component(source, cmp.Target):
         if heal_effect := esper.try_component(source, cmp.HealEffect):
             src_frz = ecs.freeze_entity(source)
             event.Damage(src_frz, target_cmp.target, -1 * heal_effect.amount)
 
 
-def apply_bleed(source: int):
+def apply_bleed(source: typ.Entity):
     if target_cmp := esper.try_component(source, cmp.Target):
         target = target_cmp.target
         if bleed_effect := esper.try_component(source, cmp.BleedEffect):
@@ -97,7 +97,7 @@ def apply_bleed(source: int):
                     condition.grant(ent, typ.Condition.Bleed, bleed_effect.value)
 
 
-def apply_stun(source: int):
+def apply_stun(source: typ.Entity):
     if target_cmp := esper.try_component(source, cmp.Target):
         target = target_cmp.target
         if stun_effect := esper.try_component(source, cmp.StunEffect):
@@ -107,7 +107,7 @@ def apply_stun(source: int):
                     condition.grant(ent, typ.Condition.Stun, stun_effect.value)
 
 
-def apply_damage(source: int):
+def apply_damage(source: typ.Entity):
     if target_cmp := esper.try_component(source, cmp.Target):
         target = target_cmp.target
         if dmg_effect := esper.try_component(source, cmp.DamageEffect):
@@ -119,14 +119,14 @@ def apply_damage(source: int):
                     event.Damage(src_frz, ent, dmg_val)
 
 
-def apply_move(source: int):
+def apply_move(source: typ.Entity):
     """move target to crosshair"""
     if move_effect := esper.try_component(source, cmp.MoveEffect):
         pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(cmp.Position)
         event.Movement(move_effect.target, pos.x, pos.y)
 
 
-def apply_push(source: int):
+def apply_push(source: typ.Entity):
     """move target N spaces away from source"""
     push_effect = esper.component_for_entity(source, cmp.PushEffect)
     source_pos = esper.component_for_entity(push_effect.source, cmp.Position)

@@ -162,7 +162,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
             + If you use off cooldown B times, then you accumulate 1 burnout
             + and that takes B * CD to clear
     - Some sort of Storm/Combo mechanic would be really cool
-    - small chance of "named" scrolls with unique effects
     - In caves, NPCs shouldn't spawn too close to player
     - Check for more places that benefit from ecs.Query.where
     - 3rd char, a pull+aegis spell, a kill spell with 1 range (corwin)

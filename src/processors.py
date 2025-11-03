@@ -348,35 +348,35 @@ class NPCTurn(Processor):
             return None
         return path[1]
 
-    def process_ranged_enemy(self, entity: int, epos: cmp.Position):
+    def process_ranged_enemy(self, enemy: typ.Entity, epos: cmp.Position):
         player_pos = location.player_last_position()
-        enemy_cmp = esper.component_for_entity(entity, cmp.Enemy)
+        enemy_cmp = esper.component_for_entity(enemy, cmp.Enemy)
         # TODO: ranged units should also sometimes follow
         player = ecs.Query(cmp.Player).first()
-        if location.can_see(entity, player, enemy_cmp.perception):
-            if condition.has(entity, typ.Condition.Cooldown):
-                behavior.wander(entity)
+        if location.can_see(enemy, player, enemy_cmp.perception):
+            if condition.has(enemy, typ.Condition.Cooldown):
+                behavior.wander(enemy)
             else:
-                event.trigger_all_callbacks(entity, cmp.EnemyTrigger)
+                event.trigger_all_callbacks(enemy, cmp.EnemyTrigger)
         else:
-            if condition.has(entity, typ.Condition.Cooldown):
+            if condition.has(enemy, typ.Condition.Cooldown):
                 # on cooldown, so player was close enough to follow them
                 if move := self.follow(epos, player_pos):
-                    event.Movement(entity, x=move[0], y=move[1])
+                    event.Movement(enemy, x=move[0], y=move[1])
             else:
-                behavior.wander(entity)
+                behavior.wander(enemy)
 
-    def process_melee_enemy(self, entity: int, epos: cmp.Position):
+    def process_melee_enemy(self, enemy: typ.Entity, epos: cmp.Position):
         player_pos = location.player_last_position()
         if player_pos.as_tuple == epos.as_tuple:
             player_pos = location.player_position()
-        enemy_cmp = esper.component_for_entity(entity, cmp.Enemy)
+        enemy_cmp = esper.component_for_entity(enemy, cmp.Enemy)
         dist_to_player = location.euclidean_distance(player_pos, epos)
         if dist_to_player > enemy_cmp.perception:
-            behavior.wander(entity)
+            behavior.wander(enemy)
         else:
             if move := self.follow(epos, player_pos):
-                event.Movement(entity, x=move[0], y=move[1])
+                event.Movement(enemy, x=move[0], y=move[1])
 
     def _process(self):
         # some of this probably want so live in behavior.py
@@ -454,7 +454,7 @@ class BoardRender(Render):
         text = f"HP: {curr}/{maximum}"
         self.console.print(x=x, y=y, string=text, fg=display.Color.BLACK)
 
-    def _draw_selection_info(self, entity: int):
+    def _draw_selection_info(self, item: typ.Entity):
         selection_info = []
         spell_component_details = [
             ("Damage", cmp.DamageEffect, "desc"),
@@ -463,19 +463,19 @@ class BoardRender(Render):
             ("Cooldown", cmp.Cooldown, "turns"),
         ]
         for name, try_cmp, attr in spell_component_details:
-            if component := esper.try_component(entity, try_cmp):
+            if component := esper.try_component(item, try_cmp):
                 value = getattr(component, attr)
                 selection_info.append(f"{name}:{value}")
-        if bleed_effect := esper.try_component(entity, cmp.BleedEffect):
+        if bleed_effect := esper.try_component(item, cmp.BleedEffect):
             message = f"Grants Bleed:{bleed_effect.value}"
             selection_info.append(message)
-        if push := esper.try_component(entity, cmp.PushEffect):
+        if push := esper.try_component(item, cmp.PushEffect):
             message = f"Imposes Push:{push.distance}"
             selection_info.append(message)
-        if stun_effect := esper.try_component(entity, cmp.StunEffect):
+        if stun_effect := esper.try_component(item, cmp.StunEffect):
             message = f"Grants Stun:{stun_effect.value}"
             selection_info.append(message)
-        if aoe := esper.try_component(entity, cmp.EffectArea):
+        if aoe := esper.try_component(item, cmp.EffectArea):
             # callback kwargs into spell info
             # this may not be right for other callbacks
             for name, value in aoe.callback.keywords.items():
