@@ -267,21 +267,22 @@ def euclidean_distance(start: cmp.Position, end: cmp.Position):
 
 def closest_position(start: cmp.Position, options: list[cmp.Position]) -> cmp.Position:
     closest_dist = float("inf")
-    closest_coord = None
+    closest_pos = None
 
     for position in options:
         distance = euclidean_distance(start, position)
         if distance < closest_dist:
             closest_dist = distance
-            closest_coord = position
+            closest_pos = position
 
-    return closest_coord or start
+    return closest_pos or start
 
 
 def trace_ray(source: int, dest: int):
     """trace a line between source  dest,
     return first blocker & inclusive path"""
     board = get_board()
+
     source_pos = esper.component_for_entity(source, cmp.Position)
     dest_pos = esper.component_for_entity(dest, cmp.Position)
 

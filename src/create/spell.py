@@ -169,7 +169,7 @@ def pull(level=1, name="Pull") -> int:
     cmps.append(cmp.Onymous(name=name))
 
     player = ecs.Query(cmp.Player).first()
-    cmps.append(cmp.PullEffect(source=player, distance=spell_range))
+    cmps.append(cmp.PullEffect(source=player))
 
     return esper.create_entity(*cmps)
 
