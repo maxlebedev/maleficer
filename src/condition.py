@@ -40,7 +40,10 @@ def apply(entity: int, condition: typ.Condition, value: int):
         case typ.Condition.Stun:
             pos = esper.component_for_entity(entity, cmp.Position)
             event.Animation([pos.as_list], fg=display.Color.CYAN)
-
+        case typ.Condition.Shunted:
+            pos = esper.component_for_entity(entity, cmp.Position)
+            esper.dispatch_event("redraw")  # redraw so we recolor the new glyph
+            event.Animation(locs=[pos.as_list], fg=display.Color.ORANGE)
         case typ.Condition.Dying:
             if value == 1:
                 event.Death(entity)

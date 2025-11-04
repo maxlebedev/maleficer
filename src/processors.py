@@ -46,6 +46,7 @@ class Processor(esper.Processor):
 
     def process(self):
         game_meta = ecs.Query(cmp.GameMeta).val
+
         if self == game_meta.process:
             # print(f"running {self.__class__}")
             self._process()

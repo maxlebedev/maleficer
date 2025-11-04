@@ -138,6 +138,7 @@ def apply_push(source: typ.Entity):
                 source_pos.as_list, entity, push_effect.distance
             )
             event.Movement(entity, x, y)
+            condition.grant(entity, typ.Condition.Shunted, 1)
 
 
 def apply_pull(source: typ.Entity):
@@ -154,6 +155,7 @@ def apply_pull(source: typ.Entity):
 
         for entity in entities:
             event.Movement(entity, dest.x, dest.y)
+            condition.grant(entity, typ.Condition.Shunted, 1)
 
 
 def _learn(spell: int):

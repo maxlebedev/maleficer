@@ -19,6 +19,7 @@ class Condition(enum.Enum):
     Dying = enum.auto()
     Stun = enum.auto()
     Aegis = enum.auto()
+    Shunted = enum.auto()
 
 
 class InvalidAction(Exception):
