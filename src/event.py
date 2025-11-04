@@ -134,7 +134,7 @@ class Animation(Event):
 
     def __post_init__(self):
         super().__post_init__()
-        processors.queue_proc(processors.Animation)
+        phase.oneshot(processors.Animation)
 
 
 @dataclass
@@ -167,6 +167,7 @@ def trigger_effect_callbacks(source: typ.Entity):
         cmp.Spell: behavior.apply_cooldown,
         cmp.MoveEffect: behavior.apply_move,
         cmp.PushEffect: behavior.apply_push,
+        cmp.PullEffect: behavior.apply_pull,
         cmp.AegisEffect: behavior.apply_aegis,
         cmp.StunEffect: behavior.apply_stun,
         cmp.BleedEffect: behavior.apply_bleed,

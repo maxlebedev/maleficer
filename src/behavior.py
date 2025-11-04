@@ -135,10 +135,25 @@ def apply_push(source: typ.Entity):
 
         for entity in entities:
             x, y = math_util.get_push_coords(
-                source_pos.as_tuple, entity, push_effect.distance
+                source_pos.as_list, entity, push_effect.distance
             )
             event.Movement(entity, x, y)
-            event.Animation(locs=[[x, y]], fg=display.Color.ORANGE)
+
+
+def apply_pull(source: typ.Entity):
+    """move target up to source"""
+    pull_effect = esper.component_for_entity(source, cmp.PullEffect)
+    source_pos = esper.component_for_entity(pull_effect.source, cmp.Position)
+    if target_cmp := esper.try_component(source, cmp.Target):
+        entities = collect_all_affected_entities(source, target_cmp.target)
+        target_pos = esper.component_for_entity(entities[0], cmp.Position)
+
+        neighbor_coords = location.get_neighbor_coords(source_pos)
+        options = [cmp.Position(x,y) for x,y in neighbor_coords]
+        dest = location.closest_position(target_pos, options)
+
+        for entity in entities:
+            event.Movement(entity, dest.x, dest.y)
 
 
 def _learn(spell: int):

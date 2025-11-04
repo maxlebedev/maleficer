@@ -229,6 +229,13 @@ class PushEffect:
 
 
 @component
+class PullEffect:
+    """different take on forced movement"""
+
+    source: int
+
+
+@component
 class HealEffect:
     amount: int
 

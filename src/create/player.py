@@ -50,6 +50,21 @@ def beatrice():
     behavior._learn(spell.lacerate())
 
 
+def caleb():
+    cmps = []
+    cmps.append(cmp.Player())
+    cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.GREEN))
+    cmps.append(cmp.Position(x=1, y=1))
+    cmps.append(cmp.Health(max=100))
+    cmps.append(cmp.Onymous(name="player"))
+    cmps.append(cmp.Blocking())
+    cmps.append(cmp.LastPosition(cmp.Position(x=1, y=1)))
+    esper.create_entity(*cmps)
+
+    behavior._learn(spell.pull())
+    behavior._learn(spell.lighting())
+
+
 def starting_inventory():
     starting_potion = item.potion()
     esper.add_component(starting_potion, cmp.InInventory())

@@ -161,6 +161,19 @@ def push(level=1, name="Push") -> int:
     return esper.create_entity(*cmps)
 
 
+def pull(level=1, name="Pull") -> int:
+    cmps = []
+    spell_range = 3 + level
+    cmps.append(cmp.Spell(target_range=spell_range))
+    cmps.append(cmp.Cooldown(turns=2))
+    cmps.append(cmp.Onymous(name=name))
+
+    player = ecs.Query(cmp.Player).first()
+    cmps.append(cmp.PullEffect(source=player, distance=spell_range))
+
+    return esper.create_entity(*cmps)
+
+
 def daze(level=1, name="Daze") -> int:
     cmps = []
     cmps.append(cmp.Spell(target_range=2))

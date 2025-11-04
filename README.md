@@ -149,6 +149,11 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - AI behavior probably doesn't *all* want to live in the NPC proc
         * Behavior trees, or state machine, or other?
             + maybe pytress, maybe that's overkill
+    - There is a lot of Pos/Coord mixing in location.py
+        * We should just be using coord for consistency
+    - I want to reimpl all of the animation stuff as theirn own Components
+        * They would be children of the Status cmp
+        * and ecs.has would check for it
 ## Game Mechanics/Balance
     - spell mods (+1 range, +1 dmg pickups)
     - cooldown alternatives like damage taken, steps walked (lotta tracking)
@@ -177,6 +182,8 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - damage types. Not sure if elemental or what, but weaknesses, resistances
     - it would be cool to use scrolls as materials for something
         * if you roll a bad spell, it shouldn't just be trash
+    - A map type that is actually the inside of a creature
+        * The walls shift and can "swallow"
 ### Enemies
     - Spawners
     - "Commander" Enemies that effect their faction
@@ -192,6 +199,8 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * might want to wait onthe NPC rework
     - Weaken X. Deals -X damage
     - Giant spider thing that leaps at you, with an AOE dmg on land
+    - Portals, that are like traps with the on-step
+        * but instead of dmg, position changes
 ## UX
     - use that M icon
     - other menus probably want backgrounds.
@@ -213,3 +222,5 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Living flame needs a rework. doesn't acutally move twice
         * We probably block this on NPC rework
     - If a map is unpopulated, using blink doesn't refresh the screen
+    - push_coords has no bounds checking.
+        * Because we do a cell lookup, this isn't safe

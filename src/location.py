@@ -34,8 +34,13 @@ def matrix(x: int, y: int, val: int):
     return [[val for _ in range(x)] for _ in range(y)]
 
 
-def can_see(entity: int, target: int, distance: int | None = None) -> bool:
-    dest_cell, trace = trace_ray(entity, target)
+def get_coord(source: typ.Entity):
+    source_pos = esper.component_for_entity(source, cmp.Position)
+    return source_pos.as_list
+
+
+def can_see(source: typ.Entity, target: typ.Entity, distance: int | None = None) -> bool:
+    dest_cell, trace = trace_ray(source, target)
     if dest_cell != target:  # no LOS
         return False
     if distance and len(trace) > distance:
