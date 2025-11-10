@@ -119,6 +119,8 @@ class Glyph(IntEnum):
     WALL2 = 843
     BWALL1 = 643
     BWALL2 = 893
+    CDOOR = 445
+    ODOOR = 447
     PLAYER = 73
     BEATRICE = 75
     FRAME1 = 947

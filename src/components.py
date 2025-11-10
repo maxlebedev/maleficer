@@ -84,6 +84,10 @@ class Wall(Cell):
 
 
 @component
+class Door(Cell):
+    closed = True
+
+@component
 class Enemy:
     speed: int = 1
     perception: int = 4

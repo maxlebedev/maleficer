@@ -136,6 +136,7 @@ class Board:
 
     def has_blocker(self, x, y):
         for ent in self.entities[x][y]:
+            # TODO: Is it safe to remove this player check?
             if esper.has_component(ent, cmp.Player):
                 return False
             if esper.has_component(ent, cmp.Blocking):

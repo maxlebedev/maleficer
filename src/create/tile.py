@@ -29,6 +29,20 @@ def wall(x: int, y: int, breakable: int = False) -> int:
     return cell
 
 
+def door(x: int, y: int) -> int:
+    map_info = ecs.Query(cmp.GameMeta).cmp(cmp.MapInfo)
+    color = math_util.from_table(map_info.mood)
+    vis = cmp.Visible(glyph=dis.Glyph.CDOOR, color=color)
+    pos = cmp.Position(x, y)
+    blocking = cmp.Blocking()
+    wall = cmp.Wall()
+    door = cmp.Door()
+    cell = esper.create_entity(cmp.Cell(), pos, vis, blocking, wall, door)
+    # TODO: support locked doors
+
+    return cell
+
+
 def stairs(x: int, y: int) -> int:
     vis = cmp.Visible(glyph=dis.Glyph.STAIRS, color=dis.Color.LGREY)
 

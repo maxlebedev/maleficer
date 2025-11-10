@@ -76,8 +76,14 @@ class Movement(Processor):
 
         if esper.has_component(source, cmp.Player):
             # Note: walking into a wall consumes a turn
-            event.Log.append("can't move there")
-            esper.dispatch_event("flash")
+            if door_cmp := esper.try_component(target, cmp.Door):
+                door_cmp.closed = False
+                esper.remove_component(target, cmp.Blocking)
+                vis = esper.component_for_entity(target, cmp.Visible)
+                vis.glyph = display.Glyph.ODOOR
+            else:
+                event.Log.append("can't move there")
+                esper.dispatch_event("flash")
 
     def pick_up(self, target):
         """pick up an item"""
@@ -607,17 +613,20 @@ class BoardRender(Render):
 
         in_fov = location.get_fov()
 
-        nonwall_drawables = ecs.Query(cmp.Position, cmp.Visible).exclude(cmp.Cell)
-        for _, (pos, vis) in nonwall_drawables.exclude(cmp.Blocking):
-            if not in_fov[pos.x][pos.y]:
-                continue
-            cell_rgbs[pos.x][pos.y] = (vis.glyph, vis.color, vis.bg_color)
-
-        foreground = nonwall_drawables.filter(cmp.Position, cmp.Visible, cmp.Blocking)
-        for _, (pos, vis, _) in foreground:
-            if not in_fov[pos.x][pos.y]:
-                continue
-            cell_rgbs[pos.x][pos.y] = (vis.glyph, vis.color, vis.bg_color)
+        for x, col in enumerate(in_fov):
+            for y, show in enumerate(col):
+                if not show:
+                    continue
+                pieces = board.pieces_at(x, y)
+                if not pieces:
+                    continue
+                front = pieces.pop()
+                for piece in pieces:
+                    if esper.has_component(piece, cmp.Blocking):
+                        # Blocking pieces have display precedence
+                        front = piece
+                if vis := esper.try_component(front, cmp.Visible):
+                    cell_rgbs[x][y] = (vis.glyph, vis.color, vis.bg_color)
 
         cell_rgbs = self._apply_lighting(cell_rgbs, in_fov)
 

@@ -184,6 +184,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * if you roll a bad spell, it shouldn't just be trash
     - A map type that is actually the inside of a creature
         * The walls shift and can "swallow"
+    - Terrain tiles. Grass that blocks LOS, water that ...?
 ### Enemies
     - Spawners
     - "Commander" Enemies that effect their faction
@@ -224,3 +225,4 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - If a map is unpopulated, using blink doesn't refresh the screen
     - push_coords has no bounds checking.
         * Because we do a cell lookup, this isn't safe
+    - dropping an item takes you out of inventory phase. it shouldn't
