@@ -151,9 +151,11 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
             + maybe pytress, maybe that's overkill
     - There is a lot of Pos/Coord mixing in location.py
         * We should just be using coord for consistency
-    - I want to reimpl all of the animation stuff as theirn own Components
+    - I want to reimpl all of the status stuff as their own Components
         * They would be children of the Status cmp
         * and ecs.has would check for it
+    - Bump is complex enough for its own system
+        * not sure how it interacts with movement sys tho
 ## Game Mechanics/Balance
     - spell mods (+1 range, +1 dmg pickups)
     - cooldown alternatives like damage taken, steps walked (lotta tracking)

@@ -2,10 +2,11 @@
 
 import random
 from dataclasses import dataclass
-from typing import Callable
+from typing import Callable, Iterable
 
 import esper
 import tcod
+import math
 
 import components as cmp
 import create
@@ -236,11 +237,31 @@ class RectangularRoom:
 
     @property
     def outer(self) -> tuple[slice, slice]:
-        """Return the inner area of this room as a 2D array index."""
+        """Return the outer area of this room as a 2D array index."""
         return slice(self.x1, self.x2 + 1), slice(self.y1, self.y2 + 1)
 
+    @property
+    def border_coords(self) -> list:
+        """Return the coords of the edges, without corners."""
+        top_edge = [(x, self.y1) for x in range(self.x1+1, self.x2)]
+        bottom_edge = [(x, self.y2) for x in range(self.x1+1, self.x2)]
+        left_edge =  [(self.x1, y) for y in range(self.y1+1, self.y2)]
+        right_edge =  [(self.x2, y) for y in range(self.y1+1, self.y2)]
+        border = top_edge + bottom_edge + left_edge + right_edge
+        return border
 
-def tunnel_between(board, start: cmp.Position, end: cmp.Position):
+
+def connect_rooms(first: RectangularRoom, second: RectangularRoom):
+    board = get_board()
+    pair = get_closest_pair(first.border_coords, second.border_coords)
+    tunnel_between(cmp.Position(*pair[0]), cmp.Position(*pair[1]))
+
+    if not random.randint(0, 1): # make doors, half the time I guess
+        board.retile(*pair[0], create.tile.door)
+        board.retile(*pair[1], create.tile.door)
+
+
+def tunnel_between(start: cmp.Position, end: cmp.Position):
     """Return an L-shaped tunnel between these two points."""
     horizontal_then_vertical = random.random() < 0.5
     if horizontal_then_vertical:
@@ -248,6 +269,7 @@ def tunnel_between(board, start: cmp.Position, end: cmp.Position):
     else:
         corner_x, corner_y = start.x, end.y
 
+    board = get_board()
     # Generate the coordinates for this tunnel.
     for x, y in tcod.los.bresenham((start.x, start.y), (corner_x, corner_y)).tolist():
         board.retile(x, y, create.tile.floor)
@@ -263,20 +285,36 @@ def intersects(board: Board, src: RectangularRoom, target: RectangularRoom) -> b
 
 
 def euclidean_distance(start: cmp.Position, end: cmp.Position):
-    return pow(pow(end.x - start.x, 2) + pow(end.y - start.y, 2), 0.5)
+    return math.dist(start.as_tuple, end.as_tuple)
 
 
-def closest_position(start: cmp.Position, options: list[cmp.Position]) -> cmp.Position:
+def get_closest_pair(first: Iterable, second: Iterable) -> tuple:
+    # TODO: very DRY with closest_position
+
+    min_dist = math.inf
+    closest_pair = None
+
+    for p1 in first:
+        for p2 in second:
+            dist = math.dist(p1, p2)  # euclidean distance
+            if dist < min_dist:
+                min_dist = dist
+                closest_pair = (p1, p2)
+    return closest_pair # type: ignore
+
+
+
+def closest_position(start: cmp.Position, options: list[cmp.Position]):
     closest_dist = float("inf")
-    closest_pos = None
+    idx = 0
 
-    for position in options:
+    for i, position in enumerate(options):
         distance = euclidean_distance(start, position)
         if distance < closest_dist:
             closest_dist = distance
-            closest_pos = position
+            idx = i
+    return idx 
 
-    return closest_pos or start
 
 
 def trace_ray(source: int, dest: int):
@@ -418,8 +456,8 @@ class Dungeon:
             pos = player_position()
             pos.x, pos.y = room.center.x, room.center.y
         else:  # All rooms after the first get one tunnel and enemy
-            endpt = closest_position(room.center, self.centers[:-1])
-            tunnel_between(self.board, room.center, endpt)
+            idx = closest_position(room.center, self.centers[:-1])
+            connect_rooms(room, self.rooms[idx])
             self.populate(room)
 
         return room
@@ -665,11 +703,9 @@ class BSPDungeon:
         node1, node2 = node.children
         leaf1 = tree[bsp.find_node(node1.x, node1.y)]
         leaf2 = tree[bsp.find_node(node2.x, node2.y)]
-        source = leaf1.get_random_pos()
-        dest = leaf2.get_random_pos()
 
         # TODO: tunnel could be better. we want to only connect adjacent rooms
-        tunnel_between(self.board, source, dest)
+        connect_rooms(leaf1, leaf2)
 
     def room_from_node(self, node) -> RectangularRoom:
         min_size = 5  # Minimum size for both width and height
