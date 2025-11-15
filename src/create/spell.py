@@ -18,7 +18,7 @@ class ProcGen:
     def named_spell(cls, power_budget: int) -> int:
         """generate a named spell of a lvl-appropriate rank"""
         spell_rank = 1 + power_budget // 10
-        foo = [firebolt, lacerate, daze, blink, push, shield, lighting]
+        foo = [firebolt, lacerate, daze, blink, push, shield, lighting, pull, crush]
         spell = random.choice(foo)
         return spell(spell_rank, name=f"{foo[0].__name__.title()} {spell_rank}")
 
@@ -190,5 +190,16 @@ def shield(level=1, name="Shield") -> int:
     cmps.append(cmp.Cooldown(turns=6))
     cmps.append(cmp.Onymous(name=name))
     cmps.append(cmp.AegisEffect(value=9 + level))
+
+    return esper.create_entity(*cmps)
+
+
+def crush(level=1, name="Crush") -> int:
+    cmps = []
+    player = ecs.Query(cmp.Player).first()
+    cmps.append(cmp.Spell(target_range=1))
+    cmps.append(cmp.Cooldown(turns=3))
+    cmps.append(cmp.DamageEffect(amount=4 + level, die_type=6, source=player))
+    cmps.append(cmp.Onymous(name=name))
 
     return esper.create_entity(*cmps)

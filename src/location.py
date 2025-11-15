@@ -271,9 +271,9 @@ def tunnel_between(start: cmp.Position, end: cmp.Position):
 
     board = get_board()
     # Generate the coordinates for this tunnel.
-    for x, y in tcod.los.bresenham((start.x, start.y), (corner_x, corner_y)).tolist():
+    for x, y in tcod.los.bresenham((start.x, start.y), (corner_x, corner_y)):
         board.retile(x, y, create.tile.floor)
-    for x, y in tcod.los.bresenham((corner_x, corner_y), (end.x, end.y)).tolist():
+    for x, y in tcod.los.bresenham((corner_x, corner_y), (end.x, end.y)):
         board.retile(x, y, create.tile.floor)
 
 

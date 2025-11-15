@@ -20,7 +20,7 @@ def inventory_map() -> list:
     return sorted_map
 
 
-def alamar():
+def adept():
     cmps = []
     cmps.append(cmp.Player())
     cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.GREEN))
@@ -35,10 +35,10 @@ def alamar():
     behavior._learn(spell.blink())
 
 
-def beatrice():
+def bloodmage():
     cmps = []
     cmps.append(cmp.Player())
-    cmps.append(cmp.Visible(glyph=dis.Glyph.BEATRICE, color=dis.Color.GREEN))
+    cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.RED))
     cmps.append(cmp.Position(x=1, y=1))
     cmps.append(cmp.Health(max=100))
     cmps.append(cmp.Onymous(name="player"))
@@ -50,10 +50,10 @@ def beatrice():
     behavior._learn(spell.lacerate())
 
 
-def caleb():
+def terramancer():
     cmps = []
     cmps.append(cmp.Player())
-    cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.GREEN))
+    cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.BROWN))
     cmps.append(cmp.Position(x=1, y=1))
     cmps.append(cmp.Health(max=100))
     cmps.append(cmp.Onymous(name="player"))
@@ -62,6 +62,20 @@ def caleb():
     esper.create_entity(*cmps)
 
     behavior._learn(spell.pull())
+    behavior._learn(spell.crush())
+
+def stormcaller():
+    cmps = []
+    cmps.append(cmp.Player())
+    cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.YELLOW))
+    cmps.append(cmp.Position(x=1, y=1))
+    cmps.append(cmp.Health(max=70))
+    cmps.append(cmp.Onymous(name="player"))
+    cmps.append(cmp.Blocking())
+    cmps.append(cmp.LastPosition(cmp.Position(x=1, y=1)))
+    esper.create_entity(*cmps)
+
+    behavior._learn(spell.blink())
     behavior._learn(spell.lighting())
 
 

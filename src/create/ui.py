@@ -43,27 +43,29 @@ def main_menu_opts():
     _make_menuitem(cmp.MainMenu, exit, "Quit", 3)
 
 
-def char_select_opts():
-    # TODO: these can probably be consolidated, maybe even into some startgame()
-    # at minimum, make a func to generate the string
-    def pick_alamar(_):
-        create.player.alamar()
-        start_game()
-        phase.change_to(phase.Ontology.level)
+def discipline_opts():
+    # TODO: does this wanna live here?
+    # can we generate the desc string?
 
-    def pick_beatrice(_):
-        create.player.beatrice()
-        start_game()
-        phase.change_to(phase.Ontology.level)
+    def make_picker(create_player):
+        def picker(_):
+            create_player()
+            start_game()
+            phase.change_to(phase.Ontology.level)
 
-    def pick_caleb(_):
-        create.player.caleb()
-        start_game()
-        phase.change_to(phase.Ontology.level)
+        return picker
 
-    alamar_text = "Alamar (80hp/blink/firebolt)"
-    _make_menuitem(cmp.StartMenu, pick_alamar, alamar_text, 0)
-    beatrice_text = "Beatrice (100hp/daze/mutilate)"
-    _make_menuitem(cmp.StartMenu, pick_beatrice, beatrice_text, 1)
-    caleb_text = "Caleb (100hp/lighning/pull)"
-    _make_menuitem(cmp.StartMenu, pick_caleb, caleb_text, 2)
+    pick_adept = make_picker(create.player.adept)
+    pick_bloodmage = make_picker(create.player.bloodmage)
+    pick_terramancer = make_picker(create.player.terramancer)
+    pick_stormcaller = make_picker(create.player.stormcaller)
+
+    opts = [
+        (pick_adept, "Adept (80hp/blink/firebolt)"),
+        (pick_bloodmage, "Bloodmage (100hp/daze/mutilate)"),
+        (pick_terramancer, "Terramancer (100hp/crush/pull)"),
+        (pick_stormcaller, "Stormcaller (70hp/lighning/blink)"),
+    ]
+
+    for i, (func, desc) in enumerate(opts):
+        _make_menuitem(cmp.StartMenu, func, desc, i)

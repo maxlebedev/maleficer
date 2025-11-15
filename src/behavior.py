@@ -151,7 +151,8 @@ def apply_pull(source: typ.Entity):
 
         neighbor_coords = location.get_neighbor_coords(source_pos)
         options = [cmp.Position(x,y) for x,y in neighbor_coords]
-        dest = location.closest_position(target_pos, options)
+        idx = location.closest_position(target_pos, options)
+        dest = options[idx]
 
         for entity in entities:
             event.Movement(entity, dest.x, dest.y)

@@ -40,6 +40,7 @@ def level_phase(context, console):
     input = processors.GameInputEvent()
     npc = processors.NPCTurn()
 
+    # TODO: is it safe to remove this dmg here?
     dmg = processors.Damage()
     death = processors.Death()
     enqueue = processors.Enqueue(_phase=Ontology.level)
@@ -92,7 +93,7 @@ def about_phase(context, console):
 
 def char_select_phase(context, console):
     background = "assets/char_select.xp"
-    title = "Select a Character"
+    title = "Select a Discipline"
     args = {"menu_cmp": cmp.StartMenu, "background": background, "title": title}
     render = processors.MenuRender(context, console, **args)
     input = processors.MenuInputEvent(cmp.StartMenu)
@@ -100,7 +101,7 @@ def char_select_phase(context, console):
     enqueue = processors.Enqueue(_phase=Ontology.char_select)
 
     ALL[Ontology.char_select] = [render, input, enqueue]
-    create.ui.char_select_opts()
+    create.ui.discipline_opts()
 
 
 def change_to(next_phase: Ontology, start_proc: type[esper.Processor] | None = None):

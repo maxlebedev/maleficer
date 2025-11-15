@@ -44,8 +44,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * Better Spell scrolls
     - What is the progression system?
         * Between Games: Horizontal power scaling
-            + New starting spells
-            + New characters that mix up the gameplay a bit
+            + New magical disciplines, with diff starting spells
         * In game
             + Better spells
             + Stat bumps
@@ -171,7 +170,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Some sort of Storm/Combo mechanic would be really cool
     - In caves, NPCs shouldn't spawn too close to player
     - Check for more places that benefit from ecs.Query.where
-    - 3rd char, a pull+aegis spell, a kill spell with 1 range (corwin)
     - Doors via conditional blocking
     - mageblight: a curse that harms player when they don't progress the game
         * probably when they spend N turns without killing an enemy
@@ -187,6 +185,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - A map type that is actually the inside of a creature
         * The walls shift and can "swallow"
     - Terrain tiles. Grass that blocks LOS, water that ...?
+    - Max HP as a resource (not for normal spells)
 ### Enemies
     - Spawners
     - "Commander" Enemies that effect their faction
@@ -202,6 +201,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * might want to wait onthe NPC rework
     - Weaken X. Deals -X damage
     - Giant spider thing that leaps at you, with an AOE dmg on land
+        * Same for charger enemies
     - Portals, that are like traps with the on-step
         * but instead of dmg, position changes
 ## UX
