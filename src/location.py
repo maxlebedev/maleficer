@@ -303,20 +303,6 @@ def get_closest_pair(first: Iterable, second: Iterable) -> tuple:
     return closest_pair # type: ignore
 
 
-
-def closest_position(start: cmp.Position, options: list[cmp.Position]):
-    closest_dist = float("inf")
-    idx = 0
-
-    for i, position in enumerate(options):
-        distance = euclidean_distance(start, position)
-        if distance < closest_dist:
-            closest_dist = distance
-            idx = i
-    return idx 
-
-
-
 def trace_ray(source: int, dest: int):
     """trace a line between source  dest,
     return first blocker & inclusive path"""
@@ -447,7 +433,6 @@ class Dungeon:
         if any(intersects(self.board, room, r) for r in self.rooms):
             return  # This room intersects, so go to the next attempt
 
-        self.centers.append(room.center)
         for cell in self.board.as_sequence(*room.inner):
             pos = esper.component_for_entity(cell, cmp.Position)
             self.board.retile(pos.x, pos.y, create.tile.floor)
@@ -456,10 +441,12 @@ class Dungeon:
             pos = player_position()
             pos.x, pos.y = room.center.x, room.center.y
         else:  # All rooms after the first get one tunnel and enemy
-            idx = closest_position(room.center, self.centers[:-1])
+            end_ctr = get_closest_pair([room.center], self.centers)[1]
+            idx = self.centers.index(end_ctr)
             connect_rooms(room, self.rooms[idx])
             self.populate(room)
 
+        self.centers.append(room.center)
         return room
 
     def populate(self, room: RectangularRoom):
