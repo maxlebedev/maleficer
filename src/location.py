@@ -35,7 +35,7 @@ def matrix(x: int, y: int, val: int):
     return [[val for _ in range(x)] for _ in range(y)]
 
 
-def get_coord(source: typ.Entity):
+def get_coord(source: typ.Entity) -> typ.Coord:
     source_pos = esper.component_for_entity(source, cmp.Position)
     return source_pos.as_list
 
@@ -49,7 +49,7 @@ def can_see(source: typ.Entity, target: typ.Entity, distance: int | None = None)
     return True
 
 
-def coords_within_radius(pos: cmp.Position, radius: int) -> list[typ.COORD]:
+def coords_within_radius(pos: cmp.Position, radius: int) -> list[typ.Coord]:
     min_x = max(0, pos.x - radius)
     max_x = min(display.BOARD_WIDTH, pos.x + radius + 1)
     min_y = max(0, pos.y - radius)
@@ -66,7 +66,7 @@ def coords_within_radius(pos: cmp.Position, radius: int) -> list[typ.COORD]:
     return ret_coords
 
 
-def coords_line_to_point(source: cmp.Position, dest: cmp.Position) -> list[typ.COORD]:
+def coords_line_to_point(source: cmp.Position, dest: cmp.Position) -> list[typ.Coord]:
     """exclude source"""
     coords = tcod.los.bresenham((source.x, source.y), (dest.x, dest.y)).tolist()
     return list(coords)[1:]
@@ -119,7 +119,7 @@ class Board:
         vis = esper.component_for_entity(cell, cmp.Visible)
         return (vis.glyph, vis.color, vis.bg_color)
 
-    def as_transparency(self) -> list[typ.COORD]:
+    def as_transparency(self) -> list[typ.Coord]:
         transparency = matrix(display.BOARD_WIDTH, display.BOARD_HEIGHT, 1)
 
         for x, col in enumerate(self.cells):
@@ -127,7 +127,7 @@ class Board:
                 transparency[x][y] = int(esper.has_component(cell, cmp.Transparent))
         return transparency
 
-    def as_move_graph(self) -> list[typ.COORD]:
+    def as_move_graph(self) -> list[typ.Coord]:
         graph = matrix(display.BOARD_WIDTH, display.BOARD_HEIGHT, 1)
 
         for x, col in enumerate(self.cells):

@@ -8,7 +8,7 @@ RGB = tuple[int, int, int]
 CELL_RGB = tuple[int, RGB, RGB]
 
 CELL = int
-COORD = list[int]
+Coord = list[int]
 
 
 class Condition(enum.Enum):

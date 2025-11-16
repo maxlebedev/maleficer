@@ -91,7 +91,7 @@ def about_phase(context, console):
     ALL[Ontology.about] = [render, input, enqueue]
 
 
-def char_select_phase(context, console):
+def select_phase(context, console):
     background = "assets/char_select.xp"
     title = "Select a Discipline"
     args = {"menu_cmp": cmp.StartMenu, "background": background, "title": title}
@@ -135,7 +135,7 @@ def setup(context, console):
     inventory_phase(context, console)
     options_phase(context, console)
     about_phase(context, console)
-    char_select_phase(context, console)
+    select_phase(context, console)
 
     animation = processors.Animation(context, console)
     esper.add_processor(animation)

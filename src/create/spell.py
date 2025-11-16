@@ -16,7 +16,7 @@ class ProcGen:
 
     @classmethod
     def named_spell(cls, power_budget: int) -> int:
-        """generate a named spell of a lvl-appropriate rank"""
+        """generate a named spell of a depth-appropriate rank"""
         spell_rank = 1 + power_budget // 10
         foo = [firebolt, lacerate, daze, blink, push, shield, lighting, pull, crush]
         spell = random.choice(foo)

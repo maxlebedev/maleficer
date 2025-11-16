@@ -95,10 +95,30 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 
 # TODO
 
-## Core System
+## Systems due for a pass
+    - "Effects"
+        * Effects and triggers might not want to be separate?
+        * OnDeath/DeathTrigger OnStep/StepTriger redundancy.
+            + The 'On's could be more ECS-compliant
+            + Potentially unscheduled procs
+    - Bump is complex enough for its own system
+        * not sure how it interacts with movement sys tho
+    - Spell resolution should def be its own (unscheduled) Proc
+    - Decision Trees
+    - Menu System. menuselection, vs how inventory does it
+    - I want to reimpl all of the status stuff as their own Components
+        * They would be children of the Status cmp
+        * and ecs.has would check for it
+        * But ECS doesn't "do" subclasses. so I'd need a lookup thing
+        * Do we modify the query func to work on superclasses? can we?
+        * At minimum, get Condition our of typ
+    - Targeting. Decouple it from spellcasting
+
+## Core
     - Save/Load
-    - sqlite db for storing current lvl value, rng seed for lvls, etc
-    - the ecs.remove syntax is awkward, but overwriting self.entities state inf ilter necessitates it for now
+        * sqlite db for storing current lvl value, rng seed for lvls, etc
+    - the ecs.remove syntax is awkward
+        * overwriting self.entities state in filter necessitates it for now
     - callbacks are a violation of ECS. consider avoiding them somehow
         * the things that are now callbacks can be Small Procs, with a guard
         * for nav menu items, a NavButton cmponent with a *to* arg for phase
@@ -107,12 +127,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         + there's probably a way to make the menu button handler via small_proc
     - lots of DRY in the NPC proc
     - bresenham_ray should *really* be under test
-    - Should Position comps be immutable?
-        * If there is only one immutable Pos per XY,
-            + we can name them Positon24_49 and then
-            + getattr(cmp,f"Position{x}_{y}") in queries
-        * This does perhaps screw us if we just want to get the pos. 
-            + Do we modify the query func to work on superclasses? can we?
     - 2x2 enemies
         * game currently assumes positions are one cell, pieces have one pos
         * If I have 2x2, then I can make snakes too
@@ -126,35 +140,12 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * It sure would be nice if it didn't need that
         * We could rewrite lob_bomb as a proc. LobberNPC or something
             + This also paves the way for every npc to have their own proc
-    - OnDeath/DeathTrigger OnStep/StepTriger redundancy.
-        * The 'On's could be more ECS-compliant
     - The main callback that needs a ref to source is lob_bomb
         * It sure would be nice if it didn't need that
         * We could rewrite lob_bomb as a proc. LobberNPC or something
             + This also paves the way for every npc to have their own proc
-    - board currently is 66*67. I could make it 64*64. Leave room for a border
-    - OnDeath/DeathTrigger OnStep/StepTriger redundancy.
-        * The 'On's could be more ECS-compliant
-    - put phase.CURRENT into GameMeta
     - global tracking of targeted squares, with enemy ai to avoid them
     - an effect:color mapping? "stun": Cyan, "force_move": Orange
-    - We replaced first-class phases with Proc queues
-        * replace the big phase dict, and have that live in the Enqueue procs
-        * make small "unscheduled" procs like animation
-            + use these to replace some callbacks
-            + does Damage want to be an un-scheduled event-driven proc?
-        * OnDeath/DeathTrigger could be solved via the unscheduled procs
-        * Spell resolution should def be its own (unscheduled) Proc
-    - AI behavior probably doesn't *all* want to live in the NPC proc
-        * Behavior trees, or state machine, or other?
-            + maybe pytress, maybe that's overkill
-    - There is a lot of Pos/Coord mixing in location.py
-        * We should just be using coord for consistency
-    - I want to reimpl all of the status stuff as their own Components
-        * They would be children of the Status cmp
-        * and ecs.has would check for it
-    - Bump is complex enough for its own system
-        * not sure how it interacts with movement sys tho
 ## Game Mechanics/Balance
     - spell mods (+1 range, +1 dmg pickups)
     - cooldown alternatives like damage taken, steps walked (lotta tracking)
@@ -186,6 +177,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * The walls shift and can "swallow"
     - Terrain tiles. Grass that blocks LOS, water that ...?
     - Max HP as a resource (not for normal spells)
+    - Caves are sort of barren. and hard to traverse without blink
 ### Enemies
     - Spawners
     - "Commander" Enemies that effect their faction
