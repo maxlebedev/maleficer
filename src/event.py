@@ -127,7 +127,7 @@ class Death(Event):
 @dataclass
 class Animation(Event):
     _queue = Queues.animation
-    locs: list[typ.COORD]
+    locs: list[typ.Coord]
     glyph: int | None = None
     fg: typ.RGB | None = None
     bg: typ.RGB | None = None

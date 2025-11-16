@@ -21,7 +21,7 @@ def apply_damage(target: typ.Entity, value: int):
     hp.current = clamp(hp.current, hp.max)
 
 
-def get_push_coords(source: typ.COORD, target: typ.Entity, distance: int):
+def get_push_coords(source: typ.Coord, target: typ.Entity, distance: int):
     """note that diagonals are allowed for pushes"""
     board = location.get_board()
     # Convert tuples to numpy arrays for easier vector math

@@ -59,8 +59,7 @@ def coords_within_radius(pos: cmp.Position, radius: int) -> list[typ.Coord]:
 
     for x in range(min_x, max_x):
         for y in range(min_y, max_y):
-            current = cmp.Position(x=x, y=y)
-            dist = euclidean_distance(pos, current)
+            dist = math.dist(pos.as_tuple, (x,y))
             if dist <= radius:
                 ret_coords.append([x, y])
     return ret_coords
@@ -68,7 +67,7 @@ def coords_within_radius(pos: cmp.Position, radius: int) -> list[typ.Coord]:
 
 def coords_line_to_point(source: cmp.Position, dest: cmp.Position) -> list[typ.Coord]:
     """exclude source"""
-    coords = tcod.los.bresenham((source.x, source.y), (dest.x, dest.y)).tolist()
+    coords = tcod.los.bresenham((source.x, source.y), (dest.x, dest.y))
     return list(coords)[1:]
 
 
