@@ -49,7 +49,7 @@ def lob_bomb(source: int):
         return True
 
     player_pos = location.player_position()
-    indices = location.get_neighbor_coords(player_pos)
+    indices = location.get_neighbor_coords(*player_pos)
     random.shuffle(indices)
     for selection in indices:
         target_cell = board.get_cell(*selection)
@@ -149,7 +149,7 @@ def apply_pull(source: typ.Entity):
         entities = collect_all_affected_entities(source, target_cmp.target)
         target_pos = esper.component_for_entity(entities[0], cmp.Position)
 
-        neighbor_coords = location.get_neighbor_coords(source_pos)
+        neighbor_coords = location.get_neighbor_coords(*source_pos)
         options = [cmp.Position(x,y) for x,y in neighbor_coords]
         idx = location.closest_position(target_pos, options)
         dest = options[idx]

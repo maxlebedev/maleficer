@@ -96,7 +96,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 # TODO
 
 ## Systems due for a pass
-    - "Effects"
+    - "Effects" / Events
         * Effects and triggers might not want to be separate?
         * OnDeath/DeathTrigger OnStep/StepTriger redundancy.
             + The 'On's could be more ECS-compliant

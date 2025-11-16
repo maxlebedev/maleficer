@@ -67,15 +67,14 @@ def coords_within_radius(pos: cmp.Position, radius: int) -> list[typ.Coord]:
 
 def coords_line_to_point(source: cmp.Position, dest: cmp.Position) -> list[typ.Coord]:
     """exclude source"""
-    coords = tcod.los.bresenham((source.x, source.y), (dest.x, dest.y))
+    coords = tcod.los.bresenham(source.as_tuple, dest.as_tuple)
     return list(coords)[1:]
 
 
 def backlight(x, y):
     """add a fading candle-colored illumination of the player's sight radius"""
     player_pos = player_position()
-    pos = cmp.Position(x=x, y=y)
-    dist_to_player = euclidean_distance(player_pos, pos)
+    dist_to_player = math.dist(player_pos.as_tuple, (x,y))
     player_cmp = ecs.Query(cmp.Player).val
 
     normalized_dist = dist_to_player / player_cmp.sight_radius
@@ -91,7 +90,7 @@ class Board:
     """
 
     cells: list[list[typ.CELL]] = []
-    entities: list[list[set[int]]] = []
+    entities: list[list[set[typ.Entity]]] = []
     explored: set[typ.CELL] = set()
 
     def __init__(self):
@@ -166,8 +165,9 @@ class Board:
         """create a tile and place it at position"""
         self.set_cell(x, y, gen_tile(x, y))
 
-    def entities_at(self, pos: cmp.Position) -> set:
-        return self.entities[pos.x][pos.y]
+    def entities_at(self, x:int, y:int) -> set:
+        """a reference to the entity set at an xy"""
+        return self.entities[x][y]
 
     def pieces_at(self, x: int, y: int) -> set:
         """entities, but without cells, crosshair, etc"""
@@ -179,7 +179,7 @@ class Board:
     def remove(self, entity: int):
         if pos := esper.component_for_entity(entity, cmp.Position):
             esper.remove_component(entity, cmp.Position)
-            self.entities_at(pos).remove(entity)
+            self.entities_at(*pos).remove(entity)
 
     def as_sequence(self, x: slice = slice(None), y: slice = slice(None)):
         for col in self.cells[x]:
@@ -191,11 +191,11 @@ class Board:
             for y in range(display.BOARD_HEIGHT):
                 self.entities[x][y] = set()
         for entity, pos in esper.get_component(cmp.Position):
-            self.entities_at(pos).add(entity)
+            self.entities_at(*pos).add(entity)
 
     def reposition(self, entity: int, x: int, y: int):
         pos = esper.component_for_entity(entity, cmp.Position)
-        if entity in self.entities_at(pos):
+        if entity in self.entities_at(*pos):
             self.entities[pos.x][pos.y].remove(entity)
         pos.x, pos.y = x, y
         self.entities[x][y].add(entity)
@@ -253,26 +253,27 @@ class RectangularRoom:
 def connect_rooms(first: RectangularRoom, second: RectangularRoom):
     board = get_board()
     pair = get_closest_pair(first.border_coords, second.border_coords)
-    tunnel_between(cmp.Position(*pair[0]), cmp.Position(*pair[1]))
+    tunnel_between(*pair[0], *pair[1])
 
     if not random.randint(0, 1): # make doors, half the time I guess
         board.retile(*pair[0], create.tile.door)
         board.retile(*pair[1], create.tile.door)
 
 
-def tunnel_between(start: cmp.Position, end: cmp.Position):
+def tunnel_between(start_x: int, start_y: int, end_x: int, end_y: int):
     """Return an L-shaped tunnel between these two points."""
     horizontal_then_vertical = random.random() < 0.5
+
     if horizontal_then_vertical:
-        corner_x, corner_y = end.x, start.y
+        corner = end_x, start_y
     else:
-        corner_x, corner_y = start.x, end.y
+        corner = start_x, end_y
 
     board = get_board()
     # Generate the coordinates for this tunnel.
-    for x, y in tcod.los.bresenham((start.x, start.y), (corner_x, corner_y)):
+    for x, y in tcod.los.bresenham((start_x, start_y), corner):
         board.retile(x, y, create.tile.floor)
-    for x, y in tcod.los.bresenham((corner_x, corner_y), (end.x, end.y)):
+    for x, y in tcod.los.bresenham(corner, (end_x, end_y)):
         board.retile(x, y, create.tile.floor)
 
 
@@ -349,14 +350,14 @@ def get_fov():
     return fov
 
 
-def get_neighbor_coords(pos: cmp.Position):
+def get_neighbor_coords(x: int, y: int):
     offsets = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
-    indices = [(pos.x + dx, pos.y + dy) for dx, dy in offsets]
+    indices = [(x + dx, y + dy) for dx, dy in offsets]
     return indices
 
 
 def count_neighbors(board, pos: cmp.Position):
-    indices = get_neighbor_coords(pos)
+    indices = get_neighbor_coords(*pos)
     neighbor_walls = 0
     for x, y in indices:
         try:
@@ -528,7 +529,7 @@ class Cave:
             pos = esper.component_for_entity(cell, cmp.Position)
             wall_count = count_neighbors(self.board, pos)
             if wall_count == 0:
-                dist = euclidean_distance(player_pos, pos)
+                dist = math.dist(player_pos.as_tuple, (x,y))
                 valid_spawns.append([dist, pos])
         valid_spawns = sorted(valid_spawns, key=lambda x: x[0])
         stair_pos = valid_spawns[-1][1]
