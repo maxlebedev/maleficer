@@ -40,7 +40,9 @@ def get_coord(source: typ.Entity) -> typ.Coord:
     return source_pos.as_list
 
 
-def can_see(source: typ.Entity, target: typ.Entity, distance: int | None = None) -> bool:
+def can_see(
+    source: typ.Entity, target: typ.Entity, distance: int | None = None
+) -> bool:
     dest_cell, trace = trace_ray(source, target)
     if dest_cell != target:  # no LOS
         return False
@@ -396,7 +398,7 @@ def new_map():
 
     game_meta_cmp = esper.component_for_entity(game_meta, cmp.GameMeta)
     game_meta_cmp.board = Board()
-    maps = [Dungeon, Cave, Maze]  # BSPDungeon, TestDungeon
+    maps = [Dungeon, DrunkenWalk, Maze]  # BSPDungeon, TestDungeon
     mapgen_func = random.choice(maps)
     mapgen_func(game_meta_cmp.board)
     game_meta_cmp.board.build_entity_cache()
@@ -557,7 +559,10 @@ class Maze:
 
     def __init__(self, board: Board):
         self.board = board
-        self.build()
+
+        blueprint, seen, dead_ends = self.make_blueprint()
+        self.build(blueprint, seen)
+        self.populate(seen, dead_ends)
 
     def hydrate(self, x):
         return (x * 2) - 1
@@ -646,9 +651,8 @@ class Maze:
             spawn = math_util.from_table(spawn_table)
             spawn(pos)
 
-    def build(self):
+    def build(self, blueprint, seen):
         self.board.fill()
-        blueprint, seen, dead_ends = self.make_blueprint()
         player_pos = player_position()
 
         player_pos.x, player_pos.y = map(self.hydrate, seen[-1])
@@ -664,6 +668,7 @@ class Maze:
             self.board.set_cell(pos.x, pos.y, cell)
         self.board.retile(stair_x, stair_y, create.tile.stairs)
 
+    def populate(self, seen, dead_ends):
         spawn_table = {
             create.item.trap: 3,
             create.npc.bat: 5,
@@ -782,3 +787,69 @@ class TestDungeon:
         create.item.potion(new_room.get_random_pos())
         create.item.scroll(new_room.get_random_pos())
         self.board.build_entity_cache()
+
+class DrunkenWalk:
+    board: Board
+
+    def __init__(self, board: Board):
+        self.board = board
+        self.build()
+        self.populate()
+
+    def build(self):
+        self.board.fill()
+        offsets = [(-1, 0), (0, -1), (0, 1), (1, 0)]
+
+        x, y = 0, 0
+        self.board.retile(32, 32, create.tile.floor)
+        floor_space = ecs.Query(cmp.Cell).exclude(cmp.Blocking)
+        while len([e for e in floor_space]) < 2000:
+            start_cell = random.choice([e[0] for e in floor_space])
+            pos = esper.component_for_entity(start_cell, cmp.Position)
+            x, y = pos.as_tuple
+
+            for _ in range(200):
+                dx, dy = random.choice(offsets)
+                if x+dx in (1, 63) or y+dy in (1, 63):
+                    # TODO: if we want a list of dead ends, we log em here
+                    break
+                x += dx
+                y += dy
+                self.board.retile(x, y, create.tile.floor)
+
+            floor_space = ecs.Query(cmp.Cell).exclude(cmp.Blocking)
+
+
+        self.board.retile(x, y, create.tile.stairs)
+        player_pos = player_position()
+        player_pos.x, player_pos.y = 32, 32
+
+    def populate(self):
+        player_pos = player_position()
+
+        valid_spawns = []
+        while len(valid_spawns) < 20:
+            x = random.randint(0, display.BOARD_WIDTH - 1)
+            y = random.randint(0, display.BOARD_HEIGHT - 1)
+            cell = self.board.cells[x][y]
+            pos = esper.component_for_entity(cell, cmp.Position)
+            wall_count = count_neighbors(self.board, pos)
+            if wall_count == 0:
+                dist = math.dist(player_pos.as_tuple, (x, y))
+                valid_spawns.append([dist, pos])
+        valid_spawns = sorted(valid_spawns, key=lambda x: x[0])
+        stair_pos = valid_spawns[-1][1]
+        self.board.retile(stair_pos.x, stair_pos.y, create.tile.stairs)
+
+        spawn_table = {
+            create.item.trap: 3,
+            create.item.potion: 2,
+            create.item.scroll: 1,
+            create.npc.bat: 5,
+            create.npc.goblin: 3,
+            create.npc.warlock: 1,
+        }
+        for _, pos in valid_spawns[:-1]:
+            spawn = math_util.from_table(spawn_table)
+            self.board.retile(pos.x, pos.y, create.tile.floor)
+            spawn(pos)

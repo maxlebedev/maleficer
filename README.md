@@ -80,9 +80,9 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - reusing Position components breaks things
     - DeathTriggers with dmg need to have oneshot(Dmg) called after
     - Warlock missles don't hit potions because they are not Blocking
-    - currently the enemy move decision tree is one static thing. break up eventually
     - TargetInputEvent returns control to the player's Damage phase. otherwise enemies get a turn before player damage resolves
-    - instead of a melee decision tree, we do melee damage via bump func
+    - instead of a melee decision tree, we do melee damage via bump func. 
+        * this is undesirable
     - Small Procs
         * A proposed refactor where we have much more procs, many with guards
         * each npc type, gets its own for example
@@ -104,7 +104,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Bump is complex enough for its own system
         * not sure how it interacts with movement sys tho
     - Spell resolution should def be its own (unscheduled) Proc
-    - Decision Trees
     - Menu System. menuselection, vs how inventory does it
     - I want to reimpl all of the status stuff as their own Components
         * They would be children of the Status cmp
@@ -113,6 +112,13 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * Do we modify the query func to work on superclasses? can we?
         * At minimum, get Condition our of typ
     - Targeting. Decouple it from spellcasting
+    - NPC (State Machine)
+        * Canned functions (or systems) for Wander, Chase, etc
+            + Built quite general
+        * NPCs have bespoke "planning" funcs that set a state
+            + output is a member of State Enum
+        * NPC action Processor. Takes state and calls the appropriate function
+
 
 ## Core
     - Save/Load
@@ -157,14 +163,12 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
             + If you use off cooldown B times, then you accumulate 1 burnout
             + and that takes B * CD to clear
     - Some sort of Storm/Combo mechanic would be really cool
-    - In caves, NPCs shouldn't spawn too close to player
     - Check for more places that benefit from ecs.Query.where
     - Doors via conditional blocking
     - mageblight: a curse that harms player when they don't progress the game
         * probably when they spend N turns without killing an enemy
         * escalates in damage
     - prefabs for BDP map
-    - drunken walk map for caves
     - X/TAB to examine, target mode without casting spell
         * This gives us a good reason to decouple target from spell
         * Are we fine printing only one desc if the spell's aoe covers more?
@@ -175,7 +179,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * The walls shift and can "swallow"
     - Terrain tiles. Grass that blocks LOS, water that ...?
     - Max HP as a resource (not for normal spells)
-    - Caves are sort of barren. and hard to traverse without blink
     - Cryomancer with lengthier stuns
         * 3 turn stun, and a 1-speed icicle projectile
 ### Enemies
@@ -208,7 +211,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Push 1 is an easy effect to miss, as the enemies move right back
         * Maybe all Push 1 comes with Stun 1
 # BUGS
-    - Found a wall I was able to walk through in the caves.
+    - Found a wall I was able to walk through in the old caves.
         * Sometimes enemies turn into walls when they die
         * those walls can be walked through
         * I think this is bc enemies spawn *in* the wall with same pos
