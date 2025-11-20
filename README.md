@@ -140,12 +140,10 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * It sure would be nice if it didn't need that
         * We could rewrite lob_bomb as a proc. LobberNPC or something
             + This also paves the way for every npc to have their own proc
-    - The main callback that needs a ref to source is lob_bomb
-        * It sure would be nice if it didn't need that
-        * We could rewrite lob_bomb as a proc. LobberNPC or something
-            + This also paves the way for every npc to have their own proc
     - global tracking of targeted squares, with enemy ai to avoid them
     - an effect:color mapping? "stun": Cyan, "force_move": Orange
+    - Do I want to split the "level phsae" into 3 parts?
+        * up to player turn, npc, aftermath
 ## Game Mechanics/Balance
     - spell mods (+1 range, +1 dmg pickups)
     - cooldown alternatives like damage taken, steps walked (lotta tracking)
@@ -178,6 +176,8 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Terrain tiles. Grass that blocks LOS, water that ...?
     - Max HP as a resource (not for normal spells)
     - Caves are sort of barren. and hard to traverse without blink
+    - Cryomancer with lengthier stuns
+        * 3 turn stun, and a 1-speed icicle projectile
 ### Enemies
     - Spawners
     - "Commander" Enemies that effect their faction
@@ -219,4 +219,3 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - If a map is unpopulated, using blink doesn't refresh the screen
     - push_coords has no bounds checking.
         * Because we do a cell lookup, this isn't safe
-    - dropping an item takes you out of inventory phase. it shouldn't

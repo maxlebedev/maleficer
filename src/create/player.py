@@ -10,13 +10,13 @@ from . import item, spell
 
 
 def inventory_map() -> list:
-    inventory = esper.get_components(cmp.InInventory, cmp.Onymous)
-    inventory_map = collections.defaultdict(set)
-    for entity, (_, named) in inventory:
-        inventory_map[named.name].add(entity)
+    inventory_cmps = esper.get_components(cmp.InInventory, cmp.Onymous)
+    inventory = collections.defaultdict(set)
+    for entity, (_, named) in inventory_cmps:
+        inventory[named.name].add(entity)
     # TODO: create a cmp.MenuItem on collection, then set the order in this func
     # then display is just a matter of lookup
-    sorted_map = sorted(inventory_map.items())
+    sorted_map = sorted(inventory.items())
     return sorted_map
 
 
@@ -63,6 +63,7 @@ def terramancer():
 
     behavior._learn(spell.pull())
     behavior._learn(spell.crush())
+
 
 def stormcaller():
     cmps = []

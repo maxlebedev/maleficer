@@ -87,6 +87,7 @@ class Wall(Cell):
 class Door(Cell):
     closed = True
 
+
 @component
 class Enemy:
     speed: int = 1

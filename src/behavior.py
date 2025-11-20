@@ -16,6 +16,8 @@ import typ
 
 
 def wander(entity: int):
+    """Take a step in a cardinal direction"""
+
     dir = random.choice([(0, 1), (0, -1), (1, 0), (-1, 0), (0, 0)])
     if dir == (0, 0):
         return
@@ -150,7 +152,7 @@ def apply_pull(source: typ.Entity):
         target_pos = esper.component_for_entity(entities[0], cmp.Position)
 
         neighbor_coords = location.get_neighbor_coords(*source_pos)
-        options = [cmp.Position(x,y) for x,y in neighbor_coords]
+        options = [cmp.Position(x, y) for x, y in neighbor_coords]
         dest = location.get_closest_pair([target_pos], options)[1]
 
         for entity in entities:
@@ -193,14 +195,7 @@ def apply_aegis(source: int):
 
 # This is perhaps the new template of "complex" enemies
 def cyclops_attack_pattern(source: int):
-    player = ecs.Query(cmp.Player).first()
-    enemy_cmp = esper.component_for_entity(source, cmp.Enemy)
-
-    if not esper.has_component(source, cmp.Aura):
-        if not location.can_see(source, player, enemy_cmp.perception):
-            wander(source)
-            return
-        # draw line
+    def draw_line(source):
         ppos = location.player_position()
         callback = partial(math_util.bresenham_ray, dest=ppos)
         aura = cmp.Aura(callback=callback, color=display.Color.RED)
@@ -210,8 +205,8 @@ def cyclops_attack_pattern(source: int):
         coords = math_util.bresenham_ray(origin=opos, dest=ppos)
         locus = cmp.Locus(coords=coords)
         esper.add_component(source, locus)
-    else:
-        # fire laser
+
+    def fire_laser(source):
         src_frz = ecs.freeze_entity(source)
         dmg_effect = esper.component_for_entity(source, cmp.DamageEffect)
         locus = esper.component_for_entity(source, cmp.Locus)
@@ -221,3 +216,13 @@ def cyclops_attack_pattern(source: int):
                 event.Damage(src_frz, cell, dmg_effect.amount)
         esper.remove_component(source, cmp.Locus)
         esper.remove_component(source, cmp.Aura)
+
+    player = ecs.Query(cmp.Player).first()
+    enemy_cmp = esper.component_for_entity(source, cmp.Enemy)
+    if not esper.has_component(source, cmp.Aura):
+        if not location.can_see(source, player, enemy_cmp.perception):
+            wander(source)
+            return
+        draw_line(source)
+    else:
+        fire_laser(source)

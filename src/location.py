@@ -59,7 +59,7 @@ def coords_within_radius(pos: cmp.Position, radius: int) -> list[typ.Coord]:
 
     for x in range(min_x, max_x):
         for y in range(min_y, max_y):
-            dist = math.dist(pos.as_tuple, (x,y))
+            dist = math.dist(pos.as_tuple, (x, y))
             if dist <= radius:
                 ret_coords.append([x, y])
     return ret_coords
@@ -74,7 +74,7 @@ def coords_line_to_point(source: cmp.Position, dest: cmp.Position) -> list[typ.C
 def backlight(x, y):
     """add a fading candle-colored illumination of the player's sight radius"""
     player_pos = player_position()
-    dist_to_player = math.dist(player_pos.as_tuple, (x,y))
+    dist_to_player = math.dist(player_pos.as_tuple, (x, y))
     player_cmp = ecs.Query(cmp.Player).val
 
     normalized_dist = dist_to_player / player_cmp.sight_radius
@@ -165,7 +165,7 @@ class Board:
         """create a tile and place it at position"""
         self.set_cell(x, y, gen_tile(x, y))
 
-    def entities_at(self, x:int, y:int) -> set:
+    def entities_at(self, x: int, y: int) -> set:
         """a reference to the entity set at an xy"""
         return self.entities[x][y]
 
@@ -242,10 +242,10 @@ class RectangularRoom:
     @property
     def border_coords(self) -> list:
         """Return the coords of the edges, without corners."""
-        top_edge = [(x, self.y1) for x in range(self.x1+1, self.x2)]
-        bottom_edge = [(x, self.y2) for x in range(self.x1+1, self.x2)]
-        left_edge =  [(self.x1, y) for y in range(self.y1+1, self.y2)]
-        right_edge =  [(self.x2, y) for y in range(self.y1+1, self.y2)]
+        top_edge = [(x, self.y1) for x in range(self.x1 + 1, self.x2)]
+        bottom_edge = [(x, self.y2) for x in range(self.x1 + 1, self.x2)]
+        left_edge = [(self.x1, y) for y in range(self.y1 + 1, self.y2)]
+        right_edge = [(self.x2, y) for y in range(self.y1 + 1, self.y2)]
         border = top_edge + bottom_edge + left_edge + right_edge
         return border
 
@@ -255,7 +255,7 @@ def connect_rooms(first: RectangularRoom, second: RectangularRoom):
     pair = get_closest_pair(first.border_coords, second.border_coords)
     tunnel_between(*pair[0], *pair[1])
 
-    if not random.randint(0, 1): # make doors, half the time I guess
+    if not random.randint(0, 1):  # make doors, half the time I guess
         board.retile(*pair[0], create.tile.door)
         board.retile(*pair[1], create.tile.door)
 
@@ -300,7 +300,7 @@ def get_closest_pair(first: Iterable, second: Iterable) -> tuple:
             if dist < min_dist:
                 min_dist = dist
                 closest_pair = (p1, p2)
-    return closest_pair # type: ignore
+    return closest_pair  # type: ignore
 
 
 def trace_ray(source: int, dest: int):
@@ -516,7 +516,7 @@ class Cave:
             pos = esper.component_for_entity(cell, cmp.Position)
             wall_count = count_neighbors(self.board, pos)
             if wall_count == 0:
-                dist = math.dist(player_pos.as_tuple, (x,y))
+                dist = math.dist(player_pos.as_tuple, (x, y))
                 valid_spawns.append([dist, pos])
         valid_spawns = sorted(valid_spawns, key=lambda x: x[0])
         stair_pos = valid_spawns[-1][1]

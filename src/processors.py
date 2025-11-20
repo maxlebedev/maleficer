@@ -25,10 +25,14 @@ PROC_QUEUE = collections.deque()
 
 
 def get_selected_menuitem():
-    # TODO: move somewhere
+    """assumes inventory has at least one item"""
+    # TODO: move the code somewhere
     inv_map = create.player.inventory_map()
     menu_selection = ecs.Query(cmp.MenuSelection).val
+    menu_selection.item = math_util.clamp(menu_selection.item, len(inv_map) - 1)
+
     selection = inv_map[menu_selection.item][1].pop()
+
     return selection
 
 
@@ -90,7 +94,6 @@ class Movement(Processor):
         board = location.get_board()
         board.remove(target)
         esper.add_component(target, cmp.InInventory())
-        create.player.inventory_map()
         name = event.Log.color_fmt(target)
         event.Log.append(f"picked up {name}")
         # oneshot call some collectable processor?
@@ -916,8 +919,12 @@ class InventoryInputEvent(InputEvent):
         esper.add_component(selection, drop_pos)
 
         board = location.get_board()
-        board.entities_at(drop_pos).add(selection)
-        phase.change_to(phase.Ontology.level, NPCTurn)
+        board.entities_at(*drop_pos).add(selection)
+
+        name = event.Log.color_fmt(selection)
+        event.Log.append(f"dropped {name}")
+        if not any(ecs.Query(cmp.InInventory)):
+            phase.change_to(phase.Ontology.level)
 
     def use_item(self, selection):
         try:
