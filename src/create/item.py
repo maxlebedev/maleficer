@@ -75,7 +75,7 @@ def bomb(pos: cmp.Position) -> int:
 
     def aura_tick(entity: int):
         aura = esper.component_for_entity(entity, cmp.Aura)
-        if aura == dis.Color.LIGHT_RED:
+        if aura.color == dis.Color.LIGHT_RED:
             aura.color = dis.Color.BLOOD_RED
 
     cmps.append(cmp.EnemyTrigger(callbacks=[aura_tick]))

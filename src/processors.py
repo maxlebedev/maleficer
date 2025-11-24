@@ -530,9 +530,9 @@ class BoardRender(Render):
         panel_contents += self._spell_section()
         panel_contents.append(None)
 
-        # if targeting, also print spell info
         game_meta = ecs.Query(cmp.GameMeta).val
 
+        # if targeting, also print spell info
         if targeting := esper.get_component(cmp.Targeting):
             trg_ent, _ = targeting[0]
             panel_contents += self._draw_selection_info(trg_ent)

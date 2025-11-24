@@ -346,7 +346,7 @@ def get_neighbor_coords(x: int, y: int):
     return indices
 
 
-def count_neighbors(board, x: int, y:int ):
+def count_neighbors(board, x: int, y: int):
     indices = get_neighbor_coords(x, y)
     neighbor_walls = 0
     for x, y in indices:
@@ -791,6 +791,7 @@ class TestDungeon:
         create.item.scroll(new_room.get_random_pos())
         self.board.build_entity_cache()
 
+
 class DrunkenWalk:
     board: Board
 
@@ -815,19 +816,20 @@ class DrunkenWalk:
 
         self.board.retile(x, y, create.tile.floor)
         floor_goal = 1000
-        path = [(x,y)]
-        def get_walkable_wall(x,y):
+        path = [(x, y)]
+
+        def get_walkable_wall(x, y):
             """find a cardinal step with a non-baorder wall"""
             offsets = [(-1, 0), (0, -1), (0, 1), (1, 0)]
             for dx, dy in random.sample(offsets, k=4):
-                new_x, new_y = x+dx, y+dy
+                new_x, new_y = x + dx, y + dy
                 if {new_x, new_y} & {0, BOARD_MAX}:
                     return None
                 if count_neighbors(self.board, new_x, new_y) < 4:
                     return None
                 cell = self.board.get_cell(new_x, new_y)
                 if esper.has_component(cell, cmp.Wall):
-                    return  new_x, new_y
+                    return new_x, new_y
             return None
 
         for _ in range(floor_goal):
@@ -842,7 +844,8 @@ class DrunkenWalk:
         return path
 
     def populate(self, path):
-        spawn_goal = 20
+        map_info = ecs.Query(cmp.GameMeta).cmp(cmp.MapInfo)
+        spawn_goal = 20 + map_info.depth
 
         spawn_table = {
             create.item.trap: 3,
