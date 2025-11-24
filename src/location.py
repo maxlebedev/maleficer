@@ -15,6 +15,8 @@ import ecs
 import math_util
 import typ
 
+BOARD_MAX = display.BOARD_WIDTH - 1
+
 
 def player_position() -> cmp.Position:
     pos = ecs.Query(cmp.Player).cmp(cmp.Position)
@@ -155,7 +157,7 @@ class Board:
     def get_cell(self, x: int, y: int) -> typ.CELL:
         if self._in_bounds(x, y):
             return self.cells[x][y]
-        raise Exception(f"No such cell {x=} {y=}")
+        raise IndexError(f"No such cell {x=} {y=}")
 
     def set_cell(self, x: int, y: int, cell: typ.CELL):
         if not self._in_bounds(x, y):
@@ -344,15 +346,15 @@ def get_neighbor_coords(x: int, y: int):
     return indices
 
 
-def count_neighbors(board, pos: cmp.Position):
-    indices = get_neighbor_coords(*pos)
+def count_neighbors(board, x: int, y:int ):
+    indices = get_neighbor_coords(x, y)
     neighbor_walls = 0
     for x, y in indices:
         try:
             cell = board.get_cell(x, y)
             if esper.has_component(cell, cmp.Wall):
                 neighbor_walls += 1
-        except Exception:
+        except IndexError:
             pass
     return neighbor_walls
 
@@ -493,7 +495,7 @@ class Cave:
         for _ in range(cell_autamata_passes):
             for cell in self.board.as_sequence():
                 player_pos = esper.component_for_entity(cell, cmp.Position)
-                wall_count = count_neighbors(self.board, player_pos)
+                wall_count = count_neighbors(self.board, *player_pos)
                 neighbours[player_pos.x][player_pos.y] = wall_count
 
         for x, row in enumerate(neighbours):
@@ -516,7 +518,7 @@ class Cave:
             y = random.randint(0, display.BOARD_HEIGHT - 1)
             cell = self.board.cells[x][y]
             pos = esper.component_for_entity(cell, cmp.Position)
-            wall_count = count_neighbors(self.board, pos)
+            wall_count = count_neighbors(self.board, *pos)
             if wall_count == 0:
                 dist = math.dist(player_pos.as_tuple, (x, y))
                 valid_spawns.append([dist, pos])
@@ -535,7 +537,8 @@ class Cave:
         for _, pos in valid_spawns[:-1]:
             spawn = math_util.from_table(spawn_table)
             self.board.retile(pos.x, pos.y, create.tile.floor)
-            spawn(pos)
+            new_pos = cmp.Position(pos.x, pos.y)
+            spawn(new_pos)
 
     def build(self):
         self.board.fill()
@@ -714,7 +717,7 @@ class BSPDungeon:
 
     def build(self):
         self.board.fill()
-        bsp = tcod.bsp.BSP(x=0, y=0, width=63, height=63)
+        bsp = tcod.bsp.BSP(x=0, y=0, width=BOARD_MAX, height=BOARD_MAX)
         bsp.split_recursive(
             depth=5,
             min_width=5,
@@ -793,53 +796,53 @@ class DrunkenWalk:
 
     def __init__(self, board: Board):
         self.board = board
-        self.build()
-        self.populate()
+        path = self.build()
+        self.populate(path)
 
     def build(self):
+        """
+        Save visited in a stack
+        only move onto walls
+        if no walls, pop stack
+        """
         self.board.fill()
-        offsets = [(-1, 0), (0, -1), (0, 1), (1, 0)]
 
-        x, y = 0, 0
-        self.board.retile(32, 32, create.tile.floor)
-        floor_space = ecs.Query(cmp.Cell).exclude(cmp.Blocking)
-        while len([e for e in floor_space]) < 2000:
-            start_cell = random.choice([e[0] for e in floor_space])
-            pos = esper.component_for_entity(start_cell, cmp.Position)
-            x, y = pos.as_tuple
+        x = random.randint(1, BOARD_MAX)
+        y = random.randint(1, BOARD_MAX)
 
-            for _ in range(200):
-                dx, dy = random.choice(offsets)
-                if x+dx in (1, 63) or y+dy in (1, 63):
-                    # TODO: if we want a list of dead ends, we log em here
-                    break
-                x += dx
-                y += dy
-                self.board.retile(x, y, create.tile.floor)
-
-            floor_space = ecs.Query(cmp.Cell).exclude(cmp.Blocking)
-
-
-        self.board.retile(x, y, create.tile.stairs)
         player_pos = player_position()
-        player_pos.x, player_pos.y = 32, 32
+        player_pos.x, player_pos.y = x, y
 
-    def populate(self):
-        player_pos = player_position()
+        self.board.retile(x, y, create.tile.floor)
+        floor_goal = 1000
+        path = [(x,y)]
+        def get_walkable_wall(x,y):
+            """find a cardinal step with a non-baorder wall"""
+            offsets = [(-1, 0), (0, -1), (0, 1), (1, 0)]
+            for dx, dy in random.sample(offsets, k=4):
+                new_x, new_y = x+dx, y+dy
+                if {new_x, new_y} & {0, BOARD_MAX}:
+                    return None
+                if count_neighbors(self.board, new_x, new_y) < 4:
+                    return None
+                cell = self.board.get_cell(new_x, new_y)
+                if esper.has_component(cell, cmp.Wall):
+                    return  new_x, new_y
+            return None
 
-        valid_spawns = []
-        while len(valid_spawns) < 20:
-            x = random.randint(0, display.BOARD_WIDTH - 1)
-            y = random.randint(0, display.BOARD_HEIGHT - 1)
-            cell = self.board.cells[x][y]
-            pos = esper.component_for_entity(cell, cmp.Position)
-            wall_count = count_neighbors(self.board, pos)
-            if wall_count == 0:
-                dist = math.dist(player_pos.as_tuple, (x, y))
-                valid_spawns.append([dist, pos])
-        valid_spawns = sorted(valid_spawns, key=lambda x: x[0])
-        stair_pos = valid_spawns[-1][1]
-        self.board.retile(stair_pos.x, stair_pos.y, create.tile.stairs)
+        for _ in range(floor_goal):
+            nxt = get_walkable_wall(x, y)
+            while nxt is None:
+                nxt = get_walkable_wall(*path.pop())
+            x, y = nxt
+            self.board.retile(x, y, create.tile.floor)
+            path.append(nxt)
+
+        self.board.retile(path[-1][0], path[-1][1], create.tile.stairs)
+        return path
+
+    def populate(self, path):
+        spawn_goal = 20
 
         spawn_table = {
             create.item.trap: 3,
@@ -849,7 +852,9 @@ class DrunkenWalk:
             create.npc.goblin: 3,
             create.npc.warlock: 1,
         }
-        for _, pos in valid_spawns[:-1]:
+
+        floor = path[:-1]
+        for x, y in random.sample(floor, k=spawn_goal):
             spawn = math_util.from_table(spawn_table)
-            self.board.retile(pos.x, pos.y, create.tile.floor)
-            spawn(pos)
+            new_pos = cmp.Position(x, y)
+            spawn(new_pos)
