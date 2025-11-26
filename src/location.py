@@ -825,6 +825,7 @@ class DrunkenWalk:
                 new_x, new_y = x + dx, y + dy
                 if {new_x, new_y} & {0, BOARD_MAX}:
                     return None
+                # without this next check we get caverns
                 if count_neighbors(self.board, new_x, new_y) < 4:
                     return None
                 cell = self.board.get_cell(new_x, new_y)

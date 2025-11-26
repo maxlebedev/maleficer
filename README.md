@@ -181,6 +181,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Max HP as a resource (not for normal spells)
     - Cryomancer with lengthier stuns
         * 3 turn stun, and a 1-speed icicle projectile
+        * need to replace Spell.target_range with range func for icicle
 ### Enemies
     - Spawners
     - "Commander" Enemies that effect their faction
@@ -199,6 +200,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * Same for charger enemies
     - Portals, that are like traps with the on-step
         * but instead of dmg, position changes
+    - Hidden trap that ticks twice like bomb, then explodes
 ## UX
     - use that M icon
     - other menus probably want backgrounds.
@@ -224,3 +226,4 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * Because we do a cell lookup, this isn't safe
     - cursor mvmt has no bounds checking
     - pieces without names crash piece_to_description
+        * I haven't found any pieces without name

@@ -162,13 +162,13 @@ def apply_pull(source: typ.Entity):
 
 def _learn(spell: int):
     # TODO: probably wants to live elsewhere
-    known_spells = esper.get_component(cmp.Known)
+    known_spells = esper.get_component(cmp.Attuned)
     if len(known_spells) == 4:
         event.Log.append("Max spells learned")
         raise typ.InvalidAction("learning failed")
 
     min_slotnum = min({1, 2, 3, 4} - {k[1].slot for k in known_spells})
-    esper.add_component(spell, cmp.Known(min_slotnum))
+    esper.add_component(spell, cmp.Attuned(min_slotnum))
 
 
 def apply_learn(source: int):

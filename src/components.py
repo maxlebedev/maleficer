@@ -295,7 +295,7 @@ class Learnable:
 
 
 @component
-class Known:
+class Attuned:
     """spell is castable"""
 
     slot: int

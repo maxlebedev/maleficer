@@ -312,9 +312,9 @@ class GameInputEvent(InputEvent):
     def unlearn(self, slot: int):
         """take a spell and turn it into a scroll"""
         unlearned = False
-        for spell_ent, (known) in esper.get_component(cmp.Known):
-            if known.slot == slot:
-                esper.remove_component(spell_ent, cmp.Known)
+        for spell_ent, (attuned) in esper.get_component(cmp.Attuned):
+            if attuned.slot == slot:
+                esper.remove_component(spell_ent, cmp.Attuned)
                 scroll = create.item.scroll(spell=spell_ent)
                 esper.add_component(scroll, cmp.InInventory())
                 unlearned = True
@@ -329,8 +329,8 @@ class GameInputEvent(InputEvent):
         board = location.get_board()
 
         casting_spell = None
-        for spell_ent, (known) in esper.get_component(cmp.Known):
-            if known.slot == slot:
+        for spell_ent, (attuned) in esper.get_component(cmp.Attuned):
+            if attuned.slot == slot:
                 casting_spell = spell_ent
 
         if not casting_spell:
@@ -494,11 +494,11 @@ class BoardRender(Render):
         return selection_info
 
     def _spell_section(self):
-        spells = ecs.Query(cmp.Spell, cmp.Onymous, cmp.Known)
+        spells = ecs.Query(cmp.Spell, cmp.Onymous, cmp.Attuned)
         sorted_spells = sorted(spells, key=lambda x: x[1][2].slot)
 
-        for spell_ent, (_, named, known) in sorted_spells:
-            text = f"Slot{known.slot}:{named.name}"
+        for spell_ent, (_, named, attuned) in sorted_spells:
+            text = f"Slot{attuned.slot}:{named.name}"
             if cd := condition.get_val(spell_ent, typ.Condition.Cooldown):
                 text = f"{text}:{typ.Condition.Cooldown.name} {cd}"
             fg = display.Color.BEIGE
