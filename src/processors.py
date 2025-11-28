@@ -144,7 +144,7 @@ class Movement(Processor):
 @dataclass
 class Damage(Processor):
     def _make_message(self, damage):
-        source_name = damage.source[cmp.Onymous].name
+        source_name = damage.source[cmp.KnownAs].name
         if cmp.Visible in damage.source:
             src_color = damage.source[cmp.Visible].color
             source_name = display.colored_text(source_name, src_color)
@@ -494,7 +494,7 @@ class BoardRender(Render):
         return selection_info
 
     def _spell_section(self):
-        spells = ecs.Query(cmp.Spell, cmp.Onymous, cmp.Attuned)
+        spells = ecs.Query(cmp.Spell, cmp.KnownAs, cmp.Attuned)
         sorted_spells = sorted(spells, key=lambda x: x[1][2].slot)
 
         for spell_ent, (_, named, attuned) in sorted_spells:
@@ -671,7 +671,7 @@ class MenuRender(Render):
 
         menu_selection = ecs.Query(cmp.MenuSelection).val
 
-        menu_elements = ecs.Query(cmp.MenuItem, self.menu_cmp, cmp.Onymous)
+        menu_elements = ecs.Query(cmp.MenuItem, self.menu_cmp, cmp.KnownAs)
         sorted_menu = sorted(menu_elements, key=lambda x: x[1][0].order)
         for i, (_, (mi, _, on)) in enumerate(sorted_menu):
             fg = display.Color.LGREY
@@ -791,7 +791,7 @@ class TargetRender(BoardRender):
 
     def piece_to_description(self, piece):
         desc = []
-        name_cmp = esper.component_for_entity(piece, cmp.Onymous)
+        name_cmp = esper.component_for_entity(piece, cmp.KnownAs)
         desc.append(f"Name: {name_cmp.name}")
         if health_cmp := esper.try_component(piece, cmp.Health):
             desc.append(f"HP: {health_cmp.current}")

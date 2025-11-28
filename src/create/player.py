@@ -10,7 +10,7 @@ from . import item, spell
 
 
 def inventory_map() -> list:
-    inventory_cmps = esper.get_components(cmp.InInventory, cmp.Onymous)
+    inventory_cmps = esper.get_components(cmp.InInventory, cmp.KnownAs)
     inventory = collections.defaultdict(set)
     for entity, (_, named) in inventory_cmps:
         inventory[named.name].add(entity)
@@ -26,7 +26,7 @@ def adept():
     cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.GREEN))
     cmps.append(cmp.Position(x=1, y=1))
     cmps.append(cmp.Health(max=80))
-    cmps.append(cmp.Onymous(name="player"))
+    cmps.append(cmp.KnownAs(name="player"))
     cmps.append(cmp.Blocking())
     cmps.append(cmp.LastPosition(cmp.Position(x=1, y=1)))
     esper.create_entity(*cmps)
@@ -41,7 +41,7 @@ def bloodmage():
     cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.RED))
     cmps.append(cmp.Position(x=1, y=1))
     cmps.append(cmp.Health(max=100))
-    cmps.append(cmp.Onymous(name="player"))
+    cmps.append(cmp.KnownAs(name="player"))
     cmps.append(cmp.Blocking())
     cmps.append(cmp.LastPosition(cmp.Position(x=1, y=1)))
     esper.create_entity(*cmps)
@@ -56,7 +56,7 @@ def terramancer():
     cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.BROWN))
     cmps.append(cmp.Position(x=1, y=1))
     cmps.append(cmp.Health(max=100))
-    cmps.append(cmp.Onymous(name="player"))
+    cmps.append(cmp.KnownAs(name="player"))
     cmps.append(cmp.Blocking())
     cmps.append(cmp.LastPosition(cmp.Position(x=1, y=1)))
     esper.create_entity(*cmps)
@@ -71,7 +71,7 @@ def stormcaller():
     cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.YELLOW))
     cmps.append(cmp.Position(x=1, y=1))
     cmps.append(cmp.Health(max=70))
-    cmps.append(cmp.Onymous(name="player"))
+    cmps.append(cmp.KnownAs(name="player"))
     cmps.append(cmp.Blocking())
     cmps.append(cmp.LastPosition(cmp.Position(x=1, y=1)))
     esper.create_entity(*cmps)

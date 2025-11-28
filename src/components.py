@@ -110,7 +110,8 @@ class Ranged:
 
 
 @component
-class Onymous:
+class KnownAs:
+    """this entity is known as"""
     name: str
     # death string?
 

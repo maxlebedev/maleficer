@@ -23,7 +23,7 @@ def wall(x: int, y: int, breakable: int = False) -> int:
     cell = esper.create_entity(cmp.Cell(), pos, vis, blocking, wall)
     if breakable:
         esper.add_component(cell, cmp.Health(max=1))
-        esper.add_component(cell, cmp.Onymous(name="wall"))
+        esper.add_component(cell, cmp.KnownAs(name="wall"))
         vis.glyph = map_info.bwall_glyph
 
     return cell

@@ -10,7 +10,7 @@ def bat(pos: cmp.Position) -> int:
     cmps.append(pos)
     cmps.append(cmp.Visible(glyph=dis.Glyph.BAT, color=dis.Color.BROWN))
     cmps.append(cmp.Health(max=10))
-    cmps.append(cmp.Onymous(name="bat"))
+    cmps.append(cmp.KnownAs(name="bat"))
     cmps.append(cmp.Flying())
     cmps.append(cmp.EnemyTrigger(callbacks=[behavior.apply_damage]))
     cmps.append(cmp.Enemy())
@@ -28,7 +28,7 @@ def skeleton(pos: cmp.Position) -> int:
     cmps.append(pos)
     cmps.append(cmp.Visible(glyph=dis.Glyph.SKELETON, color=dis.Color.BEIGE))
     cmps.append(cmp.Health(max=25))
-    cmps.append(cmp.Onymous(name="skeleton"))
+    cmps.append(cmp.KnownAs(name="skeleton"))
     cmps.append(cmp.Melee())
     cmps.append(cmp.EnemyTrigger(callbacks=[behavior.apply_damage]))
     cmps.append(cmp.Enemy(perception=10))
@@ -46,7 +46,7 @@ def warlock(pos: cmp.Position) -> int:
 
     cmps.append(cmp.Visible(glyph=dis.Glyph.WARLOCK, color=dis.Color.INDIGO))
     cmps.append(cmp.Health(max=15))
-    cmps.append(cmp.Onymous(name="warlock"))
+    cmps.append(cmp.KnownAs(name="warlock"))
     cmps.append(cmp.Ranged())
     callbacks = [behavior.fire_at_player, behavior.apply_damage]
     cmps.append(cmp.EnemyTrigger(callbacks=callbacks))
@@ -67,7 +67,7 @@ def living_flame(pos: cmp.Position) -> int:
     cmps.append(pos)
     cmps.append(cmp.Visible(glyph=dis.Glyph.FLAME, color=dis.Color.ORANGE))
     cmps.append(cmp.Health(max=20))
-    cmps.append(cmp.Onymous(name="living flame"))
+    cmps.append(cmp.KnownAs(name="living flame"))
     cmps.append(cmp.Melee())
     cmps.append(cmp.EnemyTrigger(callbacks=[behavior.apply_damage]))
     cmps.append(cmp.Enemy(speed=2, perception=5))
@@ -85,7 +85,7 @@ def goblin(pos: cmp.Position) -> int:
     cmps.append(pos)
     cmps.append(cmp.Visible(glyph=dis.Glyph.GOBLIN, color=dis.Color.DARK_GREEN))
     cmps.append(cmp.Health(max=20))
-    cmps.append(cmp.Onymous(name="goblin"))
+    cmps.append(cmp.KnownAs(name="goblin"))
     cmps.append(cmp.Ranged())
 
     cmps.append(cmp.EnemyTrigger(callbacks=[behavior.lob_bomb]))
@@ -104,7 +104,7 @@ def cyclops(pos: cmp.Position) -> int:
     cmps.append(pos)
     cmps.append(cmp.Visible(glyph=dis.Glyph.CYCLOPS, color=dis.Color.CHOCOLATE))
     cmps.append(cmp.Health(max=20))
-    cmps.append(cmp.Onymous(name="cyclops"))
+    cmps.append(cmp.KnownAs(name="cyclops"))
 
     callbacks = [behavior.cyclops_attack_pattern]
     cmps.append(cmp.EnemyTrigger(callbacks=callbacks))

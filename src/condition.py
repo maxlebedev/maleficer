@@ -34,7 +34,7 @@ def apply(entity: int, condition: typ.Condition, value: int):
             event.Animation([pos.as_list], fg=display.Color.BLOOD_RED)
             esper.dispatch_event("redraw")  # update screen before we apply anims
 
-            bleed_src = {cmp.Onymous: cmp.Onymous(name="bleed")}
+            bleed_src = {cmp.KnownAs: cmp.KnownAs(name="bleed")}
             # TODO: maybe a single global "bleed" entity
             event.Damage(bleed_src, entity, value)
         case typ.Condition.Stun:

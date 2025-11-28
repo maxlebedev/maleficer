@@ -23,7 +23,7 @@ def start_game():
 def _make_menuitem(menu_cmp, callback, name, order):
     cmps = []
     cmps.append(menu_cmp())
-    cmps.append(cmp.Onymous(name=name))
+    cmps.append(cmp.KnownAs(name=name))
     cmps.append(cmp.MenuItem(order=order))
     cmps.append(cmp.UseTrigger(callbacks=[callback]))
     esper.create_entity(*cmps)

@@ -20,7 +20,7 @@ def potion(pos: cmp.Position | None = None) -> int:
     cmps.append(cmp.Visible(glyph=dis.Glyph.POTION, color=dis.Color.GREEN))
     cmps.append(cmp.Collectable())
     cmps.append(cmp.Health(max=1))
-    cmps.append(cmp.Onymous(name="potion"))
+    cmps.append(cmp.KnownAs(name="potion"))
 
     cmps.append(cmp.HealEffect(amount=15))
     cmps.append(cmp.UseTrigger(callbacks=[behavior.apply_healing]))
@@ -51,9 +51,9 @@ def scroll(pos: cmp.Position | None = None, spell: int | None = None) -> int:
     if pos:
         esper.add_component(scroll, pos)
 
-    spell_name = esper.component_for_entity(spell, cmp.Onymous).name
-    named = cmp.Onymous(name=f"{spell_name} scroll")
-    esper.add_component(scroll, named)
+    spell_name = esper.component_for_entity(spell, cmp.KnownAs).name
+    known_as = cmp.KnownAs(name=f"{spell_name} scroll")
+    esper.add_component(scroll, known_as)
     return scroll
 
 
@@ -62,7 +62,7 @@ def bomb(pos: cmp.Position) -> int:
     cmps.append(pos)
     cmps.append(cmp.Visible(glyph=dis.Glyph.BOMB, color=dis.Color.RED))
     cmps.append(cmp.Health(max=1))
-    cmps.append(cmp.Onymous(name="bomb"))
+    cmps.append(cmp.KnownAs(name="bomb"))
     cmps.append(cmp.OnDeath())
     cmps.append(cmp.Enemy())
     callback = partial(location.coords_within_radius, radius=1)
@@ -93,7 +93,7 @@ def trap(pos: cmp.Position) -> int:
     cmps.append(pos)
     cmps.append(cmp.Visible(glyph=dis.Glyph.TRAP, color=dis.Color.RED))
     cmps.append(cmp.Health(max=1))
-    cmps.append(cmp.Onymous(name="trap"))
+    cmps.append(cmp.KnownAs(name="trap"))
     cmps.append(cmp.OnStep())
 
     cmps.append(cmp.StepTrigger(callbacks=[behavior.apply_damage]))

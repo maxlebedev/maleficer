@@ -42,7 +42,7 @@ class Log:
     @classmethod
     def color_fmt(cls, entity: typ.Entity):
         """take a string, and an entity, recolor string with entity fg"""
-        message = esper.component_for_entity(entity, cmp.Onymous).name
+        message = esper.component_for_entity(entity, cmp.Known).name
         vis = esper.component_for_entity(entity, cmp.Visible)
         fg = vis.color
         return display.colored_text(message, fg)
@@ -91,7 +91,6 @@ class Damage(Event):
     def __post_init__(self):
         super().__post_init__()
         phase.oneshot(processors.Damage)
-        # TODO: oneshot, or queue_proc?
 
 
 @dataclass
@@ -104,7 +103,7 @@ class Movement(Event):
 
     def __post_init__(self):
         super().__post_init__()
-        processors.queue_proc(processors.Movement)
+        phase.oneshot(processors.Movement)
 
 
 @dataclass
@@ -144,6 +143,7 @@ class Spawn(Event):
 
     def __post_init__(self):
         super().__post_init__()
+        # TODO: all ther others use oneshot here
         processors.queue_proc(processors.Spawn)
 
 
