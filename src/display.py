@@ -146,6 +146,7 @@ class Glyph(IntEnum):
     MAGIC_MISSILE = 618
     FLAME = 505
     CYCLOPS = 465
+    GRASS = 98
 
 
 def get_tile_glyphs():

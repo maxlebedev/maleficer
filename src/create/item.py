@@ -101,3 +101,17 @@ def trap(pos: cmp.Position) -> int:
     dmg = cmp.DamageEffect(source=trap_ent, amount=5)
     esper.add_component(trap_ent, dmg)
     return trap_ent
+
+
+def grass(pos: cmp.Position) -> int:
+    cmps = []
+    cmps.append(pos)
+    cmps.append(cmp.Visible(glyph=dis.Glyph.GRASS, color=dis.Color.DARK_GREEN))
+    cmps.append(cmp.Health(max=1))
+    cmps.append(cmp.KnownAs(name="grass"))
+    cmps.append(cmp.OnStep())
+    cmps.append(cmp.Opaque())
+
+    cmps.append(cmp.StepTrigger(callbacks=[behavior.die]))
+    trap_ent = esper.create_entity(*cmps)
+    return trap_ent

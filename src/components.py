@@ -112,6 +112,7 @@ class Ranged:
 @component
 class KnownAs:
     """this entity is known as"""
+
     name: str
     # death string?
 

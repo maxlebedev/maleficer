@@ -192,6 +192,8 @@ def apply_aegis(source: int):
                 if esper.has_component(ent, cmp.Health):
                     condition.grant(ent, typ.Condition.Aegis, aegis_effect.value)
 
+def die(ent: int):
+    event.Death(ent)
 
 # This is perhaps the new template of "complex" enemies
 def cyclops_attack_pattern(source: int):

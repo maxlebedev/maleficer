@@ -124,11 +124,14 @@ class Board:
     def as_transparency(self) -> list[typ.Coord]:
         transparency = matrix(display.BOARD_WIDTH, display.BOARD_HEIGHT, 1)
 
-        # change to entities_at, since items can be opaque
-        # turn cmp.trnasparent to cmp.opaque
-        for x, col in enumerate(self.cells):
-            for y, cell in enumerate(col):
-                transparency[x][y] = int(not(esper.has_component(cell, cmp.Opaque)))
+        for x in range(display.BOARD_WIDTH):
+            for y in range(display.BOARD_HEIGHT):
+                is_transparent = 1
+                for ent in self.entities_at(x,y):
+                    if esper.has_component(ent, cmp.Opaque):
+                        is_transparent = 0
+                transparency[x][y] = is_transparent
+
         return transparency
 
     def as_move_graph(self) -> list[typ.Coord]:
