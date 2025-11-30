@@ -790,6 +790,8 @@ class TestDungeon:
         pos = player_position()
         pos.x, pos.y = new_room.center.x, new_room.center.y
         create.npc.cyclops(new_room.get_random_pos())
+        for _ in range(20):
+            create.item.grass(new_room.get_random_pos())
         create.item.potion(new_room.get_random_pos())
         create.item.scroll(new_room.get_random_pos())
         self.board.build_entity_cache()
