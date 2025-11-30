@@ -9,7 +9,7 @@ import math_util
 
 def floor(x: int, y: int) -> int:
     vis = cmp.Visible(glyph=dis.Glyph.FLOOR, color=dis.Color.FLOOR)
-    cell = esper.create_entity(cmp.Cell(), cmp.Position(x, y), vis, cmp.Transparent())
+    cell = esper.create_entity(cmp.Cell(), cmp.Position(x, y), vis)
     return cell
 
 
@@ -20,7 +20,8 @@ def wall(x: int, y: int, breakable: int = False) -> int:
     pos = cmp.Position(x, y)
     blocking = cmp.Blocking()
     wall = cmp.Wall()
-    cell = esper.create_entity(cmp.Cell(), pos, vis, blocking, wall)
+    opaque = cmp.Opaque()
+    cell = esper.create_entity(cmp.Cell(), pos, vis, blocking, wall, opaque)
     if breakable:
         esper.add_component(cell, cmp.Health(max=1))
         esper.add_component(cell, cmp.KnownAs(name="wall"))
@@ -37,7 +38,8 @@ def door(x: int, y: int) -> int:
     blocking = cmp.Blocking()
     wall = cmp.Wall()
     door = cmp.Door()
-    cell = esper.create_entity(cmp.Cell(), pos, vis, blocking, wall, door)
+    opaque = cmp.Opaque()
+    cell = esper.create_entity(cmp.Cell(), pos, vis, blocking, wall, door, opaque)
     # TODO: support locked doors
 
     return cell
@@ -47,9 +49,8 @@ def stairs(x: int, y: int) -> int:
     vis = cmp.Visible(glyph=dis.Glyph.STAIRS, color=dis.Color.LGREY)
 
     os = cmp.OnStep()
-    tp = cmp.Transparent()
     pos = cmp.Position(x, y)
-    stairs = esper.create_entity(cmp.Cell(), pos, vis, tp, os)
+    stairs = esper.create_entity(cmp.Cell(), pos, vis, os)
 
     def descend(_):
         player = ecs.Query(cmp.Player).first()

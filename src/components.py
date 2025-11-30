@@ -64,8 +64,8 @@ class Visible:
 
 
 @component
-class Transparent:
-    """does not block light"""
+class Opaque:
+    """blocks light"""
 
 
 @component

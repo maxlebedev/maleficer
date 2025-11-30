@@ -97,6 +97,7 @@ class Mood:
         hex_to_rgb("773bbf"): 2,
         hex_to_rgb("4e278c"): 1,
     }
+    # TODO: this one kinda sucks
     earthy = {
         hex_to_rgb("b58c7f"): 1,
         hex_to_rgb("9e7767"): 2,

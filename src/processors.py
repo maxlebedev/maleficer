@@ -83,6 +83,7 @@ class Movement(Processor):
             if door_cmp := esper.try_component(target, cmp.Door):
                 door_cmp.closed = False
                 esper.remove_component(target, cmp.Blocking)
+                esper.remove_component(target, cmp.Opaque)
                 vis = esper.component_for_entity(target, cmp.Visible)
                 vis.glyph = display.Glyph.ODOOR
             else:
