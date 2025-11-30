@@ -126,11 +126,9 @@ class Board:
 
         for x in range(display.BOARD_WIDTH):
             for y in range(display.BOARD_HEIGHT):
-                is_transparent = 1
-                for ent in self.entities_at(x,y):
-                    if esper.has_component(ent, cmp.Opaque):
-                        is_transparent = 0
-                transparency[x][y] = is_transparent
+                is_opaque = lambda x: esper.has_component(x, cmp.Opaque)
+                if any(map(is_opaque, self.entities_at(x,y))):
+                    transparency[x][y] = 0
 
         return transparency
 
@@ -324,7 +322,7 @@ def trace_ray(source: int, dest: int):
     for i, (x, y) in enumerate(trace):
         entities = board.entities[x][y]
         for entity in entities:
-            if esper.has_component(entity, cmp.Blocking):
+            if esper.has_component(entity, cmp.Opaque):
                 if entity not in (source, dest):
                     return entity, trace[: i + 1]
 
