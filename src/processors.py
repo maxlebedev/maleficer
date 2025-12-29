@@ -795,8 +795,10 @@ class TargetRender(BoardRender):
 
     def piece_to_description(self, piece):
         desc = []
-        name_cmp = esper.component_for_entity(piece, cmp.KnownAs)
-        desc.append(f"Name: {name_cmp.name}")
+        name = "???"
+        if name_cmp := esper.component_for_entity(piece, cmp.KnownAs):
+            name = name_cmp.name
+        desc.append(f"Name: {name}")
         if health_cmp := esper.try_component(piece, cmp.Health):
             desc.append(f"HP: {health_cmp.current}")
         if enemy_cmp := esper.try_component(piece, cmp.Enemy):

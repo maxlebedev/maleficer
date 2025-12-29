@@ -221,7 +221,5 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - push_coords has no bounds checking.
         * Because we do a cell lookup, this isn't safe
     - cursor mvmt has no bounds checking
-    - pieces without names crash piece_to_description
-        * I haven't found any pieces without name
     - Push + dmg spells apply their push before dmg, causing the dmg to miss
         * Ideally, we would collect targets before applying any effects
