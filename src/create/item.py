@@ -11,6 +11,7 @@ import location
 import phase
 import processors
 import typ
+import event
 
 from . import spell as create_spell
 
@@ -88,18 +89,32 @@ def bomb(pos: cmp.Position) -> int:
     return bomb_ent
 
 
-def trap(pos: cmp.Position) -> int:
+def spike_trap(pos: cmp.Position) -> int:
     cmps = []
     cmps.append(pos)
     cmps.append(cmp.Visible(glyph=dis.Glyph.TRAP, color=dis.Color.RED))
     cmps.append(cmp.Health(max=1))
-    cmps.append(cmp.KnownAs(name="trap"))
+    cmps.append(cmp.KnownAs(name="spike trap"))
     cmps.append(cmp.OnStep())
 
     cmps.append(cmp.StepTrigger(callbacks=[behavior.apply_damage]))
     trap_ent = esper.create_entity(*cmps)
     dmg = cmp.DamageEffect(source=trap_ent, amount=5)
     esper.add_component(trap_ent, dmg)
+    return trap_ent
+
+
+def bomb_trap(pos: cmp.Position) -> int:
+    cmps = []
+    cmps.append(pos)
+    cmps.append(cmp.Health(max=1))
+    cmps.append(cmp.KnownAs(name="bomb trap"))
+    cmps.append(cmp.OnStep())
+
+    cmps.append(cmp.Enemy())  # this trap has to be an "Enemy" for Movement proc
+    cmps.append(cmp.EnemyTrigger(callbacks=[behavior.spawn_bomb]))
+    trap_ent = esper.create_entity(*cmps)
+
     return trap_ent
 
 

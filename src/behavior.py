@@ -67,6 +67,16 @@ def lob_bomb(source: int):
         return
 
 
+def spawn_bomb(source: typ.Entity):
+    import create
+
+    src_pos = esper.component_for_entity(source, cmp.Position)
+    player_pos = location.player_position()
+    if src_pos == player_pos:
+        die(source)
+        event.Spawn(func=partial(create.item.bomb, src_pos))
+
+
 def fire_at_player(source: typ.Entity):
     player = ecs.Query(cmp.Player).first()
     dest, trace = location.trace_ray(source, player)
@@ -192,8 +202,10 @@ def apply_aegis(source: int):
                 if esper.has_component(ent, cmp.Health):
                     condition.grant(ent, typ.Condition.Aegis, aegis_effect.value)
 
+
 def die(ent: int):
     event.Death(ent)
+
 
 # This is perhaps the new template of "complex" enemies
 def cyclops_attack_pattern(source: int):

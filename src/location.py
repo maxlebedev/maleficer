@@ -127,7 +127,7 @@ class Board:
         for x in range(display.BOARD_WIDTH):
             for y in range(display.BOARD_HEIGHT):
                 is_opaque = lambda x: esper.has_component(x, cmp.Opaque)
-                if any(map(is_opaque, self.entities_at(x,y))):
+                if any(map(is_opaque, self.entities_at(x, y))):
                     transparency[x][y] = 0
 
         return transparency
@@ -467,7 +467,9 @@ class Dungeon:
             weights = [3, 2, 1]
             npc_gen = random.choices(npcs, weights)[0]
             npc_gen(room.get_random_pos())
-        item = random.choice([create.item.trap, create.item.potion, create.item.scroll])
+        item = random.choice(
+            [create.item.spike_trap, create.item.potion, create.item.scroll]
+        )
         item(room.get_random_pos())
 
 
@@ -530,7 +532,7 @@ class Cave:
         self.board.retile(stair_pos.x, stair_pos.y, create.tile.stairs)
 
         spawn_table = {
-            create.item.trap: 3,
+            create.item.spike_trap: 3,
             create.item.potion: 2,
             create.item.scroll: 1,
             create.npc.bat: 5,
@@ -676,7 +678,7 @@ class Maze:
 
     def populate(self, seen, dead_ends):
         spawn_table = {
-            create.item.trap: 3,
+            create.item.spike_trap: 3,
             create.npc.bat: 5,
             create.npc.goblin: 3,
             create.npc.warlock: 1,
@@ -766,7 +768,9 @@ class BSPDungeon:
             weights = [3, 2, 1]
             npc_gen = random.choices(npcs, weights)[0]
             npc_gen(room.get_random_pos())
-        item = random.choice([create.item.trap, create.item.potion, create.item.scroll])
+        item = random.choice(
+            [create.item.spike_trap, create.item.potion, create.item.scroll]
+        )
         item(room.get_random_pos())
 
 
@@ -854,7 +858,7 @@ class DrunkenWalk:
         spawn_goal = 20 + map_info.depth
 
         spawn_table = {
-            create.item.trap: 3,
+            create.item.spike_trap: 3,
             create.item.potion: 2,
             create.item.scroll: 1,
             create.npc.bat: 5,

@@ -43,8 +43,9 @@ class Log:
     def color_fmt(cls, entity: typ.Entity):
         """take a string, and an entity, recolor string with entity fg"""
         message = esper.component_for_entity(entity, cmp.KnownAs).name
-        vis = esper.component_for_entity(entity, cmp.Visible)
-        fg = vis.color
+        fg = display.Color.WHITE
+        if vis := esper.try_component(entity, cmp.Visible):
+            fg = vis.color
         return display.colored_text(message, fg)
 
     @classmethod

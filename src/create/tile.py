@@ -7,12 +7,11 @@ import location
 import math_util
 
 
-
 def floor(x: int, y: int) -> int:
     cmps = []
     cmps.append(cmp.Visible(glyph=dis.Glyph.FLOOR, color=dis.Color.FLOOR))
     cmps.append(cmp.Cell())
-    cmps.append(cmp.Position(x,y))
+    cmps.append(cmp.Position(x, y))
     cell = esper.create_entity(*cmps)
     return cell
 
