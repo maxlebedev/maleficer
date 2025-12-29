@@ -104,6 +104,9 @@ class Movement(Processor):
         while event.Queues.movement:
             movement = event.Queues.movement.popleft()  # left so player first
             mover = movement.source
+            if condition.has(mover, typ.Condition.Stun):
+                continue
+
             if not esper.entity_exists(mover):
                 # entity intends to move, but dies first
                 continue

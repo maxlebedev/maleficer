@@ -185,7 +185,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 ### Enemies
     - Spawners
     - "Commander" Enemies that effect their faction
-    - do I want hidden/invisible elements? (traps, assasins)
     - missile-launcher structure, checker pattern aoe
     - one-turn-per-square moving projectiles
     - goblins should actually try to be at dist 4 to player
@@ -200,7 +199,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * Same for charger enemies
     - Portals, that are like traps with the on-step
         * but instead of dmg, position changes
-    - Hidden trap that ticks twice like bomb, then explodes
 ## UX
     - use that M icon
     - other menus probably want backgrounds.
@@ -217,7 +215,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * Sometimes enemies turn into walls when they die
         * those walls can be walked through
         * I think this is bc enemies spawn *in* the wall with same pos
-    - Stunning self doesn't lock out movement
     - Actual menuselection is on cmp.MenuSelection. not the GameMeta
     - Living flame needs a rework. doesn't acutally move twice
         * We probably block this on NPC rework
