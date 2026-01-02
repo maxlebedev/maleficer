@@ -11,7 +11,6 @@ import location
 import phase
 import processors
 import typ
-import event
 
 from . import spell as create_spell
 
@@ -65,7 +64,7 @@ def bomb(pos: cmp.Position) -> int:
     cmps.append(cmp.Health(max=1))
     cmps.append(cmp.KnownAs(name="bomb"))
     cmps.append(cmp.OnDeath())
-    cmps.append(cmp.Enemy())
+    cmps.append(cmp.Enemy(evaluate=behavior.aura_tick))
     callback = partial(location.coords_within_radius, radius=1)
     cmps.append(cmp.EffectArea(callback))
 
@@ -73,13 +72,6 @@ def bomb(pos: cmp.Position) -> int:
 
     dmg_proc = lambda _: phase.oneshot(processors.Damage)
     cmps.append(cmp.DeathTrigger(callbacks=[behavior.apply_damage, dmg_proc]))
-
-    def aura_tick(entity: int):
-        aura = esper.component_for_entity(entity, cmp.Aura)
-        if aura.color == dis.Color.LIGHT_RED:
-            aura.color = dis.Color.BLOOD_RED
-
-    cmps.append(cmp.EnemyTrigger(callbacks=[aura_tick]))
 
     bomb_ent = esper.create_entity(*cmps)
     dmg = cmp.DamageEffect(source=bomb_ent, amount=10)
@@ -111,8 +103,7 @@ def bomb_trap(pos: cmp.Position) -> int:
     cmps.append(cmp.KnownAs(name="bomb trap"))
     cmps.append(cmp.OnStep())
 
-    cmps.append(cmp.Enemy())  # this trap has to be an "Enemy" for Movement proc
-    cmps.append(cmp.EnemyTrigger(callbacks=[behavior.spawn_bomb]))
+    cmps.append(cmp.Enemy(evaluate=behavior.bomb_trap))
     trap_ent = esper.create_entity(*cmps)
 
     return trap_ent

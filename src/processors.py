@@ -146,6 +146,32 @@ class Movement(Processor):
 
 
 @dataclass
+class NPCEval(Processor):
+    def _process(self):
+        enemies = ecs.Query(cmp.Enemy)
+        stunned_txt = display.colored_text("stunned", display.Color.CYAN)
+
+        for entity, (en_cmp,) in enemies:
+            if condition.has(entity, typ.Condition.Stun):
+                name = event.Log.color_fmt(entity)
+                event.Log.append(f"{name} is {stunned_txt}")
+                continue
+
+            if en_cmp.evaluate:
+                en_cmp.action = en_cmp.evaluate(entity)
+
+
+@dataclass
+class NPCAct(Processor):
+    def _process(self):
+        enemies = ecs.Query(cmp.Enemy)
+        for entity, (en_cmp,) in enemies:
+            if en_cmp.action:
+                en_cmp.action(entity)
+                en_cmp.action = None
+
+
+@dataclass
 class Damage(Processor):
     def _make_message(self, damage):
         source_name = damage.source[cmp.KnownAs].name
@@ -323,7 +349,7 @@ class GameInputEvent(InputEvent):
                 esper.add_component(scroll, cmp.InInventory())
                 unlearned = True
                 event.Tick()
-                phase.change_to(phase.Ontology.level, NPCTurn)
+                phase.change_to(phase.Ontology.level, NPCEval)
         if not unlearned:
             esper.dispatch_event("flash")
             event.Log.append("can't unlearn, spell doesn't exist")
@@ -347,85 +373,6 @@ class GameInputEvent(InputEvent):
         board.reposition(xhair_ent, *player_pos)
         esper.add_component(casting_spell, cmp.Targeting())
         phase.change_to(phase.Ontology.target)
-
-
-@dataclass
-class NPCTurn(Processor):
-    def follow(self, start: cmp.Position, end: cmp.Position):
-        board = location.get_board()
-        cost = board.as_move_graph()
-        graph = tcod.path.SimpleGraph(cost=cost, cardinal=1, diagonal=0)
-        pf = tcod.path.Pathfinder(graph)
-        pf.add_root(start.as_tuple)
-        path: list = pf.path_to(end.as_tuple).tolist()
-        if len(path) < 2:
-            return None
-        return path[1]
-
-    def process_ranged_enemy(self, enemy: typ.Entity, epos: cmp.Position):
-        player_pos = location.player_last_position()
-        enemy_cmp = esper.component_for_entity(enemy, cmp.Enemy)
-        # TODO: ranged units should also sometimes follow
-        player = ecs.Query(cmp.Player).first()
-        if location.can_see(enemy, player, enemy_cmp.perception):
-            if condition.has(enemy, typ.Condition.Cooldown):
-                behavior.wander(enemy)
-            else:
-                event.trigger_all_callbacks(enemy, cmp.EnemyTrigger)
-        else:
-            if condition.has(enemy, typ.Condition.Cooldown):
-                # on cooldown, so player was close enough to follow them
-                if move := self.follow(epos, player_pos):
-                    event.Movement(enemy, x=move[0], y=move[1])
-            else:
-                behavior.wander(enemy)
-
-    def process_melee_enemy(self, enemy: typ.Entity, epos: cmp.Position):
-        player_pos = location.player_last_position()
-        if player_pos.as_tuple == epos.as_tuple:
-            player_pos = location.player_position()
-        enemy_cmp = esper.component_for_entity(enemy, cmp.Enemy)
-        dist_to_player = location.euclidean_distance(player_pos, epos)
-        if dist_to_player > enemy_cmp.perception:
-            behavior.wander(enemy)
-        else:
-            if move := self.follow(epos, player_pos):
-                event.Movement(enemy, x=move[0], y=move[1])
-
-    def _process(self):
-        # some of this probably want so live in behavior.py
-        stunned = set()
-
-        enemies = ecs.Query(cmp.Enemy)
-        for entity, _ in enemies:
-            if condition.has(entity, typ.Condition.Stun):
-                stunned.add(entity)
-
-        for entity in stunned:
-            name = event.Log.color_fmt(entity)
-            stunned_txt = display.colored_text("stunned", display.Color.CYAN)
-            event.Log.append(f"{name} is {stunned_txt}")
-
-        for entity, _ in enemies.filter(cmp.Wander).remove(stunned):
-            behavior.wander(entity)
-
-        melee_enemies = enemies.filter(cmp.Melee, cmp.Position).remove(stunned)
-        for entity, (_, epos) in melee_enemies:
-            enemy = esper.component_for_entity(entity, cmp.Enemy)
-            self.process_melee_enemy(entity, epos)
-            for _ in range(1, enemy.speed):
-                # phase.oneshot(Movement)
-                self.process_melee_enemy(entity, epos)
-
-        archers = enemies.filter(cmp.Ranged, cmp.Position).remove(stunned)
-        for entity, (_, epos) in archers:
-            self.process_ranged_enemy(entity, epos)
-
-        set_behavior = (cmp.Ranged, cmp.Melee, cmp.Wander)
-        enemies = ecs.Query(cmp.Enemy)
-        others = enemies.exclude(*set_behavior).remove(stunned)
-        for entity, (_) in others:
-            event.trigger_all_callbacks(entity, cmp.EnemyTrigger)
 
 
 @dataclass
@@ -937,7 +884,7 @@ class InventoryInputEvent(InputEvent):
             event.trigger_all_callbacks(selection, cmp.UseTrigger)
             esper.remove_component(selection, cmp.InInventory)
             event.Tick()
-            phase.change_to(phase.Ontology.level, NPCTurn)
+            phase.change_to(phase.Ontology.level, NPCEval)
         except typ.InvalidAction as e:
             esper.dispatch_event("flash")
             event.Log.append(str(e))

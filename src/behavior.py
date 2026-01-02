@@ -4,6 +4,7 @@ import random
 from functools import partial
 
 import esper
+import tcod
 
 import components as cmp
 import condition
@@ -42,13 +43,10 @@ def collect_all_affected_entities(source: int, target: int) -> list[int]:
 
 
 def lob_bomb(source: int):
+    # TODO: I could DRY this with spawn_bomb
     import create
 
     board = location.get_board()
-
-    player = ecs.Query(cmp.Player).first()
-    if not location.can_see(source, player):
-        return True
 
     player_pos = location.player_position()
     indices = location.get_neighbor_coords(*player_pos)
@@ -65,26 +63,6 @@ def lob_bomb(source: int):
         event.Animation(locs=trace, glyph=display.Glyph.BOMB, fg=display.Color.RED)
         apply_cooldown(source)
         return
-
-
-def spawn_bomb(source: typ.Entity):
-    import create
-
-    src_pos = esper.component_for_entity(source, cmp.Position)
-    player_pos = location.player_position()
-    if src_pos == player_pos:
-        die(source)
-        event.Spawn(func=partial(create.item.bomb, src_pos))
-
-
-def fire_at_player(source: typ.Entity):
-    player = ecs.Query(cmp.Player).first()
-    dest, trace = location.trace_ray(source, player)
-    glyph = display.Glyph.MAGIC_MISSILE
-    event.Animation(locs=trace, glyph=glyph, fg=display.Color.BLUE)
-    trg = cmp.Target(target=dest)
-    esper.add_component(source, trg)
-    apply_cooldown(source)
 
 
 def apply_cooldown(source: typ.Entity):
@@ -181,7 +159,7 @@ def _learn(spell: int):
     esper.add_component(spell, cmp.Attuned(min_slotnum))
 
 
-def apply_learn(source: int):
+def apply_learn(source: typ.Entity):
     if learnable := esper.try_component(source, cmp.Learnable):
         spell = learnable.spell
     else:
@@ -193,7 +171,7 @@ def apply_learn(source: int):
         condition.grant(spell, typ.Condition.Cooldown, cd_effect.turns)
 
 
-def apply_aegis(source: int):
+def apply_aegis(source: typ.Entity):
     if target_cmp := esper.try_component(source, cmp.Target):
         target = target_cmp.target
         if aegis_effect := esper.try_component(source, cmp.AegisEffect):
@@ -203,40 +181,177 @@ def apply_aegis(source: int):
                     condition.grant(ent, typ.Condition.Aegis, aegis_effect.value)
 
 
-def die(ent: int):
+def die(ent: typ.Entity):
     event.Death(ent)
 
 
-# This is perhaps the new template of "complex" enemies
-def cyclops_attack_pattern(source: int):
-    def draw_line(source):
-        ppos = location.player_position()
-        callback = partial(math_util.bresenham_ray, dest=ppos)
-        aura = cmp.Aura(callback=callback, color=display.Color.RED)
-        opos = esper.component_for_entity(source, cmp.Position)
-        esper.add_component(source, aura)
+def pathfind(start: cmp.Position, end: cmp.Position):
+    board = location.get_board()
+    cost = board.as_move_graph()
+    graph = tcod.path.SimpleGraph(cost=cost, cardinal=1, diagonal=0)
+    pf = tcod.path.Pathfinder(graph)
+    pf.add_root(start.as_tuple)
+    path: list = pf.path_to(end.as_tuple).tolist()
+    if len(path) < 2:
+        return None
+    return path[1]
 
-        coords = math_util.bresenham_ray(origin=opos, dest=ppos)
-        locus = cmp.Locus(coords=coords)
-        esper.add_component(source, locus)
 
-    def fire_laser(source):
-        src_frz = ecs.freeze_entity(source)
-        dmg_effect = esper.component_for_entity(source, cmp.DamageEffect)
-        locus = esper.component_for_entity(source, cmp.Locus)
-        board = location.get_board()
-        for x, y in locus.coords:
-            if cell := board.get_cell(x, y):
-                event.Damage(src_frz, cell, dmg_effect.amount)
-        esper.remove_component(source, cmp.Locus)
-        esper.remove_component(source, cmp.Aura)
+def follow(source: typ.Entity):
+    pos = esper.component_for_entity(source, cmp.Position)
+    player_pos = location.player_last_position()
 
+    if move := pathfind(pos, player_pos):
+        event.Movement(source, x=move[0], y=move[1])
+
+
+def draw_aoe_line(source: typ.Entity):
+    ppos = location.player_position()
+    callback = partial(math_util.bresenham_ray, dest=ppos)
+    aura = cmp.Aura(callback=callback, color=display.Color.RED)
+    opos = esper.component_for_entity(source, cmp.Position)
+    esper.add_component(source, aura)
+
+    coords = math_util.bresenham_ray(origin=opos, dest=ppos)
+    locus = cmp.Locus(coords=coords)
+    esper.add_component(source, locus)
+
+
+def apply_dmg_along_locus(source: typ.Entity):
+    src_frz = ecs.freeze_entity(source)
+    dmg_effect = esper.component_for_entity(source, cmp.DamageEffect)
+    locus = esper.component_for_entity(source, cmp.Locus)
+    board = location.get_board()
+    for x, y in locus.coords:
+        if cell := board.get_cell(x, y):
+            event.Damage(src_frz, cell, dmg_effect.amount)
+    esper.remove_component(source, cmp.Locus)
+    esper.remove_component(source, cmp.Aura)
+
+
+def fire_at_player(source: typ.Entity):
+    # TODO: this is warlock specific, and it might not have to be
+    player = ecs.Query(cmp.Player).first()
+    dest, trace = location.trace_ray(source, player)
+    glyph = display.Glyph.MAGIC_MISSILE
+    event.Animation(locs=trace, glyph=glyph, fg=display.Color.BLUE)
+    trg = cmp.Target(target=dest)
+    # not using attack_player, bc this is a missle, can hit obstacles
+    esper.add_component(source, trg)
+    apply_damage(source)
+    apply_cooldown(source)
+    esper.remove_component(source, cmp.Target)
+
+
+def attack_player(source: typ.Entity):
+    player = ecs.Query(cmp.Player).first()
+    esper.add_component(source, cmp.Target(target=player))
+    apply_damage(source)
+    esper.remove_component(source, cmp.Target)
+
+
+def aura_tick(entity: typ.Entity):
+    """advance the bomb aura"""
+    aura = esper.component_for_entity(entity, cmp.Aura)
+    if aura.color == display.Color.LIGHT_RED:
+        aura.color = display.Color.BLOOD_RED
+
+
+def spawn_bomb(source: typ.Entity):
+    import create
+
+    src_pos = esper.component_for_entity(source, cmp.Position)
+    die(source)
+    event.Spawn(func=partial(create.item.bomb, src_pos))
+
+
+"""
+'decide' func
+    holds the "business logic" of the enemy
+the return value is some function ref that gets called
+
+systematically:
+    we call an NPC decision proc, which populates a cmp.Intent with a func
+    then we go through all the enemies and execute the cmp.Intent
+    then we remove the Intent
+"""
+
+
+def goblin(source: typ.Entity):
+    """lob bomb if we can, otherwise wander"""
+
+    player = ecs.Query(cmp.Player).first()
+    if not location.can_see(source, player):
+        return None
+
+    if condition.has(source, typ.Condition.Cooldown):
+        return wander
+
+    return lob_bomb
+
+
+def cyclops(source: typ.Entity):
+    """if aiming fire. Otherwise, wander until you see player, then aim"""
     player = ecs.Query(cmp.Player).first()
     enemy_cmp = esper.component_for_entity(source, cmp.Enemy)
     if not esper.has_component(source, cmp.Aura):
         if not location.can_see(source, player, enemy_cmp.perception):
-            wander(source)
-            return
-        draw_line(source)
+            return wander
+        return draw_aoe_line
     else:
-        fire_laser(source)
+        return apply_dmg_along_locus
+
+
+def bat(_: typ.Entity):
+    return wander
+
+
+def skeleton(source: typ.Entity):
+    """chase player, attack if in melee"""
+    pos = esper.component_for_entity(source, cmp.Position)
+    player_pos = location.player_position()
+    enemy_cmp = esper.component_for_entity(source, cmp.Enemy)
+
+    dist_to_player = location.euclidean_distance(pos, player_pos)
+
+    if dist_to_player > enemy_cmp.perception:
+        return wander
+    if dist_to_player <= 1:
+        return attack_player
+
+    return follow
+
+
+def warlock(source: typ.Entity):
+    enemy_cmp = esper.component_for_entity(source, cmp.Enemy)
+    player = ecs.Query(cmp.Player).first()
+
+    if location.can_see(source, player, enemy_cmp.perception):
+        if condition.has(source, typ.Condition.Cooldown):
+            return wander
+        else:
+            return fire_at_player
+    return wander
+
+
+def living_flame(source: typ.Entity):
+    # TODO: for now, this is basically just skeleton. will add speed2 later
+    pos = esper.component_for_entity(source, cmp.Position)
+    player_pos = location.player_position()
+    enemy_cmp = esper.component_for_entity(source, cmp.Enemy)
+
+    dist_to_player = location.euclidean_distance(pos, player_pos)
+
+    if dist_to_player > enemy_cmp.perception:
+        return wander
+    if dist_to_player <= 1:
+        return attack_player
+
+    return follow
+
+
+def bomb_trap(source: typ.Entity):
+    src_pos = esper.component_for_entity(source, cmp.Position)
+    player_pos = location.player_position()
+    if src_pos == player_pos:
+        return spawn_bomb

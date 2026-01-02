@@ -12,10 +12,9 @@ def bat(pos: cmp.Position) -> int:
     cmps.append(cmp.Health(max=10))
     cmps.append(cmp.KnownAs(name="bat"))
     cmps.append(cmp.Flying())
-    cmps.append(cmp.EnemyTrigger(callbacks=[behavior.apply_damage]))
-    cmps.append(cmp.Enemy())
+    cmps.append(cmp.Enemy(evaluate=behavior.bat))
     cmps.append(cmp.Blocking())
-    cmps.append(cmp.Wander())
+    cmps.append(cmp.Melee())
     bat = esper.create_entity(*cmps)
 
     dmg_effect = cmp.DamageEffect(amount=5, source=bat)
@@ -30,8 +29,7 @@ def skeleton(pos: cmp.Position) -> int:
     cmps.append(cmp.Health(max=25))
     cmps.append(cmp.KnownAs(name="skeleton"))
     cmps.append(cmp.Melee())
-    cmps.append(cmp.EnemyTrigger(callbacks=[behavior.apply_damage]))
-    cmps.append(cmp.Enemy(perception=10))
+    cmps.append(cmp.Enemy(perception=10, evaluate=behavior.skeleton))
     cmps.append(cmp.Blocking())
     skeleton = esper.create_entity(*cmps)
 
@@ -48,10 +46,8 @@ def warlock(pos: cmp.Position) -> int:
     cmps.append(cmp.Health(max=15))
     cmps.append(cmp.KnownAs(name="warlock"))
     cmps.append(cmp.Ranged())
-    callbacks = [behavior.fire_at_player, behavior.apply_damage]
-    cmps.append(cmp.EnemyTrigger(callbacks=callbacks))
     cmps.append(cmp.Cooldown(turns=1))
-    cmps.append(cmp.Enemy(perception=3))
+    cmps.append(cmp.Enemy(perception=3, evaluate=behavior.warlock))
     cmps.append(cmp.Blocking())
     warlock = esper.create_entity(*cmps)
 
@@ -69,8 +65,7 @@ def living_flame(pos: cmp.Position) -> int:
     cmps.append(cmp.Health(max=20))
     cmps.append(cmp.KnownAs(name="living flame"))
     cmps.append(cmp.Melee())
-    cmps.append(cmp.EnemyTrigger(callbacks=[behavior.apply_damage]))
-    cmps.append(cmp.Enemy(speed=2, perception=5))
+    cmps.append(cmp.Enemy(speed=2, perception=5, evaluate=behavior.living_flame))
     cmps.append(cmp.Blocking())
     flame = esper.create_entity(*cmps)
 
@@ -87,10 +82,8 @@ def goblin(pos: cmp.Position) -> int:
     cmps.append(cmp.Health(max=20))
     cmps.append(cmp.KnownAs(name="goblin"))
     cmps.append(cmp.Ranged())
-
-    cmps.append(cmp.EnemyTrigger(callbacks=[behavior.lob_bomb]))
     cmps.append(cmp.Cooldown(turns=2))
-    cmps.append(cmp.Enemy(perception=5))
+    cmps.append(cmp.Enemy(perception=5, evaluate=behavior.goblin))
     cmps.append(cmp.Blocking())
     goblin = esper.create_entity(*cmps)
 
@@ -106,9 +99,7 @@ def cyclops(pos: cmp.Position) -> int:
     cmps.append(cmp.Health(max=20))
     cmps.append(cmp.KnownAs(name="cyclops"))
 
-    callbacks = [behavior.cyclops_attack_pattern]
-    cmps.append(cmp.EnemyTrigger(callbacks=callbacks))
-    cmps.append(cmp.Enemy(perception=4))
+    cmps.append(cmp.Enemy(perception=4, evaluate=behavior.cyclops))
     cmps.append(cmp.Blocking())
     cyclops = esper.create_entity(*cmps)
 

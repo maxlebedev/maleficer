@@ -38,7 +38,8 @@ def level_phase(context, console):
 
     render = processors.BoardRender(context, console)
     input = processors.GameInputEvent()
-    npc = processors.NPCTurn()
+    eval = processors.NPCEval()
+    act = processors.NPCAct()
 
     # TODO: is it safe to remove this dmg here?
     dmg = processors.Damage()
@@ -50,7 +51,8 @@ def level_phase(context, console):
         render,
         input,
         dmg,
-        npc,
+        eval,
+        act,
         death,
         enqueue,
     ]

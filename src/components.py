@@ -93,6 +93,8 @@ class Door(Cell):
 
 @component
 class Enemy:
+    evaluate: Callable | None = None
+    action: Callable | None = None
     speed: int = 1
     perception: int = 4
 
@@ -104,7 +106,7 @@ class Wander:
 
 @component
 class Melee:
-    """Walks towards player"""
+    """damages on bump"""
 
 
 @component
@@ -133,6 +135,7 @@ class Crosshair:
     """used for target selection"""
 
 
+# The difference between EffectArea and Locus is that EA is dynamic
 @component
 class EffectArea:
     callback: Callable  # takes pos, return list[x,y]

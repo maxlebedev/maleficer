@@ -112,13 +112,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * Do we modify the query func to work on superclasses? can we?
         * At minimum, get Condition our of typ
     - Targeting. Decouple it from spellcasting
-    - NPC (State Machine)
-        * Canned functions (or systems) for Wander, Chase, etc
-            + Built quite general
-        * NPCs have bespoke "planning" funcs that set a state
-            + output is a member of State Enum
-        * NPC action Processor. Takes state and calls the appropriate function
-
 
 ## Core
     - Save/Load
@@ -131,7 +124,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
             + these having to coexist with current buttons might be too complex?
             + the char select buttons are both
         + there's probably a way to make the menu button handler via small_proc
-    - lots of DRY in the NPC proc
     - bresenham_ray should *really* be under test
     - 2x2 enemies
         * game currently assumes positions are one cell, pieces have one pos
