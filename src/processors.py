@@ -71,12 +71,6 @@ class Enqueue(Processor):
 class Movement(Processor):
     def bump(self, source, target):
         """one entity bumps into another"""
-        src_is_enemy = esper.has_components(source, cmp.Enemy, cmp.Melee)
-        target_is_harmable = esper.has_component(target, cmp.Health)
-        target_is_enemy = esper.has_component(target, cmp.Enemy)
-        if src_is_enemy and target_is_harmable and not target_is_enemy:
-            esper.add_component(source, cmp.Target(target=target))
-            event.trigger_all_callbacks(source, cmp.EnemyTrigger)
 
         if esper.has_component(source, cmp.Player):
             # Note: walking into a wall consumes a turn

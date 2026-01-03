@@ -281,8 +281,10 @@ def goblin(source: typ.Entity):
     """lob bomb if we can, otherwise wander"""
 
     player = ecs.Query(cmp.Player).first()
-    if not location.can_see(source, player):
-        return None
+    enemy_cmp = esper.component_for_entity(source, cmp.Enemy)
+
+    if not location.can_see(source, player, enemy_cmp.perception):
+        return wander
 
     if condition.has(source, typ.Condition.Cooldown):
         return wander
