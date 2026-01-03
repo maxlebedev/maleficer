@@ -305,7 +305,14 @@ def cyclops(source: typ.Entity):
         return apply_dmg_along_locus
 
 
-def bat(_: typ.Entity):
+def bat(source: typ.Entity):
+    pos = esper.component_for_entity(source, cmp.Position)
+    player_pos = location.player_position()
+    dist_to_player = location.euclidean_distance(pos, player_pos)
+
+    if dist_to_player <= 1:
+        return attack_player
+
     return wander
 
 
