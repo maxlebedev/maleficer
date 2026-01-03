@@ -64,7 +64,7 @@ def bomb(pos: cmp.Position) -> int:
     cmps.append(cmp.Health(max=1))
     cmps.append(cmp.KnownAs(name="bomb"))
     cmps.append(cmp.OnDeath())
-    cmps.append(cmp.Enemy(evaluate=behavior.aura_tick))
+    cmps.append(cmp.Enemy(evaluate=behavior.bomb))
     callback = partial(location.coords_within_radius, radius=1)
     cmps.append(cmp.EffectArea(callback))
 

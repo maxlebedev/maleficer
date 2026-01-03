@@ -16,7 +16,7 @@ import math_util
 import typ
 
 
-def wander(entity: int):
+def wander(entity: typ.Entity):
     """Take a step in a cardinal direction"""
 
     dir = random.choice([(0, 1), (0, -1), (1, 0), (-1, 0), (0, 0)])
@@ -42,8 +42,9 @@ def collect_all_affected_entities(source: int, target: int) -> list[int]:
     return entities
 
 
-def lob_bomb(source: int):
+def lob_bomb(source: typ.Entity):
     # TODO: I could DRY this with spawn_bomb
+    # TODO: we could also borrow "fire_at_player" for pathfinding
     import create
 
     board = location.get_board()
@@ -357,3 +358,7 @@ def bomb_trap(source: typ.Entity):
     player_pos = location.player_position()
     if src_pos == player_pos:
         return spawn_bomb
+
+
+def bomb(_: typ.Entity):
+    return aura_tick

@@ -152,17 +152,17 @@ class NPCEval(Processor):
                 continue
 
             if en_cmp.evaluate:
-                en_cmp.action = en_cmp.evaluate(entity)
+                if action := en_cmp.evaluate(entity):
+                    esper.add_component(entity, cmp.Intent(action=action))
 
 
 @dataclass
 class NPCAct(Processor):
     def _process(self):
-        enemies = ecs.Query(cmp.Enemy)
-        for entity, (en_cmp,) in enemies:
-            if en_cmp.action:
-                en_cmp.action(entity)
-                en_cmp.action = None
+        enemies = ecs.Query(cmp.Enemy, cmp.Intent)
+        for entity, (_, intent) in enemies:
+            intent.action(entity)
+            esper.remove_component(entity, cmp.Intent)
 
 
 @dataclass

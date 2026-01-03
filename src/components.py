@@ -93,10 +93,13 @@ class Door(Cell):
 
 @component
 class Enemy:
-    evaluate: Callable | None = None
-    action: Callable | None = None
+    evaluate: Callable
     speed: int = 1
     perception: int = 4
+
+@component
+class Intent:
+    action: Callable
 
 
 @component

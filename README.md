@@ -142,6 +142,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - an effect:color mapping? "stun": Cyan, "force_move": Orange
     - Do I want to split the "level phsae" into 3 parts?
         * up to player turn, npc, aftermath
+    - behavior.py can be divided into eval funcs, apply, and action
 ## Game Mechanics/Balance
     - spell mods (+1 range, +1 dmg pickups)
     - cooldown alternatives like damage taken, steps walked (lotta tracking)
@@ -156,7 +157,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
             + and that takes B * CD to clear
     - Some sort of Storm/Combo mechanic would be really cool
     - Check for more places that benefit from ecs.Query.where
-    - Doors via conditional blocking
     - mageblight: a curse that harms player when they don't progress the game
         * probably when they spend N turns without killing an enemy
         * escalates in damage
@@ -165,6 +165,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * This gives us a good reason to decouple target from spell
         * Are we fine printing only one desc if the spell's aoe covers more?
     - damage types. Not sure if elemental or what, but weaknesses, resistances
+        * color code these things, so spells aren't just white on log
     - it would be cool to use scrolls as materials for something
         * if you roll a bad spell, it shouldn't just be trash
     - A map type that is actually the inside of a creature
