@@ -97,24 +97,10 @@ class Enemy:
     speed: int = 1
     perception: int = 4
 
+
 @component
 class Intent:
     action: Callable
-
-
-@component
-class Wander:
-    """Walks around randomly"""
-
-
-@component
-class Melee:
-    """damages on bump"""
-
-
-@component
-class Ranged:
-    """Damages player if in LOS"""
 
 
 @component
