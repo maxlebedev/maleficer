@@ -13,7 +13,8 @@ I also take inspiration from modern TTRPGs like Trespassor, especially in terms 
     - Modern TTRPGs like Trespassor
     - Rift Wizard
     - Tactics games, Survivorslikes
-<img width="1925" height="1071" alt="image" src="https://github.com/user-attachments/assets/e7b5cac2-d8bd-4b07-87f1-8c9fc95e3ee7" />
+<img width="1929" height="1077" alt="image" src="https://github.com/user-attachments/assets/600d9e1a-16bd-4bb7-8659-2bcac32a772d" />
+<img width="1929" height="1077" alt="Screenshot 2026-01-12 144041" src="https://github.com/user-attachments/assets/1c748f02-34a7-4adc-b3a0-e573454a2c95" />
 
 # Dependancies
     - libsdl2-dev
