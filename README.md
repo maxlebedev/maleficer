@@ -7,10 +7,10 @@ I also take inspiration from modern TTRPGs like Trespassor, especially in terms 
 
 # Inspiration
     - classic roguelikes
-        * Pixel Dungeon
-        * Shattered Pixed Dungeon
+        * (Shattered) Pixel Dungeon
         * Dungeons of Dredmor
-    - Modern TTPGS like Trespassor
+        * Cogmind
+    - Modern TTRPGs like Trespassor
     - Rift Wizard
     - Tactics games, Survivorslikes
 <img width="1925" height="1071" alt="image" src="https://github.com/user-attachments/assets/e7b5cac2-d8bd-4b07-87f1-8c9fc95e3ee7" />
@@ -73,7 +73,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Right now levels are limited to the board size. We could decouple those and have the board "scroll"
     - should we always place the stairs as far back as we can?
     - wet status from water tiles? are we that sort of game?
-    - We have two damage process steps, one for player damage, and one for everything else. This means enemies the player would kill don't attack back
     - Bleed damage feels like it takes an extra turn. this is intentional. it only takes effect on the start of the turn after it is applied
     - StepTrigger callbacks get their targets from the movement proc, in the OnStep case
     - Because we allow already dead entities to resolve their queued damage, enemies get one final retaliation
@@ -81,17 +80,10 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - DeathTriggers with dmg need to have oneshot(Dmg) called after
     - Warlock missles don't hit potions because they are not Blocking
     - TargetInputEvent returns control to the player's Damage phase. otherwise enemies get a turn before player damage resolves
-    - instead of a melee decision tree, we do melee damage via bump func. 
-        * this is undesirable
-    - Small Procs
-        * A proposed refactor where we have much more procs, many with guards
-        * each npc type, gets its own for example
-        * this would hopefully replace Phases and callbacks
     - The color scheme is.. color balanced for backing candle light
         - at least for NPCs
     - Conditions live in a State cmp, in a single dict
-        * we could have them all be children of a StatusEffect parent class 
-        * and a bunch of separate cmps
+        * we could have them be separate cmps, children of some StatusEffect class
 
 # TODO
 
@@ -101,8 +93,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * OnDeath/DeathTrigger OnStep/StepTriger redundancy.
             + The 'On's could be more ECS-compliant
             + Potentially unscheduled procs
-    - Bump is complex enough for its own system
-        * not sure how it interacts with movement sys tho
     - Spell resolution should def be its own (unscheduled) Proc
     - Menu System. menuselection, vs how inventory does it
     - I want to reimpl all of the status stuff as their own Components
