@@ -41,6 +41,7 @@ def main_menu_opts():
         raise SystemExit()
 
     _make_menuitem(cmp.MainMenu, exit, "Quit", 3)
+    esper.create_entity(cmp.MainMenu(), cmp.MenuSelection())
 
 
 def discipline_opts():
@@ -69,3 +70,5 @@ def discipline_opts():
 
     for i, (func, desc) in enumerate(opts):
         _make_menuitem(cmp.StartMenu, func, desc, i)
+
+    esper.create_entity(cmp.StartMenu(), cmp.MenuSelection())

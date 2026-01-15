@@ -28,7 +28,7 @@ def get_selected_menuitem():
     """assumes inventory has at least one item"""
     # TODO: move the code somewhere
     inv_map = create.player.inventory_map()
-    menu_selection = ecs.Query(cmp.MenuSelection).val
+    menu_selection = ecs.Query(cmp.MenuSelection, cmp.InventoryMenu).cmp(0)
     menu_selection.item = math_util.clamp(menu_selection.item, len(inv_map) - 1)
 
     selection = inv_map[menu_selection.item][1].pop()
@@ -313,8 +313,6 @@ class GameInputEvent(InputEvent):
         except KeyError:
             raise typ.InvalidAction
 
-        menu_selection = ecs.Query(cmp.MenuSelection).val
-        menu_selection.item = 0
         phase.change_to(phase.Ontology.inventory)
 
     def skip(self):
@@ -464,7 +462,7 @@ class BoardRender(Render):
 
     def _left_panel(self, panel_params):
         self.console.draw_frame(x=0, **panel_params)
-        hp = ecs.Query(cmp.Player, cmp.Health).cmp(cmp.Health)
+        hp = ecs.Query(cmp.Player, cmp.Health).cmp(1)
         self.render_bar(1, 1, hp.current, hp.max, display.PANEL_IWIDTH)
 
         panel_contents = []
@@ -614,7 +612,7 @@ class MenuRender(Render):
 
         self.center_print(x, y, self.title)
 
-        menu_selection = ecs.Query(cmp.MenuSelection).val
+        menu_selection = ecs.Query(cmp.MenuSelection, self.menu_cmp).cmp(0)
 
         menu_elements = ecs.Query(cmp.MenuItem, self.menu_cmp, cmp.KnownAs)
         sorted_menu = sorted(menu_elements, key=lambda x: x[1][0].order)
@@ -643,13 +641,13 @@ class MenuInputEvent(InputEvent):
             phase.change_to(self.menu_cmp.prev)
 
     def select(self):
-        menu_selection = ecs.Query(cmp.MenuSelection).val
+        menu_selection = ecs.Query(cmp.MenuSelection, self.menu_cmp).cmp(0)
         for entity, (mi, _) in ecs.Query(cmp.MenuItem, self.menu_cmp):
             if mi.order == menu_selection.item:
                 event.trigger_all_callbacks(entity, cmp.UseTrigger)
 
     def move_selection(self, diff: int):
-        menu_selection = ecs.Query(cmp.MenuSelection).val
+        menu_selection = ecs.Query(cmp.MenuSelection, self.menu_cmp).cmp(0)
         menu_selection.item += diff
 
         tot_items = len([_ for _ in ecs.Query(cmp.MenuItem, self.menu_cmp)]) - 1
@@ -682,7 +680,7 @@ class TargetInputEvent(InputEvent):
         pos = ecs.cmps[crosshair][cmp.Position]
 
         # TODO: maybe break out range to its own cmp and check for it here
-        spell_cmp = ecs.Query(cmp.Spell, cmp.Targeting).cmp(cmp.Spell)
+        spell_cmp = ecs.Query(cmp.Spell, cmp.Targeting).cmp(0)
 
         player_pos = location.player_position()
         new_pos = cmp.Position(pos.x + x, pos.y + y)
@@ -704,13 +702,13 @@ class TargetInputEvent(InputEvent):
                     self.piece_coords.append((x, y))
 
         target = self.piece_coords.pop(0)
-        xhair_pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(cmp.Position)
+        xhair_pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(1)
         xhair_pos.x, xhair_pos.y = target
         self.piece_coords.append(target)
 
     def select(self):
         self.piece_coords = []
-        xhair_pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(cmp.Position)
+        xhair_pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(1)
         targeting_entity = ecs.Query(cmp.Targeting).first()
         board = location.get_board()
 
@@ -812,7 +810,7 @@ class InventoryRender(BoardRender):
     console: tcod.console.Console
 
     def display_inventory(self):
-        menu_selection = ecs.Query(cmp.MenuSelection).val
+        menu_selection = ecs.Query(cmp.MenuSelection, cmp.InventoryMenu).cmp(0)
 
         inv_map = create.player.inventory_map()
         for i, (name, entities) in enumerate(inv_map):
@@ -845,7 +843,7 @@ class InventoryInputEvent(InputEvent):
         }
 
     def move_selection(self, diff: int):
-        menu_selection = ecs.Query(cmp.MenuSelection).val
+        menu_selection = ecs.Query(cmp.MenuSelection, cmp.InventoryMenu).cmp(0)
         inventory_size = len(create.player.inventory_map()) - 1
         menu_selection.item += diff
         menu_selection.item = math_util.clamp(menu_selection.item, inventory_size)

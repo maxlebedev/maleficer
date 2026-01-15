@@ -58,6 +58,8 @@ class Query:
 
     def cmp(self, cmp):
         """Get a given component of the (only) entity in the queryset"""
+        if isinstance(cmp, int):
+            cmp = self.include[cmp]
         if not self.entities or len(self.entities) != 1:
             raise KeyError
         for entity in self.entities:

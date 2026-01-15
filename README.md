@@ -13,8 +13,8 @@ I also take inspiration from modern TTRPGs like Trespassor, especially in terms 
     - Modern TTRPGs like Trespassor
     - Rift Wizard
     - Tactics games, Survivorslikes
-<img width="1929" height="1077" alt="image" src="https://github.com/user-attachments/assets/600d9e1a-16bd-4bb7-8659-2bcac32a772d" />
-<img width="1929" height="1077" alt="Screenshot 2026-01-12 144041" src="https://github.com/user-attachments/assets/1c748f02-34a7-4adc-b3a0-e573454a2c95" />
+<img width="1929" height="1077" alt="gameplay_screenshot" src="https://github.com/user-attachments/assets/600d9e1a-16bd-4bb7-8659-2bcac32a772d" />
+<img width="1929" height="1077" alt="closeup" src="https://github.com/user-attachments/assets/1c748f02-34a7-4adc-b3a0-e573454a2c95" />
 
 # Dependancies
     - libsdl2-dev
@@ -40,7 +40,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Multiple mana bars
         * Each accumulates and gets spent in a slightly different way
 
-# Design Questions
+# Game Design Questions
     - Why explore the level, (vs doing down asap)
         * Better Spell scrolls
     - What is the progression system?
@@ -85,6 +85,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         - at least for NPCs
     - Conditions live in a State cmp, in a single dict
         * we could have them be separate cmps, children of some StatusEffect class
+    - We may want MenuSelection, or the Menu cmp to hold a list of its MenuItems
 
 # TODO
 

@@ -183,6 +183,11 @@ class MainMenu:
 
 
 @component
+class InventoryMenu:
+    pass
+
+
+@component
 class StartMenu:
     """Indicates an element of the start menu"""
 
