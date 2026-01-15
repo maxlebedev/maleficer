@@ -17,7 +17,6 @@ class Player:
 @component
 class GameMeta:
     board: object  # location.Board
-    menu_selection: int = 0
     process: None = None
 
 

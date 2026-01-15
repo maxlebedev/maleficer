@@ -70,7 +70,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Crosshair is a big exception to how movement works. might be worth its own function
     - When I take a step, ranged enemies shoot me before step completes. feels correct for melee but unintuitive for range.
     - MenuItem is used for actual menus, but not for inventory (not 1:1 with entities)
-        * MenuSelection, however, IS reused to inventory
+        * Inevntiry does get a MenuSelection, however
     - Right now levels are limited to the board size. We could decouple those and have the board "scroll"
     - should we always place the stairs as far back as we can?
     - wet status from water tiles? are we that sort of game?
@@ -96,7 +96,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
             + The 'On's could be more ECS-compliant
             + Potentially unscheduled procs
     - Spell resolution should def be its own (unscheduled) Proc
-    - Menu System. menuselection, vs how inventory does it
     - I want to reimpl all of the status stuff as their own Components
         * They would be children of the Status cmp
         * and ecs.has would check for it
@@ -196,11 +195,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Push 1 is an easy effect to miss, as the enemies move right back
         * Maybe all Push 1 comes with Stun 1
 # BUGS
-    - Found a wall I was able to walk through in the old caves.
-        * Sometimes enemies turn into walls when they die
-        * those walls can be walked through
-        * I think this is bc enemies spawn *in* the wall with same pos
-    - Actual menuselection is on cmp.MenuSelection. not the GameMeta
     - Living flame needs a rework. doesn't acutally move twice
         * We probably block this on NPC rework
     - push_coords has no bounds checking.
