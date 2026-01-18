@@ -736,8 +736,8 @@ class TargetRender(BoardRender):
     def piece_to_description(self, piece):
         desc = []
         name = "???"
-        if name_cmp := esper.try_component(piece, cmp.KnownAs):
-            name = name_cmp.name
+        if esper.try_component(piece, cmp.KnownAs):
+            name = event.Log.color_fmt(piece)
         desc.append(f"Name: {name}")
         if health_cmp := esper.try_component(piece, cmp.Health):
             desc.append(f"HP: {health_cmp.current}")
@@ -757,9 +757,13 @@ class TargetRender(BoardRender):
         pieces = board.pieces_at(*xhair_pos)
 
         panel_contents = []
+
+        player = ecs.Query(cmp.Player).first()
+        player_cmp = ecs.Query(cmp.Player).val
         for piece in pieces:
-            panel_contents = self.piece_to_description(piece)
-            panel_contents.append(None)
+            if location.can_see(player, piece, player_cmp.sight_radius):
+                panel_contents = self.piece_to_description(piece)
+                panel_contents.append(None)
 
         x = display.R_PANEL_START
         for y_idx, content in enumerate(panel_contents, start=1):
