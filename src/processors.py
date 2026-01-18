@@ -173,7 +173,7 @@ class Damage(Processor):
             src_color = damage.source[cmp.Visible].color
             source_name = display.colored_text(source_name, src_color)
         target_name = event.Log.color_fmt(damage.target)
-        target_name = f"{target_name}#{damage.target}"
+        # target_name = f"{target_name}#{damage.target}"
 
         if damage.amount >= 0:
             amount = display.colored_text(damage.amount, display.Color.RED)
@@ -247,7 +247,8 @@ class Death(Processor):
                 event.trigger_all_callbacks(killable, cmp.DeathTrigger)
             if location.player_hears(pos):
                 name = event.Log.color_fmt(killable)
-                message = f"{name}#{killable} is no more"
+                # message = f"{name}#{killable} is no more"
+                message = f"{name} is no more"
                 event.Log.append(message)
             if esper.has_component(killable, cmp.Cell):
                 floor = create.tile.floor(pos.x, pos.y)
@@ -735,7 +736,7 @@ class TargetRender(BoardRender):
     def piece_to_description(self, piece):
         desc = []
         name = "???"
-        if name_cmp := esper.component_for_entity(piece, cmp.KnownAs):
+        if name_cmp := esper.try_component(piece, cmp.KnownAs):
             name = name_cmp.name
         desc.append(f"Name: {name}")
         if health_cmp := esper.try_component(piece, cmp.Health):
