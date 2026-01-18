@@ -761,8 +761,7 @@ class TargetRender(BoardRender):
         if aoe := esper.try_component(spell, cmp.EffectArea):
             coords = aoe.callback(xhair_pos)
 
-        pieces = [board.pieces_at(x, y) for x,y in coords]
-
+        pieces = [p for x, y in coords for p in board.pieces_at(x, y)]
 
         panel_contents = []
 
