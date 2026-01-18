@@ -754,7 +754,15 @@ class TargetRender(BoardRender):
 
         xhair_pos = ecs.Query(cmp.Crosshair).cmp(cmp.Position)
         board = location.get_board()
-        pieces = board.pieces_at(*xhair_pos)
+
+        coords = [xhair_pos.as_list]
+
+        spell = ecs.Query(cmp.Targeting).first()
+        if aoe := esper.try_component(spell, cmp.EffectArea):
+            coords = aoe.callback(xhair_pos)
+
+        pieces = [board.pieces_at(x, y) for x,y in coords]
+
 
         panel_contents = []
 
@@ -762,7 +770,7 @@ class TargetRender(BoardRender):
         player_cmp = ecs.Query(cmp.Player).val
         for piece in pieces:
             if location.can_see(player, piece, player_cmp.sight_radius):
-                panel_contents = self.piece_to_description(piece)
+                panel_contents += self.piece_to_description(piece)
                 panel_contents.append(None)
 
         x = display.R_PANEL_START
