@@ -101,3 +101,17 @@ def cyclops(pos: cmp.Position) -> int:
     dmg_effect = cmp.DamageEffect(amount=10, source=cyclops)
     esper.add_component(cyclops, dmg_effect)
     return cyclops
+
+def spider(pos: cmp.Position) -> int:
+    cmps = []
+    cmps.append(pos)
+    cmps.append(cmp.Visible(glyph=dis.Glyph.SPIDER, color=dis.Color.YELLOW))
+    cmps.append(cmp.Health(max=25))
+    cmps.append(cmp.KnownAs(name="spider"))
+    cmps.append(cmp.Enemy(perception=10, evaluate=behavior.living_flame))
+    cmps.append(cmp.Blocking())
+    spider = esper.create_entity(*cmps)
+
+    dmg_effect = cmp.DamageEffect(amount=10, source=spider)
+    esper.add_component(spider, dmg_effect)
+    return spider

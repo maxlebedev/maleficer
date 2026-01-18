@@ -202,3 +202,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - cursor mvmt has no bounds checking
     - Push + dmg spells apply their push before dmg, causing the dmg to miss
         * Ideally, we would collect targets before applying any effects
+    - Pressing space post-teleport doesn't skip turn
+        * Drinking potion doesn't take a turn?
+        * I suspect this is.. last-pos doesn't get updated post teleport

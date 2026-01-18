@@ -294,6 +294,10 @@ def intersects(board: Board, src: RectangularRoom, target: RectangularRoom) -> b
 def euclidean_distance(start: cmp.Position, end: cmp.Position):
     return math.dist(start.as_tuple, end.as_tuple)
 
+def manhattan_distance(start: cmp.Position, end: cmp.Position):
+    p1 = start.as_tuple
+    p2 = end.as_tuple
+    return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
 
 def get_closest_pair(first: Iterable, second: Iterable) -> tuple:
     # TODO: very DRY with closest_position

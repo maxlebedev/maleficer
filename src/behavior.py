@@ -187,6 +187,7 @@ def die(ent: typ.Entity):
 
 
 def pathfind(start: cmp.Position, end: cmp.Position):
+    """path[0] is start, we omit it"""
     board = location.get_board()
     cost = board.as_move_graph()
     graph = tcod.path.SimpleGraph(cost=cost, cardinal=1, diagonal=0)
@@ -195,15 +196,16 @@ def pathfind(start: cmp.Position, end: cmp.Position):
     path: list = pf.path_to(end.as_tuple).tolist()
     if len(path) < 2:
         return None
-    return path[1]
+    return path[1:]
 
 
-def follow(source: typ.Entity):
+def follow(source: typ.Entity, steps=1):
     pos = esper.component_for_entity(source, cmp.Position)
     player_pos = location.player_last_position()
 
-    if move := pathfind(pos, player_pos):
-        event.Movement(source, x=move[0], y=move[1])
+    if path := pathfind(pos, player_pos):
+        for i in range(min(steps, len(path))):
+            event.Movement(source, x=path[i][0], y=path[i][1])
 
 
 def draw_aoe_line(source: typ.Entity):
@@ -308,9 +310,9 @@ def cyclops(source: typ.Entity):
 def bat(source: typ.Entity):
     pos = esper.component_for_entity(source, cmp.Position)
     player_pos = location.player_position()
-    dist_to_player = location.euclidean_distance(pos, player_pos)
+    dist_to_player = location.manhattan_distance(pos, player_pos)
 
-    if dist_to_player <= 1:
+    if dist_to_player == 1:
         return attack_player
 
     return wander
@@ -322,11 +324,11 @@ def skeleton(source: typ.Entity):
     player_pos = location.player_position()
     enemy_cmp = esper.component_for_entity(source, cmp.Enemy)
 
-    dist_to_player = location.euclidean_distance(pos, player_pos)
+    dist_to_player = location.manhattan_distance(pos, player_pos)
 
     if dist_to_player > enemy_cmp.perception:
         return wander
-    if dist_to_player <= 1:
+    if dist_to_player == 1:
         return attack_player
 
     return follow
@@ -343,6 +345,12 @@ def warlock(source: typ.Entity):
             return fire_at_player
     return wander
 
+def action_sequence(*args):
+    """take mulitple actions"""
+    def _seq(source: typ.Entity):
+        for call in args:
+            call(source)
+    return _seq
 
 def living_flame(source: typ.Entity):
     # TODO: for now, this is basically just skeleton. will add speed2 later
@@ -350,14 +358,16 @@ def living_flame(source: typ.Entity):
     player_pos = location.player_position()
     enemy_cmp = esper.component_for_entity(source, cmp.Enemy)
 
-    dist_to_player = location.euclidean_distance(pos, player_pos)
+    dist_to_player = location.manhattan_distance(pos, player_pos)
 
     if dist_to_player > enemy_cmp.perception:
         return wander
-    if dist_to_player <= 1:
+    if dist_to_player == 2:
+        return action_sequence(follow, attack_player)
+    if dist_to_player == 1:
         return attack_player
 
-    return follow
+    return partial(follow, steps=2)
 
 
 def bomb_trap(source: typ.Entity):
