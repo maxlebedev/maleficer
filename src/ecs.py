@@ -61,7 +61,7 @@ class Query:
         if isinstance(cmp, int):
             cmp = self.include[cmp]
         if not self.entities or len(self.entities) != 1:
-            raise KeyError
+            raise KeyError("More then one entity found. Ambiguous")
         for entity in self.entities:
             return cmps[entity][cmp]
         raise KeyError

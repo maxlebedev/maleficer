@@ -14,10 +14,31 @@ def start_game():
     order0 = lambda x: x.order == 0
     all_main_menu_opts = ecs.Query(cmp.MainMenu, cmp.MenuItem)
     first_main_menu_opt = all_main_menu_opts.where(cmp.MenuItem, order0).first()
+
+    # esper.remove_component(first_main_menu_opt, cmp.MainMenu)
     esper.delete_entity(first_main_menu_opt, True)
 
     callback = lambda _: phase.change_to(phase.Ontology.level)
     _make_menuitem(cmp.MainMenu, callback, "Continue", 0)
+
+
+def end_game():
+    """unload game objects, reset main menu"""
+    old_map = ecs.Query(cmp.Position).exclude(cmp.Crosshair)
+    old_inv = ecs.Query(cmp.InInventory)
+    old_spells = ecs.Query(cmp.Spell)
+    for dd in [old_map, old_inv, old_spells]:
+        for to_del, _ in dd:
+            esper.delete_entity(to_del, immediate=True)
+
+    order0 = lambda x: x.order == 0
+    all_main_menu_opts = ecs.Query(cmp.MainMenu, cmp.MenuItem)
+    first_main_menu_opt = all_main_menu_opts.where(cmp.MenuItem, order0).first()
+
+    esper.delete_entity(first_main_menu_opt, True)
+
+    callback = lambda _: phase.change_to(phase.Ontology.char_select)
+    _make_menuitem(cmp.MainMenu, callback, "Start Game", 0)
 
 
 def _make_menuitem(menu_cmp, callback, name, order):
@@ -41,7 +62,6 @@ def main_menu_opts():
         raise SystemExit()
 
     _make_menuitem(cmp.MainMenu, exit, "Quit", 3)
-    esper.create_entity(cmp.MainMenu(), cmp.MenuSelection())
 
 
 def discipline_opts():
@@ -70,5 +90,3 @@ def discipline_opts():
 
     for i, (func, desc) in enumerate(opts):
         _make_menuitem(cmp.StartMenu, func, desc, i)
-
-    esper.create_entity(cmp.StartMenu(), cmp.MenuSelection())

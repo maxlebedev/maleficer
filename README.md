@@ -103,6 +103,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * Do we modify the query func to work on superclasses? can we?
         * At minimum, get Condition our of typ
     - Targeting. Decouple it from spellcasting
+    - Start Game flow needs to be more clear and unified, with ne top-lvl func
 
 ## Core
     - Save/Load
@@ -205,3 +206,22 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Pressing space post-teleport doesn't skip turn
         * Drinking potion doesn't take a turn?
         * I suspect this is.. last-pos doesn't get updated post teleport
+            + So enemies move to player's old last-pos
+    - DrunkenWalk can sometimes fail with a "IndexError: pop from empty list"
+        * location.py, line 852, in build()
+        * I suspect we walk into a corner or something
+    - Doored tunnels can lack middle parts, which looks bad
+
+# DOING
+    - Spider enemy design notes
+        * 237
+        * mid/high dmg attack
+        * Jump
+            + 1 turn to target
+            + 2 size aoe (so unavoidable)
+            + Jumps behind player
+            + What if spider lands on player?
+                + shunt player? choose new spot?
+        * Smalljump
+            + move two spaces instead of one
+                + can reuse for flame

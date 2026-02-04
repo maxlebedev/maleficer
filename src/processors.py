@@ -256,6 +256,10 @@ class Death(Processor):
                 board.build_entity_cache()
             else:
                 board.remove(killable)
+                player = ecs.Query(cmp.Player).first()
+                if player == killable:
+                    phase.change_to(phase.Ontology.game_over)
+                    create.ui.end_game()
                 esper.delete_entity(killable, immediate=True)
             self.queue_zero_health()
 

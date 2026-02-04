@@ -19,6 +19,7 @@ class Ontology(enum.Enum):
     target = enum.auto()
     inventory = enum.auto()
     char_select = enum.auto()
+    game_over = enum.auto()
 
 
 def main_menu_phase(context, console):
@@ -31,6 +32,19 @@ def main_menu_phase(context, console):
 
     ALL[Ontology.main_menu] = [render, input, enqueue]
     create.ui.main_menu_opts()
+    esper.create_entity(cmp.MainMenu(), cmp.MenuSelection())
+
+def game_over_phase(context, console):
+    background = "assets/main_menu.xp"
+    title = "Game Over"
+    args = {"menu_cmp": cmp.GameOverMenu, "background": background, "title": title}
+    render = processors.MenuRender(context, console, **args)
+    input = processors.MenuInputEvent(cmp.GameOverMenu)
+    enqueue = processors.Enqueue(_phase=Ontology.game_over)
+
+    ALL[Ontology.game_over] = [render, input, enqueue]
+
+    esper.create_entity(cmp.GameOverMenu(), cmp.MenuSelection())
 
 
 def level_phase(context, console):
@@ -68,13 +82,12 @@ def targeting_phase(context, console):
 
 
 def inventory_phase(context, console):
-    esper.create_entity(cmp.MenuSelection())
-
     input = processors.InventoryInputEvent()
     render = processors.InventoryRender(context, console)
     enqueue = processors.Enqueue(_phase=Ontology.inventory)
 
     ALL[Ontology.inventory] = [render, input, enqueue]
+    esper.create_entity(cmp.InventoryMenu(), cmp.MenuSelection())
 
 
 def options_phase(context, console):
@@ -104,6 +117,8 @@ def select_phase(context, console):
 
     ALL[Ontology.char_select] = [render, input, enqueue]
     create.ui.discipline_opts()
+
+    esper.create_entity(cmp.StartMenu(), cmp.MenuSelection())
 
 
 def change_to(next_phase: Ontology, start_proc: type[esper.Processor] | None = None):
@@ -138,6 +153,7 @@ def setup(context, console):
     options_phase(context, console)
     about_phase(context, console)
     select_phase(context, console)
+    game_over_phase(context, console)
 
     animation = processors.Animation(context, console)
     esper.add_processor(animation)

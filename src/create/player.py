@@ -83,4 +83,3 @@ def stormcaller():
 def starting_inventory():
     starting_potion = item.potion()
     esper.add_component(starting_potion, cmp.InInventory())
-    esper.create_entity(cmp.InventoryMenu(), cmp.MenuSelection())
