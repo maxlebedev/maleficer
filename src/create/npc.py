@@ -108,7 +108,7 @@ def spider(pos: cmp.Position) -> int:
     cmps.append(cmp.Visible(glyph=dis.Glyph.SPIDER, color=dis.Color.YELLOW))
     cmps.append(cmp.Health(max=25))
     cmps.append(cmp.KnownAs(name="spider"))
-    cmps.append(cmp.Enemy(perception=10, evaluate=behavior.living_flame))
+    cmps.append(cmp.Enemy(perception=10, evaluate=behavior.spider))
     cmps.append(cmp.Blocking())
     spider = esper.create_entity(*cmps)
 

@@ -18,7 +18,7 @@ def floor(x: int, y: int) -> int:
 
 def wall(x: int, y: int, breakable: int = False) -> int:
     map_info = ecs.Query(cmp.GameMeta).cmp(cmp.MapInfo)
-    color = math_util.from_table(map_info.mood)
+    color = math_util.rand_from_table(map_info.mood)
     glyph = map_info.wall_glyph
 
     cmps = []
@@ -41,7 +41,7 @@ def wall(x: int, y: int, breakable: int = False) -> int:
 
 def door(x: int, y: int) -> int:
     map_info = ecs.Query(cmp.GameMeta).cmp(cmp.MapInfo)
-    color = math_util.from_table(map_info.mood)
+    color = math_util.rand_from_table(map_info.mood)
 
     cmps = []
     cmps.append(cmp.Visible(glyph=dis.Glyph.CDOOR, color=color))

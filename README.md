@@ -211,17 +211,3 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * location.py, line 852, in build()
         * I suspect we walk into a corner or something
     - Doored tunnels can lack middle parts, which looks bad
-
-# DOING
-    - Spider enemy design notes
-        * 237
-        * mid/high dmg attack
-        * Jump
-            + 1 turn to target
-            + 2 size aoe (so unavoidable)
-            + Jumps behind player
-            + What if spider lands on player?
-                + shunt player? choose new spot?
-        * Smalljump
-            + move two spaces instead of one
-                + can reuse for flame

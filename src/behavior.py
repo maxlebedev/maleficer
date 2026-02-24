@@ -71,6 +71,23 @@ def lob_bomb(source: typ.Entity):
         apply_cooldown(source)
         return
 
+def spider_jump(source: typ.Entity):
+    player_pos = location.player_position()
+
+    board = location.get_board()
+    indices = location.get_neighbor_coords(*player_pos)
+    random.shuffle(indices)
+    for selection in indices:
+        target_cell = board.get_cell(*selection)
+        if board.has_blocker(*selection):
+            continue
+        dest, trace = location.trace_ray(source, target_cell)
+        if dest != target_cell:  # no LOS
+            continue
+        event.Animation(locs=trace, glyph=display.Glyph.SPIDER, fg=display.Color.YELLOW)
+        event.Movement(source, trace[-1][0], trace[-1][1])
+        return
+
 
 def apply_cooldown(source: typ.Entity):
     if cd_effect := esper.try_component(source, cmp.Cooldown):
@@ -218,11 +235,24 @@ def draw_aoe_line(source: typ.Entity):
     ppos = location.player_position()
     callback = partial(math_util.bresenham_ray, dest=ppos)
     aura = cmp.Aura(callback=callback, color=display.Color.RED)
-    opos = esper.component_for_entity(source, cmp.Position)
+    src_pos = esper.component_for_entity(source, cmp.Position)
     esper.add_component(source, aura)
 
-    coords = math_util.bresenham_ray(origin=opos, dest=ppos)
+    coords = math_util.bresenham_ray(origin=src_pos, dest=ppos)
     locus = cmp.Locus(coords=coords)
+    esper.add_component(source, locus)
+
+
+def draw_aoe_sphere(source: typ.Entity, radius=2):
+    """self-centerd sphere. at least for now"""
+    src_pos = esper.component_for_entity(source, cmp.Position)
+    callback = partial(location.coords_within_radius, radius=radius)
+    aura = cmp.Aura(callback=callback, color=display.Color.RED)
+    esper.add_component(source, aura)
+
+    coords = location.coords_within_radius(pos=src_pos, radius=radius)
+    without_self = [el for el in coords if el != src_pos.as_list]
+    locus = cmp.Locus(coords=without_self)
     esper.add_component(source, locus)
 
 
@@ -300,12 +330,11 @@ def goblin(source: typ.Entity):
 
 def cyclops(source: typ.Entity):
     """if aiming fire. Otherwise, wander until you see player, then aim"""
-    if not esper.has_component(source, cmp.Aura):
-        if not can_see_player(source):
-            return wander
-        return draw_aoe_line
-    else:
+    if esper.has_component(source, cmp.Aura):
         return apply_dmg_along_locus
+    if can_see_player(source):
+        return draw_aoe_line
+    return wander
 
 
 def bat(source: typ.Entity):
@@ -376,3 +405,12 @@ def bomb_trap(source: typ.Entity):
 
 def bomb(_: typ.Entity):
     return aura_tick
+
+
+def spider(source: typ.Entity):
+    """as is, its very hard to disengage without teleport. cooldown?"""
+    if esper.has_component(source, cmp.Aura):
+        return apply_dmg_along_locus
+    if can_see_player(source):
+        return action_sequence(spider_jump, draw_aoe_sphere)
+    return wander

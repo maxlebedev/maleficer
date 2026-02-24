@@ -544,7 +544,7 @@ class Cave:
             create.npc.warlock: 1,
         }
         for _, pos in valid_spawns[:-1]:
-            spawn = math_util.from_table(spawn_table)
+            spawn = math_util.rand_from_table(spawn_table)
             self.board.retile(pos.x, pos.y, create.tile.floor)
             new_pos = cmp.Position(pos.x, pos.y)
             spawn(new_pos)
@@ -660,7 +660,7 @@ class Maze:
             spawn_y = self.hydrate(y) + offset[1]
             pos = cmp.Position(x=spawn_x, y=spawn_y)
 
-            spawn = math_util.from_table(spawn_table)
+            spawn = math_util.rand_from_table(spawn_table)
             spawn(pos)
 
     def build(self, blueprint, seen):
@@ -872,6 +872,6 @@ class DrunkenWalk:
 
         floor = path[:-1]
         for x, y in random.sample(floor, k=spawn_goal):
-            spawn = math_util.from_table(spawn_table)
+            spawn = math_util.rand_from_table(spawn_table)
             new_pos = cmp.Position(x, y)
             spawn(new_pos)

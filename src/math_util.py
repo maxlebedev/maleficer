@@ -79,7 +79,7 @@ def bresenham_ray(origin: cmp.Position, dest: cmp.Position):
     return ray[1:]
 
 
-def from_table(table: dict):
+def rand_from_table(table: dict):
     pop = list(table.keys())
     weights = list(table.values())
     selection = random.choices(pop, weights)
