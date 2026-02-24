@@ -25,6 +25,12 @@ def wander(entity: typ.Entity):
     event.Movement(entity, *dir, relative=True)
 
 
+def can_see_player(source: typ.Entity):
+    player = ecs.Query(cmp.Player).first()
+    enemy_cmp = esper.component_for_entity(source, cmp.Enemy)
+    return location.can_see(source, player, enemy_cmp.perception)
+
+
 def collect_all_affected_entities(source: int, target: int) -> list[int]:
     board = location.get_board()
     if not esper.has_component(target, cmp.Cell):
@@ -283,10 +289,7 @@ systematically:
 def goblin(source: typ.Entity):
     """lob bomb if we can, otherwise wander"""
 
-    player = ecs.Query(cmp.Player).first()
-    enemy_cmp = esper.component_for_entity(source, cmp.Enemy)
-
-    if not location.can_see(source, player, enemy_cmp.perception):
+    if not can_see_player(source):
         return wander
 
     if condition.has(source, typ.Condition.Cooldown):
@@ -297,10 +300,8 @@ def goblin(source: typ.Entity):
 
 def cyclops(source: typ.Entity):
     """if aiming fire. Otherwise, wander until you see player, then aim"""
-    player = ecs.Query(cmp.Player).first()
-    enemy_cmp = esper.component_for_entity(source, cmp.Enemy)
     if not esper.has_component(source, cmp.Aura):
-        if not location.can_see(source, player, enemy_cmp.perception):
+        if not can_see_player(source):
             return wander
         return draw_aoe_line
     else:
@@ -335,10 +336,7 @@ def skeleton(source: typ.Entity):
 
 
 def warlock(source: typ.Entity):
-    enemy_cmp = esper.component_for_entity(source, cmp.Enemy)
-    player = ecs.Query(cmp.Player).first()
-
-    if location.can_see(source, player, enemy_cmp.perception):
+    if can_see_player(source):
         if condition.has(source, typ.Condition.Cooldown):
             return wander
         else:
@@ -353,7 +351,6 @@ def action_sequence(*args):
     return _seq
 
 def living_flame(source: typ.Entity):
-    # TODO: for now, this is basically just skeleton. will add speed2 later
     pos = esper.component_for_entity(source, cmp.Position)
     player_pos = location.player_position()
     enemy_cmp = esper.component_for_entity(source, cmp.Enemy)
