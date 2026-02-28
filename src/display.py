@@ -154,6 +154,17 @@ def get_tile_glyphs():
     return [Glyph.FLOOR, Glyph.WALL1, Glyph.WALL2, Glyph.BWALL1, Glyph.BWALL2]
 
 
+def combine_glyphs(tileset, first: Glyph, second: Glyph):
+    """while possible, this isn't recommended. shrunk glyphs are too small"""
+    # Look into "decorating" one glyph with another instead
+    dim = TILE_SIZE / 2
+    new_tile = tileset.get_tile(ord(" "))
+    new_tile[0:dim, 0:dim] = tileset.get_tile(first)[::2, ::2]
+    new_tile[dim:TILE_SIZE, dim:TILE_SIZE] = tileset.get_tile(second)[::2, ::2]
+
+    tileset.set_tile(first, new_tile)
+
+
 def _idx_to_point(x, y):
     return (x % y, x // y)
 

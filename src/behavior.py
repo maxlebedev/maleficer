@@ -71,6 +71,7 @@ def lob_bomb(source: typ.Entity):
         apply_cooldown(source)
         return
 
+
 def spider_jump(source: typ.Entity):
     player_pos = location.player_position()
 
@@ -372,12 +373,16 @@ def warlock(source: typ.Entity):
             return fire_at_player
     return wander
 
+
 def action_sequence(*args):
     """take mulitple actions"""
+
     def _seq(source: typ.Entity):
         for call in args:
             call(source)
+
     return _seq
+
 
 def living_flame(source: typ.Entity):
     pos = esper.component_for_entity(source, cmp.Position)

@@ -183,7 +183,6 @@ class MainMenu:
 
 @component
 class GameOverMenu:
-
     import phase
 
     prev = phase.Ontology.main_menu

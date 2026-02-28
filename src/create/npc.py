@@ -102,6 +102,7 @@ def cyclops(pos: cmp.Position) -> int:
     esper.add_component(cyclops, dmg_effect)
     return cyclops
 
+
 def spider(pos: cmp.Position) -> int:
     cmps = []
     cmps.append(pos)

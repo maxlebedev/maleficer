@@ -34,6 +34,7 @@ def main_menu_phase(context, console):
     create.ui.main_menu_opts()
     esper.create_entity(cmp.MainMenu(), cmp.MenuSelection())
 
+
 def game_over_phase(context, console):
     background = "assets/main_menu.xp"
     title = "Game Over"

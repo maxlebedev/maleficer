@@ -176,14 +176,11 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * when on cooldown BFS a position with dist 4, then move a step
     - living flames move up to 2 squares to enemy
         * want an animation for getting there
-        * if only moving 1 square can also attack
         * if its 2 squares away, player moves into, flame overreaches
-        * might want to wait onthe NPC rework
     - Weaken X. Deals -X damage
-    - Giant spider thing that leaps at you, with an AOE dmg on land
-        * Same for charger enemies
     - Portals, that are like traps with the on-step
         * but instead of dmg, position changes
+    - Spider takes a turn to jump, giving player just enough time to get away
 ## UX
     - use that M icon
     - other menus probably want backgrounds.
@@ -195,6 +192,8 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - black fg plus grey/green bg could look rly cool
     - Push 1 is an easy effect to miss, as the enemies move right back
         * Maybe all Push 1 comes with Stun 1
+    - Targeted squares currently hold no info on what is targeting them
+        * There isn't an easy way to do this
 # BUGS
     - Living flame needs a rework. doesn't acutally move twice
         * We probably block this on NPC rework
