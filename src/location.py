@@ -263,7 +263,8 @@ def connect_rooms(first: RectangularRoom, second: RectangularRoom):
     pair = get_closest_pair(first.border_coords, second.border_coords)
     tunnel_between(*pair[0], *pair[1])
 
-    if not random.randint(0, 1):  # make doors, half the time I guess
+    if not random.randint(0, 1) and math.dist(*pair) > 3:
+        # make doors, half the time I guess
         board.retile(*pair[0], create.tile.door)
         board.retile(*pair[1], create.tile.door)
 

@@ -148,11 +148,13 @@ def apply_push(source: typ.Entity):
         entities = collect_all_affected_entities(source, target_cmp.target)
 
         for entity in entities:
-            x, y = math_util.get_push_coords(
-                source_pos.as_list, entity, push_effect.distance
-            )
+            dist = push_effect.distance
+            x, y = math_util.get_push_coords(source_pos.as_list, entity, dist)
             event.Movement(entity, x, y)
             condition.grant(entity, typ.Condition.Shunted, 1)
+
+    board = location.get_board()
+    board.build_entity_cache()
 
 
 def apply_pull(source: typ.Entity):
@@ -170,6 +172,9 @@ def apply_pull(source: typ.Entity):
         for entity in entities:
             event.Movement(entity, dest.x, dest.y)
             condition.grant(entity, typ.Condition.Shunted, 1)
+
+    board = location.get_board()
+    board.build_entity_cache()
 
 
 def _learn(spell: int):

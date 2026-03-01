@@ -195,11 +195,15 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Targeted squares currently hold no info on what is targeting them
         * There isn't an easy way to do this
 # BUGS
-    - push_coords has no bounds checking.
-        * Because we do a cell lookup, this isn't safe
+    - Push
+        * push_coords has no bounds checking.
+            + Because we do a cell lookup, this isn't safe
+        * Push + dmg spells apply their push before dmg, causing the dmg to miss
+            + Ideally, we would collect targets before applying any effects
+        * Push + AOE
+            + might end up applying to walls too
+            + animates application to an area, but one tile at a time
     - cursor mvmt has no bounds checking
-    - Push + dmg spells apply their push before dmg, causing the dmg to miss
-        * Ideally, we would collect targets before applying any effects
     - Pressing space post-teleport doesn't skip turn
         * Drinking potion doesn't take a turn?
         * I suspect this is.. last-pos doesn't get updated post teleport
