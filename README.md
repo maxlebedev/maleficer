@@ -195,8 +195,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Targeted squares currently hold no info on what is targeting them
         * There isn't an easy way to do this
 # BUGS
-    - Living flame needs a rework. doesn't acutally move twice
-        * We probably block this on NPC rework
     - push_coords has no bounds checking.
         * Because we do a cell lookup, this isn't safe
     - cursor mvmt has no bounds checking
@@ -209,4 +207,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - DrunkenWalk can sometimes fail with a "IndexError: pop from empty list"
         * location.py, line 852, in build()
         * I suspect we walk into a corner or something
+        * nxt = get_walkable_wall(*path.pop())
     - Doored tunnels can lack middle parts, which looks bad
+    - The `brighter` function is completely different from `darker`. 

@@ -995,7 +995,9 @@ class Animation(Processor):
         bg = event.bg or bg
 
         in_fov = location.get_fov()
+
         if in_fov[x][y]:
+            fg = display.brighter(fg, scale=100)
             bg = location.backlight(x, y)
 
         self.console.rgb[board_x, board_y] = (glyph, fg, bg)

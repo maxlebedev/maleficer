@@ -157,12 +157,22 @@ def get_tile_glyphs():
 def combine_glyphs(tileset, first: Glyph, second: Glyph):
     """while possible, this isn't recommended. shrunk glyphs are too small"""
     # Look into "decorating" one glyph with another instead
-    dim = TILE_SIZE / 2
+    dim = TILE_SIZE // 2
     new_tile = tileset.get_tile(ord(" "))
     new_tile[0:dim, 0:dim] = tileset.get_tile(first)[::2, ::2]
     new_tile[dim:TILE_SIZE, dim:TILE_SIZE] = tileset.get_tile(second)[::2, ::2]
 
     tileset.set_tile(first, new_tile)
+
+def alpha_blit(bottom, top):
+    """blit one tile onto another. The one color restriction hurts here"""
+    # new_tile = alpha_blit(tileset.get_tile(glyph1), tileset.get_tile(glyph1))
+    import numpy as np
+    result = bottom
+    alpha = top[..., 3:] / 255.0
+    result[..., :3] = (1 - alpha) * result[..., :3] + alpha * top[..., :3]
+    result[..., 3] = np.maximum(result[..., 3], top[..., 3])
+    return result
 
 
 def _idx_to_point(x, y):

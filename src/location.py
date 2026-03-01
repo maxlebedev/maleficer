@@ -77,6 +77,7 @@ def coords_line_to_point(source: cmp.Position, dest: cmp.Position) -> list[typ.C
 
 def backlight(x, y):
     """add a fading candle-colored illumination of the player's sight radius"""
+    # we then darken the bg light by its distance from the light src player
     player_pos = player_position()
     dist_to_player = math.dist(player_pos.as_tuple, (x, y))
     player_cmp = ecs.Query(cmp.Player).val
@@ -319,6 +320,8 @@ def get_closest_pair(first: Iterable, second: Iterable) -> tuple:
 def trace_ray(source: int, dest: int):
     """trace a line between source  dest,
     return first blocker & inclusive path"""
+    # TODO: I don't like that this returns two different values,
+    # and we should probably take pos as args
     board = get_board()
 
     source_pos = esper.component_for_entity(source, cmp.Position)

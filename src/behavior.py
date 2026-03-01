@@ -71,7 +71,6 @@ def lob_bomb(source: typ.Entity):
         apply_cooldown(source)
         return
 
-
 def spider_jump(source: typ.Entity):
     player_pos = location.player_position()
 
@@ -373,16 +372,12 @@ def warlock(source: typ.Entity):
             return fire_at_player
     return wander
 
-
 def action_sequence(*args):
     """take mulitple actions"""
-
     def _seq(source: typ.Entity):
         for call in args:
             call(source)
-
     return _seq
-
 
 def living_flame(source: typ.Entity):
     pos = esper.component_for_entity(source, cmp.Position)
@@ -397,8 +392,14 @@ def living_flame(source: typ.Entity):
         return action_sequence(follow, attack_player)
     if dist_to_player == 1:
         return attack_player
+    def flame_anim(_):
+        player = ecs.Query(cmp.Player).first()
+        _, trace = location.trace_ray(source, player)
+        glyph = display.Glyph.FLAME
+        path = trace[:enemy_cmp.speed]
+        event.Animation(locs=path, glyph=glyph, fg=display.Color.ORANGE)
 
-    return partial(follow, steps=2)
+    return action_sequence(flame_anim, partial(follow, steps=2))
 
 
 def bomb_trap(source: typ.Entity):
