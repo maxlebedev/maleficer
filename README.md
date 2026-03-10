@@ -214,11 +214,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * Drinking potion doesn't take a turn?
         * I suspect this is.. last-pos doesn't get updated post teleport
             + So enemies move to player's old last-pos
-    - DrunkenWalk can sometimes fail with a "IndexError: pop from empty list"
-        * location.py, line 852, in build()
-        * I suspect we walk into a corner or something
-        * nxt = get_walkable_wall(*path.pop())
-    - Doored tunnels can lack middle parts, which looks bad
     - The `brighter` function is completely different from `darker`. 
     - Bomb throwing animations (and the like) pass through solid blocks
         * we should use pathfind rather than trace_ray

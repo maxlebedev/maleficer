@@ -833,18 +833,16 @@ class DrunkenWalk:
         path = [(x, y)]
 
         def get_walkable_wall(x, y):
-            """find a cardinal step with a non-baorder wall"""
+            """find a cardinal step with a non-boarder wall"""
             offsets = [(-1, 0), (0, -1), (0, 1), (1, 0)]
             for dx, dy in random.sample(offsets, k=4):
                 new_x, new_y = x + dx, y + dy
-                if {new_x, new_y} & {0, BOARD_MAX}:
-                    return None
-                # without this next check we get caverns
-                if count_neighbors(self.board, new_x, new_y) < 4:
-                    return None
-                cell = self.board.get_cell(new_x, new_y)
-                if esper.has_component(cell, cmp.Wall):
-                    return new_x, new_y
+                if 0 < new_x < BOARD_MAX and 0 < new_y < BOARD_MAX:
+                    # counting here so that passages stay narrow, not cavernous
+                    if count_neighbors(self.board, new_x, new_y) >= 4:
+                        cell = self.board.get_cell(new_x, new_y)
+                        if esper.has_component(cell, cmp.Wall):
+                            return new_x, new_y
             return None
 
         for _ in range(floor_goal):
@@ -854,6 +852,7 @@ class DrunkenWalk:
             x, y = nxt
             self.board.retile(x, y, create.tile.floor)
             path.append(nxt)
+        # TODO: IndexError in path still theoretically possible here?
 
         self.board.retile(path[-1][0], path[-1][1], create.tile.stairs)
         return path

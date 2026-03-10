@@ -34,6 +34,7 @@ def get_selected_menuitem():
 
     return selection
 
+
 def flash():
     """flashes the screen, for use on errors"""
     meta = ecs.get_meta()
@@ -45,8 +46,6 @@ def flash():
     meta.context.present(meta.console)
 
     event.redraw()
-
-
 
 
 def queue_proc(proctype: type[esper.Processor]):
