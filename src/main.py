@@ -7,25 +7,6 @@ import components as cmp
 import display
 import location
 import phase
-import processors
-import ecs
-
-
-def flash(context, console):
-    """flashes the screen, for use on errors"""
-    console.clear()
-    board = ecs.get_meta().board
-    white_out = lambda _: (1, display.Color.WHITE, display.Color.WHITE)
-    cell_rgbs = [list(map(white_out, row)) for row in board.cells]
-
-    display.write_rgbs(console, cell_rgbs)
-    context.present(console)
-
-    esper.dispatch_event("redraw")
-
-
-def redraw():
-    phase.oneshot(processors.BoardRender)
 
 
 def main() -> None:
@@ -56,17 +37,6 @@ def main() -> None:
 
     phase.setup(context, console)
     phase.change_to(phase.Ontology.main_menu)
-
-    flash_callback = lambda: flash(context, console)
-    esper.set_handler("redraw", redraw)
-    esper.set_handler("flash", flash_callback)
-
-    def fullscreen_toggle():
-        if context.sdl_window:
-            toggle = int(not context.sdl_window.fullscreen)
-            context.sdl_window.fullscreen = toggle
-
-    esper.set_handler("fullscreen_toggle", fullscreen_toggle)
 
     while True:
         esper.process()

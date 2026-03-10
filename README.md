@@ -135,6 +135,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Do I want to split the "level phsae" into 3 parts?
         * up to player turn, npc, aftermath
     - behavior.py can be divided into eval funcs, apply, and action
+    - Now that context/console is in GameMeta, we can stop passing it around
 ## Game Mechanics/Balance
     - spell mods (+1 range, +1 dmg pickups)
     - cooldown alternatives like damage taken, steps walked (lotta tracking)

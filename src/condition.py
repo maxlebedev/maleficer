@@ -32,7 +32,7 @@ def apply(entity: int, condition: typ.Condition, value: int):
         case typ.Condition.Bleed:
             pos = esper.component_for_entity(entity, cmp.Position)
             event.Animation([pos.as_list], fg=display.Color.BLOOD_RED)
-            esper.dispatch_event("redraw")  # update screen before we apply anims
+            event.redraw() # update screen before we apply anims
 
             bleed_src = {cmp.KnownAs: cmp.KnownAs(name="bleed")}
             # TODO: maybe a single global "bleed" entity
@@ -42,7 +42,7 @@ def apply(entity: int, condition: typ.Condition, value: int):
             event.Animation([pos.as_list], fg=display.Color.CYAN)
         case typ.Condition.Shunted:
             pos = esper.component_for_entity(entity, cmp.Position)
-            esper.dispatch_event("redraw")  # redraw so we recolor the new glyph
+            event.redraw()  # redraw so we recolor the new glyph
             event.Animation(locs=[pos.as_list], fg=display.Color.ORANGE)
         case typ.Condition.Dying:
             if value == 1:

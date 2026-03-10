@@ -7,7 +7,6 @@ import esper
 import tcod
 from tcod import libtcodpy
 
-import behavior
 import components as cmp
 import condition
 import create
@@ -34,6 +33,20 @@ def get_selected_menuitem():
     selection = inv_map[menu_selection.item][1].pop()
 
     return selection
+
+def flash():
+    """flashes the screen, for use on errors"""
+    meta = ecs.get_meta()
+    meta.console.clear()
+    white_out = lambda _: (1, display.Color.WHITE, display.Color.WHITE)
+    cell_rgbs = [list(map(white_out, row)) for row in meta.board.cells]
+
+    display.write_rgbs(meta.console, cell_rgbs)
+    meta.context.present(meta.console)
+
+    event.redraw()
+
+
 
 
 def queue_proc(proctype: type[esper.Processor]):
@@ -82,7 +95,7 @@ class Movement(Processor):
                 vis.glyph = display.Glyph.ODOOR
             else:
                 event.Log.append("can't move there")
-                esper.dispatch_event("flash")
+                flash()
 
     def pick_up(self, target):
         """pick up an item"""
@@ -289,7 +302,7 @@ class InputEvent(Processor):
                             case func:
                                 func()
                     except typ.InvalidAction as e:
-                        esper.dispatch_event("flash")
+                        flash()
                         event.Log.append(str(e))
                     else:
                         listen = False
@@ -352,7 +365,7 @@ class GameInputEvent(InputEvent):
                 event.Tick()
                 phase.change_to(phase.Ontology.level, NPCEval)
         if not unlearned:
-            esper.dispatch_event("flash")
+            flash()
             event.Log.append("can't unlearn, spell doesn't exist")
 
     def to_target(self, slot: int):
@@ -734,7 +747,7 @@ class TargetInputEvent(InputEvent):
             event.Tick()
             phase.change_to(phase.Ontology.level, Damage)  # to FIRST dmg phase
         except typ.InvalidAction as e:
-            esper.dispatch_event("flash")
+            flash()
             event.Log.append(str(e))
 
 
@@ -901,7 +914,7 @@ class InventoryInputEvent(InputEvent):
             event.Tick()
             phase.change_to(phase.Ontology.level, NPCEval)
         except typ.InvalidAction as e:
-            esper.dispatch_event("flash")
+            flash()
             event.Log.append(str(e))
 
 
@@ -1021,7 +1034,7 @@ class Animation(Processor):
 
             self.context.present(self.console)
             time.sleep(0.07)  # display long enough to be seen
-            esper.dispatch_event("redraw")
+            event.redraw()
 
         event.Queues.animation.clear()
 

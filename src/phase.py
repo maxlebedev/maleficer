@@ -164,3 +164,7 @@ def setup(context, console):
     for procs in ALL.values():
         for proc in procs:
             esper.add_processor(proc)
+
+
+def redraw():
+    oneshot(processors.BoardRender)
