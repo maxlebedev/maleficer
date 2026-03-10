@@ -220,3 +220,5 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * nxt = get_walkable_wall(*path.pop())
     - Doored tunnels can lack middle parts, which looks bad
     - The `brighter` function is completely different from `darker`. 
+    - Bomb throwing animations (and the like) pass through solid blocks
+        * we should use pathfind rather than trace_ray

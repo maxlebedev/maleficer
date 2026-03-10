@@ -183,3 +183,7 @@ def trigger_effect_callbacks(source: typ.Entity):
     # item use and spells have their own. so perhaps enemy/death
     if esper.entity_exists(source) and esper.has_component(source, cmp.Target):
         esper.remove_component(source, cmp.Target)
+
+
+def redraw():
+    phase.oneshot(processors.BoardRender)
