@@ -30,6 +30,7 @@ class Input(enum.Enum):
     TARGET = enum.auto()
     SKIP = enum.auto()
     ALTERNATE = enum.auto()
+    FULLSCREEN = enum.auto()
 
 
 def load_keymap(keymap_json_path):

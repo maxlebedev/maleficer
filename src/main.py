@@ -8,12 +8,13 @@ import display
 import location
 import phase
 import processors
+import ecs
 
 
 def flash(context, console):
     """flashes the screen, for use on errors"""
     console.clear()
-    board = location.get_board()
+    board = ecs.get_meta().board
     white_out = lambda _: (1, display.Color.WHITE, display.Color.WHITE)
     cell_rgbs = [list(map(white_out, row)) for row in board.cells]
 
@@ -47,7 +48,7 @@ def main() -> None:
     if context.sdl_window:
         context.sdl_window.fullscreen = tcod.context.SDL_WINDOW_FULLSCREEN_DESKTOP
 
-    game_meta = cmp.GameMeta(board=location.Board())
+    game_meta = cmp.GameMeta(location.Board(), context, console)
     esper.create_entity(game_meta)
 
     position_cmp = cmp.Position(x=0, y=0)

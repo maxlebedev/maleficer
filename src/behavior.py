@@ -32,7 +32,7 @@ def can_see_player(source: typ.Entity):
 
 
 def collect_all_affected_entities(source: int, target: int) -> list[int]:
-    board = location.get_board()
+    board = ecs.get_meta().board
     if not esper.has_component(target, cmp.Cell):
         return [target]
     pos = esper.component_for_entity(target, cmp.Position)
@@ -53,7 +53,7 @@ def lob_bomb(source: typ.Entity):
     # TODO: we could also borrow "fire_at_player" for pathfinding
     import create
 
-    board = location.get_board()
+    board = ecs.get_meta().board
 
     player_pos = location.player_position()
     indices = location.get_neighbor_coords(*player_pos)
@@ -71,10 +71,11 @@ def lob_bomb(source: typ.Entity):
         apply_cooldown(source)
         return
 
+
 def spider_jump(source: typ.Entity):
     player_pos = location.player_position()
 
-    board = location.get_board()
+    board = ecs.get_meta().board
     indices = location.get_neighbor_coords(*player_pos)
     random.shuffle(indices)
     for selection in indices:
@@ -153,7 +154,7 @@ def apply_push(source: typ.Entity):
             event.Movement(entity, x, y)
             condition.grant(entity, typ.Condition.Shunted, 1)
 
-    board = location.get_board()
+    board = ecs.get_meta().board
     board.build_entity_cache()
 
 
@@ -173,7 +174,7 @@ def apply_pull(source: typ.Entity):
             event.Movement(entity, dest.x, dest.y)
             condition.grant(entity, typ.Condition.Shunted, 1)
 
-    board = location.get_board()
+    board = ecs.get_meta().board
     board.build_entity_cache()
 
 
@@ -216,7 +217,7 @@ def die(ent: typ.Entity):
 
 def pathfind(start: cmp.Position, end: cmp.Position):
     """path[0] is start, we omit it"""
-    board = location.get_board()
+    board = ecs.get_meta().board
     cost = board.as_move_graph()
     graph = tcod.path.SimpleGraph(cost=cost, cardinal=1, diagonal=0)
     pf = tcod.path.Pathfinder(graph)
@@ -265,7 +266,7 @@ def apply_dmg_along_locus(source: typ.Entity):
     src_frz = ecs.freeze_entity(source)
     dmg_effect = esper.component_for_entity(source, cmp.DamageEffect)
     locus = esper.component_for_entity(source, cmp.Locus)
-    board = location.get_board()
+    board = ecs.get_meta().board
     for x, y in locus.coords:
         if cell := board.get_cell(x, y):
             event.Damage(src_frz, cell, dmg_effect.amount)
@@ -377,12 +378,16 @@ def warlock(source: typ.Entity):
             return fire_at_player
     return wander
 
+
 def action_sequence(*args):
     """take mulitple actions"""
+
     def _seq(source: typ.Entity):
         for call in args:
             call(source)
+
     return _seq
+
 
 def living_flame(source: typ.Entity):
     pos = esper.component_for_entity(source, cmp.Position)
@@ -397,11 +402,12 @@ def living_flame(source: typ.Entity):
         return action_sequence(follow, attack_player)
     if dist_to_player == 1:
         return attack_player
+
     def flame_anim(_):
         player = ecs.Query(cmp.Player).first()
         _, trace = location.trace_ray(source, player)
         glyph = display.Glyph.FLAME
-        path = trace[:enemy_cmp.speed]
+        path = trace[: enemy_cmp.speed]
         event.Animation(locs=path, glyph=glyph, fg=display.Color.ORANGE)
 
     return action_sequence(flame_anim, partial(follow, steps=2))

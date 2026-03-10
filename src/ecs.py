@@ -2,6 +2,7 @@
 from collections.abc import Generator
 
 import esper
+import components as cmp
 
 cmps = esper._entities
 
@@ -84,3 +85,8 @@ def freeze_entity(source: int):
     components = esper.components_for_entity(source)
     ret = {type(cmp): cmp for cmp in components}
     return ret
+
+
+def get_meta():
+    game_meta = Query(cmp.GameMeta).val
+    return game_meta

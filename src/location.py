@@ -28,11 +28,6 @@ def player_last_position() -> cmp.Position:
     return lp.pos
 
 
-def get_board():
-    game_meta = ecs.Query(cmp.GameMeta).val
-    return game_meta.board
-
-
 def matrix(x: int, y: int, val: int):
     return [[val for _ in range(x)] for _ in range(y)]
 
@@ -259,7 +254,7 @@ class RectangularRoom:
 
 
 def connect_rooms(first: RectangularRoom, second: RectangularRoom):
-    board = get_board()
+    board = ecs.get_meta().board
     pair = get_closest_pair(first.border_coords, second.border_coords)
     tunnel_between(*pair[0], *pair[1])
 
@@ -278,7 +273,7 @@ def tunnel_between(start_x: int, start_y: int, end_x: int, end_y: int):
     else:
         corner = start_x, end_y
 
-    board = get_board()
+    board = ecs.get_meta().board
     # Generate the coordinates for this tunnel.
     for x, y in tcod.los.bresenham((start_x, start_y), corner):
         board.retile(x, y, create.tile.floor)
@@ -323,7 +318,7 @@ def trace_ray(source: int, dest: int):
     return first blocker & inclusive path"""
     # TODO: I don't like that this returns two different values,
     # and we should probably take pos as args
-    board = get_board()
+    board = ecs.get_meta().board
 
     source_pos = esper.component_for_entity(source, cmp.Position)
     dest_pos = esper.component_for_entity(dest, cmp.Position)
@@ -340,7 +335,7 @@ def trace_ray(source: int, dest: int):
 
 
 def get_fov():
-    board = get_board()
+    board = ecs.get_meta().board
     transparency = board.as_transparency()
     pos = player_position()
     player_cmp = ecs.Query(cmp.Player).val

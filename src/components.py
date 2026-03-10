@@ -17,6 +17,8 @@ class Player:
 @component
 class GameMeta:
     board: object  # location.Board
+    context: object  # tcod.context.Context
+    console: object  # tcod.console.Console
     process: None = None
 
 

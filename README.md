@@ -167,6 +167,8 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Cryomancer with lengthier stuns
         * 3 turn stun, and a 1-speed icicle projectile
         * need to replace Spell.target_range with range func for icicle
+    - (destructable) Terrain generation spells
+        * pathfindin AI needs to know to break them
 ### Enemies
     - Spawners
     - "Commander" Enemies that effect their faction
@@ -194,6 +196,9 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * Maybe all Push 1 comes with Stun 1
     - Targeted squares currently hold no info on what is targeting them
         * There isn't an easy way to do this
+    - BOARD_START should maybe be a function of BOARD_WIDTH and CONSOLE
+        * That way PANEL_WIDTH is not static, but derived from that and WIDTH
+        * This may set us up for different resolutions
 # BUGS
     - Push
         * push_coords has no bounds checking.

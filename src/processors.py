@@ -86,7 +86,7 @@ class Movement(Processor):
 
     def pick_up(self, target):
         """pick up an item"""
-        board = location.get_board()
+        board = ecs.get_meta().board
         board.remove(target)
         esper.add_component(target, cmp.InInventory())
         name = event.Log.color_fmt(target)
@@ -94,11 +94,13 @@ class Movement(Processor):
         # oneshot call some collectable processor?
 
     def _process(self):
-        board = location.get_board()
+        board = ecs.get_meta().board
         while event.Queues.movement:
-            movement = event.Queues.movement.popleft()  # left so player first
+            movement = event.Queues.movement.popleft()  # left, so player first
             mover = movement.source
             if condition.has(mover, typ.Condition.Stun):
+                # TODO: this can't be the right place for this
+                # this whole thing is perhaps due for a pass
                 continue
 
             if not esper.entity_exists(mover):
@@ -182,7 +184,7 @@ class Damage(Processor):
         return f"{source_name} heals {target_name} for {amount}"
 
     def _resolve_cell_damage(self, damage_event):
-        board = location.get_board()
+        board = ecs.get_meta().board
         pos = esper.component_for_entity(damage_event.target, cmp.Position)
         entities = board.pieces_at(*pos)
         for ent in entities:
@@ -233,7 +235,7 @@ class Death(Processor):
                 event.Death(ent)
 
     def _process(self):
-        board = location.get_board()
+        board = ecs.get_meta().board
 
         self.queue_zero_health()
         while event.Queues.death:
@@ -267,6 +269,7 @@ class Death(Processor):
 @dataclass
 class InputEvent(Processor):
     action_map = {}
+    # TODO: a default here, with subclasses adding to it?
 
     def exit(self):
         raise SystemExit()
@@ -310,6 +313,7 @@ class GameInputEvent(InputEvent):
             input.KEYMAP[input.Input.SPELL4]: (self.handle_slot_key, [4]),
             input.KEYMAP[input.Input.INVENTORY]: self.to_inventory,
             input.KEYMAP[input.Input.SKIP]: self.skip,
+            input.KEYMAP[input.Input.FULLSCREEN]: display.fullscreen_toggle,
         }
 
     def to_inventory(self):
@@ -353,7 +357,7 @@ class GameInputEvent(InputEvent):
 
     def to_target(self, slot: int):
         # TODO: This probably wants to take spell_ent and not slot num
-        board = location.get_board()
+        board = ecs.get_meta().board
 
         casting_spell = None
         for spell_ent, (attuned) in esper.get_component(cmp.Attuned):
@@ -531,7 +535,7 @@ class BoardRender(Render):
 
     def _apply_lighting(self, cell_rgbs, in_fov) -> list[list[typ.CELL_RGB]]:
         """display cells in fov with lighting, explored without, and hide the rest"""
-        board = location.get_board()
+        board = ecs.get_meta().board
         # for screenshots, debugging
         # for cell in board.as_sequence():
         #     location.Board.explored.add(cell)
@@ -558,7 +562,7 @@ class BoardRender(Render):
         return cell_rgbs
 
     def _get_cell_rgbs(self):
-        board = location.get_board()
+        board = ecs.get_meta().board
 
         cell_rgbs = [list(map(board.as_rgb, row)) for row in board.cells]
 
@@ -639,6 +643,7 @@ class MenuInputEvent(InputEvent):
             input.KEYMAP[input.Input.MOVE_UP]: (self.move_selection, [-1]),
             input.KEYMAP[input.Input.ESC]: self.back,
             input.KEYMAP[input.Input.SELECT]: self.select,
+            input.KEYMAP[input.Input.FULLSCREEN]: display.fullscreen_toggle,
         }
 
     def back(self):
@@ -672,6 +677,7 @@ class TargetInputEvent(InputEvent):
             input.KEYMAP[input.Input.ESC]: self.to_level,
             input.KEYMAP[input.Input.SELECT]: self.select,
             input.KEYMAP[input.Input.TARGET]: self.tab_target,
+            input.KEYMAP[input.Input.FULLSCREEN]: display.fullscreen_toggle,
         }
 
     def to_level(self):
@@ -701,7 +707,7 @@ class TargetInputEvent(InputEvent):
             player_pos = location.player_position()
             sight_radius = ecs.Query(cmp.Player).val.sight_radius
             coords = location.coords_within_radius(player_pos, sight_radius)
-            board = location.get_board()
+            board = ecs.get_meta().board
             for x, y in coords:
                 if board.pieces_at(x, y):
                     self.piece_coords.append((x, y))
@@ -715,7 +721,7 @@ class TargetInputEvent(InputEvent):
         self.piece_coords = []
         xhair_pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(1)
         targeting_entity = ecs.Query(cmp.Targeting).first()
-        board = location.get_board()
+        board = ecs.get_meta().board
 
         if not esper.has_component(targeting_entity, cmp.Target):
             cell = xhair_pos.lookup_in(board.cells)
@@ -757,7 +763,7 @@ class TargetRender(BoardRender):
         panel_params["height"] = display.PANEL_IHEIGHT
 
         xhair_pos = ecs.Query(cmp.Crosshair).cmp(cmp.Position)
-        board = location.get_board()
+        board = ecs.get_meta().board
 
         coords = [xhair_pos.as_list]
 
@@ -856,6 +862,7 @@ class InventoryInputEvent(InputEvent):
             input.KEYMAP[input.Input.MOVE_UP]: (self.move_selection, [-1]),
             input.KEYMAP[input.Input.ESC]: to_level,
             input.KEYMAP[input.Input.SELECT]: self.handle_select,
+            input.KEYMAP[input.Input.FULLSCREEN]: display.fullscreen_toggle,
         }
 
     def move_selection(self, diff: int):
@@ -879,7 +886,7 @@ class InventoryInputEvent(InputEvent):
         drop_pos = cmp.Position(x=player_pos.x, y=player_pos.y)
         esper.add_component(selection, drop_pos)
 
-        board = location.get_board()
+        board = ecs.get_meta().board
         board.entities_at(*drop_pos).add(selection)
 
         name = event.Log.color_fmt(selection)
@@ -926,6 +933,7 @@ class OptionsInputEvent(InputEvent):
                 phase.change_to,
                 [phase.Ontology.main_menu],
             ),
+            input.KEYMAP[input.Input.FULLSCREEN]: display.fullscreen_toggle,
         }
 
 
@@ -958,6 +966,7 @@ class AboutInputEvent(InputEvent):
                 phase.change_to,
                 [phase.Ontology.main_menu],
             ),
+            input.KEYMAP[input.Input.FULLSCREEN]: display.fullscreen_toggle,
         }
 
 
@@ -1024,5 +1033,5 @@ class Spawn(Processor):
             spawn_event = event.Queues.spawn.popleft()
             spawn_event.func()
 
-        board = location.get_board()
+        board = ecs.get_meta().board
         board.build_entity_cache()

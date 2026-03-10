@@ -6,6 +6,7 @@ from enum import IntEnum
 import tcod
 
 import typ
+import ecs
 
 CONSOLE_WIDTH = 1920
 CONSOLE_HEIGHT = 1080
@@ -32,6 +33,13 @@ BOARD_STARTX = PANEL_WIDTH
 BOARD_ENDX = R_PANEL_START
 BOARD_STARTY = 1
 BOARD_ENDY = BOARD_STARTY + BOARD_HEIGHT
+
+
+def fullscreen_toggle():
+    context = ecs.get_meta().context
+    if context.sdl_window:
+        toggle = int(not context.sdl_window.fullscreen)
+        context.sdl_window.fullscreen = toggle
 
 
 def hex_to_rgb(hex: str) -> tuple:
@@ -164,10 +172,12 @@ def combine_glyphs(tileset, first: Glyph, second: Glyph):
 
     tileset.set_tile(first, new_tile)
 
+
 def alpha_blit(bottom, top):
     """blit one tile onto another. The one color restriction hurts here"""
     # new_tile = alpha_blit(tileset.get_tile(glyph1), tileset.get_tile(glyph1))
     import numpy as np
+
     result = bottom
     alpha = top[..., 3:] / 255.0
     result[..., :3] = (1 - alpha) * result[..., :3] + alpha * top[..., :3]
@@ -235,11 +245,12 @@ def remap_glyphs():
     return IntEnum("Glyph", glyph_map)
 
 
-def write_rgbs(console, cell_rgbs):
-    startx, endx = (BOARD_STARTX, BOARD_ENDX)
-    starty, endy = (BOARD_STARTY, BOARD_ENDY)
+def write_rgbs(console: tcod.console.Console, cell_rgbs):
+    half = len(cell_rgbs) // 2
+    startx, endx = CENTER_W - half, CENTER_W + half
+    starty, endy = CENTER_H - half, CENTER_H + half
     console.rgb[startx:endx, starty:endy] = cell_rgbs
-    # TODO if the magnification changes, the above line breaks
+    # TODO if the magnification/dimentions change, the above line breaks
 
 
 def colored_text(text: str, color: typ.RGB) -> str:
