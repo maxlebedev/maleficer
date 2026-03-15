@@ -96,7 +96,7 @@ def biased_randint(a, b, lam=5.0):
     Exponentially biases values toward a.
     Higher lam -> stronger bias.
     """
-    u = random.random()
-    x = -math.log(1 - u) / lam  # exponential(λ)
-    x = min(x, 1.0)  # cap to [0,1]
-    return a + int(x * (b - a))
+    uniform_sample = random.random()
+    biased_fraction = -math.log(1 - uniform_sample) / lam  # exponential(λ)
+    biased_fraction = min(biased_fraction, 1.0)  # cap to [0,1]
+    return a + int(biased_fraction * (b - a))

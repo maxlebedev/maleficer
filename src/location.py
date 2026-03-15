@@ -870,8 +870,27 @@ class DrunkenWalk:
             create.npc.warlock: 1,
         }
 
-        floor = path[:-1]
-        for x, y in random.sample(floor, k=spawn_goal):
+        floor_tiles = path[:-1]
+        spawn_tiles =random.sample(floor_tiles, k=spawn_goal) 
+        for x, y in spawn_tiles:
             spawn = math_util.rand_from_table(spawn_table)
             new_pos = cmp.Position(x, y)
             spawn(new_pos)
+
+        floor_tiles = [tile for tile in floor_tiles if tile not in spawn_tiles]
+        self.populate_grass(floor_tiles)
+
+    def populate_grass(self, floor_tiles: list[tuple]):
+        """pick an offset for grass start, make 4-8 tiles, repeat"""
+        start = random.randrange(0, len(floor_tiles)//2)
+        end = start + math_util.biased_randint(4, 10, lam=1)
+        for i, tile in enumerate(floor_tiles):
+            if i < start:
+                continue
+            if i < end:
+                grass_pos = cmp.Position(*tile)
+                create.item.grass(grass_pos)
+            elif i == end:
+                start = random.randrange(i, len(floor_tiles))
+                grass_count = math_util.biased_randint(4, 10, lam=1)
+                end = start+grass_count
