@@ -177,9 +177,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - one-turn-per-square moving projectiles
     - goblins should actually try to be at dist 4 to player
         * when on cooldown BFS a position with dist 4, then move a step
-    - living flames move up to 2 squares to enemy
-        * want an animation for getting there
-        * if its 2 squares away, player moves into, flame overreaches
     - Weaken X. Deals -X damage
     - Portals, that are like traps with the on-step
         * but instead of dmg, position changes
