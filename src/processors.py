@@ -126,6 +126,8 @@ class Movement(Processor):
             if movement.relative:
                 new_x += pos.x
                 new_y += pos.y
+            if not board._in_bounds(new_x, new_y):
+                continue
 
             if last_pos := esper.try_component(mover, cmp.LastPosition):
                 last_pos.pos.x = pos.x
@@ -140,12 +142,14 @@ class Movement(Processor):
             if not has(mover, cmp.Health):
                 continue
 
+            if has(mover, cmp.Player):
+                for target in targets:
+                    if has(target, cmp.Collectable):
+                        self.pick_up(target)
+
             for target in targets:
                 if has(target, cmp.Blocking):
                     self.bump(mover, target)
-
-                if has(mover, cmp.Player) and has(target, cmp.Collectable):
-                    self.pick_up(target)
 
                 ent_flies = esper.has_component(mover, cmp.Flying)
                 if not ent_flies and has(target, cmp.OnStep):

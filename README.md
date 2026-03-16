@@ -209,7 +209,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * Push + AOE
             + might end up applying to walls too
             + animates application to an area, but one tile at a time
-    - cursor mvmt has no bounds checking
     - Pressing space post-teleport doesn't skip turn
         * Drinking potion doesn't take a turn?
         * I suspect this is.. last-pos doesn't get updated post teleport
