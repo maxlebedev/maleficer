@@ -110,9 +110,8 @@ class Movement(Processor):
         while event.Queues.movement:
             movement = event.Queues.movement.popleft()  # left, so player first
             mover = movement.source
-            if condition.has(mover, typ.Condition.Stun):
-                # TODO: this can't be the right place for this
-                # this whole thing is perhaps due for a pass
+            if condition.has(mover, cmp.Condition.Stun):
+                # TODO: enemy stun is handled elsewhere. We shouldmove this to player
                 continue
 
             if not esper.entity_exists(mover):
@@ -164,7 +163,7 @@ class NPCEval(Processor):
         stunned_txt = display.colored_text("stunned", display.Color.CYAN)
 
         for entity, (en_cmp,) in enemies:
-            if condition.has(entity, typ.Condition.Stun):
+            if condition.has(entity, cmp.Condition.Stun):
                 name = event.Log.color_fmt(entity)
                 event.Log.append(f"{name} is {stunned_txt}")
                 continue
@@ -208,11 +207,11 @@ class Damage(Processor):
                 event.Damage(damage_event.source, ent, damage_event.amount)
 
     def _resolve_aegis(self, damage_event):
-        aegis = condition.get_val(damage_event.target, typ.Condition.Aegis)
+        aegis = condition.get_val(damage_event.target, cmp.Condition.Aegis)
         absorbed = min(aegis, damage_event.amount)
         damage_event.amount -= absorbed
         aegis -= absorbed
-        condition.grant(damage_event.target, typ.Condition.Aegis, aegis)
+        condition.grant(damage_event.target, cmp.Condition.Aegis, aegis)
 
         dmg = display.colored_text(str(absorbed), display.Color.CYAN)
         aegis = display.colored_text("Aegis", display.Color.CYAN)
@@ -230,7 +229,7 @@ class Damage(Processor):
                 # damage source hit a wall, or similar
                 continue
 
-            if condition.has(damage_event.target, typ.Condition.Aegis):
+            if condition.has(damage_event.target, cmp.Condition.Aegis):
                 self._resolve_aegis(damage_event)
 
             math_util.apply_damage(damage_event.target, damage_event.amount)
@@ -382,7 +381,7 @@ class GameInputEvent(InputEvent):
 
         if not casting_spell:
             raise typ.InvalidAction("spell doesn't exist")
-        if condition.has(casting_spell, typ.Condition.Cooldown):
+        if condition.has(casting_spell, cmp.Condition.Cooldown):
             raise typ.InvalidAction("spell on cooldown")
 
         player_pos = location.player_position()
@@ -467,8 +466,8 @@ class BoardRender(Render):
 
         for spell_ent, (_, named, attuned) in sorted_spells:
             text = f"Slot{attuned.slot}:{named.name}"
-            if cd := condition.get_val(spell_ent, typ.Condition.Cooldown):
-                text = f"{text}:{typ.Condition.Cooldown.name} {cd}"
+            if cd := condition.get_val(spell_ent, cmp.Condition.Cooldown):
+                text = f"{text}:{cmp.Condition.Cooldown.__name__} {cd}"
             fg = display.Color.BEIGE
             bg = display.Color.BLACK
             if esper.has_component(spell_ent, cmp.Targeting):
@@ -544,9 +543,11 @@ class BoardRender(Render):
 
     def gather_conditions(self):
         ret = []
-        for _, (cnd_state, _) in ecs.Query(cmp.State, cmp.Player):
-            for status_effect, duration in cnd_state.map.items():
-                ret.append(f"{status_effect.name} {duration}")
+        player = ecs.Query(cmp.Player).first()
+        for cnd_typ in cmp.Condition.all():
+            if condition.has(player, cnd_typ):
+                cnd = ecs.Query(cnd_typ, cmp.Player).cmp(cnd_typ)
+                ret.append(f"{cnd_typ.__name__} {cnd.value}")
         return ret
 
     def _apply_lighting(self, cell_rgbs, in_fov) -> list[list[typ.CELL_RGB]]:
@@ -994,12 +995,12 @@ class Upkeep(Processor):
         if not event.Queues.tick:
             return
         event.Queues.tick.clear()
-        for entity, (status,) in ecs.Query(cmp.State):
-            for status_effect, duration in list(status.map.items()):
-                condition.apply(entity, status_effect, duration)
-                status.map[status_effect] = max(0, duration - 1)
-                if status.map[status_effect] == 0:
-                    del status.map[status_effect]
+        for cnd_typ in cmp.Condition.all():
+            for entity, (instance,) in ecs.Query(cnd_typ):
+                condition.apply(entity, instance)
+                instance.value -= 1
+                if instance.value < 1:
+                    esper.remove_component(entity, cnd_typ)
 
 
 @dataclass

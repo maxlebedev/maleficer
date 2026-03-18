@@ -207,77 +207,110 @@ class StartMenu:
 
 
 @component
-class DamageEffect:
-    """a spell (or w.e) deals damage"""
+class SpellEffect:
+    """This family of cmps goes on spells, and applies conditions/other"""
+    # might need to rename if used beyond spells
 
-    source: int
-    amount: int
-    die_type: int | None = None
+    @component
+    class Damage:
+        """a spell (or w.e) deals damage"""
 
-    @property
-    def desc(self) -> str:
-        if self.die_type:
-            return f"{self.amount}d{self.die_type}"
-        return str(self.amount)
+        source: int
+        amount: int
+        die_type: int | None = None
 
-    def calculate(self):
-        import math_util
+        @property
+        def desc(self) -> str:
+            if self.die_type:
+                return f"{self.amount}d{self.die_type}"
+            return str(self.amount)
 
-        if self.die_type:
-            return math_util.roll(self.amount, self.die_type)
-        return self.amount
+        def calculate(self):
+            import math_util
 
-
-@component
-class MoveEffect:
-    """a spell (or w.e) moves a target to crosshair"""
-
-    # target is chosen at spell creation time,
-    # so this won't work for arbitrary enemies
-    target: int
+            if self.die_type:
+                return math_util.roll(self.amount, self.die_type)
+            return self.amount
 
 
-@component
-class PushEffect:
-    """different take on forced movement"""
+    @component
+    class Move:
+        """a spell (or w.e) moves a target to crosshair"""
 
-    source: int
-    distance: int
-
-
-@component
-class PullEffect:
-    """different take on forced movement"""
-
-    source: int
+        # target is chosen at spell creation time,
+        # so this won't work for arbitrary enemies
+        target: int
 
 
-@component
-class HealEffect:
-    amount: int
+    @component
+    class Push:
+        """different take on forced movement"""
+
+        source: int
+        distance: int
 
 
-@component
-class BleedEffect:
-    value: int
+    @component
+    class Pull:
+        """different take on forced movement"""
+
+        source: int
 
 
-@component
-class StunEffect:
-    value: int
+    @component
+    class Heal:
+        amount: int
 
 
-@component
-class AegisEffect:
-    value: int
+    @component
+    class Bleed:
+        value: int
 
 
-@component
-class State:
-    """all of the conditions that an entity have"""
+    @component
+    class Stun:
+        value: int
 
-    map: dict[typ.Condition, int]  # maybe some conditions are additive?
 
+    @component
+    class Aegis:
+        value: int
+
+
+
+class Condition:
+    @component
+    class Type(abc.ABC):
+        value: int
+
+    @classmethod
+    def all(cls):
+        return cls.Type.__subclasses__()
+
+    @component
+    class Aegis(Type):
+        value: int
+
+    @component
+    class Bleed(Type):
+        value: int
+
+    @component
+    class Cooldown(Type):
+        value: int
+
+
+    @component
+    class Dying(Type):
+        value: int
+
+    @component
+    class Shunted(Type):
+        value: int
+
+    @component
+    class Stun(Type):
+        value: int
 
 @component
 class OnStep:

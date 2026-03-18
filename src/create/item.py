@@ -73,9 +73,9 @@ def bomb(pos: cmp.Position) -> int:
     cmps.append(cmp.DeathTrigger(callbacks=[behavior.apply_damage, dmg_proc]))
 
     bomb_ent = esper.create_entity(*cmps)
-    dmg = cmp.DamageEffect(source=bomb_ent, amount=10)
+    dmg = cmp.SpellEffect.Damage(source=bomb_ent, amount=10)
     esper.add_component(bomb_ent, dmg)
-    condition.grant(bomb_ent, typ.Condition.Dying, 2)
+    condition.grant(bomb_ent, cmp.Condition.Dying, 2)
 
     return bomb_ent
 

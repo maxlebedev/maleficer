@@ -152,7 +152,7 @@ def apply_push(source: typ.Entity):
             dist = push_effect.distance
             x, y = math_util.get_push_coords(source_pos.as_list, entity, dist)
             event.Movement(entity, x, y)
-            condition.grant(entity, typ.Condition.Shunted, 1)
+            condition.grant(entity, cmp.Condition.Shunted, 1)
 
     board = ecs.get_meta().board
     board.build_entity_cache()
@@ -172,7 +172,7 @@ def apply_pull(source: typ.Entity):
 
         for entity in entities:
             event.Movement(entity, dest.x, dest.y)
-            condition.grant(entity, typ.Condition.Shunted, 1)
+            condition.grant(entity, cmp.Condition.Shunted, 1)
 
     board = ecs.get_meta().board
     board.build_entity_cache()
@@ -198,17 +198,17 @@ def apply_learn(source: typ.Entity):
     _learn(spell)
 
     if cd_effect := esper.try_component(spell, cmp.Cooldown):
-        condition.grant(spell, typ.Condition.Cooldown, cd_effect.turns)
+        condition.grant(spell, cmp.Condition.Cooldown, cd_effect.turns)
 
 
 def apply_aegis(source: typ.Entity):
     if target_cmp := esper.try_component(source, cmp.Target):
         target = target_cmp.target
-        if aegis_effect := esper.try_component(source, cmp.AegisEffect):
+        if aegis_effect := esper.try_component(source, cmp.SpellEffect.Aegis):
             entities = collect_all_affected_entities(source, target)
             for ent in entities:
                 if esper.has_component(ent, cmp.Health):
-                    condition.grant(ent, typ.Condition.Aegis, aegis_effect.value)
+                    condition.grant(ent, cmp.Condition.Aegis, aegis_effect.value)
 
 
 def die(ent: typ.Entity):
@@ -328,7 +328,7 @@ def goblin(source: typ.Entity):
     if not can_see_player(source):
         return wander
 
-    if condition.has(source, typ.Condition.Cooldown):
+    if condition.has(source, cmp.Condition.Cooldown):
         return wander
 
     return lob_bomb
@@ -372,7 +372,7 @@ def skeleton(source: typ.Entity):
 
 def warlock(source: typ.Entity):
     if can_see_player(source):
-        if condition.has(source, typ.Condition.Cooldown):
+        if condition.has(source, cmp.Condition.Cooldown):
             return wander
         else:
             return fire_at_player
