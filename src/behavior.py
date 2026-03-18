@@ -91,7 +91,7 @@ def spider_jump(source: typ.Entity):
 
 
 def apply_cooldown(source: typ.Entity):
-    if cd_effect := esper.try_component(source, cmp.Cooldown):
+    if cd_effect := esper.try_component(source, cmp.RechargeTime):
         condition.grant(source, cmp.Condition.Cooldown, cd_effect.turns)
 
 
@@ -197,7 +197,7 @@ def apply_learn(source: typ.Entity):
 
     _learn(spell)
 
-    if cd_effect := esper.try_component(spell, cmp.Cooldown):
+    if cd_effect := esper.try_component(spell, cmp.RechargeTime):
         condition.grant(spell, cmp.Condition.Cooldown, cd_effect.turns)
 
 

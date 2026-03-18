@@ -437,7 +437,7 @@ class BoardRender(Render):
             ("Damage", cmp.SpellEffect.Damage, "desc"),
             ("Heal", cmp.SpellEffect.Heal, "amount"),
             ("Range", cmp.Spell, "target_range"),
-            ("Cooldown", cmp.Cooldown, "turns"),
+            ("RechargeTime", cmp.RechargeTime, "turns"),
         ]
         for name, try_cmp, attr in spell_component_details:
             if component := esper.try_component(item, try_cmp):

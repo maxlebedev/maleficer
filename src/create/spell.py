@@ -83,7 +83,7 @@ class ProcGen:
     @classmethod
     def _effects_to_spell(cls, effects: list, target_range: int, cooldown: int):
         spell_cmp = cmp.Spell(target_range=target_range)
-        cooldown_cmp = cmp.Cooldown(turns=cooldown)
+        cooldown_cmp = cmp.RechargeTime(turns=cooldown)
         name = "".join(random.choices(string.ascii_lowercase, k=5))
         known_as = cmp.KnownAs(name=name)
         spell = esper.create_entity(spell_cmp, known_as, cooldown_cmp, *effects)
@@ -104,7 +104,7 @@ def firebolt(level=1, name="Firebolt") -> int:
     cmps = []
     player = ecs.Query(cmp.Player).first()
     cmps.append(cmp.Spell(target_range=5))
-    cmps.append(cmp.Cooldown(turns=1))
+    cmps.append(cmp.RechargeTime(turns=1))
     cmps.append(cmp.SpellEffect.Damage(amount=1 + level, die_type=6, source=player))
     callback = partial(location.coords_within_radius, radius=1)
     cmps.append(cmp.EffectArea(callback))
@@ -117,7 +117,7 @@ def lighting(level=1, name="Lighting") -> int:
     cmps = []
     player = ecs.Query(cmp.Player).first()
     cmps.append(cmp.Spell(target_range=5))
-    cmps.append(cmp.Cooldown(turns=5))
+    cmps.append(cmp.RechargeTime(turns=5))
     cmps.append(cmp.SpellEffect.Damage(amount=4 + level, die_type=6, source=player))
 
     player_pos = location.player_position()
@@ -132,7 +132,7 @@ def blink(level=1, name="Blink") -> int:
     cmps = []
     player = ecs.Query(cmp.Player).first()
     cmps.append(cmp.Spell(target_range=3 + level))
-    cmps.append(cmp.Cooldown(turns=5))
+    cmps.append(cmp.RechargeTime(turns=5))
     cmps.append(cmp.SpellEffect.Move(target=player))
     cmps.append(cmp.KnownAs(name=name))
 
@@ -142,7 +142,7 @@ def blink(level=1, name="Blink") -> int:
 def lacerate(level=1, name="Lacerate") -> int:
     cmps = []
     cmps.append(cmp.Spell(target_range=3))
-    cmps.append(cmp.Cooldown(turns=2))
+    cmps.append(cmp.RechargeTime(turns=2))
     cmps.append(cmp.SpellEffect.Bleed(value=4 + level))
     cmps.append(cmp.KnownAs(name=name))
 
@@ -152,7 +152,7 @@ def lacerate(level=1, name="Lacerate") -> int:
 def push(level=1, name="Push") -> int:
     cmps = []
     cmps.append(cmp.Spell(target_range=3 + level))
-    cmps.append(cmp.Cooldown(turns=2))
+    cmps.append(cmp.RechargeTime(turns=2))
     cmps.append(cmp.KnownAs(name=name))
 
     player = ecs.Query(cmp.Player).first()
@@ -165,7 +165,7 @@ def pull(level=1, name="Pull") -> int:
     cmps = []
     spell_range = 3 + level
     cmps.append(cmp.Spell(target_range=spell_range))
-    cmps.append(cmp.Cooldown(turns=2))
+    cmps.append(cmp.RechargeTime(turns=2))
     cmps.append(cmp.KnownAs(name=name))
 
     player = ecs.Query(cmp.Player).first()
@@ -177,7 +177,7 @@ def pull(level=1, name="Pull") -> int:
 def daze(level=1, name="Daze") -> int:
     cmps = []
     cmps.append(cmp.Spell(target_range=2))
-    cmps.append(cmp.Cooldown(turns=6))
+    cmps.append(cmp.RechargeTime(turns=6))
     cmps.append(cmp.KnownAs(name=name))
     cmps.append(cmp.SpellEffect.Stun(value=1 + level))
 
@@ -187,7 +187,7 @@ def daze(level=1, name="Daze") -> int:
 def shield(level=1, name="Shield") -> int:
     cmps = []
     cmps.append(cmp.Spell(target_range=0))
-    cmps.append(cmp.Cooldown(turns=6))
+    cmps.append(cmp.RechargeTime(turns=6))
     cmps.append(cmp.KnownAs(name=name))
     cmps.append(cmp.SpellEffect.Aegis(value=9 + level))
 
@@ -198,7 +198,7 @@ def crush(level=1, name="Crush") -> int:
     cmps = []
     player = ecs.Query(cmp.Player).first()
     cmps.append(cmp.Spell(target_range=1))
-    cmps.append(cmp.Cooldown(turns=3))
+    cmps.append(cmp.RechargeTime(turns=3))
     cmps.append(cmp.SpellEffect.Damage(amount=4 + level, die_type=6, source=player))
     cmps.append(cmp.KnownAs(name=name))
 

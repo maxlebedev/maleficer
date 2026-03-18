@@ -156,7 +156,7 @@ class Spell:
 
 
 @component
-class Cooldown:
+class RechargeTime:
     turns: int
 
     def __post_init__(self):
@@ -298,7 +298,6 @@ class Condition:
     @component
     class Cooldown(Type):
         value: int
-
 
     @component
     class Dying(Type):
