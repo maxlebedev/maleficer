@@ -83,8 +83,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - TargetInputEvent returns control to the player's Damage phase. otherwise enemies get a turn before player damage resolves
     - The color scheme is.. color balanced for backing candle light
         - at least for NPCs
-    - Conditions live in a State cmp, in a single dict
-        * we could have them be separate cmps, children of some StatusEffect class
     - We may want MenuSelection, or the Menu cmp to hold a list of its MenuItems
 
 # TODO
@@ -97,11 +95,8 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
             + Potentially unscheduled procs
     - Spell resolution should def be its own (unscheduled) Proc
     - I want to reimpl all of the status stuff as their own Components
-        * They would be children of the Status cmp
-        * and ecs.has would check for it
-        * But ECS doesn't "do" subclasses. so I'd need a lookup thing
-        * Do we modify the query func to work on superclasses? can we?
-        * At minimum, get Condition our of typ
+        * There is a cmp.Condition.Cooldown, and a cmp.Cooldown
+        * We wanna unify the two and use the Condition everywhere
     - Targeting. Decouple it from spellcasting
     - Start Game flow needs to be more clear and unified, with ne top-lvl func
 
@@ -210,6 +205,9 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * Drinking potion doesn't take a turn?
         * I suspect this is.. last-pos doesn't get updated post teleport
             + So enemies move to player's old last-pos
+        * we can  have blink give  Shunted condition
+            + then check for that in Move proc to update LastPos
     - The `brighter` function is completely different from `darker`. 
     - Bomb throwing animations (and the like) pass through solid blocks
         * we should use pathfind rather than trace_ray
+    - The Bleed Flashpos tappens before a player move

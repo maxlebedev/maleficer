@@ -435,8 +435,8 @@ class BoardRender(Render):
     def _draw_selection_info(self, item: typ.Entity):
         selection_info = []
         spell_component_details = [
-            ("Damage", cmp.DamageEffect, "desc"),
-            ("Heal", cmp.HealEffect, "amount"),
+            ("Damage", cmp.SpellEffect.Damage, "desc"),
+            ("Heal", cmp.SpellEffect.Heal, "amount"),
             ("Range", cmp.Spell, "target_range"),
             ("Cooldown", cmp.Cooldown, "turns"),
         ]
@@ -444,13 +444,13 @@ class BoardRender(Render):
             if component := esper.try_component(item, try_cmp):
                 value = getattr(component, attr)
                 selection_info.append(f"{name}:{value}")
-        if bleed_effect := esper.try_component(item, cmp.BleedEffect):
+        if bleed_effect := esper.try_component(item, cmp.SpellEffect.Bleed):
             message = f"Grants Bleed:{bleed_effect.value}"
             selection_info.append(message)
-        if push := esper.try_component(item, cmp.PushEffect):
+        if push := esper.try_component(item, cmp.SpellEffect.Push):
             message = f"Imposes Push:{push.distance}"
             selection_info.append(message)
-        if stun_effect := esper.try_component(item, cmp.StunEffect):
+        if stun_effect := esper.try_component(item, cmp.SpellEffect.Stun):
             message = f"Grants Stun:{stun_effect.value}"
             selection_info.append(message)
         if aoe := esper.try_component(item, cmp.EffectArea):

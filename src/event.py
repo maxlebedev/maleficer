@@ -166,14 +166,14 @@ def trigger_all_callbacks(source: typ.Entity, trigger_cmp):
 def trigger_effect_callbacks(source: typ.Entity):
     effect_map = {
         cmp.Spell: behavior.apply_cooldown,
-        cmp.MoveEffect: behavior.apply_move,
-        cmp.PushEffect: behavior.apply_push,
-        cmp.PullEffect: behavior.apply_pull,
-        cmp.AegisEffect: behavior.apply_aegis,
-        cmp.StunEffect: behavior.apply_stun,
-        cmp.BleedEffect: behavior.apply_bleed,
-        cmp.HealEffect: behavior.apply_healing,
-        cmp.DamageEffect: behavior.apply_damage,
+        cmp.SpellEffect.Move: behavior.apply_move,
+        cmp.SpellEffect.Push: behavior.apply_push,
+        cmp.SpellEffect.Pull: behavior.apply_pull,
+        cmp.SpellEffect.Aegis: behavior.apply_aegis,
+        cmp.SpellEffect.Stun: behavior.apply_stun,
+        cmp.SpellEffect.Bleed: behavior.apply_bleed,
+        cmp.SpellEffect.Heal: behavior.apply_healing,
+        cmp.SpellEffect.Damage: behavior.apply_damage,
     }
     for k, func in effect_map.items():
         if esper.has_component(source, k):

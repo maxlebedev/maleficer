@@ -16,7 +16,7 @@ def bat(pos: cmp.Position) -> int:
     cmps.append(cmp.Blocking())
     bat = esper.create_entity(*cmps)
 
-    dmg_effect = cmp.DamageEffect(amount=5, source=bat)
+    dmg_effect = cmp.SpellEffect.Damage(amount=5, source=bat)
     esper.add_component(bat, dmg_effect)
     return bat
 
@@ -31,7 +31,7 @@ def skeleton(pos: cmp.Position) -> int:
     cmps.append(cmp.Blocking())
     skeleton = esper.create_entity(*cmps)
 
-    dmg_effect = cmp.DamageEffect(amount=10, source=skeleton)
+    dmg_effect = cmp.SpellEffect.Damage(amount=10, source=skeleton)
     esper.add_component(skeleton, dmg_effect)
     return skeleton
 
@@ -48,7 +48,7 @@ def warlock(pos: cmp.Position) -> int:
     cmps.append(cmp.Blocking())
     warlock = esper.create_entity(*cmps)
 
-    dmg_effect = cmp.DamageEffect(amount=5, source=warlock)
+    dmg_effect = cmp.SpellEffect.Damage(amount=5, source=warlock)
     esper.add_component(warlock, dmg_effect)
     return warlock
 
@@ -65,7 +65,7 @@ def living_flame(pos: cmp.Position) -> int:
     cmps.append(cmp.Blocking())
     flame = esper.create_entity(*cmps)
 
-    dmg_effect = cmp.DamageEffect(amount=10, source=flame)
+    dmg_effect = cmp.SpellEffect.Damage(amount=10, source=flame)
     esper.add_component(flame, dmg_effect)
     return flame
 
@@ -82,7 +82,7 @@ def goblin(pos: cmp.Position) -> int:
     cmps.append(cmp.Blocking())
     goblin = esper.create_entity(*cmps)
 
-    dmg_effect = cmp.DamageEffect(amount=10, source=goblin)
+    dmg_effect = cmp.SpellEffect.Damage(amount=10, source=goblin)
     esper.add_component(goblin, dmg_effect)
     return goblin
 
@@ -98,7 +98,7 @@ def cyclops(pos: cmp.Position) -> int:
     cmps.append(cmp.Blocking())
     cyclops = esper.create_entity(*cmps)
 
-    dmg_effect = cmp.DamageEffect(amount=10, source=cyclops)
+    dmg_effect = cmp.SpellEffect.Damage(amount=10, source=cyclops)
     esper.add_component(cyclops, dmg_effect)
     return cyclops
 
@@ -113,6 +113,6 @@ def spider(pos: cmp.Position) -> int:
     cmps.append(cmp.Blocking())
     spider = esper.create_entity(*cmps)
 
-    dmg_effect = cmp.DamageEffect(amount=10, source=spider)
+    dmg_effect = cmp.SpellEffect.Damage(amount=10, source=spider)
     esper.add_component(spider, dmg_effect)
     return spider

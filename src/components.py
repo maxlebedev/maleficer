@@ -1,6 +1,8 @@
 import typing
+import abc
 from collections.abc import Callable
 from dataclasses import dataclass as component
+import tcod
 
 import display
 import typ
@@ -17,8 +19,8 @@ class Player:
 @component
 class GameMeta:
     board: object  # location.Board
-    context: object  # tcod.context.Context
-    console: object  # tcod.console.Console
+    context: tcod.context.Context
+    console: tcod.console.Console
     process: None = None
 
 

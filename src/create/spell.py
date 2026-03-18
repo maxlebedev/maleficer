@@ -26,22 +26,22 @@ class ProcGen:
     def make_damage_effect(cls, power_budget: int):
         player = ecs.Query(cmp.Player).first()
         amount = max(2, power_budget // 5)
-        return cmp.DamageEffect(amount=amount, die_type=6, source=player)
+        return cmp.SpellEffect.Damage(amount=amount, die_type=6, source=player)
 
     @classmethod
     def make_push_effect(cls, power_budget: int):
         player = ecs.Query(cmp.Player).first()
         distance = max(1, power_budget // 5)
-        return cmp.PushEffect(distance=distance, source=player)
+        return cmp.SpellEffect.Push(distance=distance, source=player)
 
     @classmethod
     def make_stun_effect(cls, power_budget: int):
         value = max(1, power_budget // 5)
-        return cmp.StunEffect(value=value)
+        return cmp.SpellEffect.Stun(value=value)
 
     @classmethod
     def make_bleed_effect(cls, power_budget: int):
-        return cmp.BleedEffect(value=power_budget)
+        return cmp.SpellEffect.Bleed(value=power_budget)
 
     @classmethod
     def make_area_effect(cls, power_budget: int):
@@ -105,7 +105,7 @@ def firebolt(level=1, name="Firebolt") -> int:
     player = ecs.Query(cmp.Player).first()
     cmps.append(cmp.Spell(target_range=5))
     cmps.append(cmp.Cooldown(turns=1))
-    cmps.append(cmp.DamageEffect(amount=1 + level, die_type=6, source=player))
+    cmps.append(cmp.SpellEffect.Damage(amount=1 + level, die_type=6, source=player))
     callback = partial(location.coords_within_radius, radius=1)
     cmps.append(cmp.EffectArea(callback))
     cmps.append(cmp.KnownAs(name=name))
@@ -118,7 +118,7 @@ def lighting(level=1, name="Lighting") -> int:
     player = ecs.Query(cmp.Player).first()
     cmps.append(cmp.Spell(target_range=5))
     cmps.append(cmp.Cooldown(turns=5))
-    cmps.append(cmp.DamageEffect(amount=4 + level, die_type=6, source=player))
+    cmps.append(cmp.SpellEffect.Damage(amount=4 + level, die_type=6, source=player))
 
     player_pos = location.player_position()
     callback = partial(location.coords_line_to_point, player_pos)
@@ -133,7 +133,7 @@ def blink(level=1, name="Blink") -> int:
     player = ecs.Query(cmp.Player).first()
     cmps.append(cmp.Spell(target_range=3 + level))
     cmps.append(cmp.Cooldown(turns=5))
-    cmps.append(cmp.MoveEffect(target=player))
+    cmps.append(cmp.SpellEffect.Move(target=player))
     cmps.append(cmp.KnownAs(name=name))
 
     return esper.create_entity(*cmps)
@@ -143,7 +143,7 @@ def lacerate(level=1, name="Lacerate") -> int:
     cmps = []
     cmps.append(cmp.Spell(target_range=3))
     cmps.append(cmp.Cooldown(turns=2))
-    cmps.append(cmp.BleedEffect(value=4 + level))
+    cmps.append(cmp.SpellEffect.Bleed(value=4 + level))
     cmps.append(cmp.KnownAs(name=name))
 
     return esper.create_entity(*cmps)
@@ -156,7 +156,7 @@ def push(level=1, name="Push") -> int:
     cmps.append(cmp.KnownAs(name=name))
 
     player = ecs.Query(cmp.Player).first()
-    cmps.append(cmp.PushEffect(source=player, distance=2))
+    cmps.append(cmp.SpellEffect.Push(source=player, distance=2))
 
     return esper.create_entity(*cmps)
 
@@ -169,7 +169,7 @@ def pull(level=1, name="Pull") -> int:
     cmps.append(cmp.KnownAs(name=name))
 
     player = ecs.Query(cmp.Player).first()
-    cmps.append(cmp.PullEffect(source=player))
+    cmps.append(cmp.SpellEffect.Pull(source=player))
 
     return esper.create_entity(*cmps)
 
@@ -179,7 +179,7 @@ def daze(level=1, name="Daze") -> int:
     cmps.append(cmp.Spell(target_range=2))
     cmps.append(cmp.Cooldown(turns=6))
     cmps.append(cmp.KnownAs(name=name))
-    cmps.append(cmp.StunEffect(value=1 + level))
+    cmps.append(cmp.SpellEffect.Stun(value=1 + level))
 
     return esper.create_entity(*cmps)
 
@@ -189,7 +189,7 @@ def shield(level=1, name="Shield") -> int:
     cmps.append(cmp.Spell(target_range=0))
     cmps.append(cmp.Cooldown(turns=6))
     cmps.append(cmp.KnownAs(name=name))
-    cmps.append(cmp.AegisEffect(value=9 + level))
+    cmps.append(cmp.SpellEffect.Aegis(value=9 + level))
 
     return esper.create_entity(*cmps)
 
@@ -199,7 +199,7 @@ def crush(level=1, name="Crush") -> int:
     player = ecs.Query(cmp.Player).first()
     cmps.append(cmp.Spell(target_range=1))
     cmps.append(cmp.Cooldown(turns=3))
-    cmps.append(cmp.DamageEffect(amount=4 + level, die_type=6, source=player))
+    cmps.append(cmp.SpellEffect.Damage(amount=4 + level, die_type=6, source=player))
     cmps.append(cmp.KnownAs(name=name))
 
     return esper.create_entity(*cmps)

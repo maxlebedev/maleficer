@@ -10,7 +10,6 @@ import ecs
 import location
 import phase
 import processors
-import typ
 
 from . import spell as create_spell
 
@@ -22,7 +21,7 @@ def potion(pos: cmp.Position | None = None) -> int:
     cmps.append(cmp.Health(max=1))
     cmps.append(cmp.KnownAs(name="potion"))
 
-    cmps.append(cmp.HealEffect(amount=15))
+    cmps.append(cmp.SpellEffect.Heal(amount=15))
     cmps.append(cmp.UseTrigger(callbacks=[behavior.apply_healing]))
 
     player = ecs.Query(cmp.Player).first()
@@ -91,7 +90,7 @@ def spike_trap(pos: cmp.Position) -> int:
 
     cmps.append(cmp.StepTrigger(callbacks=[behavior.apply_damage]))
     trap_ent = esper.create_entity(*cmps)
-    dmg = cmp.DamageEffect(source=trap_ent, amount=5)
+    dmg = cmp.SpellEffect.Damage(source=trap_ent, amount=5)
     esper.add_component(trap_ent, dmg)
     return trap_ent
 

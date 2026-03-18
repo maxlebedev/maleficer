@@ -92,12 +92,12 @@ def spider_jump(source: typ.Entity):
 
 def apply_cooldown(source: typ.Entity):
     if cd_effect := esper.try_component(source, cmp.Cooldown):
-        condition.grant(source, typ.Condition.Cooldown, cd_effect.turns)
+        condition.grant(source, cmp.Condition.Cooldown, cd_effect.turns)
 
 
 def apply_healing(source: typ.Entity):
     if target_cmp := esper.try_component(source, cmp.Target):
-        if heal_effect := esper.try_component(source, cmp.HealEffect):
+        if heal_effect := esper.try_component(source, cmp.SpellEffect.Heal):
             src_frz = ecs.freeze_entity(source)
             event.Damage(src_frz, target_cmp.target, -1 * heal_effect.amount)
 
@@ -105,27 +105,27 @@ def apply_healing(source: typ.Entity):
 def apply_bleed(source: typ.Entity):
     if target_cmp := esper.try_component(source, cmp.Target):
         target = target_cmp.target
-        if bleed_effect := esper.try_component(source, cmp.BleedEffect):
+        if bleed_effect := esper.try_component(source, cmp.SpellEffect.Bleed):
             entities = collect_all_affected_entities(source, target)
             for ent in entities:
                 if esper.has_component(ent, cmp.Health):
-                    condition.grant(ent, typ.Condition.Bleed, bleed_effect.value)
+                    condition.grant(ent, cmp.Condition.Bleed, bleed_effect.value)
 
 
 def apply_stun(source: typ.Entity):
     if target_cmp := esper.try_component(source, cmp.Target):
         target = target_cmp.target
-        if stun_effect := esper.try_component(source, cmp.StunEffect):
+        if stun_effect := esper.try_component(source, cmp.SpellEffect.Stun):
             entities = collect_all_affected_entities(source, target)
             for ent in entities:
                 if esper.has_component(ent, cmp.Health):
-                    condition.grant(ent, typ.Condition.Stun, stun_effect.value)
+                    condition.grant(ent, cmp.Condition.Stun, stun_effect.value)
 
 
 def apply_damage(source: typ.Entity):
     if target_cmp := esper.try_component(source, cmp.Target):
         target = target_cmp.target
-        if dmg_effect := esper.try_component(source, cmp.DamageEffect):
+        if dmg_effect := esper.try_component(source, cmp.SpellEffect.Damage):
             src_frz = ecs.freeze_entity(source)
             entities = collect_all_affected_entities(source, target)
             for ent in entities:
@@ -136,14 +136,14 @@ def apply_damage(source: typ.Entity):
 
 def apply_move(source: typ.Entity):
     """move target to crosshair"""
-    if move_effect := esper.try_component(source, cmp.MoveEffect):
+    if move_effect := esper.try_component(source, cmp.SpellEffect.Move):
         pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(cmp.Position)
         event.Movement(move_effect.target, pos.x, pos.y)
 
 
 def apply_push(source: typ.Entity):
     """move target N spaces away from source"""
-    push_effect = esper.component_for_entity(source, cmp.PushEffect)
+    push_effect = esper.component_for_entity(source, cmp.SpellEffect.Push)
     source_pos = esper.component_for_entity(push_effect.source, cmp.Position)
     if target_cmp := esper.try_component(source, cmp.Target):
         entities = collect_all_affected_entities(source, target_cmp.target)
@@ -160,7 +160,7 @@ def apply_push(source: typ.Entity):
 
 def apply_pull(source: typ.Entity):
     """move target up to source"""
-    pull_effect = esper.component_for_entity(source, cmp.PullEffect)
+    pull_effect = esper.component_for_entity(source, cmp.SpellEffect.Pull)
     source_pos = esper.component_for_entity(pull_effect.source, cmp.Position)
     if target_cmp := esper.try_component(source, cmp.Target):
         entities = collect_all_affected_entities(source, target_cmp.target)
@@ -264,7 +264,7 @@ def draw_aoe_sphere(source: typ.Entity, radius=2):
 
 def apply_dmg_along_locus(source: typ.Entity):
     src_frz = ecs.freeze_entity(source)
-    dmg_effect = esper.component_for_entity(source, cmp.DamageEffect)
+    dmg_effect = esper.component_for_entity(source, cmp.SpellEffect.Damage)
     locus = esper.component_for_entity(source, cmp.Locus)
     board = ecs.get_meta().board
     for x, y in locus.coords:
