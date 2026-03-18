@@ -94,9 +94,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
             + The 'On's could be more ECS-compliant
             + Potentially unscheduled procs
     - Spell resolution should def be its own (unscheduled) Proc
-    - I want to reimpl all of the status stuff as their own Components
-        * There is a cmp.Condition.Cooldown, and a cmp.Cooldown
-        * We wanna unify the two and use the Condition everywhere
     - Targeting. Decouple it from spellcasting
     - Start Game flow needs to be more clear and unified, with ne top-lvl func
 
