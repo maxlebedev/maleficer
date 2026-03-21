@@ -14,7 +14,7 @@ def has(entity: int, cnd_typ: type["cmp.Condition.Type"]) -> bool:
 
 
 def grant(entity: int, cnd_typ: type["cmp.Condition.Type"], value: int):
-    """ TODO: give it a default 0, then add value. so that you can 'grant' -1"""
+    """TODO: give it a default 0, then add value. so that you can 'grant' -1"""
     if not esper.has_component(entity, cnd_typ):
         esper.add_component(entity, cnd_typ(value=0))
     cnd = esper.component_for_entity(entity, cnd_typ)
@@ -23,7 +23,7 @@ def grant(entity: int, cnd_typ: type["cmp.Condition.Type"], value: int):
 
 def get_val(entity: int, cnd_typ: type["cmp.Condition.Type"]) -> int:
     if cnd := esper.try_component(entity, cnd_typ):
-        return cnd.value  or 0
+        return cnd.value or 0
     return 0
 
 

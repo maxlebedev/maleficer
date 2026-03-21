@@ -209,6 +209,7 @@ class StartMenu:
 @component
 class SpellEffect:
     """This family of cmps goes on spells, and applies conditions/other"""
+
     # might need to rename if used beyond spells
 
     @component
@@ -232,7 +233,6 @@ class SpellEffect:
                 return math_util.roll(self.amount, self.die_type)
             return self.amount
 
-
     @component
     class Move:
         """a spell (or w.e) moves a target to crosshair"""
@@ -241,7 +241,6 @@ class SpellEffect:
         # so this won't work for arbitrary enemies
         target: int
 
-
     @component
     class Push:
         """different take on forced movement"""
@@ -249,33 +248,27 @@ class SpellEffect:
         source: int
         distance: int
 
-
     @component
     class Pull:
         """different take on forced movement"""
 
         source: int
 
-
     @component
     class Heal:
         amount: int
-
 
     @component
     class Bleed:
         value: int
 
-
     @component
     class Stun:
         value: int
 
-
     @component
     class Aegis:
         value: int
-
 
 
 class Condition:
@@ -310,6 +303,7 @@ class Condition:
     @component
     class Stun(Type):
         value: int
+
 
 @component
 class OnStep:

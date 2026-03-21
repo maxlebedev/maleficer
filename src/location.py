@@ -463,19 +463,19 @@ class Dungeon:
 
     def populate(self, room: RectangularRoom):
         """fill a room with pieces"""
-        for _ in range(random.randint(1, 3)):
-            npcs = [
-                create.npc.bat,
-                create.npc.skeleton,
-                create.npc.warlock,
-            ]
-            weights = [3, 2, 1]
-            npc_gen = random.choices(npcs, weights)[0]
-            npc_gen(room.get_random_pos())
-        item = random.choice(
-            [create.item.spike_trap, create.item.potion, create.item.scroll]
-        )
-        item(room.get_random_pos())
+        depth = ecs.Query(cmp.GameMeta).cmp(cmp.MapInfo).depth
+
+        for _ in range(random.randint(1, 3 + depth // 5)):
+            spawn_table = {
+                create.npc.bat: max(0, 5 - depth),
+                create.npc.skeleton: 2,
+                create.npc.warlock: 1 + depth // 3,
+                create.npc.cyclops: depth // 5,
+                create.item.potion: 2,
+                create.item.scroll: 1,
+            }
+            spawn = math_util.rand_from_table(spawn_table)
+            spawn(room.get_random_pos())
 
 
 class Cave:
@@ -682,11 +682,14 @@ class Maze:
         self.board.retile(stair_x, stair_y, create.tile.stairs)
 
     def populate(self, seen, dead_ends):
+        depth = ecs.Query(cmp.GameMeta).cmp(cmp.MapInfo).depth
+
         spawn_table = {
             create.item.spike_trap: 3,
-            create.npc.bat: 5,
+            create.npc.bat: max(0, 5-depth),
             create.npc.goblin: 3,
-            create.npc.warlock: 1,
+            create.npc.warlock: 1 + depth // 3,
+            create.npc.spider: depth // 5,
         }
 
         self.place_from_table(spawn_table, seen[1:-1], 2)
@@ -764,19 +767,19 @@ class BSPDungeon:
 
     def populate(self, room: RectangularRoom):
         """fill a room with pieces"""
+        depth = ecs.Query(cmp.GameMeta).cmp(cmp.MapInfo).depth
+
         for _ in range(random.randint(1, 3)):
-            npcs = [
-                create.npc.bat,
-                create.npc.skeleton,
-                create.npc.warlock,
-            ]
-            weights = [3, 2, 1]
-            npc_gen = random.choices(npcs, weights)[0]
-            npc_gen(room.get_random_pos())
-        item = random.choice(
-            [create.item.spike_trap, create.item.potion, create.item.scroll]
-        )
-        item(room.get_random_pos())
+            spawn_table = {
+                create.npc.bat: max(0, 5 - depth),
+                create.npc.skeleton: 2,
+                create.npc.warlock: 1 + depth // 3,
+                create.npc.cyclops: depth // 5,
+                create.item.potion: 2,
+                create.item.scroll: 1,
+            }
+            spawn = math_util.rand_from_table(spawn_table)
+            spawn(room.get_random_pos())
 
 
 class TestDungeon:
@@ -858,20 +861,21 @@ class DrunkenWalk:
         return path
 
     def populate(self, path):
-        map_info = ecs.Query(cmp.GameMeta).cmp(cmp.MapInfo)
-        spawn_goal = 20 + map_info.depth
+        depth = ecs.Query(cmp.GameMeta).cmp(cmp.MapInfo).depth
+        spawn_goal = 20 + depth
 
         spawn_table = {
             create.item.spike_trap: 3,
             create.item.potion: 2,
             create.item.scroll: 1,
-            create.npc.bat: 5,
+            create.npc.bat: max(0, 5 - depth),
             create.npc.goblin: 3,
-            create.npc.warlock: 1,
+            create.npc.warlock: depth // 2,
+            create.npc.living_flame: depth // 3,
         }
 
         floor_tiles = path[:-1]
-        spawn_tiles =random.sample(floor_tiles, k=spawn_goal) 
+        spawn_tiles = random.sample(floor_tiles, k=spawn_goal)
         for x, y in spawn_tiles:
             spawn = math_util.rand_from_table(spawn_table)
             new_pos = cmp.Position(x, y)
@@ -882,7 +886,7 @@ class DrunkenWalk:
 
     def populate_grass(self, floor_tiles: list[tuple]):
         """pick an offset for grass start, make 4-8 tiles, repeat"""
-        start = random.randrange(0, len(floor_tiles)//2)
+        start = random.randrange(0, len(floor_tiles) // 2)
         end = start + math_util.biased_randint(4, 10, lam=1)
         for i, tile in enumerate(floor_tiles):
             if i < start:
@@ -893,4 +897,4 @@ class DrunkenWalk:
             elif i == end:
                 start = random.randrange(i, len(floor_tiles))
                 grass_count = math_util.biased_randint(4, 10, lam=1)
-                end = start+grass_count
+                end = start + grass_count
