@@ -73,11 +73,14 @@ def coords_line_to_point(source: cmp.Position, dest: cmp.Position) -> list[typ.C
 def backlight(x, y):
     """add a fading candle-colored illumination of the player's sight radius"""
     # we then darken the bg light by its distance from the light src player
-    player_pos = player_position()
-    dist_to_player = math.dist(player_pos.as_tuple, (x, y))
+    # we use the closes vision-holding entity, not just player
+    dist_to_light = float("inf")
+    for _, (_, pos) in ecs.Query(cmp.GivesVision, cmp.Position):
+        dist_to_light = min(dist_to_light, math.dist(pos.as_tuple, (x, y)))
+
     player_cmp = ecs.Query(cmp.Player).val
 
-    normalized_dist = dist_to_player / player_cmp.sight_radius
+    normalized_dist = dist_to_light / player_cmp.sight_radius
     interpolation_coef = 0.85  # higher is faster dropoff
     factor = 1.0 - (normalized_dist * normalized_dist * interpolation_coef)
     bg = display.darker(display.Color.CANDLE, factor=factor)
@@ -337,14 +340,11 @@ def trace_ray(source: int, dest: int):
 def get_fov():
     board = ecs.get_meta().board
     transparency = board.as_transparency()
-    pos = player_position()
-    player_cmp = ecs.Query(cmp.Player).val
-    radius = player_cmp.sight_radius
-    algo = tcod.libtcodpy.FOV_SHADOW
-
-    fov = tcod.map.compute_fov(
-        transparency, pos.as_tuple, radius=radius, algorithm=algo
-    )
+    fov = None
+    p = {"algorithm": tcod.libtcodpy.FOV_SHADOW, "transparency": transparency}
+    for _, (vis, pos) in ecs.Query(cmp.GivesVision, cmp.Position):
+        nfov = tcod.map.compute_fov(**p, pov=pos.as_tuple, radius=vis.distance)
+        fov = nfov if fov is None else fov | nfov
     return fov
 
 
@@ -686,7 +686,7 @@ class Maze:
 
         spawn_table = {
             create.item.spike_trap: 3,
-            create.npc.bat: max(0, 5-depth),
+            create.npc.bat: max(0, 5 - depth),
             create.npc.goblin: 3,
             create.npc.warlock: 1 + depth // 3,
             create.npc.spider: depth // 5,
@@ -802,8 +802,6 @@ class TestDungeon:
         pos = player_position()
         pos.x, pos.y = new_room.center.x, new_room.center.y
         create.npc.cyclops(new_room.get_random_pos())
-        for _ in range(20):
-            create.item.grass(new_room.get_random_pos())
         create.item.potion(new_room.get_random_pos())
         create.item.scroll(new_room.get_random_pos())
         self.board.build_entity_cache()

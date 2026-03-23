@@ -29,6 +29,7 @@ def adept():
     cmps.append(cmp.KnownAs(name="player"))
     cmps.append(cmp.Blocking())
     cmps.append(cmp.LastPosition(cmp.Position(x=1, y=1)))
+    cmps.append(cmp.GivesVision(distance=4))
     esper.create_entity(*cmps)
 
     behavior._learn(spell.firebolt())
@@ -44,6 +45,7 @@ def bloodmage():
     cmps.append(cmp.KnownAs(name="player"))
     cmps.append(cmp.Blocking())
     cmps.append(cmp.LastPosition(cmp.Position(x=1, y=1)))
+    cmps.append(cmp.GivesVision(distance=4))
     esper.create_entity(*cmps)
 
     behavior._learn(spell.daze())
@@ -59,6 +61,7 @@ def terramancer():
     cmps.append(cmp.KnownAs(name="player"))
     cmps.append(cmp.Blocking())
     cmps.append(cmp.LastPosition(cmp.Position(x=1, y=1)))
+    cmps.append(cmp.GivesVision(distance=4))
     esper.create_entity(*cmps)
 
     behavior._learn(spell.pull())
@@ -74,6 +77,7 @@ def stormcaller():
     cmps.append(cmp.KnownAs(name="player"))
     cmps.append(cmp.Blocking())
     cmps.append(cmp.LastPosition(cmp.Position(x=1, y=1)))
+    cmps.append(cmp.GivesVision(distance=5))
     esper.create_entity(*cmps)
 
     behavior._learn(spell.blink())

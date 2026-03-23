@@ -367,3 +367,8 @@ class Aura:
 
     color: typ.RGB
     callback: Callable  # takes pos, return list[x,y]
+
+
+@component
+class GivesVision:
+    distance: int = 4

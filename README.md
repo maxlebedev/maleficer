@@ -208,3 +208,11 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Bomb throwing animations (and the like) pass through solid blocks
         * we should use pathfind rather than trace_ray
     - The Bleed Flashpos tappens before a player move
+    - Warlocks can curve shots one cell behind a corner. This feels unintuitive
+
+# DOING
+    - FOV rework
+        * GivesVision cmp, vor use in get_fov and backlight
+        * the tab-target & target description code still use player.sight_radius
+    - Vision spell (spawn entities that give vision on random points in the map
+    - Maybe a npc pathfind/ai reword to attack based on some Summon cmp
