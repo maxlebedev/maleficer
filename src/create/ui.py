@@ -80,12 +80,14 @@ def discipline_opts():
     pick_bloodmage = make_picker(create.player.bloodmage)
     pick_terramancer = make_picker(create.player.terramancer)
     pick_stormcaller = make_picker(create.player.stormcaller)
+    pick_luminary = make_picker(create.player.luminary)
 
     opts = [
         (pick_adept, "Adept (80hp/blink/firebolt)"),
         (pick_bloodmage, "Bloodmage (100hp/daze/mutilate)"),
         (pick_terramancer, "Terramancer (100hp/crush/pull)"),
         (pick_stormcaller, "Stormcaller (70hp/lighning/blink)"),
+        (pick_luminary, "Luminary (100hp/firebolt/flare)"),
     ]
 
     for i, (func, desc) in enumerate(opts):

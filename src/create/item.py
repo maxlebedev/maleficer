@@ -120,3 +120,22 @@ def grass(pos: cmp.Position) -> int:
     cmps.append(cmp.StepTrigger(callbacks=[behavior.die]))
     trap_ent = esper.create_entity(*cmps)
     return trap_ent
+
+def flare_charge(pos: cmp.Position | None = None) -> int:
+    # TODO: should both this and flare spell exist?
+    cmps = []
+    cmps.append(cmp.Visible(glyph=dis.Glyph.POTION, color=dis.Color.MAGENTA))
+    cmps.append(cmp.Health(max=1))
+    cmps.append(cmp.KnownAs(name="flare charge"))
+    cmps.append(cmp.Collectable())
+    cmps.append(pos)
+    cmps.append(cmp.UseTrigger(callbacks=[behavior.spawn_sensor]*3))
+    return esper.create_entity(*cmps)
+
+def sensor(pos: cmp.Position | None = None) -> int:
+    cmps = []
+    cmps.append(cmp.Health(max=1))
+    cmps.append(cmp.KnownAs(name="sensor"))
+    cmps.append(pos)
+    cmps.append(cmp.GivesVision(distance=4))
+    return esper.create_entity(*cmps)

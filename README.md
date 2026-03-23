@@ -173,6 +173,8 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Portals, that are like traps with the on-step
         * but instead of dmg, position changes
     - Spider takes a turn to jump, giving player just enough time to get away
+    - Maybe a npc pathfind/ai reword to attack based on some Summon cmp
+        * this way flare can create destructable summons
 ## UX
     - use that M icon
     - other menus probably want backgrounds.
@@ -207,12 +209,12 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - The `brighter` function is completely different from `darker`. 
     - Bomb throwing animations (and the like) pass through solid blocks
         * we should use pathfind rather than trace_ray
-    - The Bleed Flashpos tappens before a player move
+    - The Bleed Flashpos tappens before a player moves
     - Warlocks can curve shots one cell behind a corner. This feels unintuitive
+    - Pull is buggy at some angles
+    - Spells assume a target phase. This is *okay* bc it serves as a confirm for the cast as well
 
 # DOING
     - FOV rework
-        * GivesVision cmp, vor use in get_fov and backlight
         * the tab-target & target description code still use player.sight_radius
-    - Vision spell (spawn entities that give vision on random points in the map
-    - Maybe a npc pathfind/ai reword to attack based on some Summon cmp
+        * I don't love the SSOT issue here, will move those over later

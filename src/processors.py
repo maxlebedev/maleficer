@@ -747,6 +747,7 @@ class TargetInputEvent(InputEvent):
 
         try:
             event.trigger_effect_callbacks(targeting_entity)
+            event.trigger_all_callbacks(targeting_entity, cmp.UseTrigger)
             esper.remove_component(targeting_entity, cmp.Targeting)
             event.Tick()
             phase.change_to(phase.Ontology.level, Damage)  # to FIRST dmg phase

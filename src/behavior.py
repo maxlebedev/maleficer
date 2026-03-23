@@ -66,11 +66,20 @@ def lob_bomb(source: typ.Entity):
         if dest != target_cell:  # no LOS
             continue
         dest_pos = cmp.Position(*trace[-1])
-        event.Spawn(func=partial(create.item.bomb, dest_pos))
         event.Animation(locs=trace, glyph=display.Glyph.BOMB, fg=display.Color.RED)
+        event.Spawn(func=partial(create.item.bomb, dest_pos))
         apply_cooldown(source)
         return
 
+def spawn_sensor(_source: typ.Entity):
+    import create
+    floor_ents = [ent for ent, _ in ecs.Query(cmp.Cell).exclude(cmp.Wall)]
+    floor_ent = random.choice(floor_ents)
+    dest_pos = esper.component_for_entity(floor_ent, cmp.Position)
+    # TODO: not just floor, but unoccupied floor
+    # board.entities_at(x,y)
+
+    event.Spawn(func=partial(create.item.sensor, dest_pos))
 
 def spider_jump(source: typ.Entity):
     player_pos = location.player_position()

@@ -144,8 +144,7 @@ class Spawn(Event):
 
     def __post_init__(self):
         super().__post_init__()
-        # TODO: all ther others use oneshot here
-        processors.queue_proc(processors.Spawn)
+        phase.oneshot(processors.Spawn)
 
 
 def trigger_all_callbacks(source: typ.Entity, trigger_cmp):
@@ -175,8 +174,8 @@ def trigger_effect_callbacks(source: typ.Entity):
         cmp.SpellEffect.Heal: behavior.apply_healing,
         cmp.SpellEffect.Damage: behavior.apply_damage,
     }
-    for k, func in effect_map.items():
-        if esper.has_component(source, k):
+    for component, func in effect_map.items():
+        if esper.has_component(source, component):
             func(source)
 
     # I don't remember why these are here.

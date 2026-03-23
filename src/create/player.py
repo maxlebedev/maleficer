@@ -83,6 +83,21 @@ def stormcaller():
     behavior._learn(spell.blink())
     behavior._learn(spell.lighting())
 
+def luminary():
+    cmps = []
+    cmps.append(cmp.Player())
+    cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.LCYAN))
+    cmps.append(cmp.Position(x=1, y=1))
+    cmps.append(cmp.Health(max=80))
+    cmps.append(cmp.KnownAs(name="player"))
+    cmps.append(cmp.Blocking())
+    cmps.append(cmp.LastPosition(cmp.Position(x=1, y=1)))
+    cmps.append(cmp.GivesVision(distance=4))
+    esper.create_entity(*cmps)
+
+    behavior._learn(spell.firebolt())
+    behavior._learn(spell.flare())
+
 
 def starting_inventory():
     starting_potion = item.potion()

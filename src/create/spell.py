@@ -7,6 +7,7 @@ import esper
 import components as cmp
 import ecs
 import location
+import behavior
 
 
 # TODO: maybe it takes a level as well as power budget
@@ -201,5 +202,14 @@ def crush(level=1, name="Crush") -> int:
     cmps.append(cmp.RechargeTime(turns=3))
     cmps.append(cmp.SpellEffect.Damage(amount=4 + level, die_type=6, source=player))
     cmps.append(cmp.KnownAs(name=name))
+
+    return esper.create_entity(*cmps)
+
+def flare(level=1, name="Flare") -> int:
+    cmps = []
+    cmps.append(cmp.Spell(target_range=0))
+    cmps.append(cmp.RechargeTime(turns=5))
+    cmps.append(cmp.KnownAs(name=name))
+    cmps.append(cmp.UseTrigger(callbacks=[behavior.spawn_sensor]*level))
 
     return esper.create_entity(*cmps)
