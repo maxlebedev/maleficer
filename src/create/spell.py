@@ -210,6 +210,8 @@ def flare(level=1, name="Flare") -> int:
     cmps.append(cmp.Spell(target_range=0))
     cmps.append(cmp.RechargeTime(turns=5))
     cmps.append(cmp.KnownAs(name=name))
-    cmps.append(cmp.UseTrigger(callbacks=[behavior.spawn_sensor]*level))
+
+    callback = partial(behavior.spawn_sensor, count=level+2)
+    cmps.append(cmp.UseTrigger(callbacks=[callback]))
 
     return esper.create_entity(*cmps)

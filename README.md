@@ -213,6 +213,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - Warlocks can curve shots one cell behind a corner. This feels unintuitive
     - Pull is buggy at some angles
     - Spells assume a target phase. This is *okay* bc it serves as a confirm for the cast as well
+    - Doors need to have only two non-wall neighbors
 
 # DOING
     - FOV rework
