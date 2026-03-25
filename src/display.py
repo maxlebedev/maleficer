@@ -73,6 +73,12 @@ class Color:
     BAR_EMPTY = RED
     TARGET = LCYAN
 
+    # Character colors
+    ADEPT = hex_to_rgb("5ab552")
+    BLOODMAGE = hex_to_rgb("ec273f")
+    TERRAMANCER = hex_to_rgb("a26d3f")
+    STORMCALLER = hex_to_rgb("f3a833")
+    LUMINARY = hex_to_rgb("f7f3b7")
 
 class Mood:
     """mood colors, to differentiate the vibes of different maps"""

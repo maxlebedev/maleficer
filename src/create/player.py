@@ -23,7 +23,7 @@ def inventory_map() -> list:
 def adept():
     cmps = []
     cmps.append(cmp.Player())
-    cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.GREEN))
+    cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.ADEPT))
     cmps.append(cmp.Position(x=1, y=1))
     cmps.append(cmp.Health(max=80))
     cmps.append(cmp.KnownAs(name="player"))
@@ -39,7 +39,7 @@ def adept():
 def bloodmage():
     cmps = []
     cmps.append(cmp.Player())
-    cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.RED))
+    cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.BLOODMAGE))
     cmps.append(cmp.Position(x=1, y=1))
     cmps.append(cmp.Health(max=100))
     cmps.append(cmp.KnownAs(name="player"))
@@ -55,7 +55,7 @@ def bloodmage():
 def terramancer():
     cmps = []
     cmps.append(cmp.Player())
-    cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.BROWN))
+    cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.TERRAMANCER))
     cmps.append(cmp.Position(x=1, y=1))
     cmps.append(cmp.Health(max=100))
     cmps.append(cmp.KnownAs(name="player"))
@@ -71,7 +71,7 @@ def terramancer():
 def stormcaller():
     cmps = []
     cmps.append(cmp.Player(sight_radius=5))
-    cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.YELLOW))
+    cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.STORMCALLER))
     cmps.append(cmp.Position(x=1, y=1))
     cmps.append(cmp.Health(max=70))
     cmps.append(cmp.KnownAs(name="player"))
@@ -86,7 +86,7 @@ def stormcaller():
 def luminary():
     cmps = []
     cmps.append(cmp.Player())
-    cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.LCYAN))
+    cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.LUMINARY))
     cmps.append(cmp.Position(x=1, y=1))
     cmps.append(cmp.Health(max=80))
     cmps.append(cmp.KnownAs(name="player"))
