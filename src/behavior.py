@@ -71,10 +71,10 @@ def lob_bomb(source: typ.Entity):
         apply_cooldown(source)
         return
 
-def spawn_sensor(_source: typ.Entity, count=1):
-    import create
+
+def place_on_unoccupied(_source: typ.Entity, spawn, count=1):
+    """pick an unoccupied random spot to spawn the given thing"""
     board = ecs.get_meta().board
-    # TODO: we can bias for unexplored?
 
     floor_ents = [ent for ent, _ in ecs.Query(cmp.Cell).exclude(cmp.Wall)]
     valid_positions = []
@@ -84,7 +84,7 @@ def spawn_sensor(_source: typ.Entity, count=1):
            valid_positions.append(pos) 
 
     for pos in random.choices(valid_positions, k=count):
-        event.Spawn(func=partial(create.item.sensor, pos))
+        event.Spawn(func=partial(spawn, pos))
 
 def spider_jump(source: typ.Entity):
     player_pos = location.player_position()

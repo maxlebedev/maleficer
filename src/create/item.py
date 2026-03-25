@@ -130,7 +130,7 @@ def flare_charge(pos: cmp.Position | None = None) -> int:
     cmps.append(cmp.Collectable())
     cmps.append(pos)
 
-    callback = partial(behavior.spawn_sensor, count=3)
+    callback = partial(behavior.place_on_unoccupied, spawn=sensor, count=3)
     cmps.append(cmp.UseTrigger(callbacks=[callback]))
     return esper.create_entity(*cmps)
 

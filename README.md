@@ -219,3 +219,4 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - FOV rework
         * the tab-target & target description code still use player.sight_radius
         * I don't love the SSOT issue here, will move those over later
+    - Find a new colorset just for player colors

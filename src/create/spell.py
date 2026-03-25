@@ -206,12 +206,13 @@ def crush(level=1, name="Crush") -> int:
     return esper.create_entity(*cmps)
 
 def flare(level=1, name="Flare") -> int:
+    from create.item import sensor
     cmps = []
     cmps.append(cmp.Spell(target_range=0))
     cmps.append(cmp.RechargeTime(turns=5))
     cmps.append(cmp.KnownAs(name=name))
 
-    callback = partial(behavior.spawn_sensor, count=level+2)
+    callback = partial(behavior.place_on_unoccupied, spawn=sensor, count=level+2)
     cmps.append(cmp.UseTrigger(callbacks=[callback]))
 
     return esper.create_entity(*cmps)
