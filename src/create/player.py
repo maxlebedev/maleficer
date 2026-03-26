@@ -70,7 +70,7 @@ def terramancer():
 
 def stormcaller():
     cmps = []
-    cmps.append(cmp.Player(sight_radius=5))
+    cmps.append(cmp.Player())
     cmps.append(cmp.Visible(glyph=dis.Glyph.PLAYER, color=dis.Color.STORMCALLER))
     cmps.append(cmp.Position(x=1, y=1))
     cmps.append(cmp.Health(max=70))

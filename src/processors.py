@@ -721,13 +721,19 @@ class TargetInputEvent(InputEvent):
         # TODO: make sure that player isn't the first item in the list
 
         if not self.piece_coords:
+            player = ecs.Query(cmp.Player).first()
             player_pos = location.player_position()
-            sight_radius = ecs.Query(cmp.Player).val.sight_radius
-            coords = location.coords_within_radius(player_pos, sight_radius)
+            dist = location.player_sight_distance()
+            coords = location.coords_within_radius(player_pos, dist)
             board = ecs.get_meta().board
             for x, y in coords:
-                if board.pieces_at(x, y):
+                pieces = board.pieces_at(x, y)
+                if any([location.can_see(player, piece) for piece in pieces]):
+                    if (x,y) == player_pos.as_tuple:
+                        continue
                     self.piece_coords.append((x, y))
+
+            self.piece_coords.append(player_pos.as_tuple)
 
         target = self.piece_coords.pop(0)
         xhair_pos = ecs.Query(cmp.Crosshair, cmp.Position).cmp(1)
@@ -794,9 +800,9 @@ class TargetRender(BoardRender):
         panel_contents = []
 
         player = ecs.Query(cmp.Player).first()
-        player_cmp = ecs.Query(cmp.Player).val
+        dist = location.player_sight_distance()
         for piece in pieces:
-            if location.can_see(player, piece, player_cmp.sight_radius):
+            if location.can_see(player, piece, dist):
                 panel_contents += self.piece_to_description(piece)
                 panel_contents.append(None)
 

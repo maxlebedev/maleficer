@@ -27,6 +27,10 @@ def player_last_position() -> cmp.Position:
     lp = ecs.Query(cmp.Player).cmp(cmp.LastPosition)
     return lp.pos
 
+def player_sight_distance() -> int:
+    gvis = ecs.Query(cmp.GivesVision, cmp.Player).cmp(0)
+    return gvis.distance
+
 
 def matrix(x: int, y: int, val: int):
     return [[val for _ in range(x)] for _ in range(y)]
@@ -75,12 +79,14 @@ def backlight(x, y):
     # we then darken the bg light by its distance from the light src player
     # we use the closes vision-holding entity, not just player
     dist_to_light = float("inf")
-    for _, (_, pos) in ecs.Query(cmp.GivesVision, cmp.Position):
-        dist_to_light = min(dist_to_light, math.dist(pos.as_tuple, (x, y)))
+    sight_radius = 1
+    for _, (gvis, pos) in ecs.Query(cmp.GivesVision, cmp.Position):
+        current_dist = math.dist(pos.as_tuple, (x, y))
+        if current_dist <  dist_to_light:
+            dist_to_light = current_dist
+            sight_radius = gvis.distance
 
-    player_cmp = ecs.Query(cmp.Player).val
-
-    normalized_dist = dist_to_light / player_cmp.sight_radius
+    normalized_dist = dist_to_light / sight_radius
     interpolation_coef = 0.85  # higher is faster dropoff
     factor = 1.0 - (normalized_dist * normalized_dist * interpolation_coef)
     bg = dis.darker(dis.Color.CANDLE, factor=factor)
