@@ -8,7 +8,7 @@ import tcod
 import typ
 
 import components as cmp
-import display
+import display as dis
 import processors
 import phase
 import behavior
@@ -36,17 +36,17 @@ class Log:
     """Messages to be displayed in in-game log"""
 
     messages: list = []
-    max_len = display.PANEL_IHEIGHT
+    max_len = dis.PANEL_IHEIGHT
     curr_len = 0
 
     @classmethod
     def color_fmt(cls, entity: typ.Entity):
         """take a string, and an entity, recolor string with entity fg"""
         message = esper.component_for_entity(entity, cmp.KnownAs).name
-        fg = display.Color.WHITE
+        fg = dis.Color.WHITE
         if vis := esper.try_component(entity, cmp.Visible):
             fg = vis.color
-        return display.colored_text(message, fg)
+        return dis.colored_text(message, fg)
 
     @classmethod
     def append(cls, text: str):
@@ -54,7 +54,7 @@ class Log:
         print(clean_text)
 
         ghr = tcod.console.get_height_rect
-        lines = ghr(width=display.PANEL_IWIDTH, string=clean_text)
+        lines = ghr(width=dis.PANEL_IWIDTH, string=clean_text)
 
         cls.curr_len += lines
 

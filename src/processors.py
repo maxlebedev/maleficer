@@ -10,7 +10,7 @@ from tcod import libtcodpy
 import components as cmp
 import condition
 import create
-import display
+import display as dis
 import ecs
 import event
 import input
@@ -39,10 +39,10 @@ def flash():
     """flashes the screen, for use on errors"""
     meta = ecs.get_meta()
     meta.console.clear()
-    white_out = lambda _: (1, display.Color.WHITE, display.Color.WHITE)
+    white_out = lambda _: (1, dis.Color.WHITE, dis.Color.WHITE)
     cell_rgbs = [list(map(white_out, row)) for row in meta.board.cells]
 
-    display.write_rgbs(meta.console, cell_rgbs)
+    dis.write_rgbs(meta.console, cell_rgbs)
     meta.context.present(meta.console)
 
     event.redraw()
@@ -91,7 +91,7 @@ class Movement(Processor):
                 esper.remove_component(target, cmp.Blocking)
                 esper.remove_component(target, cmp.Opaque)
                 vis = esper.component_for_entity(target, cmp.Visible)
-                vis.glyph = display.Glyph.ODOOR
+                vis.glyph = dis.Glyph.ODOOR
             else:
                 event.Log.append("can't move there")
                 flash()
@@ -160,7 +160,7 @@ class Movement(Processor):
 class NPCEval(Processor):
     def _process(self):
         enemies = ecs.Query(cmp.Enemy)
-        stunned_txt = display.colored_text("stunned", display.Color.CYAN)
+        stunned_txt = dis.colored_text("stunned", dis.Color.CYAN)
 
         for entity, (en_cmp,) in enemies:
             if condition.has(entity, cmp.Condition.Stun):
@@ -188,14 +188,14 @@ class Damage(Processor):
         source_name = damage.source[cmp.KnownAs].name
         if cmp.Visible in damage.source:
             src_color = damage.source[cmp.Visible].color
-            source_name = display.colored_text(source_name, src_color)
+            source_name = dis.colored_text(source_name, src_color)
         target_name = event.Log.color_fmt(damage.target)
         # target_name = f"{target_name}#{damage.target}"
 
         if damage.amount >= 0:
-            amount = display.colored_text(damage.amount, display.Color.RED)
+            amount = dis.colored_text(damage.amount, dis.Color.RED)
             return f"{source_name} deals {amount} damage to {target_name}"
-        amount = display.colored_text(-1 * damage.amount, display.Color.GREEN)
+        amount = dis.colored_text(-1 * damage.amount, dis.Color.GREEN)
         return f"{source_name} heals {target_name} for {amount}"
 
     def _resolve_cell_damage(self, damage_event):
@@ -213,8 +213,8 @@ class Damage(Processor):
         aegis -= absorbed
         condition.grant(damage_event.target, cmp.Condition.Aegis, aegis)
 
-        dmg = display.colored_text(str(absorbed), display.Color.CYAN)
-        aegis = display.colored_text("Aegis", display.Color.CYAN)
+        dmg = dis.colored_text(str(absorbed), dis.Color.CYAN)
+        aegis = dis.colored_text("Aegis", dis.Color.CYAN)
         event.Log.append(f"{aegis} absorbs {dmg} damage")
 
     def _process(self):
@@ -328,7 +328,7 @@ class GameInputEvent(InputEvent):
             input.KEYMAP[input.Input.SPELL4]: (self.handle_slot_key, [4]),
             input.KEYMAP[input.Input.INVENTORY]: self.to_inventory,
             input.KEYMAP[input.Input.SKIP]: self.skip,
-            input.KEYMAP[input.Input.FULLSCREEN]: display.fullscreen_toggle,
+            input.KEYMAP[input.Input.FULLSCREEN]: dis.fullscreen_toggle,
         }
 
     def to_inventory(self):
@@ -396,7 +396,7 @@ class Render(Processor):
     context: tcod.context.Context
     console: tcod.console.Console
 
-    dashes = "├" + "─" * (display.PANEL_IWIDTH) + "┤"
+    dashes = "├" + "─" * (dis.PANEL_IWIDTH) + "┤"
 
     def left_print(self, *args, **kwargs):
         self.console.print(alignment=libtcodpy.LEFT, *args, **kwargs)
@@ -408,7 +408,7 @@ class Render(Processor):
         self.console.print(alignment=libtcodpy.RIGHT, *args, **kwargs)
 
     def present(self, cell_rgbs):
-        display.write_rgbs(self.console, cell_rgbs)
+        dis.write_rgbs(self.console, cell_rgbs)
         self.context.present(self.console)
 
 
@@ -419,17 +419,17 @@ class BoardRender(Render):
 
     def render_bar(self, x: int, y: int, curr: int, maximum: int, width: int):
         bar_width = int(curr / maximum * width)
-        bg = display.Color.BAR_EMPTY
+        bg = dis.Color.BAR_EMPTY
         bar_args = {"x": x, "y": y, "height": 1, "ch": 1, "bg": bg}
 
         self.console.draw_rect(width=width, **bar_args)
 
         if bar_width > 0:
-            bar_args["bg"] = display.Color.BAR_FILLED
+            bar_args["bg"] = dis.Color.BAR_FILLED
             self.console.draw_rect(width=bar_width, **bar_args)
 
         text = f"HP: {curr}/{maximum}"
-        self.console.print(x=x, y=y, string=text, fg=display.Color.BLACK)
+        self.console.print(x=x, y=y, string=text, fg=dis.Color.BLACK)
 
     def _draw_selection_info(self, item: typ.Entity):
         selection_info = []
@@ -468,18 +468,18 @@ class BoardRender(Render):
             text = f"Slot{attuned.slot}:{named.name}"
             if cd := condition.get_val(spell_ent, cmp.Condition.Cooldown):
                 text = f"{text}:{cmp.Condition.Cooldown.__name__} {cd}"
-            fg = display.Color.BEIGE
-            bg = display.Color.BLACK
+            fg = dis.Color.BEIGE
+            bg = dis.Color.BLACK
             if esper.has_component(spell_ent, cmp.Targeting):
                 fg, bg = bg, fg
             yield (text, fg, bg)
 
     def _right_panel(self, panel_params):
-        self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
-        panel_params["x"] = display.R_PANEL_START + 1
+        self.console.draw_frame(x=dis.R_PANEL_START, **panel_params)
+        panel_params["x"] = dis.R_PANEL_START + 1
         panel_params["y"] = 1
-        panel_params["width"] = display.PANEL_IWIDTH
-        panel_params["height"] = display.PANEL_IHEIGHT
+        panel_params["width"] = dis.PANEL_IWIDTH
+        panel_params["height"] = dis.PANEL_IHEIGHT
 
         message = "\n".join([m[0] for m in event.Log.messages])
         self.console.print_box(string=message, **panel_params)
@@ -487,7 +487,7 @@ class BoardRender(Render):
     def _left_panel(self, panel_params):
         self.console.draw_frame(x=0, **panel_params)
         hp = ecs.Query(cmp.Player, cmp.Health).cmp(1)
-        self.render_bar(1, 1, hp.current, hp.max, display.PANEL_IWIDTH)
+        self.render_bar(1, 1, hp.current, hp.max, dis.PANEL_IWIDTH)
 
         panel_contents = []
 
@@ -519,11 +519,11 @@ class BoardRender(Render):
                     self.console.print(0, y_idx, self.dashes)
 
         map_info = ecs.Query(cmp.GameMeta).cmp(cmp.MapInfo)
-        self.console.print(1, display.PANEL_IHEIGHT, f"Depth: {map_info.depth}")
+        self.console.print(1, dis.PANEL_IHEIGHT, f"Depth: {map_info.depth}")
 
         for i, cnd in enumerate(self.gather_conditions()):
-            y = display.PANEL_IHEIGHT - i - 1
-            self.console.print(1, y, cnd, fg=display.Color.YELLOW)
+            y = dis.PANEL_IHEIGHT - i - 1
+            self.console.print(1, y, cnd, fg=dis.Color.YELLOW)
 
     def _inventory(self):
         inv_map = create.player.inventory_map()
@@ -534,8 +534,8 @@ class BoardRender(Render):
     def _draw_panels(self):
         panel_params = {
             "y": 0,
-            "width": display.PANEL_WIDTH,
-            "height": display.PANEL_HEIGHT,
+            "width": dis.PANEL_WIDTH,
+            "height": dis.PANEL_HEIGHT,
         }
 
         self._left_panel(panel_params)
@@ -566,15 +566,15 @@ class BoardRender(Render):
 
                     if not esper.get_component(cmp.Targeting):
                         # TODO: or if not TargetRender:
-                        brighter = display.brighter(fgcolor, scale=100)
+                        brighter = dis.brighter(fgcolor, scale=100)
                         cell_rgbs[x][y] = (glyph, brighter, location.backlight(x, y))
                 elif cell in board.explored:
-                    cell_rgbs[x][y] = (glyph, fgcolor, display.Color.BLACK)
+                    cell_rgbs[x][y] = (glyph, fgcolor, dis.Color.BLACK)
                 else:
                     cell_rgbs[x][y] = (
-                        display.Glyph.NONE,
-                        display.Color.BLACK,
-                        display.Color.BLACK,
+                        dis.Glyph.NONE,
+                        dis.Color.BLACK,
+                        dis.Color.BLACK,
                     )
         return cell_rgbs
 
@@ -630,8 +630,8 @@ class MenuRender(Render):
 
     def _process(self):
         self.console.clear()
-        x = display.CENTER_W
-        y = display.CENTER_H
+        x = dis.CENTER_W
+        y = dis.CENTER_H
 
         if self.background:
             (self.console,) = tcod.console.load_xp(self.background, order="F")
@@ -643,9 +643,9 @@ class MenuRender(Render):
         menu_elements = ecs.Query(cmp.MenuItem, self.menu_cmp, cmp.KnownAs)
         sorted_menu = sorted(menu_elements, key=lambda x: x[1][0].order)
         for i, (_, (mi, _, on)) in enumerate(sorted_menu):
-            fg = display.Color.LGREY
+            fg = dis.Color.LGREY
             if menu_selection.item == mi.order:
-                fg = display.Color.WHITE
+                fg = dis.Color.WHITE
             self.center_print(x=x, y=y + 2 + i, string=on.name, fg=fg)
 
         self.context.present(self.console)
@@ -660,7 +660,7 @@ class MenuInputEvent(InputEvent):
             input.KEYMAP[input.Input.MOVE_UP]: (self.move_selection, [-1]),
             input.KEYMAP[input.Input.ESC]: self.back,
             input.KEYMAP[input.Input.SELECT]: self.select,
-            input.KEYMAP[input.Input.FULLSCREEN]: display.fullscreen_toggle,
+            input.KEYMAP[input.Input.FULLSCREEN]: dis.fullscreen_toggle,
         }
 
     def back(self):
@@ -694,7 +694,7 @@ class TargetInputEvent(InputEvent):
             input.KEYMAP[input.Input.ESC]: self.to_level,
             input.KEYMAP[input.Input.SELECT]: self.select,
             input.KEYMAP[input.Input.TARGET]: self.tab_target,
-            input.KEYMAP[input.Input.FULLSCREEN]: display.fullscreen_toggle,
+            input.KEYMAP[input.Input.FULLSCREEN]: dis.fullscreen_toggle,
         }
 
     def to_level(self):
@@ -774,11 +774,11 @@ class TargetRender(BoardRender):
         return desc
 
     def _right_panel(self, panel_params):
-        self.console.draw_frame(x=display.R_PANEL_START, **panel_params)
-        panel_params["x"] = display.R_PANEL_START + 1
+        self.console.draw_frame(x=dis.R_PANEL_START, **panel_params)
+        panel_params["x"] = dis.R_PANEL_START + 1
         panel_params["y"] = 1
-        panel_params["width"] = display.PANEL_IWIDTH
-        panel_params["height"] = display.PANEL_IHEIGHT
+        panel_params["width"] = dis.PANEL_IWIDTH
+        panel_params["height"] = dis.PANEL_IHEIGHT
 
         xhair_pos = ecs.Query(cmp.Crosshair).cmp(cmp.Position)
         board = ecs.get_meta().board
@@ -800,7 +800,7 @@ class TargetRender(BoardRender):
                 panel_contents += self.piece_to_description(piece)
                 panel_contents.append(None)
 
-        x = display.R_PANEL_START
+        x = dis.R_PANEL_START
         for y_idx, content in enumerate(panel_contents, start=1):
             match content:
                 case str():
@@ -828,18 +828,18 @@ class TargetRender(BoardRender):
                 cell = cell_rgbs[x][y]
                 glyph, fg, bg = cell[0], cell[1], cell[2]
 
-                fg = display.brighter(fg, scale=100)
-                if cell[0] in display.get_tile_glyphs():
-                    fg = display.Color.BEIGE
-                if bg not in (display.Color.LIGHT_RED, display.Color.BLOOD_RED):
+                fg = dis.brighter(fg, scale=100)
+                if cell[0] in dis.get_tile_glyphs():
+                    fg = dis.Color.BEIGE
+                if bg not in (dis.Color.LIGHT_RED, dis.Color.BLOOD_RED):
                     # a poor subtitute for an "is there an aoe here" check
-                    bg = display.Color.CANDLE
+                    bg = dis.Color.CANDLE
 
                 cell_rgbs[x][y] = glyph, fg, bg
 
         for x, y in highlighted:
             cell = cell_rgbs[x][y]
-            cell_rgbs[x][y] = cell[0], cell[1], display.Color.TARGET
+            cell_rgbs[x][y] = cell[0], cell[1], dis.Color.TARGET
 
         self.present(cell_rgbs)
 
@@ -855,8 +855,8 @@ class InventoryRender(BoardRender):
         inv_map = create.player.inventory_map()
         for i, (name, entities) in enumerate(inv_map):
             text = f"{len(entities)}x {name}"
-            fg = display.Color.WHITE
-            bg = display.Color.BLACK
+            fg = dis.Color.WHITE
+            bg = dis.Color.BLACK
             if menu_selection.item == i:
                 fg, bg = bg, fg
             self.console.print(1, 3 + i, string=text, fg=fg, bg=bg)
@@ -880,7 +880,7 @@ class InventoryInputEvent(InputEvent):
             input.KEYMAP[input.Input.MOVE_UP]: (self.move_selection, [-1]),
             input.KEYMAP[input.Input.ESC]: to_level,
             input.KEYMAP[input.Input.SELECT]: self.handle_select,
-            input.KEYMAP[input.Input.FULLSCREEN]: display.fullscreen_toggle,
+            input.KEYMAP[input.Input.FULLSCREEN]: dis.fullscreen_toggle,
         }
 
     def move_selection(self, diff: int):
@@ -930,8 +930,8 @@ class OptionsRender(Render):
 
     def _process(self):
         self.console.clear()
-        x = display.CENTER_W
-        y = display.CENTER_H
+        x = dis.CENTER_W
+        y = dis.CENTER_H
         self.center_print(x, y, "OPTIONS")
 
         y_idx = itertools.count(y + 2)
@@ -951,7 +951,7 @@ class OptionsInputEvent(InputEvent):
                 phase.change_to,
                 [phase.Ontology.main_menu],
             ),
-            input.KEYMAP[input.Input.FULLSCREEN]: display.fullscreen_toggle,
+            input.KEYMAP[input.Input.FULLSCREEN]: dis.fullscreen_toggle,
         }
 
 
@@ -963,15 +963,15 @@ class AboutRender(Render):
     def _process(self):
         self.console.clear()
 
-        self.center_print(display.CENTER_W, display.CENTER_H, "ABOUT")
+        self.center_print(dis.CENTER_W, dis.CENTER_H, "ABOUT")
 
         about_text = [
             "placeholder text explaining lore and game mechanics",
             "second line",
         ]
-        y_idx = itertools.count(display.CENTER_H + 1)
+        y_idx = itertools.count(dis.CENTER_H + 1)
         for row in about_text:
-            self.center_print(display.CENTER_W, next(y_idx), row)
+            self.center_print(dis.CENTER_W, next(y_idx), row)
 
         self.context.present(self.console)
 
@@ -984,7 +984,7 @@ class AboutInputEvent(InputEvent):
                 phase.change_to,
                 [phase.Ontology.main_menu],
             ),
-            input.KEYMAP[input.Input.FULLSCREEN]: display.fullscreen_toggle,
+            input.KEYMAP[input.Input.FULLSCREEN]: dis.fullscreen_toggle,
         }
 
 
@@ -1012,8 +1012,8 @@ class Animation(Processor):
     def flash_pos(self, coord, event):
         """change glyph at a position"""
         x, y = coord
-        board_x = display.BOARD_STARTX + x
-        board_y = display.BOARD_STARTY + y
+        board_x = dis.BOARD_STARTX + x
+        board_y = dis.BOARD_STARTY + y
 
         glyph, fg, bg = self.console.rgb[board_x, board_y]
 
@@ -1024,7 +1024,7 @@ class Animation(Processor):
         in_fov = location.get_fov()
 
         if in_fov[x][y]:
-            fg = display.brighter(fg, scale=100)
+            fg = dis.brighter(fg, scale=100)
             bg = location.backlight(x, y)
 
         self.console.rgb[board_x, board_y] = (glyph, fg, bg)

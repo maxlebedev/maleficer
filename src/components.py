@@ -4,7 +4,7 @@ from collections.abc import Callable
 from dataclasses import dataclass as component
 import tcod
 
-import display
+import display as dis
 import typ
 
 T = typing.TypeVar("T")
@@ -64,8 +64,8 @@ class LastPosition:
 @component
 class Visible:
     glyph: int
-    color: typ.RGB = display.Color.WHITE
-    bg_color: typ.RGB = display.Color.BLACK
+    color: typ.RGB = dis.Color.WHITE
+    bg_color: typ.RGB = dis.Color.BLACK
     # bg_color mostly represents explored state, rather than a property of the entity
 
 

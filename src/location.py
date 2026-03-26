@@ -10,12 +10,12 @@ import math
 
 import components as cmp
 import create
-import display
+import display as dis
 import ecs
 import math_util
 import typ
 
-BOARD_MAX = display.BOARD_WIDTH - 1
+BOARD_MAX = dis.BOARD_WIDTH - 1
 
 
 def player_position() -> cmp.Position:
@@ -50,9 +50,9 @@ def can_see(
 
 def coords_within_radius(pos: cmp.Position, radius: int) -> list[typ.Coord]:
     min_x = max(0, pos.x - radius)
-    max_x = min(display.BOARD_WIDTH, pos.x + radius + 1)
+    max_x = min(dis.BOARD_WIDTH, pos.x + radius + 1)
     min_y = max(0, pos.y - radius)
-    max_y = min(display.BOARD_HEIGHT, pos.y + radius + 1)
+    max_y = min(dis.BOARD_HEIGHT, pos.y + radius + 1)
 
     ret_coords = []
 
@@ -83,7 +83,7 @@ def backlight(x, y):
     normalized_dist = dist_to_light / player_cmp.sight_radius
     interpolation_coef = 0.85  # higher is faster dropoff
     factor = 1.0 - (normalized_dist * normalized_dist * interpolation_coef)
-    bg = display.darker(display.Color.CANDLE, factor=factor)
+    bg = dis.darker(dis.Color.CANDLE, factor=factor)
     return bg
 
 
@@ -98,21 +98,21 @@ class Board:
 
     def __init__(self):
         self.entities = [
-            [set() for _ in range(display.BOARD_HEIGHT)]
-            for _ in range(display.BOARD_WIDTH)
+            [set() for _ in range(dis.BOARD_HEIGHT)]
+            for _ in range(dis.BOARD_WIDTH)
         ]
         self.cells = []
 
     def fill(self):
         def make_wall(x, y):
-            if x in (0, display.BOARD_WIDTH - 1):
+            if x in (0, dis.BOARD_WIDTH - 1):
                 return create.tile.wall(x, y)
-            if y in (0, display.BOARD_HEIGHT - 1):
+            if y in (0, dis.BOARD_HEIGHT - 1):
                 return create.tile.wall(x, y)
             return create.tile.wall(x, y, breakable=not random.randint(0, 15))
 
-        for x in range(display.BOARD_WIDTH):
-            col = [make_wall(x, y) for y in range(display.BOARD_HEIGHT)]
+        for x in range(dis.BOARD_WIDTH):
+            col = [make_wall(x, y) for y in range(dis.BOARD_HEIGHT)]
             self.cells.append(col)
 
     @classmethod
@@ -121,10 +121,10 @@ class Board:
         return (vis.glyph, vis.color, vis.bg_color)
 
     def as_transparency(self) -> list[typ.Coord]:
-        transparency = matrix(display.BOARD_WIDTH, display.BOARD_HEIGHT, 1)
+        transparency = matrix(dis.BOARD_WIDTH, dis.BOARD_HEIGHT, 1)
 
-        for x in range(display.BOARD_WIDTH):
-            for y in range(display.BOARD_HEIGHT):
+        for x in range(dis.BOARD_WIDTH):
+            for y in range(dis.BOARD_HEIGHT):
                 is_opaque = lambda x: esper.has_component(x, cmp.Opaque)
                 if any(map(is_opaque, self.entities_at(x, y))):
                     transparency[x][y] = 0
@@ -132,7 +132,7 @@ class Board:
         return transparency
 
     def as_move_graph(self) -> list[typ.Coord]:
-        graph = matrix(display.BOARD_WIDTH, display.BOARD_HEIGHT, 1)
+        graph = matrix(dis.BOARD_WIDTH, dis.BOARD_HEIGHT, 1)
 
         for x, col in enumerate(self.cells):
             for y, _ in enumerate(col):
@@ -152,7 +152,7 @@ class Board:
     def _in_bounds(self, x: int, y: int) -> bool:
         if x < 0 or y < 0:
             return False
-        if x > display.BOARD_WIDTH - 1 or y > display.BOARD_HEIGHT - 1:
+        if x > dis.BOARD_WIDTH - 1 or y > dis.BOARD_HEIGHT - 1:
             return False
         return True
 
@@ -193,8 +193,8 @@ class Board:
                 yield cell
 
     def build_entity_cache(self):
-        for x in range(display.BOARD_WIDTH):
-            for y in range(display.BOARD_HEIGHT):
+        for x in range(dis.BOARD_WIDTH):
+            for y in range(dis.BOARD_HEIGHT):
                 self.entities[x][y] = set()
         for entity, pos in esper.get_component(cmp.Position):
             self.entities_at(*pos).add(entity)
@@ -368,10 +368,10 @@ def count_neighbors(board, x: int, y: int):
 
 
 def build_perimeter_wall(board):
-    border = {(0, y) for y in range(display.BOARD_HEIGHT)}
-    border |= {(display.BOARD_WIDTH - 1, y) for y in range(display.BOARD_HEIGHT)}
-    border |= {(x, 0) for x in range(display.BOARD_WIDTH)}
-    border |= {(x, display.BOARD_HEIGHT - 1) for x in range(display.BOARD_WIDTH)}
+    border = {(0, y) for y in range(dis.BOARD_HEIGHT)}
+    border |= {(dis.BOARD_WIDTH - 1, y) for y in range(dis.BOARD_HEIGHT)}
+    border |= {(x, 0) for x in range(dis.BOARD_WIDTH)}
+    border |= {(x, dis.BOARD_HEIGHT - 1) for x in range(dis.BOARD_WIDTH)}
 
     for x, y in border:
         board.retile(x, y, create.tile.wall)
@@ -398,9 +398,9 @@ def new_map():
         if esper.has_component(game_meta, cmp.MapInfo):
             depth = esper.component_for_entity(game_meta, cmp.MapInfo).depth
             esper.remove_component(game_meta, cmp.MapInfo)
-        mood = display.Mood.shuffle()
-        wall = random.choice([display.Glyph.WALL1, display.Glyph.WALL2])
-        bwall = random.choice([display.Glyph.BWALL1])  # , display.Glyph.BWALL2
+        mood = dis.Mood.shuffle()
+        wall = random.choice([dis.Glyph.WALL1, dis.Glyph.WALL2])
+        bwall = random.choice([dis.Glyph.BWALL1])  # , dis.Glyph.BWALL2
         mi = cmp.MapInfo(mood=mood, wall_glyph=wall, bwall_glyph=bwall, depth=depth + 1)
         esper.add_component(game_meta, mi)
 
@@ -438,8 +438,8 @@ class Dungeon:
         self.board.retile(last_center.x, last_center.y, create.tile.stairs)
 
     def make_room(self, width: int, height: int):
-        x = random.randint(0, display.BOARD_WIDTH - width - 1)
-        y = random.randint(0, display.BOARD_HEIGHT - height - 1)
+        x = random.randint(0, dis.BOARD_WIDTH - width - 1)
+        y = random.randint(0, dis.BOARD_HEIGHT - height - 1)
 
         room = RectangularRoom(x, y, width, height)
         if any(intersects(self.board, room, r) for r in self.rooms):
@@ -493,14 +493,14 @@ class Cave:
 
     def horizontal_blanking(self):
         """big gap in the middle to islands don't form"""
-        x_slice = slice(3, display.BOARD_WIDTH - 3)
-        y_slice = slice(display.CENTER_H - 1, display.CENTER_H + 2)
+        x_slice = slice(3, dis.BOARD_WIDTH - 3)
+        y_slice = slice(dis.CENTER_H - 1, dis.CENTER_H + 2)
         for cell in self.board.as_sequence(x_slice, y_slice):
             player_pos = esper.component_for_entity(cell, cmp.Position)
             self.board.retile(*player_pos.as_tuple, create.tile.floor)
 
     def automata(self):
-        neighbours = matrix(display.BOARD_WIDTH, display.BOARD_HEIGHT, 0)
+        neighbours = matrix(dis.BOARD_WIDTH, dis.BOARD_HEIGHT, 0)
         cell_autamata_passes = 4
         for _ in range(cell_autamata_passes):
             for cell in self.board.as_sequence():
@@ -524,8 +524,8 @@ class Cave:
 
         valid_spawns = []
         while len(valid_spawns) < 20:
-            x = random.randint(0, display.BOARD_WIDTH - 1)
-            y = random.randint(0, display.BOARD_HEIGHT - 1)
+            x = random.randint(0, dis.BOARD_WIDTH - 1)
+            y = random.randint(0, dis.BOARD_HEIGHT - 1)
             cell = self.board.cells[x][y]
             pos = esper.component_for_entity(cell, cmp.Position)
             wall_count = count_neighbors(self.board, *pos)
@@ -561,8 +561,8 @@ class Cave:
         # TODO: the 3 cells closes to corner should be wall too
 
         player_pos = player_position()
-        player_pos.x = display.BOARD_WIDTH // 2
-        player_pos.y = display.BOARD_HEIGHT // 2
+        player_pos.x = dis.BOARD_WIDTH // 2
+        player_pos.y = dis.BOARD_HEIGHT // 2
 
         self.populate()
 
@@ -593,8 +593,8 @@ class Maze:
         then pick an unvisited neighbor and repeat
         when there are no neighbors, pop stack and try again for that space
         """
-        end_x = (display.BOARD_WIDTH // 2) + 1
-        end_y = (display.BOARD_HEIGHT // 2) + 1
+        end_x = (dis.BOARD_WIDTH // 2) + 1
+        end_y = (dis.BOARD_HEIGHT // 2) + 1
         blueprint = matrix(end_x, end_y, 1)
 
         # even coord pairs are floor nodes, to be connected
@@ -792,8 +792,8 @@ class TestDungeon:
     def build(self):
         """one room, one enemy, one item"""
         self.board.fill()
-        room_x = display.BOARD_WIDTH // 2
-        room_y = display.BOARD_HEIGHT // 2
+        room_x = dis.BOARD_WIDTH // 2
+        room_y = dis.BOARD_HEIGHT // 2
         new_room = RectangularRoom(room_x, room_y, 10, 10)
         for cell in self.board.as_sequence(*new_room.inner):
             pos = esper.component_for_entity(cell, cmp.Position)

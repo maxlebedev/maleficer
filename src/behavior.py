@@ -8,7 +8,7 @@ import tcod
 
 import components as cmp
 import condition
-import display
+import display as dis
 import ecs
 import event
 import location
@@ -66,7 +66,7 @@ def lob_bomb(source: typ.Entity):
         if dest != target_cell:  # no LOS
             continue
         dest_pos = cmp.Position(*trace[-1])
-        event.Animation(locs=trace, glyph=display.Glyph.BOMB, fg=display.Color.RED)
+        event.Animation(locs=trace, glyph=dis.Glyph.BOMB, fg=dis.Color.RED)
         event.Spawn(func=partial(create.item.bomb, dest_pos))
         apply_cooldown(source)
         return
@@ -99,7 +99,7 @@ def spider_jump(source: typ.Entity):
         dest, trace = location.trace_ray(source, target_cell)
         if dest != target_cell:  # no LOS
             continue
-        event.Animation(locs=trace, glyph=display.Glyph.SPIDER, fg=display.Color.YELLOW)
+        event.Animation(locs=trace, glyph=dis.Glyph.SPIDER, fg=dis.Color.YELLOW)
         event.Movement(source, trace[-1][0], trace[-1][1])
         return
 
@@ -254,7 +254,7 @@ def follow(source: typ.Entity, steps=1):
 def draw_aoe_line(source: typ.Entity):
     ppos = location.player_position()
     callback = partial(math_util.bresenham_ray, dest=ppos)
-    aura = cmp.Aura(callback=callback, color=display.Color.RED)
+    aura = cmp.Aura(callback=callback, color=dis.Color.RED)
     src_pos = esper.component_for_entity(source, cmp.Position)
     esper.add_component(source, aura)
 
@@ -267,7 +267,7 @@ def draw_aoe_sphere(source: typ.Entity, radius=2):
     """self-centerd sphere. at least for now"""
     src_pos = esper.component_for_entity(source, cmp.Position)
     callback = partial(location.coords_within_radius, radius=radius)
-    aura = cmp.Aura(callback=callback, color=display.Color.RED)
+    aura = cmp.Aura(callback=callback, color=dis.Color.RED)
     esper.add_component(source, aura)
 
     coords = location.coords_within_radius(pos=src_pos, radius=radius)
@@ -292,8 +292,8 @@ def fire_at_player(source: typ.Entity):
     # TODO: this is warlock specific, and it might not have to be
     player = ecs.Query(cmp.Player).first()
     dest, trace = location.trace_ray(source, player)
-    glyph = display.Glyph.MAGIC_MISSILE
-    event.Animation(locs=trace, glyph=glyph, fg=display.Color.BLUE)
+    glyph = dis.Glyph.MAGIC_MISSILE
+    event.Animation(locs=trace, glyph=glyph, fg=dis.Color.BLUE)
     trg = cmp.Target(target=dest)
     # not using attack_player, bc this is a missle, can hit obstacles
     esper.add_component(source, trg)
@@ -312,8 +312,8 @@ def attack_player(source: typ.Entity):
 def aura_tick(entity: typ.Entity):
     """advance the bomb aura"""
     aura = esper.component_for_entity(entity, cmp.Aura)
-    if aura.color == display.Color.LIGHT_RED:
-        aura.color = display.Color.BLOOD_RED
+    if aura.color == dis.Color.LIGHT_RED:
+        aura.color = dis.Color.BLOOD_RED
 
 
 def spawn_bomb(source: typ.Entity):
@@ -420,9 +420,9 @@ def living_flame(source: typ.Entity):
     def flame_anim(_):
         player = ecs.Query(cmp.Player).first()
         _, trace = location.trace_ray(source, player)
-        glyph = display.Glyph.FLAME
+        glyph = dis.Glyph.FLAME
         path = trace[: enemy_cmp.speed]
-        event.Animation(locs=path, glyph=glyph, fg=display.Color.ORANGE)
+        event.Animation(locs=path, glyph=glyph, fg=dis.Color.ORANGE)
 
     return action_sequence(flame_anim, partial(follow, steps=2))
 
