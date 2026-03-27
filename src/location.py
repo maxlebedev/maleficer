@@ -359,8 +359,7 @@ def get_neighbor_coords(x: int, y: int):
     indices = [(x + dx, y + dy) for dx, dy in offsets]
     return indices
 
-
-def count_neighbors(board, x: int, y: int):
+def count_neighbor_walls(board, x: int, y: int):
     indices = get_neighbor_coords(x, y)
     neighbor_walls = 0
     for x, y in indices:
@@ -414,13 +413,14 @@ def new_map():
 
     game_meta_cmp = esper.component_for_entity(game_meta, cmp.GameMeta)
     game_meta_cmp.board = Board()
-    maps = [Dungeon, DrunkenWalk, Maze]  # BSPDungeon, TestDungeon
+    maps = [RoomDungeon, DrunkenWalk, Maze]  # BSPDungeon, TestDungeon
+    maps = [RoomDungeon]  # BSPDungeon, TestDungeon
     mapgen_func = random.choice(maps)
     mapgen_func(game_meta_cmp.board)
     game_meta_cmp.board.build_entity_cache()
 
 
-class Dungeon:
+class RoomDungeon:
     board: Board
     rooms: list[RectangularRoom]
     centers: list[cmp.Position]
@@ -511,7 +511,7 @@ class Cave:
         for _ in range(cell_autamata_passes):
             for cell in self.board.as_sequence():
                 player_pos = esper.component_for_entity(cell, cmp.Position)
-                wall_count = count_neighbors(self.board, *player_pos)
+                wall_count = count_neighbor_walls(self.board, *player_pos)
                 neighbours[player_pos.x][player_pos.y] = wall_count
 
         for x, row in enumerate(neighbours):
@@ -534,7 +534,7 @@ class Cave:
             y = random.randint(0, dis.BOARD_HEIGHT - 1)
             cell = self.board.cells[x][y]
             pos = esper.component_for_entity(cell, cmp.Position)
-            wall_count = count_neighbors(self.board, *pos)
+            wall_count = count_neighbor_walls(self.board, *pos)
             if wall_count == 0:
                 dist = math.dist(player_pos.as_tuple, (x, y))
                 valid_spawns.append([dist, pos])
@@ -846,7 +846,7 @@ class DrunkenWalk:
                 new_x, new_y = x + dx, y + dy
                 if 0 < new_x < BOARD_MAX and 0 < new_y < BOARD_MAX:
                     # counting here so that passages stay narrow, not cavernous
-                    if count_neighbors(self.board, new_x, new_y) >= 4:
+                    if count_neighbor_walls(self.board, new_x, new_y) >= 4:
                         cell = self.board.get_cell(new_x, new_y)
                         if esper.has_component(cell, cmp.Wall):
                             return new_x, new_y

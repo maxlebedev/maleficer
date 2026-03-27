@@ -63,6 +63,11 @@ class Log:
             cls.curr_len -= cls.messages[0][1]
             cls.messages = cls.messages[1:]
 
+    @classmethod
+    def clear(cls):
+        cls.curr_len = 0
+        cls.messages = []
+
 
 class Queues:
     """global queues that help one processor delegate an action to another"""

@@ -5,6 +5,7 @@ import create
 import ecs
 import location
 import phase
+import event
 
 
 def start_game():
@@ -36,6 +37,7 @@ def end_game():
     first_main_menu_opt = all_main_menu_opts.where(cmp.MenuItem, order0).first()
 
     esper.delete_entity(first_main_menu_opt, True)
+    event.Log.clear()
 
     callback = lambda _: phase.change_to(phase.Ontology.char_select)
     _make_menuitem(cmp.MainMenu, callback, "Start Game", 0)
