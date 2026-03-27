@@ -414,7 +414,6 @@ def new_map():
     game_meta_cmp = esper.component_for_entity(game_meta, cmp.GameMeta)
     game_meta_cmp.board = Board()
     maps = [RoomDungeon, DrunkenWalk, Maze]  # BSPDungeon, TestDungeon
-    maps = [RoomDungeon]  # BSPDungeon, TestDungeon
     mapgen_func = random.choice(maps)
     mapgen_func(game_meta_cmp.board)
     game_meta_cmp.board.build_entity_cache()
