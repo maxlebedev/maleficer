@@ -5,7 +5,6 @@ import esper
 import numpy as np
 
 import components as cmp
-import location
 import ecs
 import typ
 
@@ -23,38 +22,32 @@ def apply_damage(target: typ.Entity, value: int):
 
 
 def get_push_coords(source: typ.Coord, target: typ.Entity, distance: int):
-    """note that diagonals are allowed for pushes"""
     board = ecs.get_meta().board
-    # Convert tuples to numpy arrays for easier vector math
     trg_pos = esper.component_for_entity(target, cmp.Position)
     src = np.array(source)
-    tgt = np.array(trg_pos.as_tuple)
+    tgt = np.array(trg_pos.as_list)
 
     direction = tgt - src
 
     unit_direction = clamp(direction[0], 1, -1), clamp(direction[1], 1, -1)
     unit_direction = np.array(unit_direction)
+    trace = bresenham_ray(trg_pos.as_list, list(tgt+unit_direction))
 
-    # n steps in the opposite direction
-    result = unit_direction * distance
-    dest_coord = tgt + result
+    dest_x, dest_y = tgt
+    for x, y in trace[:distance]:
+        if board._in_bounds(x,y) or not board.has_blocker(x, y):
+            dest_x = x
+            dest_y = y
+    return dest_x, dest_y
 
-    dest_cell = board.get_cell(*dest_coord)
-    _, trace = location.trace_ray(target, dest_cell)
-    for x, y in trace[::-1]:
-        if not board.has_blocker(x, y):
-            return x, y
-    return dest_coord
-
-
-def bresenham_ray(origin: cmp.Position, dest: cmp.Position):
+def bresenham_ray(origin: typ.Coord, dest: typ.Coord):
     """bresenham line, but continue past dest to wall"""
     board = ecs.get_meta().board
 
-    dx = abs(dest.x - origin.x)
-    dy = abs(dest.y - origin.y)
-    xsign = 1 if (origin.x < dest.x) else -1
-    ysign = 1 if (origin.y < dest.y) else -1
+    dx = abs(dest[0] - origin[0])
+    dy = abs(dest[1] - origin[1])
+    xsign = 1 if (origin[0] < dest[0]) else -1
+    ysign = 1 if (origin[1] < dest[1]) else -1
 
     if dx > dy:
         xx, xy, yx, yy = xsign, 0, 0, ysign
@@ -68,8 +61,11 @@ def bresenham_ray(origin: cmp.Position, dest: cmp.Position):
     ray = []
     cell = 1
     while cell and not esper.has_component(cell, cmp.Wall):
-        coord = (origin.x + x * xx + y * yx, origin.y + x * xy + y * yy)
-        cell = board.get_cell(*coord)
+        coord = (origin[0] + x * xx + y * yx, origin[1] + x * xy + y * yy)
+        try:
+            cell = board.get_cell(*coord)
+        except IndexError:
+            break
         ray.append(coord)
         if err >= 0:
             y += 1

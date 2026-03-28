@@ -253,12 +253,12 @@ def follow(source: typ.Entity, steps=1):
 
 def draw_aoe_line(source: typ.Entity):
     ppos = location.player_position()
-    callback = partial(math_util.bresenham_ray, dest=ppos)
+    callback = partial(math_util.bresenham_ray, dest=ppos.as_list)
     aura = cmp.Aura(callback=callback, color=dis.Color.RED)
     src_pos = esper.component_for_entity(source, cmp.Position)
     esper.add_component(source, aura)
 
-    coords = math_util.bresenham_ray(origin=src_pos, dest=ppos)
+    coords = math_util.bresenham_ray(origin=src_pos.as_list, dest=ppos.as_list)
     locus = cmp.Locus(coords=coords)
     esper.add_component(source, locus)
 

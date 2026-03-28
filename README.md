@@ -193,20 +193,20 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
         * This may set us up for different resolutions
 # BUGS
     - Push
-        * push_coords has no bounds checking.
-            + Because we do a cell lookup, this isn't safe
         * Push + dmg spells apply their push before dmg, causing the dmg to miss
             + Ideally, we would collect targets before applying any effects
         * Push + AOE
             + might end up applying to walls too
+                + Do we want to do this?
             + animates application to an area, but one tile at a time
+                + This is more an animation issue than a push one
     - Pressing space post-teleport doesn't skip turn
         * Drinking potion doesn't take a turn?
         * I suspect this is.. last-pos doesn't get updated post teleport
             + So enemies move to player's old last-pos
         * we can  have blink give  Shunted condition
             + then check for that in Move proc to update LastPos
-    - The `brighter` function is completely different from `darker`. 
+    - The `brighter` function is completely different from `darker`.
     - Bomb throwing animations (and the like) pass through solid blocks
         * we should use pathfind rather than trace_ray
     - The Bleed Flashpos tappens before a player moves
