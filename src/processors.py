@@ -107,53 +107,71 @@ class Movement(Processor):
 
     def _process(self):
         board = ecs.get_meta().board
+
         while event.Queues.movement:
             movement = event.Queues.movement.popleft()  # left, so player first
-            mover = movement.source
-            if condition.has(mover, cmp.Condition.Stun):
-                # TODO: enemy stun is handled elsewhere. We shouldmove this to player
-                continue
 
-            if not esper.entity_exists(mover):
-                # entity intends to move, but dies first
-                continue
+            self._handle_single_move(movement, board)
 
-            has = esper.has_component
 
-            pos = esper.component_for_entity(mover, cmp.Position)
-            new_x, new_y = movement.x, movement.y
-            if movement.relative:
-                new_x += pos.x
-                new_y += pos.y
-            if not board._in_bounds(new_x, new_y):
-                continue
+    def _handle_single_move(self, movement, board):
+        mover = movement.source
 
-            if last_pos := esper.try_component(mover, cmp.LastPosition):
-                last_pos.pos.x = pos.x
-                last_pos.pos.y = pos.y
+        if condition.has(mover, cmp.Condition.Stun):
+           return
 
-            targets = {e for e in board.entities[new_x][new_y]}
+        pos = esper.component_for_entity(mover, cmp.Position)
+        new_x, new_y = self.get_new_coords(mover, movement)
 
-            blocked = any(has(target, cmp.Blocking) for target in targets)
-            if has(mover, cmp.Crosshair) or not blocked:
-                board.reposition(mover, new_x, new_y)
+        if not board._in_bounds(new_x, new_y):
+            return
 
-            if not has(mover, cmp.Health):
-                continue
+        if last_pos := esper.try_component(mover, cmp.LastPosition):
+            last_pos.pos.x = pos.x
+            last_pos.pos.y = pos.y
+            if not movement.relative:
+                last_pos.pos.x = new_x
+                last_pos.pos.y = new_y
+                # TODO: this happens before blocking check,
+                # but Blink fails before this check, so its okay?
 
-            if has(mover, cmp.Player):
-                for target in targets:
-                    if has(target, cmp.Collectable):
-                        self.pick_up(target)
+        targets = list(board.entities_at(new_x, new_y))
 
+        is_blocked = any(esper.has_component(t, cmp.Blocking) for t in targets)
+        is_crosshair = esper.has_component(mover, cmp.Crosshair)
+
+        if is_crosshair or not is_blocked:
+            board.reposition(mover, new_x, new_y)
+
+        self.on_step_checks(mover, targets)
+
+    def get_new_coords(self, mover: typ.Entity, movement):
+        pos = esper.component_for_entity(mover, cmp.Position)
+        new_x, new_y = movement.x, movement.y
+        if movement.relative:
+            new_x += pos.x
+            new_y += pos.y
+        # TODO: bounds checking here?
+        return (new_x, new_y)
+
+    def on_step_checks(self, mover, targets):
+        if not esper.has_component(mover, cmp.Health):
+           return
+
+        if esper.has_component(mover, cmp.Player):
             for target in targets:
-                if has(target, cmp.Blocking):
-                    self.bump(mover, target)
+                if esper.has_component(target, cmp.Collectable):
+                    self.pick_up(target)
 
-                ent_flies = esper.has_component(mover, cmp.Flying)
-                if not ent_flies and has(target, cmp.OnStep):
-                    esper.add_component(target, cmp.Target(target=mover))
-                    event.trigger_all_callbacks(target, cmp.StepTrigger)
+        for target in targets:
+            if esper.has_component(target, cmp.Blocking):
+                self.bump(mover, target)
+
+            ent_flies = esper.has_component(mover, cmp.Flying)
+            if not ent_flies and esper.has_component(target, cmp.OnStep):
+                esper.add_component(target, cmp.Target(target=mover))
+                event.trigger_all_callbacks(target, cmp.StepTrigger)
+
 
 
 @dataclass
