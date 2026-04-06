@@ -320,7 +320,6 @@ def spawn_bomb(source: typ.Entity):
     import create
 
     src_pos = esper.component_for_entity(source, cmp.Position)
-    die(source)
     event.Spawn(func=partial(create.item.bomb, src_pos))
 
 
@@ -328,7 +327,6 @@ def spawn_poison_cloud(source: typ.Entity):
     import create
 
     src_pos = esper.component_for_entity(source, cmp.Position)
-    die(source)
     event.Spawn(func=partial(create.item.poison_cloud, src_pos))
 
 

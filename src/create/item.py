@@ -99,10 +99,9 @@ def bomb_trap(pos: cmp.Position) -> int:
     cmps.append(cmp.Health(max=1))
     cmps.append(cmp.Visible(glyph=dis.Glyph.TRAP, color=dis.Color.RED))
     cmps.append(cmp.KnownAs(name="bomb trap"))
-    cmps.append(cmp.StepTrigger(callbacks=[behavior.spawn_bomb]))
 
-    # if this dies to own bomb, then it spawns and blows up another instantly
-    # cmps.append(cmp.DeathTrigger(callbacks=[behavior.spawn_bomb]))
+    cmps.append(cmp.StepTrigger(callbacks=[behavior.die]))
+    cmps.append(cmp.DeathTrigger(callbacks=[behavior.spawn_bomb]))
     trap_ent = esper.create_entity(*cmps)
 
     return trap_ent
@@ -115,8 +114,8 @@ def poison_trap(pos: cmp.Position) -> int:
     cmps.append(cmp.Visible(glyph=dis.Glyph.TRAP, color=dis.Color.RED))
     cmps.append(cmp.KnownAs(name="poison trap"))
 
-    cmps.append(cmp.StepTrigger(callbacks=[behavior.spawn_poison_cloud]))
-    # cmps.append(cmp.DeathTrigger(callbacks=[behavior.spawn_bomb]))
+    cmps.append(cmp.StepTrigger(callbacks=[behavior.die]))
+    cmps.append(cmp.DeathTrigger(callbacks=[behavior.spawn_poison_cloud]))
     trap_ent = esper.create_entity(*cmps)
 
     return trap_ent
