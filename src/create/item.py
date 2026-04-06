@@ -99,10 +99,11 @@ def bomb_trap(pos: cmp.Position) -> int:
     cmps = []
     cmps.append(pos)
     cmps.append(cmp.Health(max=1))
+    cmps.append(cmp.Visible(glyph=dis.Glyph.TRAP, color=dis.Color.RED))
     cmps.append(cmp.KnownAs(name="bomb trap"))
     cmps.append(cmp.OnStep())
 
-    cmps.append(cmp.Enemy(evaluate=behavior.bomb_trap))
+    cmps.append(cmp.StepTrigger(callbacks=[behavior.spawn_bomb]))
     trap_ent = esper.create_entity(*cmps)
 
     return trap_ent

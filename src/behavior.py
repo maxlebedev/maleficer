@@ -427,13 +427,6 @@ def living_flame(source: typ.Entity):
     return action_sequence(flame_anim, partial(follow, steps=2))
 
 
-def bomb_trap(source: typ.Entity):
-    src_pos = esper.component_for_entity(source, cmp.Position)
-    player_pos = location.player_position()
-    if src_pos == player_pos:
-        return spawn_bomb
-
-
 def bomb(_: typ.Entity):
     return aura_tick
 
