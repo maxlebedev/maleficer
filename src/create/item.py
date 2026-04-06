@@ -108,6 +108,36 @@ def bomb_trap(pos: cmp.Position) -> int:
     return trap_ent
 
 
+def poison_trap(pos: cmp.Position) -> int:
+    cmps = []
+    cmps.append(pos)
+    cmps.append(cmp.Health(max=1))
+    cmps.append(cmp.Visible(glyph=dis.Glyph.TRAP, color=dis.Color.RED))
+    cmps.append(cmp.KnownAs(name="poison trap"))
+
+    cmps.append(cmp.StepTrigger(callbacks=[behavior.spawn_poison_cloud]))
+    # cmps.append(cmp.DeathTrigger(callbacks=[behavior.spawn_bomb]))
+    trap_ent = esper.create_entity(*cmps)
+
+    return trap_ent
+
+def poison_cloud(pos: cmp.Position):
+    cmps = []
+    cmps.append(pos)
+    cmps.append(cmp.Visible(glyph=dis.Glyph.CLOUD, color=dis.Color.GREEN))
+    cmps.append(cmp.KnownAs(name="poison cloud"))
+    cmps.append(cmp.Condition.Dying(value=5))
+
+    # TODO: technically bats are immune
+    cmps.append(cmp.StepTrigger(callbacks=[behavior.apply_damage]))
+    cloud = esper.create_entity(*cmps)
+    dmg = cmp.SpellEffect.Damage(source=cloud, amount=5)
+    esper.add_component(cloud, dmg)
+
+    return cloud
+
+
+
 def grass(pos: cmp.Position) -> int:
     cmps = []
     cmps.append(pos)

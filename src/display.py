@@ -162,6 +162,7 @@ class Glyph(IntEnum):
     CYCLOPS = 465
     GRASS = 98
     SPIDER = 273
+    CLOUD = 566
 
 
 def get_tile_glyphs():
