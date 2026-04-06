@@ -62,7 +62,6 @@ def bomb(pos: cmp.Position) -> int:
     cmps.append(cmp.Visible(glyph=dis.Glyph.BOMB, color=dis.Color.RED))
     cmps.append(cmp.Health(max=1))
     cmps.append(cmp.KnownAs(name="bomb"))
-    cmps.append(cmp.OnDeath())
     cmps.append(cmp.Enemy(evaluate=behavior.bomb))
     callback = partial(location.coords_within_radius, radius=1)
     cmps.append(cmp.EffectArea(callback))
@@ -86,7 +85,6 @@ def spike_trap(pos: cmp.Position) -> int:
     cmps.append(cmp.Visible(glyph=dis.Glyph.TRAP, color=dis.Color.RED))
     cmps.append(cmp.Health(max=1))
     cmps.append(cmp.KnownAs(name="spike trap"))
-    cmps.append(cmp.OnStep())
 
     cmps.append(cmp.StepTrigger(callbacks=[behavior.apply_damage]))
     trap_ent = esper.create_entity(*cmps)
@@ -101,9 +99,10 @@ def bomb_trap(pos: cmp.Position) -> int:
     cmps.append(cmp.Health(max=1))
     cmps.append(cmp.Visible(glyph=dis.Glyph.TRAP, color=dis.Color.RED))
     cmps.append(cmp.KnownAs(name="bomb trap"))
-    cmps.append(cmp.OnStep())
-
     cmps.append(cmp.StepTrigger(callbacks=[behavior.spawn_bomb]))
+
+    # if this dies to own bomb, then it spawns and blows up another instantly
+    # cmps.append(cmp.DeathTrigger(callbacks=[behavior.spawn_bomb]))
     trap_ent = esper.create_entity(*cmps)
 
     return trap_ent
@@ -115,7 +114,6 @@ def grass(pos: cmp.Position) -> int:
     cmps.append(cmp.Visible(glyph=dis.Glyph.GRASS, color=dis.Color.DARK_GREEN))
     cmps.append(cmp.Health(max=1))
     cmps.append(cmp.KnownAs(name="grass"))
-    cmps.append(cmp.OnStep())
     cmps.append(cmp.Opaque())
 
     cmps.append(cmp.StepTrigger(callbacks=[behavior.die]))

@@ -75,7 +75,7 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
     - should we always place the stairs as far back as we can?
     - wet status from water tiles? are we that sort of game?
     - Bleed damage feels like it takes an extra turn. this is intentional. it only takes effect on the start of the turn after it is applied
-    - StepTrigger callbacks get their targets from the movement proc, in the OnStep case
+    - StepTrigger callbacks get their targets from the movement proc
     - Because we allow already dead entities to resolve their queued damage, enemies get one final retaliation
     - reusing Position components breaks things
     - DeathTriggers with dmg need to have oneshot(Dmg) called after
@@ -90,9 +90,6 @@ The player is an ambitous and foolhardy wizard school dropout. They start with s
 ## Systems due for a pass
     - "Effects" / Events
         * Effects and triggers might not want to be separate?
-        * OnDeath/DeathTrigger OnStep/StepTriger redundancy.
-            + The 'On's could be more ECS-compliant
-            + Potentially unscheduled procs
     - Spell resolution should def be its own (unscheduled) Proc
     - Targeting. Decouple it from spellcasting
     - Start Game flow needs to be more clear and unified, with ne top-lvl func

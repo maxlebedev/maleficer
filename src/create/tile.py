@@ -67,7 +67,6 @@ def stairs(x: int, y: int) -> int:
     cmps = []
     cmps.append(cmp.Visible(glyph=dis.Glyph.STAIRS, color=dis.Color.LGREY))
 
-    cmps.append(cmp.OnStep())
     cmps.append(cmp.Position(x, y))
     cmps.append(cmp.StepTrigger(callbacks=[descend]))
 

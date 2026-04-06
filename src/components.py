@@ -305,18 +305,8 @@ class Condition:
 
 
 @component
-class OnStep:
-    """activates an effect when walked on"""
-
-
-@component
-class OnDeath:
-    """activates an effect when entity dies"""
-
-
-@component
 class Flying:
-    """not affected by OnStep components"""
+    """does not proc StepTriggers"""
 
 
 @component

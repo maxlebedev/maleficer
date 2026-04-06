@@ -168,7 +168,7 @@ class Movement(Processor):
                 self.bump(mover, target)
 
             ent_flies = esper.has_component(mover, cmp.Flying)
-            if not ent_flies and esper.has_component(target, cmp.OnStep):
+            if not ent_flies:
                 esper.add_component(target, cmp.Target(target=mover))
                 event.trigger_all_callbacks(target, cmp.StepTrigger)
 
